@@ -84,7 +84,7 @@ def datapoint_index(path, datapoint_file):
     return df
 
 
-def create_index_file(path, indexfile):
+def create_index_file(path, indexfile='ddf--index.csv'):
     fs = os.listdir(path)
 
     res = []
@@ -98,4 +98,8 @@ def create_index_file(path, indexfile):
 
     res_df = concat(res)
     res_df = res_df.drop_duplicates()
-    res_df.to_csv(indexfile, index=False)
+
+    index_path = os.path.join(path, indexfile)
+    res_df.to_csv(index_path, index=False)
+
+    return res_df
