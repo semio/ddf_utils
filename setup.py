@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from setuptools import setup
+from setuptools import setup, find_packages
 
 
 setup(
@@ -13,6 +13,6 @@ setup(
     author_email = 'prairy.long@gmail.com',
 
     license = 'MIT',
-
+    packages=find_packages(exclude=['contrib', 'docs', 'tests']),
     install_requires=['pandas']
 )
