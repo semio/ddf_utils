@@ -144,6 +144,7 @@ class Ingredient(object):
 
         filtered = self.filter_key_value()
 
+        res = []
         for f in set(filtered['file'].values):
             if 'continuous' in f:
                 key = 'continuous'
@@ -152,7 +153,6 @@ class Ingredient(object):
             else:
                 key = 'concept'
 
-            res = []
             df = pd.read_csv(os.path.join(ddf_path, f))
 
             if isinstance(self.values, list):
@@ -164,7 +164,7 @@ class Ingredient(object):
                 df = df.query(query_str)
 
             res.append([key, df])
-            return dict(res)
+        return dict(res)
 
     def _get_data_entity(self):
         ddf_path = self.ddf_path
