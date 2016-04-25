@@ -312,7 +312,7 @@ def _identity(ingredient):
 
 
 ## functions for reading/running recipe
-def run_recipe(recipe_file, out_ddf_path):
+def run_recipe(recipe_file):
     if re.match('.*\.json', recipe_file):
         recipe = json.load(open(recipe_file))
     else:
