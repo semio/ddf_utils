@@ -45,11 +45,11 @@ class Ingredient(object):
     @property
     def dtype(self):
         if self.key == 'concept':
-            return 'concept'
+            return 'concepts'
         elif isinstance(self.key, list):
-            return 'entity'
+            return 'entities'
         else:
-            return 'datapoint'
+            return 'datapoints'
 
     def __repr__(self):
         lines = []
@@ -66,12 +66,12 @@ class Ingredient(object):
 
     def key_to_list(self):
         # TODO: if key == "*"?
-        if self.dtype == "datapoint":
+        if self.dtype == "datapoints":
             return self.key.split(',')
         else:
             raise ValueError("only datapoint should call this method")
 
-    def filter_key_value(self):
+    def filter_index_key_value(self):
 
         index = _get_index(self.ddf_id)
         key = self.key
@@ -88,15 +88,45 @@ class Ingredient(object):
             else:
                 return index[index["key"] == key]
 
+    def filter_index_file_name(self):
+        index = _get_index(self.ddf_id)
+        key = self.key
+
+        if isinstance(key, list):
+            bools = []
+            for k in key:
+                bools.append(index['file'].str.contains(k))
+
+            ser_0 = bools[0]
+            for ser in bools[1:]:
+                ser_0 = ser_0 | ser
+
+            full_list = index[ser_0]
+        else:
+            full_list = index[index['file'].str.contains(key)]
+
+        return full_list[full_list['file'].str.contains(self.dtype)]
+
+    def filter_row(self, df):
+        # TODO:
+        # 1. know more about the row_filter syntax
+        # 2. The query() Method is Experimental
+        if self.row_filter:
+            query_str = "and".join(["{} in {}".format(k, v) for k, v in self.row_filter.items()])
+            # print(query_str)
+            df = df.query(query_str)
+
+        return df
+
     def get_data(self):
 
         if self.data is not None:
             return self.data
 
         funcs = {
-            'concept': self._get_data_concept,
-            'entity': self._get_data_entity,
-            'datapoint': self._get_data_datapoint
+            'concepts': self._get_data_concept,
+            'entitys': self._get_data_entity,
+            'datapoints': self._get_data_datapoint
         }
 
         self.data = funcs[self.dtype]()
@@ -104,7 +134,11 @@ class Ingredient(object):
 
     def get_data_copy(self):
 
-        filtered = self.filter_key_value()
+        if self.dtype == 'entities':
+            filtered = self.filter_index_file_name()
+        else:
+            filtered = self.filter_index_key_value()
+
         ddf_path = self.ddf_path
 
         res = []
@@ -121,19 +155,13 @@ class Ingredient(object):
     def _get_data_datapoint(self):
         ddf_path = self.ddf_path
 
-        filtered = self.filter_key_value()
+        filtered = self.filter_index_key_value()
 
         res = []
 
         for i, row in filtered.iterrows():
             df = pd.read_csv(os.path.join(ddf_path, row['file']))
-            # TODO:
-            # 1. know more about the row_filter syntax
-            # 2. The query() Method is Experimental
-            if self.row_filter:
-                query_str = "and".join(["{} in {}".format(k, v) for k, v in self.row_filter.items()])
-                # print(query_str)
-                df = df.query(query_str)
+            df = self.filter_row(df)
 
             res.append([row['value'], df])
 
@@ -142,7 +170,7 @@ class Ingredient(object):
     def _get_data_concept(self):
         ddf_path = self.ddf_path
 
-        filtered = self.filter_key_value()
+        filtered = self.filter_index_key_value()
 
         res = []
         for f in set(filtered['file'].values):
@@ -158,34 +186,28 @@ class Ingredient(object):
             if isinstance(self.values, list):
                 df = df[self.values]
 
-            if self.row_filter:
-                query_str = "and".join(["{} in {}".format(k, v) for k, v in self.row_filter.items()])
-                # print(query_str)
-                df = df.query(query_str)
-
+            df = self.filter_row(df)
             res.append([key, df])
         return dict(res)
 
     def _get_data_entity(self):
         ddf_path = self.ddf_path
 
-        filtered = self.filter_key_value()
+        filtered = self.filter_index_file_name()
 
         res = []
 
         for f in set(filtered['file'].values):
             entity = f[:-4].split('--')[-1]
 
-            df = pd.read_csv(os.path.join(ddf_path, f))
+            # if re.match('ddf--entities--.*--.*.csv', f):
+                # domain = re.match('ddf--entities--(.*)--.*.csv', f).groups()[0]
+
+            df = pd.read_csv(os.path.join(ddf_path, f), dtype=str)
 
             if isinstance(self.values, list):
                 df = df[self.values]
-
-            if self.row_filter:
-                query_str = "and".join(["{} in {}".format(k, v) for k, v in self.row_filter.items()])
-                # print(query_str)
-                df = df.query(query_str)
-
+            df = self.filter_row(df)
             res.append([entity, df])
 
         return dict(res)
@@ -277,7 +299,7 @@ def _merge(left, right, **options):
 
     assert left.dtype == right.dtype
 
-    if left.dtype == 'datapoint':
+    if left.dtype == 'datapoints':
 
         if deep:
             for k, df in right_data.items():
@@ -291,7 +313,7 @@ def _merge(left, right, **options):
 
         return left_data
 
-    elif left.dtype == 'concept':
+    elif left.dtype == 'concepts':
 
         left_df = pd.concat(left_data.values())
         right_df = pd.concat(right_data.values())
