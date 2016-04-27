@@ -11,6 +11,6 @@ setup(
     author='Semio Zheng',
     author_email='prairy.long@gmail.com',
     license='MIT',
-    packages=find_packages(exclude=['contrib', 'docs', 'tests']),
+    packages=find_packages(exclude=['contrib', 'docs', 'tests', 'scripts']),
     install_requires=['pandas']
 )
