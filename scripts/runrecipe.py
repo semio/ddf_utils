@@ -8,7 +8,7 @@ usage:
 before running the script, enviornment variables should be set
 
 $ export DDF_PATH='path_to_search_ddf'
-$ export DICT_PATH='path_to_search_translation_dict
+$ export DICT_PATH='path_to_search_translation_dict'
 
 Then you can run the script with:
 
