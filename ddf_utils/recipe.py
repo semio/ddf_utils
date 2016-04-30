@@ -15,6 +15,7 @@ DICT_PATH = ''
 class Ingredient(object):
     """
     ingredient class: represents an ingredient object in recipe file.
+    see the impletment of from_dict() method for how the object is constructed.
     """
     def __init__(self, ingred_id, ddf_id, key, values, row_filter=None, data=None):
         self.ingred_id = ingred_id
@@ -23,7 +24,6 @@ class Ingredient(object):
         self.values = values
         self.row_filter = row_filter
         self.data = data
-        # self.index = _get_index(ddf_id)
 
     @classmethod
     def from_dict(cls, data):
@@ -43,7 +43,17 @@ class Ingredient(object):
         return _get_ddf_path(self.ddf_id)
 
     @property
+    def index(self):
+        return _get_index(self.ddf_id)
+
+    @property
     def dtype(self):
+        """
+        returns the type of ddf data, i.e. concepts/entities/datapoints.
+
+        It will be inferred from the key porperity of ingredient.
+        TODO: what if key == '*'? Is it possible?
+        """
         if self.key == 'concept':
             return 'concepts'
         elif isinstance(self.key, list):
@@ -65,15 +75,14 @@ class Ingredient(object):
         return '\n'.join(lines)
 
     def key_to_list(self):
-        # TODO: if key == "*"?
         if self.dtype == "datapoints":
             return self.key.split(',')
         else:
             raise ValueError("only datapoint should call this method")
 
     def filter_index_key_value(self):
-
-        index = _get_index(self.ddf_id)
+        """filter index file by key and value"""
+        index = self.index
         key = self.key
 
         if isinstance(self.values, list):
@@ -89,7 +98,11 @@ class Ingredient(object):
                 return index[index["key"] == key]
 
     def filter_index_file_name(self):
-        index = _get_index(self.ddf_id)
+        """
+        filter index by keywords in the file names.
+        This method should only called for entities related tasks.
+        """
+        index = self.index
         key = self.key
 
         if isinstance(key, list):
@@ -108,6 +121,7 @@ class Ingredient(object):
         return full_list[full_list['file'].str.contains(self.dtype)]
 
     def filter_row(self, df):
+        """return the rows selected by self.row_filter."""
         # TODO:
         # 1. know more about the row_filter syntax
         # 2. The query() Method is Experimental
@@ -120,10 +134,13 @@ class Ingredient(object):
 
     def get_data(self):
 
+        # if data is not empty, then it will just return the data
+        # when get_data() is called.
         if self.data is not None:
             return self.data
 
         funcs = {
+            # all functions will return a dictionary of dataframes.
             'concepts': self._get_data_concept,
             'entitys': self._get_data_entity,
             'datapoints': self._get_data_datapoint
@@ -133,7 +150,10 @@ class Ingredient(object):
         return self.data
 
     def get_data_copy(self):
-
+        """
+        this function will return the related data as it is,
+        using the filename as key in the result
+        """
         if self.dtype == 'entities':
             filtered = self.filter_index_file_name()
         else:
@@ -292,6 +312,9 @@ def _translate_column(ingredient, result, **options):
 
 def _merge(left, right, **options):
 
+    # deep merge is when we check every datapoint for existence
+    # if false, overwrite is on the file level. If key-value (e.g. geo,year-population_total) exists, whole file gets overwritten
+    # if true, overwrite is on the row level. If values (e.g. afr,2015-population_total) exists, it gets overwritten, if it doesn't it stays
     deep = options['deep']
 
     left_data = left.get_data().copy()
@@ -326,7 +349,7 @@ def _merge(left, right, **options):
 
     else:
         # TODO
-        raise ValueError('entity data do not support merging yet.')
+        raise NotImplementedError('entity data do not support merging yet.')
 
 
 def _identity(ingredient):
