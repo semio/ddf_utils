@@ -16,16 +16,16 @@ def generate_metadata(ddf_path, outpath):
     try:
         ddf_concept = pd.read_csv(os.path.join(ddf_path, 'ddf--concepts.csv'))
     except:
-        ddf_concept = pd.read_csv(os.path.join(ddf_path, 'ddf--concepts--continous.csv'))
+        ddf_concept = pd.read_csv(os.path.join(ddf_path, 'ddf--concepts--continuous.csv'))
 
     # use OrderedDict in order to keep the order of insertion.
-    indb = OrderedDict([['indicatorsDB', OrderedDict()]])
+    indb = OrderedDict()
 
     # TODO:
     # 1. geo concepts?
     # 2. oneset?
 
-    # TODO: see if below columns are engough
+    # FIXME: see if below columns are engough
     measure_cols = ['concept', 'sourceLink', 'scales', 'interpolation', 'color']
 
     mdata = ddf_concept[ddf_concept['concept_type'] == 'measure'][measure_cols]
@@ -36,9 +36,9 @@ def generate_metadata(ddf_path, outpath):
 
     mdata_dict = to_dict_dropna(mdata)
     for k in sorted(mdata_dict.keys()):
-        indb['indicatorsDB'][k] = mdata_dict.get(k)
+        indb[k] = mdata_dict.get(k)
 
-    for i in indb['indicatorsDB'].keys():
+    for i in indb.keys():
         fname = os.path.join(ddf_path, 'ddf--datapoints--'+i+'--by--geo--time.csv')
         try:
             df = pd.read_csv(fname, dtype={i: float, 'time': int})
@@ -63,9 +63,9 @@ def generate_metadata(ddf_path, outpath):
 
         domain_quantiles_10_90 = [values_sorted[q_10], values_sorted[q_90]]
 
-        indb['indicatorsDB'][i].update({
+        indb[i].update({
             'domain': dm, 'availability': av,
             'domain_quantiles_10_90': domain_quantiles_10_90
         })
 
-    return indb['indicatorsDB']
+    return indb
