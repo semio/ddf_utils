@@ -54,6 +54,18 @@ def ddf_datapoints(ddf_id):
     return res
 
 
+def ddf_datapoint(ddf_id, concept):
+    """return one datapoint"""
+    index = _get_index(ddf_id)
+    path = _get_ddf_path(ddf_id)
+
+    index = index.set_index('value')
+
+    fn = index.ix[concept]['file']
+
+    return pd.read_csv(os.path.join(path, fn))
+
+
 def _get_ddf_path(ddf_id):
     global SEARCH_PATH
 
