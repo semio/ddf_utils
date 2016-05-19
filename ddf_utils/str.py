@@ -2,6 +2,8 @@
 """string functions for ddf files"""
 
 import re
+import numpy as np
+from unidecode import unidecode
 
 
 # TODO: make the sub parameter just a list of string, not expr
@@ -20,4 +22,4 @@ def to_concept_id(s, sub='[/ -\.\*";]+', sep='_'):
     if s1[0] == sep:
         s1 = s1[1:]
 
-    return s1.lower()
+    return unidecode(s1.lower())
