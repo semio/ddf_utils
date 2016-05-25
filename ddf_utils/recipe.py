@@ -258,7 +258,7 @@ def _get_index(ddf_id):
     if os.path.exists(index_path):
         return pd.read_csv(index_path)
     else:
-        from index import create_index_file
+	from . index import create_index_file
         print("no index file, creating one...")
         return create_index_file(ddf_path)
 
