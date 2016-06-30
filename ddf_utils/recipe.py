@@ -258,7 +258,7 @@ def _get_index(ddf_id):
     if os.path.exists(index_path):
         return pd.read_csv(index_path)
     else:
-	from . index import create_index_file
+        from . index import create_index_file
         print("no index file, creating one...")
         return create_index_file(ddf_path)
 
@@ -354,6 +354,20 @@ def _merge(left, right, **options):
 
 def _identity(ingredient):
     return ingredient.get_data_copy()
+
+
+# def _remap_geo(df, base=None):  # TODO: to be done
+#     """remap the geo/country in df to the same ones as in base"""
+#     from . import ddf_reader as ddf
+#     ddf.SEARCH_PATH = SEARCH_PATH
+#     if base is None:
+#         c = ddf.ddf_entities('ddf--gapminder--systema_globalis')['country']
+
+#     cols = ['name', 'alternative_1', 'alternative_2', 'alternative_3',
+#             'upper_case_name', 'alternative_4_cdiac', 'pandg', 'god_id',
+#             'alt_5', 'arb1', 'arb2', 'arb3', 'arb4', 'arb5', 'arb6']
+
+#     for i in cols:
 
 
 ## functions for reading/running recipe

@@ -21,3 +21,8 @@ def to_csv(df, out_dir, ftype, concept, by=None, **kwargs):
         path = os.path.join(out_dir, filename)
 
     df.to_csv(path, **kwargs)
+
+
+def load_google_xls(filehash):
+    # TODO: return the xls file with given filehash
+    raise NotImplementedError
