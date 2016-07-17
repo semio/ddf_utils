@@ -309,8 +309,16 @@ def _translate_column(ingredient, result, **options):
 
     return Ingredient(result, result, ingredient.key, "*", data=di)
 
+# TODO:
+# def _run_op(df, **options):
 
 def _merge(left, right, **options):
+    """the main merge function"""
+    # TODO:
+    # 1. add `op` parameter: merge left, right with the op function
+    #     1.1 add dtype parameter. in run_recipe() we can get the dtype from recipe.
+    #
+
     # deep merge is when we check every datapoint for existence
     # if false, overwrite is on the file level. If key-value (e.g. geo,year-population_total) exists, whole file gets overwritten
     # if true, overwrite is on the row level. If values (e.g. afr,2015-population_total) exists, it gets overwritten, if it doesn't it stays
