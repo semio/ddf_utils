@@ -258,7 +258,7 @@ def _get_index(ddf_id):
     if os.path.exists(index_path):
         return pd.read_csv(index_path)
     else:
-	from . index import create_index_file
+        from . index import create_index_file
         print("no index file, creating one...")
         return create_index_file(ddf_path)
 
@@ -311,7 +311,6 @@ def _translate_column(ingredient, result, **options):
 
 
 def _merge(left, right, **options):
-
     # deep merge is when we check every datapoint for existence
     # if false, overwrite is on the file level. If key-value (e.g. geo,year-population_total) exists, whole file gets overwritten
     # if true, overwrite is on the row level. If values (e.g. afr,2015-population_total) exists, it gets overwritten, if it doesn't it stays
@@ -327,7 +326,7 @@ def _merge(left, right, **options):
         if deep:
             for k, df in right_data.items():
                 if k in left_data.keys():
-                    left_data[k].update(df)
+                    left_data[k].update(df)  # TODO: maybe need to set_index before update
                 else:
                     left_data[k] = df
         else:
@@ -356,12 +355,70 @@ def _identity(ingredient):
     return ingredient.get_data_copy()
 
 
+# def _remap_geo(df, base=None):  # TODO: to be done
+#     """remap the geo/country in df to the same ones as in base"""
+#     from . import ddf_reader as ddf
+#     ddf.SEARCH_PATH = SEARCH_PATH
+#     if base is None:
+#         c = ddf.ddf_entities('ddf--gapminder--systema_globalis')['country']
+
+#     cols = ['name', 'alternative_1', 'alternative_2', 'alternative_3',
+#             'upper_case_name', 'alternative_4_cdiac', 'pandg', 'god_id',
+#             'alt_5', 'arb1', 'arb2', 'arb3', 'arb4', 'arb5', 'arb6']
+
+#     for i in cols:
+
+
 ## functions for reading/running recipe
-def run_recipe(recipe_file):
+def build_recipe(recipe_file):
+    """build a complete recipe file if there are includes in
+    recipe file, if no includes found than return the file as is.
+    """
     if re.match('.*\.json', recipe_file):
         recipe = json.load(open(recipe_file))
     else:
         recipe = yaml.load(open(recipe_file))
+
+    if 'include' not in recipe.keys():
+        return recipe
+    else:
+        base_dir = os.path.dirname(recipe_file)
+        recipe_dir = recipe['config']['recipes_dir']
+
+        sub_recipes = []
+        for i in recipe['include']:
+            path = os.path.join(base_dir, recipe_dir, i)
+            sub_recipes.append(build_recipe(path))
+
+        for rcp in sub_recipes:
+            if 'ingredients' in recipe.keys():
+                ingredients = [*recipe['ingredients'], *rcp['ingredients']]
+                # drop duplicated ingredients.
+                # TODO: it's assumed that ingredients with same id have same key/value.
+                # need to confirm if it is true.
+                recipe['ingredients'] = list({v['id']:v for v in ingredients}.values())
+            else:
+                recipe['ingredients'] = rcp['ingredients']
+
+            for p in ['datapoints', 'entities', 'concepts']:
+                if p not in rcp['cooking'].keys():
+                    continue
+
+                if 'cooking' in recipe.keys():
+                    if p in recipe['cooking'].keys():
+                        recipe['cooking'][p] = [*recipe['cooking'][p], *rcp['cooking'][p]]
+                    else:
+                        recipe['cooking'][p] = rcp['cooking'][p]
+                else:
+                    recipe['cooking'] = {}
+                    recipe['cooking'][p] = rcp['cooking'][p]
+
+        return recipe
+
+
+def run_recipe(recipe_file):
+    """run the recipe."""
+    recipe = build_recipe(recipe_file)
 
     # load ingredients
     ings = [Ingredient.from_dict(i) for i in recipe['ingredients']]
