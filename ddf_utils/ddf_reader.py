@@ -96,3 +96,11 @@ def _get_index(ddf_id):
         return create_index_file(ddf_path)
 
 
+def ddf_index_cols(ddf_id, concept):
+    """return the index columns for given concept
+    """
+    index = _get_index(ddf_id)
+    filtered = index[index['value'] == concept]
+    assert len(filtered) == 1
+    keys = filtered['key'].values[0]
+    return keys.split(',')
