@@ -1,0 +1,15 @@
+MANIFEST.in
+setup.cfg
+ddf_utils/__init__.py
+ddf_utils/ddf_reader.py
+ddf_utils/index.py
+ddf_utils/io.py
+ddf_utils/metadata.py
+ddf_utils/recipe.py
+ddf_utils/str.py
+ddf_utils.egg-info/PKG-INFO
+ddf_utils.egg-info/SOURCES.txt
+ddf_utils.egg-info/dependency_links.txt
+ddf_utils.egg-info/requires.txt
+ddf_utils.egg-info/top_level.txt
+scripts/runrecipe.py

@@ -6,20 +6,20 @@ import numpy as np
 from unidecode import unidecode
 
 
-# TODO: make the sub parameter just a list of string, not expr
-# using re.escape()
-def to_concept_id(s, sub='[/ -\.\*";]+', sep='_'):
-    '''convert a string to lowercase alphanumeric + underscore id for concepts'''
+def to_concept_id(s, sep='_'):
+
     if s is np.nan:
         return s
 
-    s1 = re.sub(sub, sep, s.strip())
-    s1 = s1.replace('\n', '')
+    pattern = re.compile('[\W_]+')
+    snew = unidecode(pattern.sub(sep, s.strip()).lower())
 
-    # remove the first/last underscore
-    if s1[-1] == sep:
-        s1 = s1[:-1]
-    if s1[0] == sep:
-        s1 = s1[1:]
+    # remove first/last underscore
+    if snew[-1] == sep:
+        snew = snew[:-1]
+    if snew[0] == sep:
+        snew = snew[1:]
 
-    return unidecode(s1.lower())
+    return snew
+
+
