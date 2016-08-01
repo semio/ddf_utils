@@ -7,11 +7,10 @@ import json
 import yaml
 import re
 
-from ingredient import *
-from procedure import *
+from . ingredient import *
+from . procedure import *
 
-SEARCH_PATH = ''
-DICT_PATH = ''
+import logging
 
 
 ## functions for reading/running recipe
@@ -71,10 +70,11 @@ def run_recipe(recipe_file):
 
     # cooking
     funcs = {
-        'translate_column': _translate_column,
-        'translate_header': _translate_header,
-        'identity': _identity,
-        'merge': _merge
+        'translate_column': translate_column,
+        'translate_header': translate_header,
+        'identity': identity,
+        'merge': merge,
+        'run_op': run_op
     }
 
     res = {}
@@ -85,6 +85,10 @@ def run_recipe(recipe_file):
 
         for p in pceds:
             func = p['procedure']
+
+            if func not in funcs.keys():
+                raise NotImplementedError("Not supported: " + func)
+
             ingredient = [ings_dict[i] for i in p['ingredients']]
 
             if 'result' in p.keys():

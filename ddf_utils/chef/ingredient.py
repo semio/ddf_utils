@@ -3,6 +3,11 @@
 """main ingredient class"""
 
 import pandas as pd
+import os
+import logging
+
+from . config import *
+
 
 class Ingredient(object):
     """

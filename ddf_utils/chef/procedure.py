@@ -5,7 +5,7 @@
 import pandas as pd
 
 # TODO: _translate_header and _translate_column should be combined.
-def _translate_header(ingredient, result, **options):
+def translate_header(ingredient, result, **options):
 
     global DICT_PATH
 
@@ -30,7 +30,7 @@ def _translate_header(ingredient, result, **options):
     return Ingredient(result, result, ingredient.key, "*", data=di)
 
 
-def _translate_column(ingredient, result, **options):
+def translate_column(ingredient, result, **options):
 
     global DICT_PATH
 
@@ -52,7 +52,7 @@ def _translate_column(ingredient, result, **options):
     return Ingredient(result, result, ingredient.key, "*", data=di)
 
 
-def _merge(left, right, **options):
+def merge(left, right, **options):
     """the main merge function"""
     # TODO:
     # 1. add `op` parameter: merge left, right with the op function
@@ -99,32 +99,32 @@ def _merge(left, right, **options):
         raise NotImplementedError('entity data do not support merging yet.')
 
 
-def _identity(ingredient):
+def identity(ingredient):
     return ingredient.get_data_copy()
 
 
-def _filter(ingredient, **options):
+def filter_(ingredient, **options):
     """filter an ingredient based on a set of options and return
     the result as new ingredient
     """
     pass
 
 
-def _align(ingredient, base, **options):
+def align(ingredient, base, **options):
     pass
 
 
-def _groupby(ingredient, **options):
+def groupby(ingredient, **options):
     pass
 
 
-def _run_op(ingredient: Ingredient, **options):
+def run_op(ingredient: Ingredient, **options):
     data = ingredient.get_data()
 
     ops = options['op']
 
-    for k, v in ops:
+    for k, v in ops.items():
         df = data[k]
-        data[k] = df.eval('{} ' + v)
+        data[k][k] = df.eval('{} '.format(k) + v)
 
-    ingredient.data = data
+    return data
