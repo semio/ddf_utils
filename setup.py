@@ -5,7 +5,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='ddf_utils',
-    version='0.0.3',
+    version='0.0.4-dev',
     description='Commonly used functions/utilities for DDF file model.',
     url='https://github.com/semio/ddf_utils',
     author='Semio Zheng',
