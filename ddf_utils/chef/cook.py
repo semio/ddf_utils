@@ -13,7 +13,7 @@ from . procedure import *
 import logging
 
 
-## functions for reading/running recipe
+# functions for reading/running recipe
 def build_recipe(recipe_file):
     """build a complete recipe file if there are includes in
     recipe file, if no includes found than return the file as is.
@@ -74,7 +74,8 @@ def run_recipe(recipe_file):
         'translate_header': translate_header,
         'identity': identity,
         'merge': merge,
-        'run_op': run_op
+        'run_op': run_op,
+        'filter': filter_col
     }
 
     res = {}
@@ -128,6 +129,8 @@ def dish_to_csv(dishes, outpath):
                 else:
                     if by is not None:
                         path = os.path.join(outpath, 'ddf--{}--{}--by--{}.csv'.format(t, k, '--'.join(by)))
+                    elif k == 'concept':
+                        path = os.path.join(outpath, 'ddf--{}.csv'.format(t))
                     else:
                         path = os.path.join(outpath, 'ddf--{}--{}.csv'.format(t, k))
 

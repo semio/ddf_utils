@@ -3,6 +3,12 @@
 """all procedures for recipes"""
 
 import pandas as pd
+import json
+from . config import *
+from . ingredient import Ingredient
+
+import logging
+
 
 # TODO: _translate_header and _translate_column should be combined.
 def translate_header(ingredient, result, **options):
@@ -99,15 +105,37 @@ def merge(left, right, **options):
         raise NotImplementedError('entity data do not support merging yet.')
 
 
-def identity(ingredient):
-    return ingredient.get_data_copy()
+def identity(ingredient, **options):
+    try:
+        if options.pop('copy'):
+            return ingredient.get_data_copy()
+    except KeyError:
+        pass
+    return ingredient.get_data()
 
 
-def filter_(ingredient, **options):
+def filter_col(ingredient: Ingredient, **options) -> dict:
     """filter an ingredient based on a set of options and return
     the result as new ingredient
     """
-    pass
+    data = ingredient.get_data()
+    dictionary = options.pop('dictionary')
+
+    res = {}
+
+    for k, v in dictionary.items():
+        from_name = v.pop('from')
+        df = data[from_name]
+        # TODO: support more query methods.
+        query = ' '.join(["{} == '{}'".format(x, y) for x, y in v.items()])
+
+        logging.debug('query sting: ' + query)
+
+        df = df.query(query).copy()
+        df = df.drop(v.keys(), axis=1).rename(columns={from_name: k})
+        res[k] = df
+
+    return res
 
 
 def align(ingredient, base, **options):
@@ -118,7 +146,7 @@ def groupby(ingredient, **options):
     pass
 
 
-def run_op(ingredient: Ingredient, **options):
+def run_op(ingredient: Ingredient, **options) -> dict:
     data = ingredient.get_data()
 
     ops = options['op']
