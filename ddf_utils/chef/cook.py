@@ -96,9 +96,9 @@ def run_recipe(recipe_file):
                 result = p['result']
                 if 'options' in p.keys():
                     options = p['options']
-                    ings_dict[result] = funcs[func](*ingredient, result, **options)
+                    ings_dict[result] = funcs[func](*ingredient, result=result, **options)
                 else:
-                    ings_dict[result] = funcs[func](*ingredient, result)
+                    ings_dict[result] = funcs[func](*ingredient, result=result)
             else:
                 if 'options' in p.keys():
                     options = p['options']
@@ -106,7 +106,7 @@ def run_recipe(recipe_file):
                 else:
                     out = funcs[func](*ingredient)
 
-        res[k] = out
+        res[k] = out.get_data()
 
     return res
 

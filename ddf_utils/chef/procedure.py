@@ -11,7 +11,7 @@ import logging
 
 
 # TODO: _translate_header and _translate_column should be combined.
-def translate_header(ingredient, result, **options):
+def translate_header(ingredient, *, result=None, **options):
 
     global DICT_PATH
 
@@ -33,10 +33,12 @@ def translate_header(ingredient, result, **options):
         else:
             di[k] = di[k].rename(columns=rm)
 
+    if not result:
+        result = ingredient.ingred_id + '-translated'
     return Ingredient(result, result, ingredient.key, "*", data=di)
 
 
-def translate_column(ingredient, result, **options):
+def translate_column(ingredient, *, result=None, **options):
 
     global DICT_PATH
 
@@ -55,10 +57,12 @@ def translate_column(ingredient, result, **options):
         df = df.set_index(column)
         di[k] = df.rename(index=rm).reset_index()
 
+    if not result:
+        result = ingredient.ingred_id + '-translated'
     return Ingredient(result, result, ingredient.key, "*", data=di)
 
 
-def merge(left, right, **options):
+def merge(left, right, *, result=None, **options):
     """the main merge function"""
     # TODO:
     # 1. add `op` parameter: merge left, right with the op function
@@ -87,7 +91,7 @@ def merge(left, right, **options):
             for k, df in right_data.items():
                 left_data[k] = df
 
-        return left_data
+        res_data = left_data
 
     elif left.dtype == 'concepts':
 
@@ -96,25 +100,30 @@ def merge(left, right, **options):
 
         if deep:
             left_df = left_df.merge(right_df, how='outer')
-            return left_df
+            res_data = left_df
         else:
-            return right_df
+            res_data = right_df
 
     else:
         # TODO
         raise NotImplementedError('entity data do not support merging yet.')
 
-
-def identity(ingredient, **options):
-    try:
-        if options.pop('copy'):
-            return ingredient.get_data_copy()
-    except KeyError:
-        pass
-    return ingredient.get_data()
+    if not result:
+        result = left.ingred_id + '-merged'
+    return Ingredient(result, left.ddf_id, left.key, '*', data=res_data)
 
 
-def filter_col(ingredient: Ingredient, **options) -> dict:
+def identity(ingredient, *, result=None, **options):
+    if 'copy' in options:
+        ingredient.data = ingredient.get_data_copy()
+    else:
+        ingredient.data = ingredient.get_data()
+
+    ingredient.ingred_id = result
+    return ingredient
+
+
+def filter_col(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
     """filter an ingredient based on a set of options and return
     the result as new ingredient
     """
@@ -135,7 +144,9 @@ def filter_col(ingredient: Ingredient, **options) -> dict:
         df = df.drop(v.keys(), axis=1).rename(columns={from_name: k})
         res[k] = df
 
-    return res
+    if not result:
+        result = ingredient.ingred_id + '-filtered'
+    return Ingredient(result, result, ingredient.key, '*', data=res)
 
 
 def align(ingredient, base, **options):
@@ -146,7 +157,7 @@ def groupby(ingredient, **options):
     pass
 
 
-def run_op(ingredient: Ingredient, **options) -> dict:
+def run_op(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
     data = ingredient.get_data()
 
     ops = options['op']
@@ -155,4 +166,6 @@ def run_op(ingredient: Ingredient, **options) -> dict:
         df = data[k]
         data[k][k] = df.eval('{} '.format(k) + v)
 
-    return data
+    if not result:
+        result = ingredient.ingred_id + '-op'
+    return Ingredient(result, ingredient.ddf_id, ingredient.key, '*', data=data)
