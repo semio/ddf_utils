@@ -119,7 +119,8 @@ def identity(ingredient, *, result=None, **options):
     else:
         ingredient.data = ingredient.get_data()
 
-    ingredient.ingred_id = result
+    if result:
+        ingredient.ingred_id = result
     return ingredient
 
 
