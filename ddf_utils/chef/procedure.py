@@ -150,8 +150,49 @@ def filter_col(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
     return Ingredient(result, result, ingredient.key, '*', data=res)
 
 
-def align(ingredient, base, **options):
-    pass
+def align(to_align: Ingredient, base: Ingredient, *, result=None, **options) -> Ingredient:
+    try:
+        search_cols = options.pop('search_cols')
+        to_find = options.pop('to_find')
+        to_replace = options.pop('to_replace')
+    except KeyError:
+        raise KeyError("not enough parameters! please check your recipe")
+
+    if len(base.get_data()) > 1:
+        raise NotImplementedError('align to base data with multiple dataframes is not supported yet.')
+
+    base_data = list(base.get_data().values())[0]
+    ing_data = to_align.get_data()
+
+    base_data = base_data.set_index(base.key)
+
+    mapping = {}
+
+    for k, df in ing_data.items():
+        for f in df[to_find].drop_duplicates().values:
+            if f in mapping:
+                continue
+            # TODO: if I don't add drop_duplicates() below, I will get multiple same rows.
+            # find out why.
+            filtered = base_data[base_data[search_cols].values == f].drop_duplicates()
+            if len(filtered) == 1:
+                mapping[f] = filtered.index[0]
+            elif len(filtered) > 1:
+                logging.warning("multiple match found: "+f)
+                mapping[f] = filtered.index[0]
+            else:
+                logging.warning("No match found: "+f)
+
+        df = df[df[to_find].isin(mapping.keys())]  # only keep those available in mappings.
+        for old, new in mapping.items():
+            df.ix[df[to_find] == old, to_replace] = new
+
+        ing_data[k] = df
+
+    if not result:
+        result = to_align.ingred_id + '-aligned'
+    return Ingredient(result, result, to_replace, '*', data=ing_data)
+
 
 
 def groupby(ingredient, **options):
