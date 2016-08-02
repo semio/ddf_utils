@@ -139,7 +139,7 @@ class Ingredient(object):
         funcs = {
             # all functions will return a dictionary of dataframes.
             'concepts': self._get_data_concept,
-            'entitys': self._get_data_entity,
+            'entities': self._get_data_entity,
             'datapoints': self._get_data_datapoint
         }
 
