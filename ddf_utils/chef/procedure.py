@@ -218,13 +218,22 @@ def groupby(ingredient, **options):
 
 
 def run_op(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
-    data = ingredient.get_data()
 
+    assert ingredient.dtype == 'datapoints'
+
+    data = ingredient.get_data()
+    keys = ingredient.key_to_list()
     ops = options['op']
 
+    # concat all the datapoint dataframe first, and eval the ops
+    # TODO: concat() may be expansive. should find a way to improve.
+    to_concat = [v.set_index(keys) for v in data.values()]
+    df = pd.concat(to_concat, axis=1)
+
     for k, v in ops.items():
-        df = data[k]
-        data[k][k] = df.eval('{} '.format(k) + v)
+        data[k] = df.eval(v).dropna().reset_index(name=k)
+
+    logging.debug(data.keys())
 
     if not result:
         result = ingredient.ingred_id + '-op'

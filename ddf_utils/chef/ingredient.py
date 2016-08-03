@@ -75,7 +75,8 @@ class Ingredient(object):
         if self.dtype == "datapoints":
             return self.key.split(',')
         else:
-            raise ValueError("only datapoint should call this method")
+            assert isinstance(self.key, str)
+            return [self.key]
 
     def filter_index_key_value(self):
         """filter index file by key and value"""
