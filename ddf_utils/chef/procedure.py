@@ -136,6 +136,9 @@ def filter_col(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
     for k, v in dictionary.items():
         from_name = v.pop('from')
         df = data[from_name]
+        if len(v) == 0:
+            res[k] = df.rename(columns={from_name: k})
+            continue
         # TODO: support more query methods.
         query = ' '.join(["{} == '{}'".format(x, y) for x, y in v.items()])
 
@@ -148,6 +151,21 @@ def filter_col(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
     if not result:
         result = ingredient.ingred_id + '-filtered'
     return Ingredient(result, result, ingredient.key, '*', data=res)
+
+
+def filter_item(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
+    """filter item from the ingredient data dict"""
+    data = ingredient.get_data()
+    items = options.pop('items')
+
+    ingredient.data = dict([(k, data[k]) for k in data.keys() if k in items])
+
+    return ingredient
+
+
+def format_data():
+    """format floating points"""
+    pass
 
 
 def align(to_align: Ingredient, base: Ingredient, *, result=None, **options) -> Ingredient:
