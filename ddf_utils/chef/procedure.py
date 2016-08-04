@@ -212,9 +212,19 @@ def align(to_align: Ingredient, base: Ingredient, *, result=None, **options) -> 
     return Ingredient(result, result, to_replace, '*', data=ing_data)
 
 
+def groupby(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
+    data = ingredient.get_data()
+    by = options.pop('by')
+    agg = options.pop('aggregate')
 
-def groupby(ingredient, **options):
-    pass
+    for k, df in data.items():
+        df = df.groupby(by=by).agg({k: agg})
+        newkey = ','.join(df.index.names)
+        data[k] = df.reset_index()
+
+    if not 'result':
+        result = ingredient.ingred_id + '-agg'
+    return Ingredient(result, result, newkey, '*', data=data)
 
 
 def run_op(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
