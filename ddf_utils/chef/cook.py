@@ -75,9 +75,10 @@ def run_recipe(recipe_file):
         'identity': identity,
         'merge': merge,
         'run_op': run_op,
-        'filter': filter_col,
+        'filter': filter_row,
         'align': align,
-        'filter_item': filter_item
+        'filter_item': filter_item,
+        'groupby': groupby
     }
 
     res = {}

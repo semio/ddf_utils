@@ -70,8 +70,10 @@ def merge(left, right, *, result=None, **options):
     #
 
     # deep merge is when we check every datapoint for existence
-    # if false, overwrite is on the file level. If key-value (e.g. geo,year-population_total) exists, whole file gets overwritten
-    # if true, overwrite is on the row level. If values (e.g. afr,2015-population_total) exists, it gets overwritten, if it doesn't it stays
+    # if false, overwrite is on the file level. If key-value
+    # (e.g. geo,year-population_total) exists, whole file gets overwritten
+    # if true, overwrite is on the row level. If values
+    # (e.g. afr,2015-population_total) exists, it gets overwritten, if it doesn't it stays
     deep = options['deep']
 
     left_data = left.get_data().copy()
@@ -124,7 +126,7 @@ def identity(ingredient, *, result=None, **options):
     return ingredient
 
 
-def filter_col(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
+def filter_row(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
     """filter an ingredient based on a set of options and return
     the result as new ingredient
     """
@@ -139,18 +141,37 @@ def filter_col(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
         if len(v) == 0:
             res[k] = df.rename(columns={from_name: k})
             continue
-        # TODO: support more query methods.
-        query = ' '.join(["{} == '{}'".format(x, y) for x, y in v.items()])
+        queries = []
 
-        logging.debug('query sting: ' + query)
+        for col, val in v.items():
+            if isinstance(val, list):
+                queries.append("{} in {}".format(col, val))
+            elif isinstance(val, str):
+                queries.append("{} == '{}'".format(col, val))
+            # TODO: support more query methods.
+            else:
+                raise ValueError("not supported in query: " + type(val))
 
-        df = df.query(query).copy()
-        df = df.drop(v.keys(), axis=1).rename(columns={from_name: k})
+        query_string = ' and '.join(queries)
+
+        logging.debug('query sting: ' + query_string)
+
+        df = df.query(query_string).copy()
+        df = df.rename(columns={from_name: k})
+        # drops a column if all values are same.
+        newkey = ingredient.key
+        for c in df.columns:
+            if ingredient.dtype == 'datapoints' and len(df[c].unique()) == 1:
+                df = df.drop(c, axis=1)
+                keys = ingredient.key_to_list()
+                keys.remove(c)
+                newkey = ','.join(keys)
         res[k] = df
 
     if not result:
         result = ingredient.ingred_id + '-filtered'
-    return Ingredient(result, result, ingredient.key, '*', data=res)
+    # TODO: the ingredient key need to be dropped too.
+    return Ingredient(result, result, newkey, '*', data=res)
 
 
 def filter_item(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
@@ -177,7 +198,10 @@ def align(to_align: Ingredient, base: Ingredient, *, result=None, **options) -> 
         raise KeyError("not enough parameters! please check your recipe")
 
     if len(base.get_data()) > 1:
+        logging.warning(base.get_data().keys())
         raise NotImplementedError('align to base data with multiple dataframes is not supported yet.')
+
+    logging.info("aligning: {} and {}".format(to_align.ingred_id, base.ingred_id))
 
     base_data = list(base.get_data().values())[0]
     ing_data = to_align.get_data()
@@ -185,6 +209,7 @@ def align(to_align: Ingredient, base: Ingredient, *, result=None, **options) -> 
     base_data = base_data.set_index(base.key)
 
     mapping = {}
+    no_match = []
 
     for k, df in ing_data.items():
         for f in df[to_find].drop_duplicates().values:
@@ -199,17 +224,22 @@ def align(to_align: Ingredient, base: Ingredient, *, result=None, **options) -> 
                 logging.warning("multiple match found: "+f)
                 mapping[f] = filtered.index[0]
             else:
-                logging.warning("No match found: "+f)
-
-        df = df[df[to_find].isin(mapping.keys())]  # only keep those available in mappings.
+                no_match.append(f)
+        df = df[df[to_find].isin(mapping.keys())].copy()  # only keep those available in mappings.
         for old, new in mapping.items():
-            df.ix[df[to_find] == old, to_replace] = new
+            df.loc[df[to_find] == old, to_replace] = new
 
         ing_data[k] = df
 
+    logging.warning("no match found for: " + str(set(no_match)))
+
     if not result:
         result = to_align.ingred_id + '-aligned'
-    return Ingredient(result, result, to_replace, '*', data=ing_data)
+    if to_align.dtype == 'datapoints':
+        newkey = to_align.key.replace(to_find, to_replace)
+        return Ingredient(result, result, newkey, '*', data=ing_data)
+    else:
+        return Ingredient(result, result, to_replace, '*', data=ing_data)
 
 
 def groupby(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
@@ -233,6 +263,7 @@ def run_op(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
 
     data = ingredient.get_data()
     keys = ingredient.key_to_list()
+    # TODO: load the op as ordered dict to spead up. (I can do some comman ops at the beginning.)
     ops = options['op']
 
     # concat all the datapoint dataframe first, and eval the ops
