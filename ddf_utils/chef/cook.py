@@ -34,15 +34,19 @@ def build_recipe(recipe_file):
             path = os.path.join(base_dir, recipe_dir, i)
             sub_recipes.append(build_recipe(path))
 
+        # TODO: for now only one level supported. make it recursive.
         for rcp in sub_recipes:
             if 'ingredients' in recipe.keys():
                 ingredients = [*recipe['ingredients'], *rcp['ingredients']]
                 # drop duplicated ingredients.
                 # TODO: it's assumed that ingredients with same id have same key/value.
                 # need to confirm if it is true.
-                recipe['ingredients'] = list({v['id']:v for v in ingredients}.values())
+                recipe['ingredients'] = list({v['id']: v for v in ingredients}.values())
             else:
                 recipe['ingredients'] = rcp['ingredients']
+
+            if 'cooking' not in rcp.keys():
+                continue
 
             for p in ['datapoints', 'entities', 'concepts']:
                 if p not in rcp['cooking'].keys():
@@ -75,7 +79,7 @@ def run_recipe(recipe_file):
         'identity': identity,
         'merge': merge,
         'run_op': run_op,
-        'filter': filter_row,
+        'filter_row': filter_row,
         'align': align,
         'filter_item': filter_item,
         'groupby': groupby
