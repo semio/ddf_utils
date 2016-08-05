@@ -180,8 +180,12 @@ class Ingredient(object):
 
         res = []
 
+        # map all index columns to string type
+        keys = self.key_to_list()
+        dtype_conf = dict([(x, str) for x in keys])
+
         for i, row in filtered.iterrows():
-            df = pd.read_csv(os.path.join(ddf_path, row['file']))
+            df = pd.read_csv(os.path.join(ddf_path, row['file']), dtype=dtype_conf)
             df = self.filter_row(df)
 
             res.append([row['value'], df])
