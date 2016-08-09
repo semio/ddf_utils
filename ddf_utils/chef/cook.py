@@ -46,7 +46,7 @@ def build_recipe(recipe_file):
                         # raise error when ingredients with same ID have different contents.
                         if v != rcp_dict_tmp[v['id']]:
                             raise ValueError("Different content with same ingredient id detected: " + v['id'])
-                recipe['ingredients'] = rcp_dict_tmp.values()
+                recipe['ingredients'] = list(rcp_dict_tmp.values())
             else:
                 recipe['ingredients'] = rcp['ingredients']
 
