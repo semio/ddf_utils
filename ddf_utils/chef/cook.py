@@ -34,14 +34,19 @@ def build_recipe(recipe_file):
             path = os.path.join(base_dir, recipe_dir, i)
             sub_recipes.append(build_recipe(path))
 
-        # TODO: for now only one level supported. make it recursive.
         for rcp in sub_recipes:
             if 'ingredients' in recipe.keys():
                 ingredients = [*recipe['ingredients'], *rcp['ingredients']]
                 # drop duplicated ingredients.
-                # TODO: it's assumed that ingredients with same id have same key/value.
-                # need to confirm if it is true.
-                recipe['ingredients'] = list({v['id']: v for v in ingredients}.values())
+                rcp_dict_tmp = {}
+                for v in ingredients:
+                    if v['id'] not in rcp_dict_tmp.keys():
+                        rcp_dict_tmp[v['id']] = v
+                    else:
+                        # raise error when ingredients with same ID have different contents.
+                        if v != rcp_dict_tmp[v['id']]:
+                            raise ValueError("Different content with same ingredient id detected: " + v['id'])
+                recipe['ingredients'] = rcp_dict_tmp.values()
             else:
                 recipe['ingredients'] = rcp['ingredients']
 
@@ -53,8 +58,13 @@ def build_recipe(recipe_file):
                     continue
 
                 if 'cooking' in recipe.keys():
+                    # currently if dictionary option is a file name it won't change
+                    # to actual dictionary in that file.
+                    # TODO: build all dictionary options into the recipe.
                     if p in recipe['cooking'].keys():
-                        recipe['cooking'][p] = [*recipe['cooking'][p], *rcp['cooking'][p]]
+                        # NOTE: the included cooking procedures should be placed in front of
+                        # the origin ones.
+                        recipe['cooking'][p] = [*rcp['cooking'][p], *recipe['cooking'][p]]
                     else:
                         recipe['cooking'][p] = rcp['cooking'][p]
                 else:
@@ -65,7 +75,11 @@ def build_recipe(recipe_file):
 
 
 def run_recipe(recipe_file):
-    """run the recipe."""
+    """run the recipe.
+
+    returns a dictionary. keys are `concepts`, `entities` and `datapoints`,
+    and values are ingredients return by the procedures
+    """
     recipe = build_recipe(recipe_file)
 
     # load ingredients
@@ -103,17 +117,23 @@ def run_recipe(recipe_file):
                 result = p['result']
                 if 'options' in p.keys():
                     options = p['options']
-                    ings_dict[result] = funcs[func](*ingredient, result=result, **options)
+                    out = funcs[func](*ingredient, result=result, **options)
                 else:
-                    ings_dict[result] = funcs[func](*ingredient, result=result)
+                    out = funcs[func](*ingredient, result=result)
             else:
                 if 'options' in p.keys():
                     options = p['options']
                     out = funcs[func](*ingredient, **options)
                 else:
                     out = funcs[func](*ingredient)
+                result = out.ingred_id
 
-        res[k] = out.get_data()
+            if result in ings_dict.keys():
+                logging.warning("overwriting existing ingredient: " + result)
+
+            ings_dict[result] = out
+
+        res[k] = out  # use the last output Ingredient object as final result.
 
     return res
 
@@ -121,16 +141,19 @@ def run_recipe(recipe_file):
 def dish_to_csv(dishes, outpath):
     for t, dish in dishes.items():
 
+        all_data = dish.get_data()
+
         # get the key for datapoint
         if t == 'datapoints':
-            name_tmp = list(dish.keys())[0]
-            df_tmp = dish[name_tmp]
+            # assuming all datapoints have same by values, so only check one item.
+            name_tmp = list(all_data.keys())[0]
+            df_tmp = all_data[name_tmp]
             by = df_tmp.columns.drop(name_tmp)
         else:
             by = None
 
-        if isinstance(dish, dict):
-            for k, df in dish.items():
+        if isinstance(all_data, dict):
+            for k, df in all_data.items():
                 if re.match('ddf--.*.csv', k):
                     path = os.path.join(outpath, k)
                 else:
@@ -138,8 +161,12 @@ def dish_to_csv(dishes, outpath):
                         path = os.path.join(outpath, 'ddf--{}--{}--by--{}.csv'.format(t, k, '--'.join(by)))
                     elif k == 'concept':
                         path = os.path.join(outpath, 'ddf--{}.csv'.format(t))
-                    else:
-                        path = os.path.join(outpath, 'ddf--{}--{}.csv'.format(t, k))
+                    else:  # entities
+                        domain = dish.key[0]
+                        if k == domain:
+                            path = os.path.join(outpath, 'ddf--{}--{}.csv'.format(t, k))
+                        else:
+                            path = os.path.join(outpath, 'ddf--{}--{}--{}.csv'.format(t, domain, k))
 
                 if t == 'datapoints':
                     df.to_csv(path, index=False, float_format='%.2f')
@@ -147,4 +174,4 @@ def dish_to_csv(dishes, outpath):
                     df.to_csv(path, index=False)
         else:
             path = os.path.join(outpath, 'ddf--{}.csv'.format(t))
-            dish.to_csv(path, index=False)
+            all_data.to_csv(path, index=False)
