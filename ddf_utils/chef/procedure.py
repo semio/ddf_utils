@@ -7,7 +7,7 @@ import json
 from . config import *
 from . ingredient import Ingredient
 import time
-from typing import List, Union
+from typing import List, Union, Dict
 
 import logging
 
@@ -15,29 +15,38 @@ import logging
 # TODO: _translate_header and _translate_column should be combined.
 def translate_header(ingredient, *, result=None, **options):
 
+    logging.debug("translate_header: " + ingredient.ingred_id)
+
     global DICT_PATH
 
     dictionary = options['dictionary']
 
-    di = ingredient.get_data().copy()
+    data = ingredient.get_data().copy()
 
     if isinstance(dictionary, dict):
         rm = dictionary
     else:
         rm = json.load(open(os.path.join(DICT_PATH, dictionary), 'r'))
 
-    for k, df in di.items():
+    for k, df in data.items():
+        if k in rm.keys():  # if we are renaming concepts
+            data[rm[k]] = data[k].rename(columns=rm)
+            del(data[k])
 
-        if k in rm.keys():
-            di[rm[k]] = di[k].rename(columns=rm)
-            del(di[k])
-
-        else:
-            di[k] = di[k].rename(columns=rm)
+        else:  # then we are renaming the index columns
+            data[k] = data[k].rename(columns=rm)
+            if ingredient.dtype == 'datapoints' or ingredient.dtype == 'concepts':
+                for key in rm.keys():
+                    if key in ingredient.key:
+                        ingredient.key = ingredient.key.replace(key, rm[key])
+            else:
+                for key in rm.keys():
+                    if key in ingredient.key:
+                        ingredient.key[ingredient.key.index(key)] = rm[key]
 
     if not result:
         result = ingredient.ingred_id + '-translated'
-    return Ingredient(result, result, ingredient.key, "*", data=di)
+    return Ingredient(result, result, ingredient.key, "*", data=data)
 
 
 def translate_column(ingredient, *, result=None, **options):
@@ -99,8 +108,10 @@ def merge(*ingredients: List[Ingredient], result=None, **options):
     return Ingredient(result, result, index_col, '*', data=res_all)
 
 
-def _merge_two(left: dict, right: dict, index_col: Union[List, str], dtype: str, deep=False) -> dict:
-
+def _merge_two(left: Dict[str, pd.DataFrame],
+               right: Dict[str, pd.DataFrame],
+               index_col: Union[List, str],
+               dtype: str, deep=False) -> Dict[str, pd.DataFrame]:
     if len(left) == 0:
         return right
 
@@ -125,9 +136,9 @@ def _merge_two(left: dict, right: dict, index_col: Union[List, str], dtype: str,
 
         if deep:
             left_df = left_df.merge(right_df, how='outer')
-            res_data = {'concept': left_df}
+            res_data = {'concept': left_df.drop_duplicates()}
         else:
-            res_data = {'concept': right_df}
+            res_data = {'concept': right_df.drop_duplicates()}
     else:
         # TODO
         raise NotImplementedError('entity data do not support merging yet.')
@@ -294,8 +305,6 @@ def run_op(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
 
     for k, v in ops.items():
         data[k] = df.eval(v).dropna().reset_index(name=k)
-
-    logging.debug(data.keys())
 
     if not result:
         result = ingredient.ingred_id + '-op'
