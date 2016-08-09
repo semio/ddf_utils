@@ -1,0 +1,84 @@
+# basic info
+info:
+    id: bp-sg-dataset
+    base:
+        - &d1 ddf--bp--energy
+        - &d2 ddf--gapminder--geo_entity_domain
+        - &d3 ddf--gapminder--gapminder_world
+
+config:
+    recipes_dir: /Users/semio/src/work/Gapminder/ddf--gapminder--systema_globalis/etl/recipes/
+
+indclude:
+    - recipe_gw_common.yaml
+
+ingredients:
+    - id: bp-datapoints
+      dataset: *d1
+      key: "geo,year"
+      value: &FILTER_CONC
+          - coal_consumption_mtoe
+          - electricity_generation
+          - gas_production_tonnes
+          - gas_proved_reserves_history
+          - oil_consumption_tonnes
+          - oil_production_tonnes
+          - oil_proved_reserves_history
+    - id: gw-entities
+      dataset: *d2
+      key:
+          - geo
+      value: "*"
+    - id: gw-concepts-bp
+      dataset: *d3
+      key: concept
+      value: "*"
+      filter:
+          concept: &CONC_FILTER
+              - coal_consumption_total
+              - electricity_generation_total
+              - natural_gas_production_total
+              - natural_gas_proved_reserves_total
+              - oil_consumption_total
+              - oil_production_total
+              - oil_proved_reserves_total
+
+cooking:
+    concepts:
+        - procedure: merge
+          ingredients:
+              - gw-concepts-bp
+              - gw-concepts-discrete
+              - gw-concepts-geo
+          options:
+              deep: true
+          result: bp-concepts-final
+    entities:
+        - procedure: identity
+          ingredients: [gw-entities]
+    datapoints:
+        - procedure: translate_header
+          ingredients: [bp-datapoints]
+          options:
+              dictionary:
+                  year: time
+          result: bp-datapoints-translated
+
+        - procedure: run_op
+          ingredients: [bp-datapoints-translated]
+          options:
+              op:
+                  coal_consumption_total: "coal_consumption_mtoe * 1000000"
+                  electricity_generation_total: "electricity_generation * 1000000000"
+                  natural_gas_production_total: "gas_production_tonnes * 1000000"
+                  gas_proved_reserves_history: "gas_proved_reserves_history * 900000000"
+                  oil_consumption_total: "oil_consumption_tonnes * 1000000"
+                  oil_production_total: "oil_production_tonnes * 1000000"
+                  oil_proved_reserves_total: "oil_proved_reserves_history * 136400000"
+          result: bp-datapoints-op
+        - procedure: filter_item
+          ingredients:
+              - bp-datapoints-op
+          options:
+              items: *CONC_FILTER
+          result: bp-datapoints-final

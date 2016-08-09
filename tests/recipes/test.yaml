@@ -1,0 +1,25 @@
+# basic info
+info:
+    id: test_ddf_util
+
+config:
+    recipes_dir: /Users/semio/src/work/Gapminder/ddf_utils/tests/recipes
+
+include:
+    - recipe_bp.yaml
+    - recipe_cme.yaml
+
+cooking:
+    concepts:
+        - procedure: merge
+          ingredients:
+              - cme-concepts-final
+              - bp-concepts-final
+          options:
+              deep: true
+
+    datapoints:
+        - procedure: merge
+          ingredients:
+              - cme-datapoints-final
+              - bp-datapoints-final
