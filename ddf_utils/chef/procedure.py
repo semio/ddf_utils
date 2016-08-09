@@ -6,6 +6,8 @@ import pandas as pd
 import json
 from . config import *
 from . ingredient import Ingredient
+import time
+from typing import List, Union
 
 import logging
 
@@ -62,57 +64,75 @@ def translate_column(ingredient, *, result=None, **options):
     return Ingredient(result, result, ingredient.key, "*", data=di)
 
 
-def merge(left, right, *, result=None, **options):
+def merge(*ingredients: List[Ingredient], result=None, **options):
     """the main merge function"""
-    # TODO:
-    # 1. add `op` parameter: merge left, right with the op function
-    #     1.1 add dtype parameter. in run_recipe() we can get the dtype from recipe.
-    #
+    # all ingredients should have same dtype and index
+    assert len(set([(x.dtype, x.key) for x in ingredients])) == 1
+
+    # get the dtype and index
+    dtype = ingredients[0].dtype
+
+    if dtype == 'datapoints':
+        index_col = ingredients[0].key_to_list()
+    else:
+        index_col = ingredients[0].key
 
     # deep merge is when we check every datapoint for existence
     # if false, overwrite is on the file level. If key-value
     # (e.g. geo,year-population_total) exists, whole file gets overwritten
     # if true, overwrite is on the row level. If values
     # (e.g. afr,2015-population_total) exists, it gets overwritten, if it doesn't it stays
-    deep = options['deep']
+    if 'deep' in options.keys():
+        deep = options.pop('deep')
+    else:
+        deep = False
 
-    left_data = left.get_data().copy()
-    right_data = right.get_data().copy()
+    # merge data from ingredients one by one.
+    res_all = {}
 
-    assert left.dtype == right.dtype
+    for i in ingredients:
+        res_all = _merge_two(res_all, i.get_data(), index_col, dtype, deep)
 
-    if left.dtype == 'datapoints':
+    if not result:
+        result = 'all_data_merged_'+str(int(time.time()))
 
+    return Ingredient(result, result, index_col, '*', data=res_all)
+
+
+def _merge_two(left: dict, right: dict, index_col: Union[List, str], dtype: str, deep=False) -> dict:
+
+    if len(left) == 0:
+        return right
+
+    if dtype == 'datapoints':
         if deep:
-            for k, df in right_data.items():
-                if k in left_data.keys():
-                    left_data[k].update(df)  # TODO: maybe need to set_index before update
+            for k, df in right.items():
+                if k in left.keys():
+                    left[k].append(df)
+                    left[k] = left[k].drop_duplicates(cols=index_col, take_last=True)
                 else:
-                    left_data[k] = df
+                    left[k] = df
         else:
-            for k, df in right_data.items():
-                left_data[k] = df
+            for k, df in right.items():
+                left[k] = df
 
-        res_data = left_data
+        res_data = left
 
-    elif left.dtype == 'concepts':
+    elif dtype == 'concepts':
 
-        left_df = pd.concat(left_data.values())
-        right_df = pd.concat(right_data.values())
+        left_df = pd.concat(left.values())
+        right_df = pd.concat(right.values())
 
         if deep:
             left_df = left_df.merge(right_df, how='outer')
-            res_data = left_df
+            res_data = {'concept': left_df}
         else:
-            res_data = right_df
-
+            res_data = {'concept': right_df}
     else:
         # TODO
         raise NotImplementedError('entity data do not support merging yet.')
 
-    if not result:
-        result = left.ingred_id + '-merged'
-    return Ingredient(result, left.ddf_id, left.key, '*', data=res_data)
+    return res_data
 
 
 def identity(ingredient, *, result=None, **options):
@@ -231,7 +251,8 @@ def align(to_align: Ingredient, base: Ingredient, *, result=None, **options) -> 
 
         ing_data[k] = df
 
-    logging.warning("no match found for: " + str(set(no_match)))
+    if len(no_match) > 0:
+        logging.warning("no match found for: " + str(set(no_match)))
 
     if not result:
         result = to_align.ingred_id + '-aligned'
@@ -263,7 +284,7 @@ def run_op(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
 
     data = ingredient.get_data()
     keys = ingredient.key_to_list()
-    # TODO: load the op as ordered dict to spead up. (I can do some comman ops at the beginning.)
+    # TODO: load the op as ordered dict to speed up. (I can do some common ops at the beginning.)
     ops = options['op']
 
     # concat all the datapoint dataframe first, and eval the ops
