@@ -23,6 +23,21 @@ def build_recipe(recipe_file):
     else:
         recipe = yaml.load(open(recipe_file))
 
+    # expand all files in the options
+    if 'config' in recipe.keys() and 'dictionary_dir' in recipe['config'].keys():
+        dict_dir = recipe['config']['dictionary_dir']
+        for p in ['concepts', 'datapoints', 'entities']:
+            if p not in recipe['cooking'].keys():
+                continue
+            for i, procedure in enumerate(recipe['cooking'][p]):
+                try:
+                    opt_dict = procedure['options']['dictionary']
+                except KeyError:
+                    continue
+                if isinstance(opt_dict, str):
+                    path = os.path.join(dict_dir, opt_dict)
+                    recipe['cooking'][p][i]['options']['dictionary'] = json.load(open(path, 'r'))
+
     if 'include' not in recipe.keys():
         return recipe
     else:
@@ -81,6 +96,10 @@ def run_recipe(recipe_file):
     and values are ingredients return by the procedures
     """
     recipe = build_recipe(recipe_file)
+
+    config.SEARCH_PATH = recipe['config']['ddf_dir']
+
+    logging.debug('path for searching: ' + str(config.SEARCH_PATH))
 
     # load ingredients
     ings = [Ingredient.from_dict(i) for i in recipe['ingredients']]

@@ -6,7 +6,7 @@ import pandas as pd
 import os
 import logging
 
-from . config import *
+from . import config
 
 
 class Ingredient(object):
@@ -240,12 +240,11 @@ class Ingredient(object):
 
 # helper functions for Ingredient
 def _get_ddf_path(ddf_id):
-    global SEARCH_PATH
 
-    if isinstance(SEARCH_PATH, str):
-        SEARCH_PATH = [SEARCH_PATH]
+    if isinstance(config.SEARCH_PATH, str):
+        config.SEARCH_PATH = [config.SEARCH_PATH]
 
-    for p in SEARCH_PATH:
+    for p in config.SEARCH_PATH:
         path = os.path.join(p, ddf_id)
         if os.path.exists(path):
             return path

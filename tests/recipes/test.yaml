@@ -3,6 +3,7 @@ info:
     id: test_ddf_util
 
 config:
+    ddf_dir: /Users/semio/src/work/Gapminder/
     recipes_dir: /Users/semio/src/work/Gapminder/ddf_utils/tests/recipes
 
 include:

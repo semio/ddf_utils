@@ -2,5 +2,5 @@
 
 import os
 
-SEARCH_PATH = os.environ.get('DDF_PATH')
-DICT_PATH = os.environ.get('DICT_PATH')
+SEARCH_PATH = ''
+DICT_PATH = ''

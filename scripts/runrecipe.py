@@ -27,8 +27,6 @@ logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(message)s')
 if __name__ == '__main__':
     opts, args = getopt.getopt(sys.argv[1:], 'i:o:', ['recipe=', 'outdir='])
 
-    logging.debug('path for searching: ' + str(ddfrecipe.SEARCH_PATH))
-
     for o, v in opts:
         if o == '-i':
             recipe = v

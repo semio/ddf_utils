@@ -14,8 +14,8 @@ import shutil
 import logging
 logging.basicConfig(level=logging.DEBUG)
 
-chef.SEARCH_PATH = '/Users/semio/src/work/Gapminder/'
-chef.DICT_PATH = '/Users/semio/src/work/Gapminder/ddf--gapminder--systema_globalis/etl/translation_dictionaries'
+# chef.SEARCH_PATH = '/Users/semio/src/work/Gapminder/'
+# chef.DICT_PATH = '/Users/semio/src/work/Gapminder/ddf--gapminder--systema_globalis/etl/translation_dictionaries'
 
 recipe = 'recipes/test.yaml'
 outdir = 'tmp/'

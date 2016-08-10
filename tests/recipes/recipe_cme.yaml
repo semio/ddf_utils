@@ -8,6 +8,7 @@ info:
 
 config:
     recipes_dir: /Users/semio/src/work/Gapminder/ddf--gapminder--systema_globalis/etl/recipes/
+    dictionary_dir: /Users/semio/src/work/Gapminder/ddf--gapminder--systema_globalis/etl/translation_dictionaries/
         
 include:
     - recipe_gw_common.yaml
