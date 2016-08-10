@@ -38,30 +38,48 @@ def ddf_entities(ddf_id):
 
 
 def ddf_datapoints(ddf_id):
-    """return all datapoints"""
+    """return all datapoints
+
+    in case of there are multiple files for one concept (with different keys)
+    this function will return a dictionary in the form of {(concept, keys): dataframe}
+    """
     index = _get_index(ddf_id)
     path = _get_ddf_path(ddf_id)
 
     index = index.set_index('value')
-    files = index[index['file'].str.contains('datapoints')]['file'].drop_duplicates()
+    files = index[index['file'].str.contains('datapoints')][['key', 'file']].drop_duplicates()
 
     res = {}
 
-    for c, f in files.iteritems():
-        df = pd.read_csv(os.path.join(path, f))
-        res[c] = df
+    for c, f in files.iterrows():
+        fn = f['file']
+        df = pd.read_csv(os.path.join(path, fn))
+        res[(c, f['key'])] = df
 
     return res
 
 
-def ddf_datapoint(ddf_id, concept):
+def ddf_datapoint(ddf_id, concept, key=None):
     """return one datapoint"""
     index = _get_index(ddf_id)
     path = _get_ddf_path(ddf_id)
 
     index = index.set_index('value')
 
-    fn = index.ix[concept]['file']
+    f = index.ix[concept][['key', 'file']]
+
+    if len(f) == 0:
+        raise KeyError("concept not found: " + concept)
+
+    if len(f) > 1:
+        if not key:
+            print("WARNING: found multiple files for concept: " + concept)
+            print("using the first one in the index")
+            fn = f['file'].values[0]
+        else:
+            fn = f.loc[f['key'] == key, 'file'].values[0]
+    else:
+        fn = f['file'].values[0]
 
     return pd.read_csv(os.path.join(path, fn))
 
