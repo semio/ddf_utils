@@ -11,18 +11,24 @@ import shutil
 # import numpy as np
 
 
+import logging
+logging.basicConfig(level=logging.DEBUG)
+
 chef.SEARCH_PATH = '/Users/semio/src/work/Gapminder/'
 chef.DICT_PATH = '/Users/semio/src/work/Gapminder/ddf--gapminder--systema_globalis/etl/translation_dictionaries'
 
-recipe = 'test.yaml'
-outdir = '../tmp'
+recipe = 'recipes/test.yaml'
+outdir = 'tmp/'
 
 if not os.path.exists(outdir):
     os.mkdir(outdir)
 else:
     for f in os.listdir(outdir):
         path = os.path.join(outdir, f)
-        shutil.rmtree(path)
+        if os.path.isdir(path):
+            pass
+        else:
+            os.remove(path)
 
 res = chef.run_recipe(recipe)
 chef.dish_to_csv(res, outdir)
