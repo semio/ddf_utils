@@ -3,8 +3,6 @@
 """all procedures for recipes"""
 
 import pandas as pd
-import json
-from . config import *
 from . ingredient import Ingredient
 import time
 from typing import List, Union, Dict
@@ -12,21 +10,12 @@ from typing import List, Union, Dict
 import logging
 
 
-# TODO: _translate_header and _translate_column should be combined.
 def translate_header(ingredient, *, result=None, **options):
 
     logging.debug("translate_header: " + ingredient.ingred_id)
 
-    global DICT_PATH
-
-    dictionary = options['dictionary']
-
+    rm = options['dictionary']
     data = ingredient.get_data().copy()
-
-    if isinstance(dictionary, dict):
-        rm = dictionary
-    else:
-        rm = json.load(open(os.path.join(DICT_PATH, dictionary), 'r'))
 
     for k, df in data.items():
         if k in rm.keys():  # if we are renaming concepts
@@ -50,18 +39,9 @@ def translate_header(ingredient, *, result=None, **options):
 
 
 def translate_column(ingredient, *, result=None, **options):
-
-    global DICT_PATH
-
-    dictionary = options['dictionary']
+    rm = options['dictionary']
     column = options['column']
-
     di = ingredient.get_data().copy()
-
-    if isinstance(dictionary, dict):
-        rm = dictionary
-    else:
-        rm = json.load(open(os.path.join(DICT_PATH, dictionary), 'r'))
 
     for k, df in di.items():
 
