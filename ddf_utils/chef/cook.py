@@ -8,7 +8,10 @@ import yaml
 import re
 
 from . ingredient import *
+from . import config
 from . procedure import *
+
+from more_itertools import unique_everseen
 
 import logging
 
@@ -46,7 +49,10 @@ def build_recipe(recipe_file):
 
         sub_recipes = []
         for i in recipe['include']:
-            path = os.path.join(base_dir, recipe_dir, i)
+            if os.path.isabs(recipe_dir):
+                path = os.path.join(recipe_dir, i)
+            else:
+                path = os.path.join(base_dir, recipe_dir, i)
             sub_recipes.append(build_recipe(path))
 
         for rcp in sub_recipes:
@@ -85,6 +91,14 @@ def build_recipe(recipe_file):
                 else:
                     recipe['cooking'] = {}
                     recipe['cooking'][p] = rcp['cooking'][p]
+
+                # TODO: drop duplicated procedures
+                # if ingredients, procedure name are same, then
+                # we assume the procedures are same one
+                # recipe['cooking'][p] = list(
+                #     unique_everseen([[proc['procedure'], proc['ingredients']]
+                #                      for proc in recipe['cooking'][p]])
+                # )
 
         return recipe
 

@@ -12,6 +12,6 @@ setup(
     author_email='prairy.long@gmail.com',
     license='MIT',
     packages=find_packages(exclude=['contrib', 'docs', 'tests', 'scripts']),
-    install_requires=['pandas', 'unidecode'],
+    install_requires=['pandas', 'unidecode', 'pyyaml'],
     scripts=['scripts/runrecipe.py']
 )

@@ -83,7 +83,7 @@ def merge(*ingredients: List[Ingredient], result=None, **options):
         res_all = _merge_two(res_all, i.get_data(), index_col, dtype, deep)
 
     if not result:
-        result = 'all_data_merged_'+str(int(time.time()))
+        result = 'all_data_merged_'+str(int(time.time() * 1000))
 
     return Ingredient(result, result, index_col, '*', data=res_all)
 
@@ -275,7 +275,7 @@ def run_op(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
 
     data = ingredient.get_data()
     keys = ingredient.key_to_list()
-    # TODO: load the op as ordered dict to speed up. (I can do some common ops at the beginning.)
+    # TODO: load the op as ordered dict to speed up. (e.g I can create shared var at beginning)
     ops = options['op']
 
     # concat all the datapoint dataframe first, and eval the ops
