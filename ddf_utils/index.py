@@ -59,9 +59,12 @@ def entity_index(path, entity_file):
     if domain in header:
         header.remove(domain)
         key = domain
-    if concept in header:
+    elif concept in header:
         header.remove(concept)
         key = concept
+    else:
+        raise ValueError("the header in entity file not match with file name! \
+        Please double check your entities files.")
 
     df['value'] = header
     df['key'] = key

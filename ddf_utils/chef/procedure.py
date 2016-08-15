@@ -3,9 +3,11 @@
 """all procedures for recipes"""
 
 import pandas as pd
+import numpy as np
 from . ingredient import Ingredient
 import time
-from typing import List, Union, Dict
+from typing import List, Union, Dict, Optional
+import re
 
 import logging
 
@@ -17,10 +19,10 @@ def translate_header(ingredient, *, result=None, **options):
     rm = options['dictionary']
     data = ingredient.get_data().copy()
 
-    for k, df in data.items():
+    for k in list(data.keys()):
         if k in rm.keys():  # if we are renaming concepts
             data[rm[k]] = data[k].rename(columns=rm)
-            del(data[k])
+            # del(data[k])
 
         else:  # then we are renaming the index columns
             data[k] = data[k].rename(columns=rm)
@@ -56,7 +58,15 @@ def translate_column(ingredient, *, result=None, **options):
 def merge(*ingredients: List[Ingredient], result=None, **options):
     """the main merge function"""
     # all ingredients should have same dtype and index
-    assert len(set([(x.dtype, x.key) for x in ingredients])) == 1
+
+    logging.debug("merge: " + str([i.ingred_id for i in ingredients]))
+
+    # assert that dtype and key are same in all dataframe
+    try:
+        assert len(set([(x.dtype, x.key) for x in ingredients])) == 1
+    except AssertionError:
+        logging.info("Error: " + str(set([(x.dtype, x.key) for x in ingredients])))
+        raise
 
     # get the dtype and index
     dtype = ingredients[0].dtype
@@ -159,9 +169,11 @@ def filter_row(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
                 queries.append("{} in {}".format(col, val))
             elif isinstance(val, str):
                 queries.append("{} == '{}'".format(col, val))
+            elif np.issubdtype(type(val), np.number):
+                queries.append("{} == {}".format(col, val))
             # TODO: support more query methods.
             else:
-                raise ValueError("not supported in query: " + type(val))
+                raise ValueError("not supported in query: " + str(type(val)))
 
         query_string = ' and '.join(queries)
 
@@ -175,7 +187,8 @@ def filter_row(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
             if ingredient.dtype == 'datapoints' and len(df[c].unique()) == 1:
                 df = df.drop(c, axis=1)
                 keys = ingredient.key_to_list()
-                keys.remove(c)
+                if c in keys:
+                    keys.remove(c)
                 newkey = ','.join(keys)
         res[k] = df
 
@@ -185,14 +198,17 @@ def filter_row(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
     return Ingredient(result, result, newkey, '*', data=res)
 
 
-def filter_item(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
+def filter_item(ingredient: Ingredient, *, result: Optional[str]=None, **options) -> Ingredient:
     """filter item from the ingredient data dict"""
     data = ingredient.get_data()
     items = options.pop('items')
 
-    ingredient.data = dict([(k, data[k]) for k in data.keys() if k in items])
+    data = dict([(k, data[k]) for k in data.keys() if k in items])
 
-    return ingredient
+    if not result:
+        result = ingredient.ingred_id
+
+    return Ingredient(result, result, ingredient.key, '*', data=data)
 
 
 def format_data():
@@ -309,7 +325,12 @@ def run_op(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
     # concat all the datapoint dataframe first, and eval the ops
     # TODO: concat() may be expansive. should find a way to improve.
     to_concat = [v.set_index(keys) for v in data.values()]
-    df = pd.concat(to_concat, axis=1)
+    try:
+        df = pd.concat(to_concat, axis=1)
+    except:
+        for i, df in enumerate(to_concat):
+            df.to_csv('tmp_'+str(i)+'.csv')
+        raise
 
     for k, v in ops.items():
         data[k] = df.eval(v).dropna().reset_index(name=k)

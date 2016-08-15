@@ -17,7 +17,7 @@ import logging
 
 
 # functions for reading/running recipe
-def build_recipe(recipe_file):
+def build_recipe(recipe_file, to_disk=False):
     """build a complete recipe file if there are includes in
     recipe file, if no includes found than return the file as is.
     """
@@ -49,6 +49,7 @@ def build_recipe(recipe_file):
 
         sub_recipes = []
         for i in recipe['include']:
+            # FIXME: add support to expand user home and env vars
             if os.path.isabs(recipe_dir):
                 path = os.path.join(recipe_dir, i)
             else:
@@ -99,6 +100,8 @@ def build_recipe(recipe_file):
                 #     unique_everseen([[proc['procedure'], proc['ingredients']]
                 #                      for proc in recipe['cooking'][p]])
                 # )
+        if to_disk:
+            yaml.dump(recipe, open('recipe.yaml', 'w'))
 
         return recipe
 

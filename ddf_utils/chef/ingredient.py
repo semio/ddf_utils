@@ -258,14 +258,9 @@ class Ingredient(object):
 
 # helper functions for Ingredient
 def _get_ddf_path(ddf_id):
-
-    if isinstance(config.SEARCH_PATH, str):
-        config.SEARCH_PATH = [config.SEARCH_PATH]
-
-    for p in config.SEARCH_PATH:
-        path = os.path.join(p, ddf_id)
-        if os.path.exists(path):
-            return path
+    path = os.path.join(config.SEARCH_PATH, ddf_id)
+    if os.path.exists(path):
+        return path
     else:
         raise ValueError('data set not found: {}'.format(ddf_id))
 
