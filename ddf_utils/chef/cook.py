@@ -209,7 +209,7 @@ def dish_to_csv(dishes, outpath):
                             path = os.path.join(outpath, 'ddf--{}--{}--{}.csv'.format(t, domain, k))
 
                 if t == 'datapoints':
-                    df.to_csv(path, index=False, float_format='%.2f')
+                    df.to_csv(path, index=False, float_format='%.15g')
                 else:
                     df.to_csv(path, index=False)
         else:
