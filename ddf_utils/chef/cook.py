@@ -129,7 +129,8 @@ def run_recipe(recipe_file):
         'filter_row': filter_row,
         'align': align,
         'filter_item': filter_item,
-        'groupby': groupby
+        'groupby': groupby,
+        'accumulate': accumulate
     }
 
     res = {}

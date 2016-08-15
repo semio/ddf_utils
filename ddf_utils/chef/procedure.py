@@ -257,16 +257,44 @@ def align(to_align: Ingredient, base: Ingredient, *, result=None, **options) -> 
 def groupby(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
     data = ingredient.get_data()
     by = options.pop('by')
-    agg = options.pop('aggregate')
+
+    try:
+        agg = options.pop('aggregate')
+    except KeyError:
+        logging.warning("no aggregate function found, assuming sum()")
+        agg = 'sum'
 
     for k, df in data.items():
         df = df.groupby(by=by).agg({k: agg})
         newkey = ','.join(df.index.names)
         data[k] = df.reset_index()
 
-    if not 'result':
+    if not result:
         result = ingredient.ingred_id + '-agg'
     return Ingredient(result, result, newkey, '*', data=data)
+
+
+def accumulate(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
+
+    if ingredient.dtype != 'datapoints':
+        raise ValueError("only datapoint support this function!")
+
+    ops = options.pop('op')
+
+    data = ingredient.get_data()
+    index = ingredient.key_to_list()
+
+    for k, func in ops.items():
+        df = data[k]
+        df = df.groupby(by=index).agg('sum')
+        assert re.match('[a-z]+', func)  # only lower case chars allowed, for security
+        df = eval("df.groupby(level=[0]).{}()".format(func))
+        data[k] = df.reset_index()
+
+    if not result:
+        result = ingredient.ingred_id + '-accued'
+
+    return Ingredient(result, result, ingredient.key, '*', data=data)
 
 
 def run_op(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
