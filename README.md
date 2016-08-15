@@ -3,7 +3,7 @@
 ## Installation
 
 We are using python3 only features such as type signature in this repo.
-So we need python3 to run it.
+So python 3 is required in order to run this module.
 
 ```$ pip3 install git+https://github.com/semio/ddf_utils.git```
 
@@ -18,3 +18,7 @@ to run a recipe, simply run following:
 ```
 $ runrecipe.py -i path_to_recipe -o outdir
 ```
+
+### useful API for etl tasks
+
+TBD.

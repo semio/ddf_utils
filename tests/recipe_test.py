@@ -17,7 +17,7 @@ logging.basicConfig(level=logging.DEBUG)
 # chef.SEARCH_PATH = '/Users/semio/src/work/Gapminder/'
 # chef.DICT_PATH = '/Users/semio/src/work/Gapminder/ddf--gapminder--systema_globalis/etl/translation_dictionaries'
 
-recipe = 'recipes/test.yaml'
+recipe_file = 'recipes/test.yaml'
 outdir = 'tmp/'
 
 if not os.path.exists(outdir):
@@ -30,5 +30,7 @@ else:
         else:
             os.remove(path)
 
+
+recipe =  chef.build_recipe(recipe_file, to_disk=True)
 res = chef.run_recipe(recipe)
 chef.dish_to_csv(res, outdir)
