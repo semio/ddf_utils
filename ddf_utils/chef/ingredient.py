@@ -21,6 +21,9 @@ class Ingredient(object):
         self.values = values
         self.row_filter = row_filter
         self.data = data
+        # last_update is a dataframe contains last update
+        # time for each file in this ingredient.
+        self.last_update = None
 
     @classmethod
     def from_dict(cls, data):
@@ -172,6 +175,21 @@ class Ingredient(object):
 
     def copy(self, copy_data: bool):
         pass
+
+    def get_last_update(self):
+        if self.last_update is not None:
+            return self.last_update
+
+        index = self.index
+
+        for f in index['file'].drop_duplicates().values:
+            path = os.path.join(config.SEARCH_PATH, self.ddf_id, f)
+            mtime = os.path.getmtime(path)
+
+            index.loc[index['file'] == f, 'last_update'] = mtime
+
+        self.last_update = index[['file', 'last_update']].drop_duplicates()
+        return self.last_update
 
     def _get_data_datapoint(self):
         ddf_path = self.ddf_path

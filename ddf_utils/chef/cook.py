@@ -103,13 +103,16 @@ def build_recipe(recipe_file):
         return recipe
 
 
-def run_recipe(recipe_file):
+def update_recipe_last_update(recipe, outdir):
+    pass
+
+
+def run_recipe(recipe):
     """run the recipe.
 
     returns a dictionary. keys are `concepts`, `entities` and `datapoints`,
     and values are ingredients return by the procedures
     """
-    recipe = build_recipe(recipe_file)
 
     config.SEARCH_PATH = recipe['config']['ddf_dir']
 
