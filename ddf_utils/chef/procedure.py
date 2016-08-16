@@ -55,6 +55,23 @@ def translate_column(ingredient, *, result=None, **options):
     return Ingredient(result, result, ingredient.key, "*", data=di)
 
 
+def copy(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
+    """make copy of ingredient data, with new names"""
+    dictionary = options['dictionary']
+    data = ingredient.get_data()
+
+    for k, v in dictionary.items():
+        if isinstance(v, str):
+            data[v] = data[k].rename(columns={k: v}).copy()
+        else:
+            for n in v:
+                data[n] = data[k].rename(columns={k: n}).copy()
+
+    if not result:
+        result = ingredient.ingred_id + '_'
+    return Ingredient(result, result, ingredient.key, "*", data=data)
+
+
 def merge(*ingredients: List[Ingredient], result=None, **options):
     """the main merge function"""
     # all ingredients should have same dtype and index

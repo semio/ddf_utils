@@ -126,6 +126,7 @@ def run_recipe(recipe):
     ings_dict = dict([[i.ingred_id, i] for i in ings])
 
     # cooking
+    # TODO: move this dict outside
     funcs = {
         'translate_column': translate_column,
         'translate_header': translate_header,
@@ -136,7 +137,8 @@ def run_recipe(recipe):
         'align': align,
         'filter_item': filter_item,
         'groupby': groupby,
-        'accumulate': accumulate
+        'accumulate': accumulate,
+        'copy': copy
     }
 
     res = {}
