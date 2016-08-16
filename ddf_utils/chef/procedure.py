@@ -20,12 +20,13 @@ def translate_header(ingredient, *, result=None, **options):
     data = ingredient.get_data().copy()
 
     for k in list(data.keys()):
-        if k in rm.keys():  # if we are renaming concepts
-            data[rm[k]] = data[k].rename(columns=rm)
-            # del(data[k])
+        if k in rm.keys():  # if we need to rename the concept name
+            data[rm[k]] = data[k].rename(columns=rm).copy()
+            del(data[k])
 
-        else:  # then we are renaming the index columns
+        else:  # we only rename index/properties columns
             data[k] = data[k].rename(columns=rm)
+            # also rename the key
             if ingredient.dtype == 'datapoints' or ingredient.dtype == 'concepts':
                 for key in rm.keys():
                     if key in ingredient.key:
@@ -80,10 +81,10 @@ def merge(*ingredients: List[Ingredient], result=None, **options):
 
     # assert that dtype and key are same in all dataframe
     try:
-        assert len(set([(x.dtype, x.key) for x in ingredients])) == 1
+        assert len(set([x.key for x in ingredients])) == 1
+        assert len(set([x.dtype for x in ingredients])) == 1
     except AssertionError:
-        logging.info("Error: " + str(set([(x.dtype, x.key) for x in ingredients])))
-        raise
+        logging.warning("multiple dtype/key detected: " + str(set([(x.dtype, x.key) for x in ingredients])))
 
     # get the dtype and index
     dtype = ingredients[0].dtype
