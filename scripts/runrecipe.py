@@ -22,7 +22,9 @@ import sys
 import getopt
 
 import logging
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(message)s')
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s -%(levelname)s %(message)s',
+                    datefmt="%H:%M:%S"
+                    )
 
 if __name__ == '__main__':
     opts, args = getopt.getopt(sys.argv[1:], 'i:o:u', ['recipe=', 'outdir=', 'update'])
