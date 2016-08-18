@@ -11,8 +11,6 @@ from . ingredient import *
 from . import config
 from . procedure import *
 
-from more_itertools import unique_everseen
-
 import logging
 
 
@@ -38,6 +36,7 @@ def build_recipe(recipe_file, to_disk=False):
                 except KeyError:
                     continue
                 if isinstance(opt_dict, str):
+                    # FIXME: sometimes if dictionary_dir is not define, no error will raise
                     path = os.path.join(dict_dir, opt_dict)
                     recipe['cooking'][p][i]['options']['dictionary'] = json.load(open(path, 'r'))
 
