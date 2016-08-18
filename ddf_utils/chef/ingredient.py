@@ -89,14 +89,20 @@ class Ingredient(object):
         if isinstance(self.values, list):
             values = self.values
             if isinstance(self.key, list):
-                return index[(index["key"].isin(key)) & (index['value'].isin(values))]
+                filtered = index[(index["key"].isin(key)) & (index['value'].isin(values))]
             else:
-                return index[(index["key"] == key) & (index['value'].isin(values))]
+                filtered = index[(index["key"] == key) & (index['value'].isin(values))]
         else:  # assuming value = "*"
             if isinstance(self.key, list):
-                return index[index["key"].isin(key)]
+                filtered = index[index["key"].isin(key)]
             else:
-                return index[index["key"] == key]
+                filtered = index[index["key"] == key]
+
+        if len(filtered) == 0:
+            raise ValueError(self.ingred_id +
+                             ": No data found for the key/value pair! check your ingredient.")
+
+        return filtered
 
     def filter_index_file_name(self):
         """

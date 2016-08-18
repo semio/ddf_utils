@@ -23,22 +23,23 @@ def translate_header(ingredient, *, result=None, **options):
         if k in rm.keys():  # if we need to rename the concept name
             data[rm[k]] = data[k].rename(columns=rm).copy()
             del(data[k])
-
         else:  # we only rename index/properties columns
             data[k] = data[k].rename(columns=rm)
-            # also rename the key
-            if ingredient.dtype == 'datapoints' or ingredient.dtype == 'concepts':
-                for key in rm.keys():
-                    if key in ingredient.key:
-                        ingredient.key = ingredient.key.replace(key, rm[key])
-            else:
-                for key in rm.keys():
-                    if key in ingredient.key:
-                        ingredient.key[ingredient.key.index(key)] = rm[key]
+
+    # also rename the key
+    newkey = ingredient.key
+    if ingredient.dtype == 'datapoints' or ingredient.dtype == 'concepts':
+        for key in rm.keys():
+            if key in ingredient.key:
+                newkey = newkey.replace(key, rm[key])
+    else:
+        for key in rm.keys():
+            if key in ingredient.key:
+                newkey[ingredient.key.index(key)] = rm[key]
 
     if not result:
         result = ingredient.ingred_id + '-translated'
-    return Ingredient(result, result, ingredient.key, "*", data=data)
+    return Ingredient(result, result, newkey, "*", data=data)
 
 
 def translate_column(ingredient, *, result=None, **options):
@@ -83,16 +84,21 @@ def merge(*ingredients: List[Ingredient], result=None, **options):
     try:
         assert len(set([x.key for x in ingredients])) == 1
         assert len(set([x.dtype for x in ingredients])) == 1
-    except AssertionError:
-        logging.warning("multiple dtype/key detected: " + str(set([(x.dtype, x.key) for x in ingredients])))
+    except (AssertionError, TypeError):
+        log1 = "multiple dtype/key detected: \n"
+        log2 = "\n".join(["{}: {}, {}".format(x.ingred_id, x.dtype, x.key) for x in ingredients])
+        logging.warning(log1+log2)
 
     # get the dtype and index
+    # FIXME: handle the index key better
     dtype = ingredients[0].dtype
 
     if dtype == 'datapoints':
         index_col = ingredients[0].key_to_list()
+        newkey = ','.join(index_col)
     else:
         index_col = ingredients[0].key
+        newkey = index_col
 
     # deep merge is when we check every datapoint for existence
     # if false, overwrite is on the file level. If key-value
@@ -113,7 +119,7 @@ def merge(*ingredients: List[Ingredient], result=None, **options):
     if not result:
         result = 'all_data_merged_'+str(int(time.time() * 1000))
 
-    return Ingredient(result, result, index_col, '*', data=res_all)
+    return Ingredient(result, result, newkey, '*', data=res_all)
 
 
 def _merge_two(left: Dict[str, pd.DataFrame],
@@ -195,19 +201,25 @@ def filter_row(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
 
         query_string = ' and '.join(queries)
 
-        logging.debug('query sting: ' + query_string)
+        # logging.debug('query sting: ' + query_string)
 
         df = df.query(query_string).copy()
         df = df.rename(columns={from_name: k})
-        # drops a column if all values are same.
+        # drops all columns with unique contents. and update the key.
         newkey = ingredient.key
+        keys = ingredient.key_to_list()
         for c in df.columns:
-            if ingredient.dtype == 'datapoints' and len(df[c].unique()) == 1:
-                df = df.drop(c, axis=1)
-                keys = ingredient.key_to_list()
-                if c in keys:
-                    keys.remove(c)
-                newkey = ','.join(keys)
+            if ingredient.dtype == 'datapoints':
+                if c in v.keys() and len(df[c].unique()) > 1:
+                    logging.debug("column {} have multiple values: {}".format(c, df[c].unique()))
+                elif len(df[c].unique()) <= 1:
+                    df = df.drop(c, axis=1)
+                    if c in keys:
+                        keys.remove(c)
+                    newkey = ','.join(keys)
+            else:
+                raise NotImplementedError("filtering concept/entity")
+
         res[k] = df
 
     if not result:
@@ -221,7 +233,11 @@ def filter_item(ingredient: Ingredient, *, result: Optional[str]=None, **options
     data = ingredient.get_data()
     items = options.pop('items')
 
-    data = dict([(k, data[k]) for k in data.keys() if k in items])
+    try:
+        data = dict([(k, data[k]) for k in items])
+    except KeyError:
+        logging.debug("keys in {}: {}".format(ingredient.ingred_id, str(list(data.keys()))))
+        raise
 
     if not result:
         result = ingredient.ingred_id
