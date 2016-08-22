@@ -134,7 +134,7 @@ def _merge_two(left: Dict[str, pd.DataFrame],
             for k, df in right.items():
                 if k in left.keys():
                     left[k].append(df)
-                    left[k] = left[k].drop_duplicates(cols=index_col, take_last=True)
+                    left[k] = left[k].drop_duplicates(subset=index_col, keep='last')
                 else:
                     left[k] = df
         else:
@@ -150,9 +150,9 @@ def _merge_two(left: Dict[str, pd.DataFrame],
 
         if deep:
             left_df = left_df.merge(right_df, how='outer')
-            res_data = {'concept': left_df.drop_duplicates()}
+            res_data = {'concept': left_df.drop_duplicates(subset='concept', keep='last')}
         else:
-            res_data = {'concept': right_df.drop_duplicates()}
+            res_data = {'concept': right_df.drop_duplicates(subset='concept', keep='last')}
     else:
         # TODO
         raise NotImplementedError('entity data do not support merging yet.')
@@ -258,6 +258,11 @@ def align(to_align: Ingredient, base: Ingredient, *, result=None, **options) -> 
     except KeyError:
         raise KeyError("not enough parameters! please check your recipe")
 
+    if 'drop_not_found' not in options:
+        drop_not_found = True
+    else:
+        drop_not_found = options['drop_not_found']
+
     if len(base.get_data()) > 1:
         logging.warning(base.get_data().keys())
         raise NotImplementedError('align to base data with multiple dataframes is not supported yet.')
@@ -286,11 +291,18 @@ def align(to_align: Ingredient, base: Ingredient, *, result=None, **options) -> 
                 mapping[f] = filtered.index[0]
             else:
                 no_match.append(f)
-        df = df[df[to_find].isin(mapping.keys())].copy()  # only keep those available in mappings.
-        for old, new in mapping.items():
-            df.loc[df[to_find] == old, to_replace] = new
 
-        ing_data[k] = df
+        if drop_not_found:
+            # drop those entities not found in the mappings
+            df_ = df[df[to_find].isin(mapping.keys())].copy()
+        else:
+            df_ = df.copy()
+
+        for old, new in mapping.items():
+            if not pd.isnull(new):
+                df_.loc[df_[to_find] == old, to_replace] = new
+
+        ing_data[k] = df_.dropna(how='any')
 
     if len(no_match) > 0:
         logging.warning("no match found for: " + str(set(no_match)))
