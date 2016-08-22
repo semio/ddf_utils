@@ -22,14 +22,16 @@ import sys
 import getopt
 
 import logging
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s -%(levelname)s %(message)s',
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s -%(levelname)s- %(message)s',
                     datefmt="%H:%M:%S"
                     )
 
 if __name__ == '__main__':
-    opts, args = getopt.getopt(sys.argv[1:], 'i:o:u', ['recipe=', 'outdir=', 'update'])
+    opts, args = getopt.getopt(sys.argv[1:], 'i:o:u:d', ['recipe=', 'outdir=', 'update', 'dry-run'])
 
     update = False
+    dry_run = False
+
     for o, v in opts:
         if o == '-i':
             recipe_file = v
@@ -37,13 +39,16 @@ if __name__ == '__main__':
             outdir = v
         if o == '-u':
             update = True
+        if o == '-d':
+            dry_run = True
 
     print('running recipe...')
     recipe = ddfrecipe.build_recipe(recipe_file)
     if update:
         pass
     res = ddfrecipe.run_recipe(recipe)
-    print('saving result to disk...')
-    ddfrecipe.dish_to_csv(res, outdir)
-    print('creating index file...')
-    create_index_file(outdir)
+    if not dry_run:
+        print('saving result to disk...')
+        ddfrecipe.dish_to_csv(res, outdir)
+        print('creating index file...')
+        create_index_file(outdir)
