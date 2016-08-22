@@ -10,6 +10,7 @@ import re
 from . ingredient import *
 from . import config
 from . procedure import *
+from .. str import format_float_digits
 
 import logging
 
@@ -24,6 +25,10 @@ def build_recipe(recipe_file, to_disk=False):
     else:
         recipe = yaml.load(open(recipe_file))
 
+    # the base dir of recipe file. for building paths for dictionary_dir and
+    # sub recipe paths.
+    base_dir = os.path.dirname(recipe_file)
+
     # expand all files in the options
     if 'config' in recipe.keys() and 'dictionary_dir' in recipe['config'].keys():
         dict_dir = recipe['config']['dictionary_dir']
@@ -37,18 +42,21 @@ def build_recipe(recipe_file, to_disk=False):
                     continue
                 if isinstance(opt_dict, str):
                     # FIXME: sometimes if dictionary_dir is not define, no error will raise
-                    path = os.path.join(dict_dir, opt_dict)
-                    recipe['cooking'][p][i]['options']['dictionary'] = json.load(open(path, 'r'))
+                    if os.path.isabs(dict_dir):
+                        path = os.path.join(dict_dir, opt_dict)
+                    else:
+                        path = os.path.join(base_dir, dict_dir, opt_dict)
+                    with open(path, 'r') as f:
+                        recipe['cooking'][p][i]['options']['dictionary'] = json.load(f)
 
     if 'include' not in recipe.keys():
         return recipe
     else:
-        base_dir = os.path.dirname(recipe_file)
         recipe_dir = recipe['config']['recipes_dir']
 
         sub_recipes = []
         for i in recipe['include']:
-            # FIXME: add support to expand user home and env vars
+            # TODO: maybe add support to expand user home and env vars
             if os.path.isabs(recipe_dir):
                 path = os.path.join(recipe_dir, i)
             else:
@@ -210,7 +218,13 @@ def dish_to_csv(dishes, outpath):
                             path = os.path.join(outpath, 'ddf--{}--{}--{}.csv'.format(t, domain, k))
 
                 if t == 'datapoints':
-                    df.to_csv(path, index=False, float_format='%.15g')
+                    ks = dish.key_to_list()
+                    df = df.set_index(ks)
+                    if not np.issubdtype(df[k].dtype, np.number):
+                        df[k] = df[k].astype(float)
+                    # TODO: better handle the float format.
+                    df[k] = df[k].map(lambda x: format_float_digits(x, 5))
+                    df.to_csv(path)
                 else:
                     df.to_csv(path, index=False)
         else:
