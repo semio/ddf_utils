@@ -4,6 +4,7 @@
 import re
 import numpy as np
 from unidecode import unidecode
+import decimal
 
 
 def to_concept_id(s, sep='_'):
@@ -51,3 +52,81 @@ def fix_time_range(s):
             return int(y1 + (y2 - y1) / 2 )
 
 
+def _float_to_decimal(f):
+    # http://docs.python.org/library/decimal.html#decimal-faq
+    """Convert a floating point number to a Decimal with no loss of information"""
+    n, d = f.as_integer_ratio()
+    numerator, denominator = decimal.Decimal(n), decimal.Decimal(d)
+    ctx = decimal.Context(prec=60)
+    result = ctx.divide(numerator, denominator)
+    while ctx.flags[decimal.Inexact]:
+        ctx.flags[decimal.Inexact] = False
+        ctx.prec *= 2
+        result = ctx.divide(numerator, denominator)
+    return result
+
+
+def format_float_digits(number, digits=5, threshold=None):
+    # assert(digits > 0)
+    # try:
+    #     d = decimal.Decimal(number)
+    # except TypeError:
+    #     d = _float_to_decimal(float(number))
+
+    d = float(number)
+
+    if threshold:
+        if abs(d) >= threshold:
+            return '0'
+
+    s = format(d, '.{}f'.format(digits))
+
+    if '.' in s:
+        s = s.rstrip('0')
+        if s[-1] == '.':
+            s = s[:-1]
+
+    return s
+
+
+def format_float_sigfig(number, sigfig=5, threshold=None):
+    # http://stackoverflow.com/questions/2663612/nicely-representing-a-floating-point-number-in-python/2663623#2663623
+    # assert(sigfig > 0)
+    try:
+        d = decimal.Decimal(number)
+    except TypeError:
+        d = _float_to_decimal(float(number))
+
+    if threshold:
+        if abs(d) >= threshold:
+            return '0'
+
+    sign, digits, exponent = d.as_tuple()
+
+    if len(digits) < sigfig:
+        digits = list(digits)
+        digits.extend([0] * (sigfig - len(digits)))
+    shift = d.adjusted()
+    result = int(''.join(map(str, digits[:sigfig])))
+    # Round the result
+    if len(digits) > sigfig and digits[sigfig] >= 5:
+        result += 1
+    result = list(str(result))
+    # Rounding can change the length of result
+    # If so, adjust shift
+    shift += len(result) - sigfig
+    # reset len of result to sigfig
+    result = result[:sigfig]
+    if shift >= sigfig - 1:
+        # Tack more zeros on the end
+        result += ['0']*(shift-sigfig+1)
+    elif 0 <= shift:
+        # Place the decimal point in between digits
+        result.insert(shift+1, '.')
+    else:
+        # Tack zeros on the front
+        assert(shift < 0)
+        result = ['0.']+['0']*(-shift-1)+result
+    if sign:
+        result.insert(0, '-')
+    return ''.join(result)
