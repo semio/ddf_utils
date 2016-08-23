@@ -192,21 +192,13 @@ def dish_to_csv(dishes, outpath):
 
         all_data = dish.get_data()
 
-        # get the key for datapoint
-        if t == 'datapoints':
-            # assuming all datapoints have same by values, so only check one item.
-            name_tmp = list(all_data.keys())[0]
-            df_tmp = all_data[name_tmp]
-            by = df_tmp.columns.drop(name_tmp)
-        else:
-            by = None
-
         if isinstance(all_data, dict):
             for k, df in all_data.items():
                 if re.match('ddf--.*.csv', k):
                     path = os.path.join(outpath, k)
                 else:
-                    if by is not None:
+                    if t == 'datapoints':
+                        by = dish.key_to_list()
                         path = os.path.join(outpath, 'ddf--{}--{}--by--{}.csv'.format(t, k, '--'.join(by)))
                     elif k == 'concept':
                         path = os.path.join(outpath, 'ddf--{}.csv'.format(t))
@@ -218,13 +210,12 @@ def dish_to_csv(dishes, outpath):
                             path = os.path.join(outpath, 'ddf--{}--{}--{}.csv'.format(t, domain, k))
 
                 if t == 'datapoints':
-                    ks = dish.key_to_list()
-                    df = df.set_index(ks)
+                    df = df.set_index(by)
                     if not np.issubdtype(df[k].dtype, np.number):
                         df[k] = df[k].astype(float)
                     # TODO: better handle the float format.
                     df[k] = df[k].map(lambda x: format_float_digits(x, 5))
-                    df.to_csv(path)
+                    df[[k]].to_csv(path)
                 else:
                     df.to_csv(path, index=False)
         else:
