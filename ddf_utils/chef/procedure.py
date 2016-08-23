@@ -14,7 +14,7 @@ import logging
 
 def translate_header(ingredient, *, result=None, **options):
 
-    logging.debug("translate_header: " + ingredient.ingred_id)
+    logging.info("translate_header: " + ingredient.ingred_id)
 
     rm = options['dictionary']
     data = ingredient.get_data().copy()
@@ -43,6 +43,9 @@ def translate_header(ingredient, *, result=None, **options):
 
 
 def translate_column(ingredient, *, result=None, **options):
+
+    logging.info("translate_column: " + ingredient.ingred_id)
+
     rm = options['dictionary']
     column = options['column']
     di = ingredient.get_data().copy()
@@ -59,6 +62,9 @@ def translate_column(ingredient, *, result=None, **options):
 
 def copy(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
     """make copy of ingredient data, with new names"""
+
+    logging.info("copy: " + ingredient.ingred_id)
+
     dictionary = options['dictionary']
     data = ingredient.get_data()
 
@@ -78,7 +84,7 @@ def merge(*ingredients: List[Ingredient], result=None, **options):
     """the main merge function"""
     # all ingredients should have same dtype and index
 
-    logging.debug("merge: " + str([i.ingred_id for i in ingredients]))
+    logging.info("merge: " + str([i.ingred_id for i in ingredients]))
 
     # assert that dtype and key are same in all dataframe
     try:
@@ -175,6 +181,9 @@ def filter_row(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
     """filter an ingredient based on a set of options and return
     the result as new ingredient
     """
+
+    logging.info("filter_row: " + ingredient.ingred_id)
+
     data = ingredient.get_data()
     dictionary = options.pop('dictionary')
 
@@ -230,6 +239,9 @@ def filter_row(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
 
 def filter_item(ingredient: Ingredient, *, result: Optional[str]=None, **options) -> Ingredient:
     """filter item from the ingredient data dict"""
+
+    logging.info("filter_item: " + ingredient.ingred_id)
+
     data = ingredient.get_data()
     items = options.pop('items')
 
@@ -251,6 +263,7 @@ def format_data():
 
 
 def align(to_align: Ingredient, base: Ingredient, *, result=None, **options) -> Ingredient:
+    """doc here"""
     try:
         search_cols = options.pop('search_cols')
         to_find = options.pop('to_find')
@@ -320,6 +333,8 @@ def groupby(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
     data = ingredient.get_data()
     by = options.pop('by')
 
+    logging.info("groupby: " + ingredient.ingred_id)
+
     try:
         agg = options.pop('aggregate')
     except KeyError:
@@ -338,6 +353,7 @@ def groupby(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
 
 def accumulate(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
 
+    logging.info("accumulate: " + ingredient.ingred_id)
     if ingredient.dtype != 'datapoints':
         raise ValueError("only datapoint support this function!")
 
@@ -362,6 +378,7 @@ def accumulate(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
 def run_op(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
 
     assert ingredient.dtype == 'datapoints'
+    logging.info("run_op: " + ingredient.ingred_id)
 
     data = ingredient.get_data()
     keys = ingredient.key_to_list()
