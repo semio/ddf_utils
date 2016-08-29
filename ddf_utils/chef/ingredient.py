@@ -51,7 +51,7 @@ class Ingredient(object):
         """
         returns the type of ddf data, i.e. concepts/entities/datapoints.
 
-        It will be inferred from the key porperity of ingredient.
+        It will be inferred from the key property of ingredient.
         TODO: what if key == '*'? Is it possible?
         """
         if self.key == 'concept':

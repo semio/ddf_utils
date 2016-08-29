@@ -72,6 +72,7 @@ def format_float_digits(number, digits=5, threshold=None):
     #     d = decimal.Decimal(number)
     # except TypeError:
     #     d = _float_to_decimal(float(number))
+    #FIXME: deal with nan
 
     d = float(number)
 

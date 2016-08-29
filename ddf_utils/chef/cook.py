@@ -212,9 +212,14 @@ def dish_to_csv(dishes, outpath):
                 if t == 'datapoints':
                     df = df.set_index(by)
                     if not np.issubdtype(df[k].dtype, np.number):
-                        df[k] = df[k].astype(float)
-                    # TODO: better handle the float format.
-                    df[k] = df[k].map(lambda x: format_float_digits(x, 5))
+                        try:
+                            df[k] = df[k].astype(float)
+                            # TODO: better handle the float format.
+                            df[k] = df[k].map(lambda x: format_float_digits(x, 5))
+                        except ValueError:
+                            logging.warning("data not numeric: " + k)
+                    else:
+                        df[k] = df[k].map(lambda x: format_float_digits(x, 5))
                     df[[k]].to_csv(path)
                 else:
                     df.to_csv(path, index=False)
