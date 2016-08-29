@@ -115,7 +115,8 @@ def merge(*ingredients: List[Ingredient], result=None, **options):
         deep = options.pop('deep')
     else:
         deep = False
-
+    if deep:
+        logging.info("merge: doing deep merge")
     # merge data from ingredients one by one.
     res_all = {}
 
@@ -139,8 +140,9 @@ def _merge_two(left: Dict[str, pd.DataFrame],
         if deep:
             for k, df in right.items():
                 if k in left.keys():
-                    left[k].append(df)
+                    left[k] = left[k].append(df)
                     left[k] = left[k].drop_duplicates(subset=index_col, keep='last')
+                    left[k] = left[k].sort_values(by=index_col)
                 else:
                     left[k] = df
         else:
@@ -362,17 +364,38 @@ def accumulate(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
     data = ingredient.get_data()
     index = ingredient.key_to_list()
 
+    funcs = {
+        'aagr': _aagr
+    }
+
     for k, func in ops.items():
         df = data[k]
         df = df.groupby(by=index).agg('sum')
-        assert re.match('[a-z]+', func)  # only lower case chars allowed, for security
-        df = eval("df.groupby(level=[0]).{}()".format(func))
-        data[k] = df.reset_index()
+        assert re.match('[a-z_]+', func)  # only lower case chars allowed, for security
+        # assuming level0 index is geo
+        # because we should run accumulate for each country
+        # TODO: search for geo index, not assuming
+        if func in funcs:
+            # FIXME: change the recipe format so that it can accept acc. fun. options
+            df = df.groupby(level=0, as_index=False).apply(funcs[func])
+            df = df.reset_index()
+            df = df[[*index, k]]
+        else:
+            df = eval("df.groupby(level=0).{}()".format(func))
+            df = df.reset_index()
+
+        data[k] = df
 
     if not result:
         result = ingredient.ingred_id + '-accued'
 
     return Ingredient(result, result, ingredient.key, '*', data=data)
+
+
+def _aagr(df: pd.DataFrame, window: int=10):
+    """average annual growth rate"""
+    pct = df.pct_change()
+    return pct.rolling(window).apply(np.mean).dropna()
 
 
 def run_op(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
