@@ -293,12 +293,19 @@ def align(to_align: Ingredient, base: Ingredient, *, result=None, **options) -> 
     no_match = []
 
     for k, df in ing_data.items():
-        for f in df[to_find].drop_duplicates().values:
+        for f in df[to_find].unique():
             if f in mapping:
                 continue
-            # TODO: if I don't add drop_duplicates() below, I will get multiple same rows.
-            # find out why.
-            filtered = base_data[base_data[search_cols].values == f].drop_duplicates()
+
+            # filtering name in all search_cols
+            bools = []
+            for sc in search_cols:
+                bools.append(base_data[sc] == f)
+            mask = bools[0]
+            for m in bools[1:]:
+                mask = mask | m
+            filtered = base_data[mask]
+
             if len(filtered) == 1:
                 mapping[f] = filtered.index[0]
             elif len(filtered) > 1:
@@ -315,9 +322,9 @@ def align(to_align: Ingredient, base: Ingredient, *, result=None, **options) -> 
 
         for old, new in mapping.items():
             if not pd.isnull(new):
-                df_.loc[df_[to_find] == old, to_replace] = new
+                df_.at[df_[to_find] == old, to_replace] = new
 
-        ing_data[k] = df_.dropna(how='any')
+        ing_data[k] = df_
 
     if len(no_match) > 0:
         logging.warning("no match found for: " + str(set(no_match)))
