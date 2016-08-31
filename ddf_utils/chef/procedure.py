@@ -94,9 +94,11 @@ def merge(*ingredients: List[Ingredient], result=None, **options):
         log1 = "multiple dtype/key detected: \n"
         log2 = "\n".join(["{}: {}, {}".format(x.ingred_id, x.dtype, x.key) for x in ingredients])
         logging.warning(log1+log2)
+        raise ValueError("can't merge data with multiple dtype/key!")
 
     # get the dtype and index
-    # FIXME: handle the index key better
+    # we have assert dtype and key is unique, so we take it from
+    # the first ingredient
     dtype = ingredients[0].dtype
 
     if dtype == 'datapoints':
@@ -235,7 +237,6 @@ def filter_row(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
 
     if not result:
         result = ingredient.ingred_id + '-filtered'
-    # TODO: the ingredient key need to be dropped too.
     return Ingredient(result, result, newkey, '*', data=res)
 
 
@@ -381,9 +382,8 @@ def accumulate(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
         assert re.match('[a-z_]+', func)  # only lower case chars allowed, for security
         # assuming level0 index is geo
         # because we should run accumulate for each country
-        # TODO: search for geo index, not assuming
+        # TODO: https://github.com/semio/ddf_utils/issues/25
         if func in funcs:
-            # FIXME: change the recipe format so that it can accept acc. fun. options
             df = df.groupby(level=0, as_index=False).apply(funcs[func])
             df = df.reset_index()
             df = df[[*index, k]]
@@ -416,7 +416,6 @@ def run_op(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
     ops = options['op']
 
     # concat all the datapoint dataframe first, and eval the ops
-    # TODO: concat() may be expansive. should find a way to improve.
     to_concat = [v.set_index(keys) for v in data.values()]
     try:
         df = pd.concat(to_concat, axis=1)

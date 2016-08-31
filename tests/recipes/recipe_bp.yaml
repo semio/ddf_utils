@@ -98,7 +98,7 @@ cooking:
                   coal_consumption_total: "coal_consumption_mtoe * 1000000"
                   electricity_generation_total: "electricity_generation * 1000000000"
                   natural_gas_production_total: "gas_production_tonnes * 1000000"
-                  gas_proved_reserves_history: "gas_proved_reserves_history * 900000000"
+                  natural_gas_proved_reserves_total: "gas_proved_reserves_history * 900000000"
                   oil_consumption_total: "oil_consumption_tonnes * 1000000"
                   oil_production_total: "oil_production_tonnes * 1000000"
                   oil_proved_reserves_total: "oil_proved_reserves_history * 136400000"

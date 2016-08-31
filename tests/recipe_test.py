@@ -31,6 +31,6 @@ else:
             os.remove(path)
 
 
-recipe =  chef.build_recipe(recipe_file, to_disk=True)
+recipe = chef.build_recipe(recipe_file, to_disk=True)
 res = chef.run_recipe(recipe)
 chef.dish_to_csv(res, outdir)

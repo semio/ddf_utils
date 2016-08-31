@@ -17,6 +17,21 @@ from .. str import format_float_digits
 import logging
 
 
+supported_procs = {
+    'translate_column': translate_column,
+    'translate_header': translate_header,
+    'identity': identity,
+    'merge': merge,
+    'run_op': run_op,
+    'filter_row': filter_row,
+    'align': align,
+    'filter_item': filter_item,
+    'groupby': groupby,
+    'accumulate': accumulate,
+    'copy': copy
+}
+
+
 def _loadfile(f):
     """load json/yaml file"""
     if re.match('.*\.json', f):
@@ -55,7 +70,9 @@ def build_recipe(recipe_file, to_disk=False):
                 except KeyError:
                     continue
                 if isinstance(opt_dict, str):
-                    # FIXME: sometimes if dictionary_dir is not define, no error will raise
+                    # if the option dict is str, then it should be a filename
+                    if dict_dir is None:
+                        raise KeyError("dictionary_dir not found in config!")
                     if os.path.isabs(dict_dir):
                         path = os.path.join(dict_dir, opt_dict)
                     else:
@@ -78,6 +95,7 @@ def build_recipe(recipe_file, to_disk=False):
             sub_recipes.append(build_recipe(path))
 
         for rcp in sub_recipes:
+            # appending ingredients
             if 'ingredients' in recipe.keys():
                 ingredients = [*recipe['ingredients'], *rcp['ingredients']]
                 # drop duplicated ingredients.
@@ -93,17 +111,13 @@ def build_recipe(recipe_file, to_disk=False):
             else:
                 recipe['ingredients'] = rcp['ingredients']
 
+            # appending cooking procedures
             if 'cooking' not in rcp.keys():
                 continue
-
             for p in ['datapoints', 'entities', 'concepts']:
                 if p not in rcp['cooking'].keys():
                     continue
-
                 if 'cooking' in recipe.keys():
-                    # currently if dictionary option is a file name it won't change
-                    # to actual dictionary in that file.
-                    # TODO: build all dictionary options into the recipe.
                     if p in recipe['cooking'].keys():
                         # NOTE: the included cooking procedures should be placed in front of
                         # the origin ones.
@@ -114,13 +128,6 @@ def build_recipe(recipe_file, to_disk=False):
                     recipe['cooking'] = {}
                     recipe['cooking'][p] = rcp['cooking'][p]
 
-                # TODO: drop duplicated procedures
-                # if ingredients, procedure name are same, then
-                # we assume the procedures are same one
-                # recipe['cooking'][p] = list(
-                #     unique_everseen([[proc['procedure'], proc['ingredients']]
-                #                      for proc in recipe['cooking'][p]])
-                # )
         if to_disk:
             yaml.dump(recipe, open('recipe.yaml', 'w'))
 
@@ -147,21 +154,7 @@ def run_recipe(recipe):
     ings_dict = dict([[i.ingred_id, i] for i in ings])
 
     # cooking
-    # TODO: move this dict outside
-    funcs = {
-        'translate_column': translate_column,
-        'translate_header': translate_header,
-        'identity': identity,
-        'merge': merge,
-        'run_op': run_op,
-        'filter_row': filter_row,
-        'align': align,
-        'filter_item': filter_item,
-        'groupby': groupby,
-        'accumulate': accumulate,
-        'copy': copy
-    }
-
+    funcs = supported_procs
     res = {}
 
     for k, pceds in recipe['cooking'].items():
@@ -228,7 +221,6 @@ def dish_to_csv(dishes, outpath):
                     if not np.issubdtype(df[k].dtype, np.number):
                         try:
                             df[k] = df[k].astype(float)
-                            # TODO: better handle the float format.
                             df[k] = df[k].map(lambda x: format_float_digits(x, 5))
                         except ValueError:
                             logging.warning("data not numeric: " + k)
