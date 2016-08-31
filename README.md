@@ -19,9 +19,15 @@ to run a recipe, simply run following:
 $ runrecipe.py -i path_to_recipe -o outdir
 ```
 
+to run a recipe without saving the result into disk, run
+
+```
+$ runrecipe.py -i path_to_recipe -d
+```
+
 note that you should set `ddf_dir`/`recipes_dir`/`dictionary_dir` correct in order 
 the chef can find the correct file. if there are includes in the recipe, only the top 
-level `ddf_dir` will be used. 
+level `ddf_dir` will be used (so the ddf_dir setting in sub-recipes will be ignored). 
 
 ### useful API for etl tasks
 
