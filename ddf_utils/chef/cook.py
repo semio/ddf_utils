@@ -6,6 +6,8 @@ import pandas as pd
 import json
 import yaml
 import re
+from orderedattrdict import AttrDict
+from orderedattrdict.yamlutils import AttrDictYAMLLoader
 
 from . ingredient import *
 from . import config
@@ -15,23 +17,35 @@ from .. str import format_float_digits
 import logging
 
 
+def _loadfile(f):
+    """load json/yaml file"""
+    if re.match('.*\.json', f):
+        res = json.load(open(f), object_pairs_hook=AttrDict)
+    else:
+        res = yaml.load(open(f), Loader=AttrDictYAMLLoader)
+
+    return res
+
+
 # functions for reading/running recipe
 def build_recipe(recipe_file, to_disk=False):
     """build a complete recipe file if there are includes in
     recipe file, if no includes found than return the file as is.
     """
-    if re.match('.*\.json', recipe_file):
-        recipe = json.load(open(recipe_file))
-    else:
-        recipe = yaml.load(open(recipe_file))
+    recipe = _loadfile(recipe_file)
 
     # the base dir of recipe file. for building paths for dictionary_dir and
     # sub recipe paths.
     base_dir = os.path.dirname(recipe_file)
 
-    # expand all files in the options
-    if 'config' in recipe.keys() and 'dictionary_dir' in recipe['config'].keys():
+    # the dictionary dir to retrieve translation dictionaries
+    try:
         dict_dir = recipe['config']['dictionary_dir']
+    except KeyError:
+        dict_dir = None
+
+    # expand all files in the options
+    if 'cooking' in recipe.keys():
         for p in ['concepts', 'datapoints', 'entities']:
             if p not in recipe['cooking'].keys():
                 continue
@@ -46,12 +60,12 @@ def build_recipe(recipe_file, to_disk=False):
                         path = os.path.join(dict_dir, opt_dict)
                     else:
                         path = os.path.join(base_dir, dict_dir, opt_dict)
-                    with open(path, 'r') as f:
-                        recipe['cooking'][p][i]['options']['dictionary'] = json.load(f)
+
+                    recipe['cooking'][p][i]['options']['dictionary'] = _loadfile(path)
 
     if 'include' not in recipe.keys():
         return recipe
-    else:
+    else:  # append sub-recipe entities into main recipe
         recipe_dir = recipe['config']['recipes_dir']
 
         sub_recipes = []
