@@ -1036,6 +1036,13 @@ table {
   <div id="sidebar">
     <h1>Index</h1>
     <ul id="index">
+    <li class="set"><h3><a href="#header-variables">Module variables</a></h3>
+      
+  <ul>
+    <li class="mono"><a href="#ddf_utils.chef.cook.supported_procs">supported_procs</a></li>
+  </ul>
+
+    </li>
 
     <li class="set"><h3><a href="#header-functions">Functions</a></h3>
       
@@ -1068,17 +1075,42 @@ table {
     <div class="codehilite"><pre><span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="sd">&quot;&quot;&quot;recipe cooking&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">import</span> <span class="nn">yaml</span>
-<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">from</span> <span class="nn">orderedattrdict</span> <span class="kn">import</span> <span class="n">AttrDict</span>
+<span class="kn">from</span> <span class="nn">orderedattrdict.yamlutils</span> <span class="kn">import</span> <span class="n">AttrDictYAMLLoader</span>
 
 <span class="kn">from</span> <span class="nn">.</span> <span class="nn">ingredient</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">config</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="nn">procedure</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">..</span> <span class="nn">str</span> <span class="kn">import</span> <span class="n">format_float_digits</span>
 
 <span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="c1"># supported procedures, import from procedure.py</span>
+<span class="n">supported_procs</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;translate_column&#39;</span><span class="p">:</span> <span class="n">translate_column</span><span class="p">,</span>
+    <span class="s1">&#39;translate_header&#39;</span><span class="p">:</span> <span class="n">translate_header</span><span class="p">,</span>
+    <span class="s1">&#39;identity&#39;</span><span class="p">:</span> <span class="n">identity</span><span class="p">,</span>
+    <span class="s1">&#39;merge&#39;</span><span class="p">:</span> <span class="n">merge</span><span class="p">,</span>
+    <span class="s1">&#39;run_op&#39;</span><span class="p">:</span> <span class="n">run_op</span><span class="p">,</span>
+    <span class="s1">&#39;filter_row&#39;</span><span class="p">:</span> <span class="n">filter_row</span><span class="p">,</span>
+    <span class="s1">&#39;align&#39;</span><span class="p">:</span> <span class="n">align</span><span class="p">,</span>
+    <span class="s1">&#39;filter_item&#39;</span><span class="p">:</span> <span class="n">filter_item</span><span class="p">,</span>
+    <span class="s1">&#39;groupby&#39;</span><span class="p">:</span> <span class="n">groupby</span><span class="p">,</span>
+    <span class="s1">&#39;accumulate&#39;</span><span class="p">:</span> <span class="n">accumulate</span><span class="p">,</span>
+    <span class="s1">&#39;copy&#39;</span><span class="p">:</span> <span class="n">copy</span>
+<span class="p">}</span>
+
+
+<span class="k">def</span> <span class="nf">_loadfile</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;load json/yaml file, into AttrDict&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s1">&#39;.*\.json&#39;</span><span class="p">,</span> <span class="n">f</span><span class="p">):</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">f</span><span class="p">),</span> <span class="n">object_pairs_hook</span><span class="o">=</span><span class="n">AttrDict</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">f</span><span class="p">),</span> <span class="n">Loader</span><span class="o">=</span><span class="n">AttrDictYAMLLoader</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">res</span>
 
 
 <span class="c1"># functions for reading/running recipe</span>
@@ -1086,14 +1118,20 @@ table {
     <span class="sd">&quot;&quot;&quot;build a complete recipe file if there are includes in</span>
 <span class="sd">    recipe file, if no includes found than return the file as is.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s1">&#39;.*\.json&#39;</span><span class="p">,</span> <span class="n">recipe_file</span><span class="p">):</span>
-        <span class="n">recipe</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">recipe_file</span><span class="p">))</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">recipe</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">recipe_file</span><span class="p">))</span>
+    <span class="n">recipe</span> <span class="o">=</span> <span class="n">_loadfile</span><span class="p">(</span><span class="n">recipe_file</span><span class="p">)</span>
+
+    <span class="c1"># the base dir of recipe file. for building paths for dictionary_dir and</span>
+    <span class="c1"># sub recipe paths.</span>
+    <span class="n">base_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">recipe_file</span><span class="p">)</span>
+
+    <span class="c1"># the dictionary dir to retrieve translation dictionaries</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">dict_dir</span> <span class="o">=</span> <span class="n">recipe</span><span class="p">[</span><span class="s1">&#39;config&#39;</span><span class="p">][</span><span class="s1">&#39;dictionary_dir&#39;</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="n">dict_dir</span> <span class="o">=</span> <span class="bp">None</span>
 
     <span class="c1"># expand all files in the options</span>
-    <span class="k">if</span> <span class="s1">&#39;config&#39;</span> <span class="ow">in</span> <span class="n">recipe</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="ow">and</span> <span class="s1">&#39;dictionary_dir&#39;</span> <span class="ow">in</span> <span class="n">recipe</span><span class="p">[</span><span class="s1">&#39;config&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-        <span class="n">dict_dir</span> <span class="o">=</span> <span class="n">recipe</span><span class="p">[</span><span class="s1">&#39;config&#39;</span><span class="p">][</span><span class="s1">&#39;dictionary_dir&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="s1">&#39;cooking&#39;</span> <span class="ow">in</span> <span class="n">recipe</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
         <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;concepts&#39;</span><span class="p">,</span> <span class="s1">&#39;datapoints&#39;</span><span class="p">,</span> <span class="s1">&#39;entities&#39;</span><span class="p">]:</span>
             <span class="k">if</span> <span class="n">p</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">recipe</span><span class="p">[</span><span class="s1">&#39;cooking&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
                 <span class="k">continue</span>
@@ -1103,19 +1141,24 @@ table {
                 <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
                     <span class="k">continue</span>
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">opt_dict</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-                    <span class="c1"># FIXME: sometimes if dictionary_dir is not define, no error will raise</span>
-                    <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dict_dir</span><span class="p">,</span> <span class="n">opt_dict</span><span class="p">)</span>
-                    <span class="n">recipe</span><span class="p">[</span><span class="s1">&#39;cooking&#39;</span><span class="p">][</span><span class="n">p</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;options&#39;</span><span class="p">][</span><span class="s1">&#39;dictionary&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">))</span>
+                    <span class="c1"># if the option dict is str, then it should be a filename</span>
+                    <span class="k">if</span> <span class="n">dict_dir</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;dictionary_dir not found in config!&quot;</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isabs</span><span class="p">(</span><span class="n">dict_dir</span><span class="p">):</span>
+                        <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dict_dir</span><span class="p">,</span> <span class="n">opt_dict</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">base_dir</span><span class="p">,</span> <span class="n">dict_dir</span><span class="p">,</span> <span class="n">opt_dict</span><span class="p">)</span>
+
+                    <span class="n">recipe</span><span class="p">[</span><span class="s1">&#39;cooking&#39;</span><span class="p">][</span><span class="n">p</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;options&#39;</span><span class="p">][</span><span class="s1">&#39;dictionary&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_loadfile</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="s1">&#39;include&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">recipe</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
         <span class="k">return</span> <span class="n">recipe</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">base_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">recipe_file</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>  <span class="c1"># append sub-recipe entities into main recipe</span>
         <span class="n">recipe_dir</span> <span class="o">=</span> <span class="n">recipe</span><span class="p">[</span><span class="s1">&#39;config&#39;</span><span class="p">][</span><span class="s1">&#39;recipes_dir&#39;</span><span class="p">]</span>
 
         <span class="n">sub_recipes</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">recipe</span><span class="p">[</span><span class="s1">&#39;include&#39;</span><span class="p">]:</span>
-            <span class="c1"># FIXME: add support to expand user home and env vars</span>
+            <span class="c1"># TODO: maybe add support to expand user home and env vars</span>
             <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isabs</span><span class="p">(</span><span class="n">recipe_dir</span><span class="p">):</span>
                 <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">recipe_dir</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
@@ -1123,6 +1166,7 @@ table {
             <span class="n">sub_recipes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">build_recipe</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
 
         <span class="k">for</span> <span class="n">rcp</span> <span class="ow">in</span> <span class="n">sub_recipes</span><span class="p">:</span>
+            <span class="c1"># appending ingredients</span>
             <span class="k">if</span> <span class="s1">&#39;ingredients&#39;</span> <span class="ow">in</span> <span class="n">recipe</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
                 <span class="n">ingredients</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="n">recipe</span><span class="p">[</span><span class="s1">&#39;ingredients&#39;</span><span class="p">],</span> <span class="o">*</span><span class="n">rcp</span><span class="p">[</span><span class="s1">&#39;ingredients&#39;</span><span class="p">]]</span>
                 <span class="c1"># drop duplicated ingredients.</span>
@@ -1138,17 +1182,13 @@ table {
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">recipe</span><span class="p">[</span><span class="s1">&#39;ingredients&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rcp</span><span class="p">[</span><span class="s1">&#39;ingredients&#39;</span><span class="p">]</span>
 
+            <span class="c1"># appending cooking procedures</span>
             <span class="k">if</span> <span class="s1">&#39;cooking&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">rcp</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
                 <span class="k">continue</span>
-
             <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;datapoints&#39;</span><span class="p">,</span> <span class="s1">&#39;entities&#39;</span><span class="p">,</span> <span class="s1">&#39;concepts&#39;</span><span class="p">]:</span>
                 <span class="k">if</span> <span class="n">p</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">rcp</span><span class="p">[</span><span class="s1">&#39;cooking&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
                     <span class="k">continue</span>
-
                 <span class="k">if</span> <span class="s1">&#39;cooking&#39;</span> <span class="ow">in</span> <span class="n">recipe</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-                    <span class="c1"># currently if dictionary option is a file name it won&#39;t change</span>
-                    <span class="c1"># to actual dictionary in that file.</span>
-                    <span class="c1"># TODO: build all dictionary options into the recipe.</span>
                     <span class="k">if</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">recipe</span><span class="p">[</span><span class="s1">&#39;cooking&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
                         <span class="c1"># NOTE: the included cooking procedures should be placed in front of</span>
                         <span class="c1"># the origin ones.</span>
@@ -1159,13 +1199,6 @@ table {
                     <span class="n">recipe</span><span class="p">[</span><span class="s1">&#39;cooking&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
                     <span class="n">recipe</span><span class="p">[</span><span class="s1">&#39;cooking&#39;</span><span class="p">][</span><span class="n">p</span><span class="p">]</span> <span class="o">=</span> <span class="n">rcp</span><span class="p">[</span><span class="s1">&#39;cooking&#39;</span><span class="p">][</span><span class="n">p</span><span class="p">]</span>
 
-                <span class="c1"># TODO: drop duplicated procedures</span>
-                <span class="c1"># if ingredients, procedure name are same, then</span>
-                <span class="c1"># we assume the procedures are same one</span>
-                <span class="c1"># recipe[&#39;cooking&#39;][p] = list(</span>
-                <span class="c1">#     unique_everseen([[proc[&#39;procedure&#39;], proc[&#39;ingredients&#39;]]</span>
-                <span class="c1">#                      for proc in recipe[&#39;cooking&#39;][p]])</span>
-                <span class="c1"># )</span>
         <span class="k">if</span> <span class="n">to_disk</span><span class="p">:</span>
             <span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">recipe</span><span class="p">,</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;recipe.yaml&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">))</span>
 
@@ -1192,21 +1225,7 @@ table {
     <span class="n">ings_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">([[</span><span class="n">i</span><span class="o">.</span><span class="n">ingred_id</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">ings</span><span class="p">])</span>
 
     <span class="c1"># cooking</span>
-    <span class="c1"># TODO: move this dict outside</span>
-    <span class="n">funcs</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s1">&#39;translate_column&#39;</span><span class="p">:</span> <span class="n">translate_column</span><span class="p">,</span>
-        <span class="s1">&#39;translate_header&#39;</span><span class="p">:</span> <span class="n">translate_header</span><span class="p">,</span>
-        <span class="s1">&#39;identity&#39;</span><span class="p">:</span> <span class="n">identity</span><span class="p">,</span>
-        <span class="s1">&#39;merge&#39;</span><span class="p">:</span> <span class="n">merge</span><span class="p">,</span>
-        <span class="s1">&#39;run_op&#39;</span><span class="p">:</span> <span class="n">run_op</span><span class="p">,</span>
-        <span class="s1">&#39;filter_row&#39;</span><span class="p">:</span> <span class="n">filter_row</span><span class="p">,</span>
-        <span class="s1">&#39;align&#39;</span><span class="p">:</span> <span class="n">align</span><span class="p">,</span>
-        <span class="s1">&#39;filter_item&#39;</span><span class="p">:</span> <span class="n">filter_item</span><span class="p">,</span>
-        <span class="s1">&#39;groupby&#39;</span><span class="p">:</span> <span class="n">groupby</span><span class="p">,</span>
-        <span class="s1">&#39;accumulate&#39;</span><span class="p">:</span> <span class="n">accumulate</span><span class="p">,</span>
-        <span class="s1">&#39;copy&#39;</span><span class="p">:</span> <span class="n">copy</span>
-    <span class="p">}</span>
-
+    <span class="n">funcs</span> <span class="o">=</span> <span class="n">supported_procs</span>
     <span class="n">res</span> <span class="o">=</span> <span class="p">{}</span>
 
     <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">pceds</span> <span class="ow">in</span> <span class="n">recipe</span><span class="p">[</span><span class="s1">&#39;cooking&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -1251,21 +1270,13 @@ table {
 
         <span class="n">all_data</span> <span class="o">=</span> <span class="n">dish</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
 
-        <span class="c1"># get the key for datapoint</span>
-        <span class="k">if</span> <span class="n">t</span> <span class="o">==</span> <span class="s1">&#39;datapoints&#39;</span><span class="p">:</span>
-            <span class="c1"># assuming all datapoints have same by values, so only check one item.</span>
-            <span class="n">name_tmp</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">all_data</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="n">df_tmp</span> <span class="o">=</span> <span class="n">all_data</span><span class="p">[</span><span class="n">name_tmp</span><span class="p">]</span>
-            <span class="n">by</span> <span class="o">=</span> <span class="n">df_tmp</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">name_tmp</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">by</span> <span class="o">=</span> <span class="bp">None</span>
-
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">all_data</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
             <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">df</span> <span class="ow">in</span> <span class="n">all_data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                 <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s1">&#39;ddf--.*.csv&#39;</span><span class="p">,</span> <span class="n">k</span><span class="p">):</span>
                     <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">outpath</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="n">by</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">t</span> <span class="o">==</span> <span class="s1">&#39;datapoints&#39;</span><span class="p">:</span>
+                        <span class="n">by</span> <span class="o">=</span> <span class="n">dish</span><span class="o">.</span><span class="n">key_to_list</span><span class="p">()</span>
                         <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">outpath</span><span class="p">,</span> <span class="s1">&#39;ddf--{}--{}--by--{}.csv&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="s1">&#39;--&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">by</span><span class="p">)))</span>
                     <span class="k">elif</span> <span class="n">k</span> <span class="o">==</span> <span class="s1">&#39;concept&#39;</span><span class="p">:</span>
                         <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">outpath</span><span class="p">,</span> <span class="s1">&#39;ddf--{}.csv&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">t</span><span class="p">))</span>
@@ -1277,7 +1288,16 @@ table {
                             <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">outpath</span><span class="p">,</span> <span class="s1">&#39;ddf--{}--{}--{}.csv&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">domain</span><span class="p">,</span> <span class="n">k</span><span class="p">))</span>
 
                 <span class="k">if</span> <span class="n">t</span> <span class="o">==</span> <span class="s1">&#39;datapoints&#39;</span><span class="p">:</span>
-                    <span class="n">df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">float_format</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%.15g</span><span class="s1">&#39;</span><span class="p">)</span>
+                    <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="n">by</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">issubdtype</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">number</span><span class="p">):</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">df</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+                            <span class="n">df</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">format_float_digits</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+                        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                            <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;data not numeric: &quot;</span> <span class="o">+</span> <span class="n">k</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">df</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">format_float_digits</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+                    <span class="n">df</span><span class="p">[[</span><span class="n">k</span><span class="p">]]</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -1290,6 +1310,15 @@ table {
   </header>
 
   <section id="section-items">
+    <h2 class="section-title" id="header-variables">Module variables</h2>
+      <div class="item">
+      <p id="ddf_utils.chef.cook.supported_procs" class="name">var <span class="ident">supported_procs</span></p>
+      
+  
+  <div class="source_cont">
+</div>
+
+      </div>
 
     <h2 class="section-title" id="header-functions">Functions</h2>
       
@@ -1310,14 +1339,20 @@ recipe file, if no includes found than return the file as is.</p></div>
     <span class="sd">&quot;&quot;&quot;build a complete recipe file if there are includes in</span>
 <span class="sd">    recipe file, if no includes found than return the file as is.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s1">&#39;.*\.json&#39;</span><span class="p">,</span> <span class="n">recipe_file</span><span class="p">):</span>
-        <span class="n">recipe</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">recipe_file</span><span class="p">))</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">recipe</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">recipe_file</span><span class="p">))</span>
+    <span class="n">recipe</span> <span class="o">=</span> <span class="n">_loadfile</span><span class="p">(</span><span class="n">recipe_file</span><span class="p">)</span>
+
+    <span class="c1"># the base dir of recipe file. for building paths for dictionary_dir and</span>
+    <span class="c1"># sub recipe paths.</span>
+    <span class="n">base_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">recipe_file</span><span class="p">)</span>
+
+    <span class="c1"># the dictionary dir to retrieve translation dictionaries</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">dict_dir</span> <span class="o">=</span> <span class="n">recipe</span><span class="p">[</span><span class="s1">&#39;config&#39;</span><span class="p">][</span><span class="s1">&#39;dictionary_dir&#39;</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="n">dict_dir</span> <span class="o">=</span> <span class="bp">None</span>
 
     <span class="c1"># expand all files in the options</span>
-    <span class="k">if</span> <span class="s1">&#39;config&#39;</span> <span class="ow">in</span> <span class="n">recipe</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="ow">and</span> <span class="s1">&#39;dictionary_dir&#39;</span> <span class="ow">in</span> <span class="n">recipe</span><span class="p">[</span><span class="s1">&#39;config&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-        <span class="n">dict_dir</span> <span class="o">=</span> <span class="n">recipe</span><span class="p">[</span><span class="s1">&#39;config&#39;</span><span class="p">][</span><span class="s1">&#39;dictionary_dir&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="s1">&#39;cooking&#39;</span> <span class="ow">in</span> <span class="n">recipe</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
         <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;concepts&#39;</span><span class="p">,</span> <span class="s1">&#39;datapoints&#39;</span><span class="p">,</span> <span class="s1">&#39;entities&#39;</span><span class="p">]:</span>
             <span class="k">if</span> <span class="n">p</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">recipe</span><span class="p">[</span><span class="s1">&#39;cooking&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
                 <span class="k">continue</span>
@@ -1327,19 +1362,24 @@ recipe file, if no includes found than return the file as is.</p></div>
                 <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
                     <span class="k">continue</span>
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">opt_dict</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-                    <span class="c1"># FIXME: sometimes if dictionary_dir is not define, no error will raise</span>
-                    <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dict_dir</span><span class="p">,</span> <span class="n">opt_dict</span><span class="p">)</span>
-                    <span class="n">recipe</span><span class="p">[</span><span class="s1">&#39;cooking&#39;</span><span class="p">][</span><span class="n">p</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;options&#39;</span><span class="p">][</span><span class="s1">&#39;dictionary&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">))</span>
+                    <span class="c1"># if the option dict is str, then it should be a filename</span>
+                    <span class="k">if</span> <span class="n">dict_dir</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;dictionary_dir not found in config!&quot;</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isabs</span><span class="p">(</span><span class="n">dict_dir</span><span class="p">):</span>
+                        <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dict_dir</span><span class="p">,</span> <span class="n">opt_dict</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">base_dir</span><span class="p">,</span> <span class="n">dict_dir</span><span class="p">,</span> <span class="n">opt_dict</span><span class="p">)</span>
+
+                    <span class="n">recipe</span><span class="p">[</span><span class="s1">&#39;cooking&#39;</span><span class="p">][</span><span class="n">p</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;options&#39;</span><span class="p">][</span><span class="s1">&#39;dictionary&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_loadfile</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="s1">&#39;include&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">recipe</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
         <span class="k">return</span> <span class="n">recipe</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">base_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">recipe_file</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>  <span class="c1"># append sub-recipe entities into main recipe</span>
         <span class="n">recipe_dir</span> <span class="o">=</span> <span class="n">recipe</span><span class="p">[</span><span class="s1">&#39;config&#39;</span><span class="p">][</span><span class="s1">&#39;recipes_dir&#39;</span><span class="p">]</span>
 
         <span class="n">sub_recipes</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">recipe</span><span class="p">[</span><span class="s1">&#39;include&#39;</span><span class="p">]:</span>
-            <span class="c1"># FIXME: add support to expand user home and env vars</span>
+            <span class="c1"># TODO: maybe add support to expand user home and env vars</span>
             <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isabs</span><span class="p">(</span><span class="n">recipe_dir</span><span class="p">):</span>
                 <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">recipe_dir</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
@@ -1347,6 +1387,7 @@ recipe file, if no includes found than return the file as is.</p></div>
             <span class="n">sub_recipes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">build_recipe</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
 
         <span class="k">for</span> <span class="n">rcp</span> <span class="ow">in</span> <span class="n">sub_recipes</span><span class="p">:</span>
+            <span class="c1"># appending ingredients</span>
             <span class="k">if</span> <span class="s1">&#39;ingredients&#39;</span> <span class="ow">in</span> <span class="n">recipe</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
                 <span class="n">ingredients</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="n">recipe</span><span class="p">[</span><span class="s1">&#39;ingredients&#39;</span><span class="p">],</span> <span class="o">*</span><span class="n">rcp</span><span class="p">[</span><span class="s1">&#39;ingredients&#39;</span><span class="p">]]</span>
                 <span class="c1"># drop duplicated ingredients.</span>
@@ -1362,17 +1403,13 @@ recipe file, if no includes found than return the file as is.</p></div>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">recipe</span><span class="p">[</span><span class="s1">&#39;ingredients&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rcp</span><span class="p">[</span><span class="s1">&#39;ingredients&#39;</span><span class="p">]</span>
 
+            <span class="c1"># appending cooking procedures</span>
             <span class="k">if</span> <span class="s1">&#39;cooking&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">rcp</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
                 <span class="k">continue</span>
-
             <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;datapoints&#39;</span><span class="p">,</span> <span class="s1">&#39;entities&#39;</span><span class="p">,</span> <span class="s1">&#39;concepts&#39;</span><span class="p">]:</span>
                 <span class="k">if</span> <span class="n">p</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">rcp</span><span class="p">[</span><span class="s1">&#39;cooking&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
                     <span class="k">continue</span>
-
                 <span class="k">if</span> <span class="s1">&#39;cooking&#39;</span> <span class="ow">in</span> <span class="n">recipe</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-                    <span class="c1"># currently if dictionary option is a file name it won&#39;t change</span>
-                    <span class="c1"># to actual dictionary in that file.</span>
-                    <span class="c1"># TODO: build all dictionary options into the recipe.</span>
                     <span class="k">if</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">recipe</span><span class="p">[</span><span class="s1">&#39;cooking&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
                         <span class="c1"># NOTE: the included cooking procedures should be placed in front of</span>
                         <span class="c1"># the origin ones.</span>
@@ -1383,13 +1420,6 @@ recipe file, if no includes found than return the file as is.</p></div>
                     <span class="n">recipe</span><span class="p">[</span><span class="s1">&#39;cooking&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
                     <span class="n">recipe</span><span class="p">[</span><span class="s1">&#39;cooking&#39;</span><span class="p">][</span><span class="n">p</span><span class="p">]</span> <span class="o">=</span> <span class="n">rcp</span><span class="p">[</span><span class="s1">&#39;cooking&#39;</span><span class="p">][</span><span class="n">p</span><span class="p">]</span>
 
-                <span class="c1"># TODO: drop duplicated procedures</span>
-                <span class="c1"># if ingredients, procedure name are same, then</span>
-                <span class="c1"># we assume the procedures are same one</span>
-                <span class="c1"># recipe[&#39;cooking&#39;][p] = list(</span>
-                <span class="c1">#     unique_everseen([[proc[&#39;procedure&#39;], proc[&#39;ingredients&#39;]]</span>
-                <span class="c1">#                      for proc in recipe[&#39;cooking&#39;][p]])</span>
-                <span class="c1"># )</span>
         <span class="k">if</span> <span class="n">to_disk</span><span class="p">:</span>
             <span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">recipe</span><span class="p">,</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;recipe.yaml&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">))</span>
 
@@ -1418,21 +1448,13 @@ recipe file, if no includes found than return the file as is.</p></div>
 
         <span class="n">all_data</span> <span class="o">=</span> <span class="n">dish</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
 
-        <span class="c1"># get the key for datapoint</span>
-        <span class="k">if</span> <span class="n">t</span> <span class="o">==</span> <span class="s1">&#39;datapoints&#39;</span><span class="p">:</span>
-            <span class="c1"># assuming all datapoints have same by values, so only check one item.</span>
-            <span class="n">name_tmp</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">all_data</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="n">df_tmp</span> <span class="o">=</span> <span class="n">all_data</span><span class="p">[</span><span class="n">name_tmp</span><span class="p">]</span>
-            <span class="n">by</span> <span class="o">=</span> <span class="n">df_tmp</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">name_tmp</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">by</span> <span class="o">=</span> <span class="bp">None</span>
-
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">all_data</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
             <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">df</span> <span class="ow">in</span> <span class="n">all_data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                 <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s1">&#39;ddf--.*.csv&#39;</span><span class="p">,</span> <span class="n">k</span><span class="p">):</span>
                     <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">outpath</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="n">by</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">t</span> <span class="o">==</span> <span class="s1">&#39;datapoints&#39;</span><span class="p">:</span>
+                        <span class="n">by</span> <span class="o">=</span> <span class="n">dish</span><span class="o">.</span><span class="n">key_to_list</span><span class="p">()</span>
                         <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">outpath</span><span class="p">,</span> <span class="s1">&#39;ddf--{}--{}--by--{}.csv&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="s1">&#39;--&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">by</span><span class="p">)))</span>
                     <span class="k">elif</span> <span class="n">k</span> <span class="o">==</span> <span class="s1">&#39;concept&#39;</span><span class="p">:</span>
                         <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">outpath</span><span class="p">,</span> <span class="s1">&#39;ddf--{}.csv&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">t</span><span class="p">))</span>
@@ -1444,7 +1466,16 @@ recipe file, if no includes found than return the file as is.</p></div>
                             <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">outpath</span><span class="p">,</span> <span class="s1">&#39;ddf--{}--{}--{}.csv&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">domain</span><span class="p">,</span> <span class="n">k</span><span class="p">))</span>
 
                 <span class="k">if</span> <span class="n">t</span> <span class="o">==</span> <span class="s1">&#39;datapoints&#39;</span><span class="p">:</span>
-                    <span class="n">df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">float_format</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%.15g</span><span class="s1">&#39;</span><span class="p">)</span>
+                    <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="n">by</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">issubdtype</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">number</span><span class="p">):</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">df</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+                            <span class="n">df</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">format_float_digits</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+                        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                            <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;data not numeric: &quot;</span> <span class="o">+</span> <span class="n">k</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">df</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">format_float_digits</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+                    <span class="n">df</span><span class="p">[[</span><span class="n">k</span><span class="p">]]</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -1488,21 +1519,7 @@ and values are ingredients return by the procedures</p></div>
     <span class="n">ings_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">([[</span><span class="n">i</span><span class="o">.</span><span class="n">ingred_id</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">ings</span><span class="p">])</span>
 
     <span class="c1"># cooking</span>
-    <span class="c1"># TODO: move this dict outside</span>
-    <span class="n">funcs</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s1">&#39;translate_column&#39;</span><span class="p">:</span> <span class="n">translate_column</span><span class="p">,</span>
-        <span class="s1">&#39;translate_header&#39;</span><span class="p">:</span> <span class="n">translate_header</span><span class="p">,</span>
-        <span class="s1">&#39;identity&#39;</span><span class="p">:</span> <span class="n">identity</span><span class="p">,</span>
-        <span class="s1">&#39;merge&#39;</span><span class="p">:</span> <span class="n">merge</span><span class="p">,</span>
-        <span class="s1">&#39;run_op&#39;</span><span class="p">:</span> <span class="n">run_op</span><span class="p">,</span>
-        <span class="s1">&#39;filter_row&#39;</span><span class="p">:</span> <span class="n">filter_row</span><span class="p">,</span>
-        <span class="s1">&#39;align&#39;</span><span class="p">:</span> <span class="n">align</span><span class="p">,</span>
-        <span class="s1">&#39;filter_item&#39;</span><span class="p">:</span> <span class="n">filter_item</span><span class="p">,</span>
-        <span class="s1">&#39;groupby&#39;</span><span class="p">:</span> <span class="n">groupby</span><span class="p">,</span>
-        <span class="s1">&#39;accumulate&#39;</span><span class="p">:</span> <span class="n">accumulate</span><span class="p">,</span>
-        <span class="s1">&#39;copy&#39;</span><span class="p">:</span> <span class="n">copy</span>
-    <span class="p">}</span>
-
+    <span class="n">funcs</span> <span class="o">=</span> <span class="n">supported_procs</span>
     <span class="n">res</span> <span class="o">=</span> <span class="p">{}</span>
 
     <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">pceds</span> <span class="ow">in</span> <span class="n">recipe</span><span class="p">[</span><span class="s1">&#39;cooking&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>

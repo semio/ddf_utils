@@ -1045,7 +1045,6 @@ table {
     <li class="mono"><a href="#ddf_utils.chef.procedure.copy">copy</a></li>
     <li class="mono"><a href="#ddf_utils.chef.procedure.filter_item">filter_item</a></li>
     <li class="mono"><a href="#ddf_utils.chef.procedure.filter_row">filter_row</a></li>
-    <li class="mono"><a href="#ddf_utils.chef.procedure.format_data">format_data</a></li>
     <li class="mono"><a href="#ddf_utils.chef.procedure.groupby">groupby</a></li>
     <li class="mono"><a href="#ddf_utils.chef.procedure.identity">identity</a></li>
     <li class="mono"><a href="#ddf_utils.chef.procedure.merge">merge</a></li>
@@ -1087,12 +1086,21 @@ table {
 <span class="kn">import</span> <span class="nn">logging</span>
 
 
-<span class="k">def</span> <span class="nf">translate_header</span><span class="p">(</span><span class="n">ingredient</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">translate_header</span><span class="p">(</span><span class="n">ingredient</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Ingredient</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Translate column headers</span>
 
-    <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;translate_header: &quot;</span> <span class="o">+</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">ingred_id</span><span class="p">)</span>
+<span class="sd">    Args:</span>
+<span class="sd">        ingredient: Ingredient object</span>
+<span class="sd">        result: ingred_id of return ingredient</span>
+<span class="sd">        options: dict of options</span>
+
+<span class="sd">    available options are:</span>
+<span class="sd">        `dictionary`: a dictionary of oldname -&gt; newname mappings</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;translate_header: &quot;</span> <span class="o">+</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">ingred_id</span><span class="p">)</span>
 
     <span class="n">rm</span> <span class="o">=</span> <span class="n">options</span><span class="p">[</span><span class="s1">&#39;dictionary&#39;</span><span class="p">]</span>
-    <span class="n">data</span> <span class="o">=</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">copy_data</span><span class="p">()</span>
 
     <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
         <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">rm</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>  <span class="c1"># if we need to rename the concept name</span>
@@ -1103,7 +1111,7 @@ table {
 
     <span class="c1"># also rename the key</span>
     <span class="n">newkey</span> <span class="o">=</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">key</span>
-    <span class="k">if</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="s1">&#39;datapoints&#39;</span> <span class="ow">or</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="s1">&#39;concepts&#39;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">dtype</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;datapoints&#39;</span><span class="p">,</span> <span class="s1">&#39;concepts&#39;</span><span class="p">]:</span>
         <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">rm</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">key</span><span class="p">:</span>
                 <span class="n">newkey</span> <span class="o">=</span> <span class="n">newkey</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">rm</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
@@ -1114,13 +1122,26 @@ table {
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">result</span><span class="p">:</span>
         <span class="n">result</span> <span class="o">=</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">ingred_id</span> <span class="o">+</span> <span class="s1">&#39;-translated&#39;</span>
-    <span class="k">return</span> <span class="n">Ingredient</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">result</span><span class="p">,</span> <span class="n">newkey</span><span class="p">,</span> <span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Ingredient</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">ddf_id</span><span class="p">,</span> <span class="n">newkey</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">translate_column</span><span class="p">(</span><span class="n">ingredient</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">translate_column</span><span class="p">(</span><span class="n">ingredient</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Ingredient</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Translate column values.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        ingredient: Ingredient object</span>
+<span class="sd">        result: ingred_id of return ingredient</span>
+<span class="sd">        options: dict of options</span>
+
+<span class="sd">    available options are:</span>
+<span class="sd">        `dictionary`: a dictionary of oldname -&gt; newname mappings</span>
+<span class="sd">        `column`: the column to rename</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;translate_column: &quot;</span> <span class="o">+</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">ingred_id</span><span class="p">)</span>
+
     <span class="n">rm</span> <span class="o">=</span> <span class="n">options</span><span class="p">[</span><span class="s1">&#39;dictionary&#39;</span><span class="p">]</span>
     <span class="n">column</span> <span class="o">=</span> <span class="n">options</span><span class="p">[</span><span class="s1">&#39;column&#39;</span><span class="p">]</span>
-    <span class="n">di</span> <span class="o">=</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">di</span> <span class="o">=</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">copy_data</span><span class="p">()</span>
 
     <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">df</span> <span class="ow">in</span> <span class="n">di</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
 
@@ -1129,31 +1150,45 @@ table {
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">result</span><span class="p">:</span>
         <span class="n">result</span> <span class="o">=</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">ingred_id</span> <span class="o">+</span> <span class="s1">&#39;-translated&#39;</span>
-    <span class="k">return</span> <span class="n">Ingredient</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">result</span><span class="p">,</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">key</span><span class="p">,</span> <span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">di</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Ingredient</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">ddf_id</span><span class="p">,</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">key</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">di</span><span class="p">)</span>
 
 
 <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="n">ingredient</span><span class="p">:</span> <span class="n">Ingredient</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Ingredient</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;make copy of ingredient data, with new names&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;make copy of ingredient data, with new names.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        ingredient: Ingredient object</span>
+<span class="sd">        result: ingred_id of return ingredient</span>
+<span class="sd">        options: dict of options</span>
+
+<span class="sd">    available options:</span>
+<span class="sd">        `dictionary`: a dictionary of oldname -&gt; newname mappings</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;copy: &quot;</span> <span class="o">+</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">ingred_id</span><span class="p">)</span>
+
     <span class="n">dictionary</span> <span class="o">=</span> <span class="n">options</span><span class="p">[</span><span class="s1">&#39;dictionary&#39;</span><span class="p">]</span>
-    <span class="n">data</span> <span class="o">=</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">copy_data</span><span class="p">()</span>
 
     <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">dictionary</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>  <span class="c1"># value is str, means only make one copy</span>
             <span class="n">data</span><span class="p">[</span><span class="n">v</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span><span class="p">})</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-        <span class="k">else</span><span class="p">:</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># then it&#39;s a list, should make multiple copy</span>
             <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">v</span><span class="p">:</span>
                 <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">n</span><span class="p">})</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 
+    <span class="c1"># usually the old ingredient won&#39;t be used after creating copy.</span>
+    <span class="c1"># just reset the data to save memory</span>
+    <span class="n">ingredient</span><span class="o">.</span><span class="n">reset_data</span><span class="p">()</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">result</span><span class="p">:</span>
         <span class="n">result</span> <span class="o">=</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">ingred_id</span> <span class="o">+</span> <span class="s1">&#39;_&#39;</span>
-    <span class="k">return</span> <span class="n">Ingredient</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">result</span><span class="p">,</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">key</span><span class="p">,</span> <span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Ingredient</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">ddf_id</span><span class="p">,</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">key</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
 
 
 <span class="k">def</span> <span class="nf">merge</span><span class="p">(</span><span class="o">*</span><span class="n">ingredients</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Ingredient</span><span class="p">],</span> <span class="n">result</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;the main merge function&quot;&quot;&quot;</span>
     <span class="c1"># all ingredients should have same dtype and index</span>
 
-    <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;merge: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">([</span><span class="n">i</span><span class="o">.</span><span class="n">ingred_id</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">ingredients</span><span class="p">]))</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;merge: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">([</span><span class="n">i</span><span class="o">.</span><span class="n">ingred_id</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">ingredients</span><span class="p">]))</span>
 
     <span class="c1"># assert that dtype and key are same in all dataframe</span>
     <span class="k">try</span><span class="p">:</span>
@@ -1163,9 +1198,11 @@ table {
         <span class="n">log1</span> <span class="o">=</span> <span class="s2">&quot;multiple dtype/key detected: </span><span class="se">\n</span><span class="s2">&quot;</span>
         <span class="n">log2</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s2">&quot;{}: {}, {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">ingred_id</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">key</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ingredients</span><span class="p">])</span>
         <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">log1</span><span class="o">+</span><span class="n">log2</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;can&#39;t merge data with multiple dtype/key!&quot;</span><span class="p">)</span>
 
     <span class="c1"># get the dtype and index</span>
-    <span class="c1"># FIXME: handle the index key better</span>
+    <span class="c1"># we have assert dtype and key is unique, so we take it from</span>
+    <span class="c1"># the first ingredient</span>
     <span class="n">dtype</span> <span class="o">=</span> <span class="n">ingredients</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span>
 
     <span class="k">if</span> <span class="n">dtype</span> <span class="o">==</span> <span class="s1">&#39;datapoints&#39;</span><span class="p">:</span>
@@ -1184,7 +1221,8 @@ table {
         <span class="n">deep</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;deep&#39;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">deep</span> <span class="o">=</span> <span class="bp">False</span>
-
+    <span class="k">if</span> <span class="n">deep</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;merge: doing deep merge&quot;</span><span class="p">)</span>
     <span class="c1"># merge data from ingredients one by one.</span>
     <span class="n">res_all</span> <span class="o">=</span> <span class="p">{}</span>
 
@@ -1208,8 +1246,9 @@ table {
         <span class="k">if</span> <span class="n">deep</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">df</span> <span class="ow">in</span> <span class="n">right</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                 <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">left</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-                    <span class="n">left</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
-                    <span class="n">left</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">left</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">(</span><span class="n">cols</span><span class="o">=</span><span class="n">index_col</span><span class="p">,</span> <span class="n">take_last</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+                    <span class="n">left</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">left</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+                    <span class="n">left</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">left</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="n">index_col</span><span class="p">,</span> <span class="n">keep</span><span class="o">=</span><span class="s1">&#39;last&#39;</span><span class="p">)</span>
+                    <span class="n">left</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">left</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="n">index_col</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">left</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span>
         <span class="k">else</span><span class="p">:</span>
@@ -1225,9 +1264,9 @@ table {
 
         <span class="k">if</span> <span class="n">deep</span><span class="p">:</span>
             <span class="n">left_df</span> <span class="o">=</span> <span class="n">left_df</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">right_df</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s1">&#39;outer&#39;</span><span class="p">)</span>
-            <span class="n">res_data</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;concept&#39;</span><span class="p">:</span> <span class="n">left_df</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">()}</span>
+            <span class="n">res_data</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;concept&#39;</span><span class="p">:</span> <span class="n">left_df</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="s1">&#39;concept&#39;</span><span class="p">,</span> <span class="n">keep</span><span class="o">=</span><span class="s1">&#39;last&#39;</span><span class="p">)}</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">res_data</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;concept&#39;</span><span class="p">:</span> <span class="n">right_df</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">()}</span>
+            <span class="n">res_data</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;concept&#39;</span><span class="p">:</span> <span class="n">right_df</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="s1">&#39;concept&#39;</span><span class="p">,</span> <span class="n">keep</span><span class="o">=</span><span class="s1">&#39;last&#39;</span><span class="p">)}</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="c1"># TODO</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;entity data do not support merging yet.&#39;</span><span class="p">)</span>
@@ -1236,8 +1275,9 @@ table {
 
 
 <span class="k">def</span> <span class="nf">identity</span><span class="p">(</span><span class="n">ingredient</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">):</span>
-    <span class="k">if</span> <span class="s1">&#39;copy&#39;</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
-        <span class="n">ingredient</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">get_data_copy</span><span class="p">()</span>
+    <span class="sd">&quot;&quot;&quot;return the ingredient as is.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="s1">&#39;copy&#39;</span> <span class="ow">in</span> <span class="n">options</span> <span class="ow">and</span> <span class="n">options</span><span class="p">[</span><span class="s1">&#39;copy&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>
+        <span class="n">ingredient</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">get_data_str</span><span class="p">()</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">ingredient</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
 
@@ -1248,8 +1288,19 @@ table {
 
 <span class="k">def</span> <span class="nf">filter_row</span><span class="p">(</span><span class="n">ingredient</span><span class="p">:</span> <span class="n">Ingredient</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Ingredient</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;filter an ingredient based on a set of options and return</span>
-<span class="sd">    the result as new ingredient</span>
+<span class="sd">    the result as new ingredient.</span>
+
+<span class="sd">    Args::</span>
+<span class="sd">        ingredient: Ingredient object</span>
+<span class="sd">        result: ingred_id of return ingredient</span>
+<span class="sd">        options: dict of options</span>
+
+<span class="sd">    available options::</span>
+<span class="sd">        dictionary: test</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;filter_row: &quot;</span> <span class="o">+</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">ingred_id</span><span class="p">)</span>
+
     <span class="n">data</span> <span class="o">=</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
     <span class="n">dictionary</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;dictionary&#39;</span><span class="p">)</span>
 
@@ -1276,8 +1327,6 @@ table {
 
         <span class="n">query_string</span> <span class="o">=</span> <span class="s1">&#39; and &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">queries</span><span class="p">)</span>
 
-        <span class="c1"># logging.debug(&#39;query sting: &#39; + query_string)</span>
-
         <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">query_string</span><span class="p">)</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="n">from_name</span><span class="p">:</span> <span class="n">k</span><span class="p">})</span>
         <span class="c1"># drops all columns with unique contents. and update the key.</span>
@@ -1299,12 +1348,14 @@ table {
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">result</span><span class="p">:</span>
         <span class="n">result</span> <span class="o">=</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">ingred_id</span> <span class="o">+</span> <span class="s1">&#39;-filtered&#39;</span>
-    <span class="c1"># TODO: the ingredient key need to be dropped too.</span>
     <span class="k">return</span> <span class="n">Ingredient</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">result</span><span class="p">,</span> <span class="n">newkey</span><span class="p">,</span> <span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">res</span><span class="p">)</span>
 
 
 <span class="k">def</span> <span class="nf">filter_item</span><span class="p">(</span><span class="n">ingredient</span><span class="p">:</span> <span class="n">Ingredient</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">result</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Ingredient</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;filter item from the ingredient data dict&quot;&quot;&quot;</span>
+
+    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;filter_item: &quot;</span> <span class="o">+</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">ingred_id</span><span class="p">)</span>
+
     <span class="n">data</span> <span class="o">=</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
     <span class="n">items</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;items&#39;</span><span class="p">)</span>
 
@@ -1317,21 +1368,22 @@ table {
     <span class="k">if</span> <span class="ow">not</span> <span class="n">result</span><span class="p">:</span>
         <span class="n">result</span> <span class="o">=</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">ingred_id</span>
 
-    <span class="k">return</span> <span class="n">Ingredient</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">result</span><span class="p">,</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">key</span><span class="p">,</span> <span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
-
-
-<span class="k">def</span> <span class="nf">format_data</span><span class="p">():</span>
-    <span class="sd">&quot;&quot;&quot;format floating points&quot;&quot;&quot;</span>
-    <span class="k">pass</span>
+    <span class="k">return</span> <span class="n">Ingredient</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">ddf_id</span><span class="p">,</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">key</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
 
 
 <span class="k">def</span> <span class="nf">align</span><span class="p">(</span><span class="n">to_align</span><span class="p">:</span> <span class="n">Ingredient</span><span class="p">,</span> <span class="n">base</span><span class="p">:</span> <span class="n">Ingredient</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Ingredient</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;doc here&quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">search_cols</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;search_cols&#39;</span><span class="p">)</span>
         <span class="n">to_find</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;to_find&#39;</span><span class="p">)</span>
         <span class="n">to_replace</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;to_replace&#39;</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;not enough parameters! please check your recipe&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="s1">&#39;drop_not_found&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
+        <span class="n">drop_not_found</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">drop_not_found</span> <span class="o">=</span> <span class="n">options</span><span class="p">[</span><span class="s1">&#39;drop_not_found&#39;</span><span class="p">]</span>
 
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">get_data</span><span class="p">())</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
         <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
@@ -1348,12 +1400,19 @@ table {
     <span class="n">no_match</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">df</span> <span class="ow">in</span> <span class="n">ing_data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">df</span><span class="p">[</span><span class="n">to_find</span><span class="p">]</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">()</span><span class="o">.</span><span class="n">values</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">df</span><span class="p">[</span><span class="n">to_find</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">mapping</span><span class="p">:</span>
                 <span class="k">continue</span>
-            <span class="c1"># TODO: if I don&#39;t add drop_duplicates() below, I will get multiple same rows.</span>
-            <span class="c1"># find out why.</span>
-            <span class="n">filtered</span> <span class="o">=</span> <span class="n">base_data</span><span class="p">[</span><span class="n">base_data</span><span class="p">[</span><span class="n">search_cols</span><span class="p">]</span><span class="o">.</span><span class="n">values</span> <span class="o">==</span> <span class="n">f</span><span class="p">]</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">()</span>
+
+            <span class="c1"># filtering name in all search_cols</span>
+            <span class="n">bools</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">sc</span> <span class="ow">in</span> <span class="n">search_cols</span><span class="p">:</span>
+                <span class="n">bools</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">base_data</span><span class="p">[</span><span class="n">sc</span><span class="p">]</span> <span class="o">==</span> <span class="n">f</span><span class="p">)</span>
+            <span class="n">mask</span> <span class="o">=</span> <span class="n">bools</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">bools</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+                <span class="n">mask</span> <span class="o">=</span> <span class="n">mask</span> <span class="o">|</span> <span class="n">m</span>
+            <span class="n">filtered</span> <span class="o">=</span> <span class="n">base_data</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">filtered</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="n">mapping</span><span class="p">[</span><span class="n">f</span><span class="p">]</span> <span class="o">=</span> <span class="n">filtered</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">filtered</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
@@ -1361,11 +1420,18 @@ table {
                 <span class="n">mapping</span><span class="p">[</span><span class="n">f</span><span class="p">]</span> <span class="o">=</span> <span class="n">filtered</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">no_match</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
-        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="n">to_find</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">mapping</span><span class="o">.</span><span class="n">keys</span><span class="p">())]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>  <span class="c1"># only keep those available in mappings.</span>
-        <span class="k">for</span> <span class="n">old</span><span class="p">,</span> <span class="n">new</span> <span class="ow">in</span> <span class="n">mapping</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="n">to_find</span><span class="p">]</span> <span class="o">==</span> <span class="n">old</span><span class="p">,</span> <span class="n">to_replace</span><span class="p">]</span> <span class="o">=</span> <span class="n">new</span>
 
-        <span class="n">ing_data</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span>
+        <span class="k">if</span> <span class="n">drop_not_found</span><span class="p">:</span>
+            <span class="c1"># drop those entities not found in the mappings</span>
+            <span class="n">df_</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="n">to_find</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">mapping</span><span class="o">.</span><span class="n">keys</span><span class="p">())]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">df_</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">old</span><span class="p">,</span> <span class="n">new</span> <span class="ow">in</span> <span class="n">mapping</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">pd</span><span class="o">.</span><span class="n">isnull</span><span class="p">(</span><span class="n">new</span><span class="p">):</span>
+                <span class="n">df_</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">df_</span><span class="p">[</span><span class="n">to_find</span><span class="p">]</span> <span class="o">==</span> <span class="n">old</span><span class="p">,</span> <span class="n">to_replace</span><span class="p">]</span> <span class="o">=</span> <span class="n">new</span>
+
+        <span class="n">ing_data</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_</span>
 
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">no_match</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;no match found for: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">no_match</span><span class="p">)))</span>
@@ -1382,6 +1448,8 @@ table {
 <span class="k">def</span> <span class="nf">groupby</span><span class="p">(</span><span class="n">ingredient</span><span class="p">:</span> <span class="n">Ingredient</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Ingredient</span><span class="p">:</span>
     <span class="n">data</span> <span class="o">=</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
     <span class="n">by</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;by&#39;</span><span class="p">)</span>
+
+    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;groupby: &quot;</span> <span class="o">+</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">ingred_id</span><span class="p">)</span>
 
     <span class="k">try</span><span class="p">:</span>
         <span class="n">agg</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;aggregate&#39;</span><span class="p">)</span>
@@ -1401,6 +1469,7 @@ table {
 
 <span class="k">def</span> <span class="nf">accumulate</span><span class="p">(</span><span class="n">ingredient</span><span class="p">:</span> <span class="n">Ingredient</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Ingredient</span><span class="p">:</span>
 
+    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;accumulate: &quot;</span> <span class="o">+</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">ingred_id</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">dtype</span> <span class="o">!=</span> <span class="s1">&#39;datapoints&#39;</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;only datapoint support this function!&quot;</span><span class="p">)</span>
 
@@ -1409,12 +1478,26 @@ table {
     <span class="n">data</span> <span class="o">=</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
     <span class="n">index</span> <span class="o">=</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">key_to_list</span><span class="p">()</span>
 
+    <span class="n">funcs</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;aagr&#39;</span><span class="p">:</span> <span class="n">_aagr</span>
+    <span class="p">}</span>
+
     <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">func</span> <span class="ow">in</span> <span class="n">ops</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="n">df</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
         <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="n">index</span><span class="p">)</span><span class="o">.</span><span class="n">agg</span><span class="p">(</span><span class="s1">&#39;sum&#39;</span><span class="p">)</span>
-        <span class="k">assert</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s1">&#39;[a-z]+&#39;</span><span class="p">,</span> <span class="n">func</span><span class="p">)</span>  <span class="c1"># only lower case chars allowed, for security</span>
-        <span class="n">df</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="s2">&quot;df.groupby(level=[0]).{}()&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">func</span><span class="p">))</span>
-        <span class="n">data</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s1">&#39;[a-z_]+&#39;</span><span class="p">,</span> <span class="n">func</span><span class="p">)</span>  <span class="c1"># only lower case chars allowed, for security</span>
+        <span class="c1"># assuming level0 index is geo</span>
+        <span class="c1"># because we should run accumulate for each country</span>
+        <span class="c1"># TODO: https://github.com/semio/ddf_utils/issues/25</span>
+        <span class="k">if</span> <span class="n">func</span> <span class="ow">in</span> <span class="n">funcs</span><span class="p">:</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">as_index</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">funcs</span><span class="p">[</span><span class="n">func</span><span class="p">])</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[[</span><span class="o">*</span><span class="n">index</span><span class="p">,</span> <span class="n">k</span><span class="p">]]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="s2">&quot;df.groupby(level=0).{}()&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">func</span><span class="p">))</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+
+        <span class="n">data</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">result</span><span class="p">:</span>
         <span class="n">result</span> <span class="o">=</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">ingred_id</span> <span class="o">+</span> <span class="s1">&#39;-accued&#39;</span>
@@ -1422,9 +1505,16 @@ table {
     <span class="k">return</span> <span class="n">Ingredient</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">result</span><span class="p">,</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">key</span><span class="p">,</span> <span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
 
 
+<span class="k">def</span> <span class="nf">_aagr</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">window</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;average annual growth rate&quot;&quot;&quot;</span>
+    <span class="n">pct</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">pct_change</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">pct</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="n">window</span><span class="p">)</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span>
+
+
 <span class="k">def</span> <span class="nf">run_op</span><span class="p">(</span><span class="n">ingredient</span><span class="p">:</span> <span class="n">Ingredient</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Ingredient</span><span class="p">:</span>
 
     <span class="k">assert</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="s1">&#39;datapoints&#39;</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;run_op: &quot;</span> <span class="o">+</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">ingred_id</span><span class="p">)</span>
 
     <span class="n">data</span> <span class="o">=</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
     <span class="n">keys</span> <span class="o">=</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">key_to_list</span><span class="p">()</span>
@@ -1432,7 +1522,6 @@ table {
     <span class="n">ops</span> <span class="o">=</span> <span class="n">options</span><span class="p">[</span><span class="s1">&#39;op&#39;</span><span class="p">]</span>
 
     <span class="c1"># concat all the datapoint dataframe first, and eval the ops</span>
-    <span class="c1"># TODO: concat() may be expansive. should find a way to improve.</span>
     <span class="n">to_concat</span> <span class="o">=</span> <span class="p">[</span><span class="n">v</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="n">keys</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">to_concat</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
@@ -1470,6 +1559,7 @@ table {
   <div id="source-ddf_utils.chef.procedure.accumulate" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">accumulate</span><span class="p">(</span><span class="n">ingredient</span><span class="p">:</span> <span class="n">Ingredient</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Ingredient</span><span class="p">:</span>
 
+    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;accumulate: &quot;</span> <span class="o">+</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">ingred_id</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">dtype</span> <span class="o">!=</span> <span class="s1">&#39;datapoints&#39;</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;only datapoint support this function!&quot;</span><span class="p">)</span>
 
@@ -1478,12 +1568,26 @@ table {
     <span class="n">data</span> <span class="o">=</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
     <span class="n">index</span> <span class="o">=</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">key_to_list</span><span class="p">()</span>
 
+    <span class="n">funcs</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;aagr&#39;</span><span class="p">:</span> <span class="n">_aagr</span>
+    <span class="p">}</span>
+
     <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">func</span> <span class="ow">in</span> <span class="n">ops</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="n">df</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
         <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="n">index</span><span class="p">)</span><span class="o">.</span><span class="n">agg</span><span class="p">(</span><span class="s1">&#39;sum&#39;</span><span class="p">)</span>
-        <span class="k">assert</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s1">&#39;[a-z]+&#39;</span><span class="p">,</span> <span class="n">func</span><span class="p">)</span>  <span class="c1"># only lower case chars allowed, for security</span>
-        <span class="n">df</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="s2">&quot;df.groupby(level=[0]).{}()&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">func</span><span class="p">))</span>
-        <span class="n">data</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s1">&#39;[a-z_]+&#39;</span><span class="p">,</span> <span class="n">func</span><span class="p">)</span>  <span class="c1"># only lower case chars allowed, for security</span>
+        <span class="c1"># assuming level0 index is geo</span>
+        <span class="c1"># because we should run accumulate for each country</span>
+        <span class="c1"># TODO: https://github.com/semio/ddf_utils/issues/25</span>
+        <span class="k">if</span> <span class="n">func</span> <span class="ow">in</span> <span class="n">funcs</span><span class="p">:</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">as_index</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">funcs</span><span class="p">[</span><span class="n">func</span><span class="p">])</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[[</span><span class="o">*</span><span class="n">index</span><span class="p">,</span> <span class="n">k</span><span class="p">]]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="s2">&quot;df.groupby(level=0).{}()&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">func</span><span class="p">))</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+
+        <span class="n">data</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">result</span><span class="p">:</span>
         <span class="n">result</span> <span class="o">=</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">ingred_id</span> <span class="o">+</span> <span class="s1">&#39;-accued&#39;</span>
@@ -1505,16 +1609,23 @@ table {
 
     
   
+    <div class="desc"><p>doc here</p></div>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-ddf_utils.chef.procedure.align', this);">Show source &equiv;</a></p>
   <div id="source-ddf_utils.chef.procedure.align" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">align</span><span class="p">(</span><span class="n">to_align</span><span class="p">:</span> <span class="n">Ingredient</span><span class="p">,</span> <span class="n">base</span><span class="p">:</span> <span class="n">Ingredient</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Ingredient</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;doc here&quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">search_cols</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;search_cols&#39;</span><span class="p">)</span>
         <span class="n">to_find</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;to_find&#39;</span><span class="p">)</span>
         <span class="n">to_replace</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;to_replace&#39;</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;not enough parameters! please check your recipe&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="s1">&#39;drop_not_found&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
+        <span class="n">drop_not_found</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">drop_not_found</span> <span class="o">=</span> <span class="n">options</span><span class="p">[</span><span class="s1">&#39;drop_not_found&#39;</span><span class="p">]</span>
 
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">get_data</span><span class="p">())</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
         <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
@@ -1531,12 +1642,19 @@ table {
     <span class="n">no_match</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">df</span> <span class="ow">in</span> <span class="n">ing_data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">df</span><span class="p">[</span><span class="n">to_find</span><span class="p">]</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">()</span><span class="o">.</span><span class="n">values</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">df</span><span class="p">[</span><span class="n">to_find</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">mapping</span><span class="p">:</span>
                 <span class="k">continue</span>
-            <span class="c1"># TODO: if I don&#39;t add drop_duplicates() below, I will get multiple same rows.</span>
-            <span class="c1"># find out why.</span>
-            <span class="n">filtered</span> <span class="o">=</span> <span class="n">base_data</span><span class="p">[</span><span class="n">base_data</span><span class="p">[</span><span class="n">search_cols</span><span class="p">]</span><span class="o">.</span><span class="n">values</span> <span class="o">==</span> <span class="n">f</span><span class="p">]</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">()</span>
+
+            <span class="c1"># filtering name in all search_cols</span>
+            <span class="n">bools</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">sc</span> <span class="ow">in</span> <span class="n">search_cols</span><span class="p">:</span>
+                <span class="n">bools</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">base_data</span><span class="p">[</span><span class="n">sc</span><span class="p">]</span> <span class="o">==</span> <span class="n">f</span><span class="p">)</span>
+            <span class="n">mask</span> <span class="o">=</span> <span class="n">bools</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">bools</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+                <span class="n">mask</span> <span class="o">=</span> <span class="n">mask</span> <span class="o">|</span> <span class="n">m</span>
+            <span class="n">filtered</span> <span class="o">=</span> <span class="n">base_data</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">filtered</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="n">mapping</span><span class="p">[</span><span class="n">f</span><span class="p">]</span> <span class="o">=</span> <span class="n">filtered</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">filtered</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
@@ -1544,11 +1662,18 @@ table {
                 <span class="n">mapping</span><span class="p">[</span><span class="n">f</span><span class="p">]</span> <span class="o">=</span> <span class="n">filtered</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">no_match</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
-        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="n">to_find</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">mapping</span><span class="o">.</span><span class="n">keys</span><span class="p">())]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>  <span class="c1"># only keep those available in mappings.</span>
-        <span class="k">for</span> <span class="n">old</span><span class="p">,</span> <span class="n">new</span> <span class="ow">in</span> <span class="n">mapping</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="n">to_find</span><span class="p">]</span> <span class="o">==</span> <span class="n">old</span><span class="p">,</span> <span class="n">to_replace</span><span class="p">]</span> <span class="o">=</span> <span class="n">new</span>
 
-        <span class="n">ing_data</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span>
+        <span class="k">if</span> <span class="n">drop_not_found</span><span class="p">:</span>
+            <span class="c1"># drop those entities not found in the mappings</span>
+            <span class="n">df_</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="n">to_find</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">mapping</span><span class="o">.</span><span class="n">keys</span><span class="p">())]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">df_</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">old</span><span class="p">,</span> <span class="n">new</span> <span class="ow">in</span> <span class="n">mapping</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">pd</span><span class="o">.</span><span class="n">isnull</span><span class="p">(</span><span class="n">new</span><span class="p">):</span>
+                <span class="n">df_</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">df_</span><span class="p">[</span><span class="n">to_find</span><span class="p">]</span> <span class="o">==</span> <span class="n">old</span><span class="p">,</span> <span class="n">to_replace</span><span class="p">]</span> <span class="o">=</span> <span class="n">new</span>
+
+        <span class="n">ing_data</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_</span>
 
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">no_match</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;no match found for: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">no_match</span><span class="p">)))</span>
@@ -1576,25 +1701,45 @@ table {
 
     
   
-    <div class="desc"><p>make copy of ingredient data, with new names</p></div>
+    <div class="desc"><p>make copy of ingredient data, with new names.</p>
+<p>Args:
+    ingredient: Ingredient object
+    result: ingred_id of return ingredient
+    options: dict of options</p>
+<p>available options:
+    <code>dictionary</code>: a dictionary of oldname -&gt; newname mappings</p></div>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-ddf_utils.chef.procedure.copy', this);">Show source &equiv;</a></p>
   <div id="source-ddf_utils.chef.procedure.copy" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="n">ingredient</span><span class="p">:</span> <span class="n">Ingredient</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Ingredient</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;make copy of ingredient data, with new names&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;make copy of ingredient data, with new names.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        ingredient: Ingredient object</span>
+<span class="sd">        result: ingred_id of return ingredient</span>
+<span class="sd">        options: dict of options</span>
+
+<span class="sd">    available options:</span>
+<span class="sd">        `dictionary`: a dictionary of oldname -&gt; newname mappings</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;copy: &quot;</span> <span class="o">+</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">ingred_id</span><span class="p">)</span>
+
     <span class="n">dictionary</span> <span class="o">=</span> <span class="n">options</span><span class="p">[</span><span class="s1">&#39;dictionary&#39;</span><span class="p">]</span>
-    <span class="n">data</span> <span class="o">=</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">copy_data</span><span class="p">()</span>
 
     <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">dictionary</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>  <span class="c1"># value is str, means only make one copy</span>
             <span class="n">data</span><span class="p">[</span><span class="n">v</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span><span class="p">})</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-        <span class="k">else</span><span class="p">:</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># then it&#39;s a list, should make multiple copy</span>
             <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">v</span><span class="p">:</span>
                 <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">n</span><span class="p">})</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 
+    <span class="c1"># usually the old ingredient won&#39;t be used after creating copy.</span>
+    <span class="c1"># just reset the data to save memory</span>
+    <span class="n">ingredient</span><span class="o">.</span><span class="n">reset_data</span><span class="p">()</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">result</span><span class="p">:</span>
         <span class="n">result</span> <span class="o">=</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">ingred_id</span> <span class="o">+</span> <span class="s1">&#39;_&#39;</span>
-    <span class="k">return</span> <span class="n">Ingredient</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">result</span><span class="p">,</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">key</span><span class="p">,</span> <span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Ingredient</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">ddf_id</span><span class="p">,</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">key</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
 </pre></div>
 
   </div>
@@ -1617,6 +1762,9 @@ table {
   <div id="source-ddf_utils.chef.procedure.filter_item" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">filter_item</span><span class="p">(</span><span class="n">ingredient</span><span class="p">:</span> <span class="n">Ingredient</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">result</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Ingredient</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;filter item from the ingredient data dict&quot;&quot;&quot;</span>
+
+    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;filter_item: &quot;</span> <span class="o">+</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">ingred_id</span><span class="p">)</span>
+
     <span class="n">data</span> <span class="o">=</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
     <span class="n">items</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;items&#39;</span><span class="p">)</span>
 
@@ -1629,7 +1777,7 @@ table {
     <span class="k">if</span> <span class="ow">not</span> <span class="n">result</span><span class="p">:</span>
         <span class="n">result</span> <span class="o">=</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">ingred_id</span>
 
-    <span class="k">return</span> <span class="n">Ingredient</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">result</span><span class="p">,</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">key</span><span class="p">,</span> <span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Ingredient</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">ddf_id</span><span class="p">,</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">key</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
 </pre></div>
 
   </div>
@@ -1647,14 +1795,31 @@ table {
     
   
     <div class="desc"><p>filter an ingredient based on a set of options and return
-the result as new ingredient</p></div>
+the result as new ingredient.</p>
+<p>Args::
+    ingredient: Ingredient object
+    result: ingred_id of return ingredient
+    options: dict of options</p>
+<p>available options::
+    dictionary: test</p></div>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-ddf_utils.chef.procedure.filter_row', this);">Show source &equiv;</a></p>
   <div id="source-ddf_utils.chef.procedure.filter_row" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">filter_row</span><span class="p">(</span><span class="n">ingredient</span><span class="p">:</span> <span class="n">Ingredient</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Ingredient</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;filter an ingredient based on a set of options and return</span>
-<span class="sd">    the result as new ingredient</span>
+<span class="sd">    the result as new ingredient.</span>
+
+<span class="sd">    Args::</span>
+<span class="sd">        ingredient: Ingredient object</span>
+<span class="sd">        result: ingred_id of return ingredient</span>
+<span class="sd">        options: dict of options</span>
+
+<span class="sd">    available options::</span>
+<span class="sd">        dictionary: test</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;filter_row: &quot;</span> <span class="o">+</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">ingred_id</span><span class="p">)</span>
+
     <span class="n">data</span> <span class="o">=</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
     <span class="n">dictionary</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;dictionary&#39;</span><span class="p">)</span>
 
@@ -1681,8 +1846,6 @@ the result as new ingredient</p></div>
 
         <span class="n">query_string</span> <span class="o">=</span> <span class="s1">&#39; and &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">queries</span><span class="p">)</span>
 
-        <span class="c1"># logging.debug(&#39;query sting: &#39; + query_string)</span>
-
         <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">query_string</span><span class="p">)</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="n">from_name</span><span class="p">:</span> <span class="n">k</span><span class="p">})</span>
         <span class="c1"># drops all columns with unique contents. and update the key.</span>
@@ -1704,31 +1867,7 @@ the result as new ingredient</p></div>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">result</span><span class="p">:</span>
         <span class="n">result</span> <span class="o">=</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">ingred_id</span> <span class="o">+</span> <span class="s1">&#39;-filtered&#39;</span>
-    <span class="c1"># TODO: the ingredient key need to be dropped too.</span>
     <span class="k">return</span> <span class="n">Ingredient</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">result</span><span class="p">,</span> <span class="n">newkey</span><span class="p">,</span> <span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">res</span><span class="p">)</span>
-</pre></div>
-
-  </div>
-</div>
-
-  </div>
-  
-      
-  <div class="item">
-    <div class="name def" id="ddf_utils.chef.procedure.format_data">
-    <p>def <span class="ident">format_data</span>(</p><p>)</p>
-    </div>
-    
-
-    
-  
-    <div class="desc"><p>format floating points</p></div>
-  <div class="source_cont">
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-ddf_utils.chef.procedure.format_data', this);">Show source &equiv;</a></p>
-  <div id="source-ddf_utils.chef.procedure.format_data" class="source">
-    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">format_data</span><span class="p">():</span>
-    <span class="sd">&quot;&quot;&quot;format floating points&quot;&quot;&quot;</span>
-    <span class="k">pass</span>
 </pre></div>
 
   </div>
@@ -1751,6 +1890,8 @@ the result as new ingredient</p></div>
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">groupby</span><span class="p">(</span><span class="n">ingredient</span><span class="p">:</span> <span class="n">Ingredient</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Ingredient</span><span class="p">:</span>
     <span class="n">data</span> <span class="o">=</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
     <span class="n">by</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;by&#39;</span><span class="p">)</span>
+
+    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;groupby: &quot;</span> <span class="o">+</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">ingred_id</span><span class="p">)</span>
 
     <span class="k">try</span><span class="p">:</span>
         <span class="n">agg</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;aggregate&#39;</span><span class="p">)</span>
@@ -1782,12 +1923,14 @@ the result as new ingredient</p></div>
 
     
   
+    <div class="desc"><p>return the ingredient as is.</p></div>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-ddf_utils.chef.procedure.identity', this);">Show source &equiv;</a></p>
   <div id="source-ddf_utils.chef.procedure.identity" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">identity</span><span class="p">(</span><span class="n">ingredient</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">):</span>
-    <span class="k">if</span> <span class="s1">&#39;copy&#39;</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
-        <span class="n">ingredient</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">get_data_copy</span><span class="p">()</span>
+    <span class="sd">&quot;&quot;&quot;return the ingredient as is.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="s1">&#39;copy&#39;</span> <span class="ow">in</span> <span class="n">options</span> <span class="ow">and</span> <span class="n">options</span><span class="p">[</span><span class="s1">&#39;copy&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>
+        <span class="n">ingredient</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">get_data_str</span><span class="p">()</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">ingredient</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
 
@@ -1818,7 +1961,7 @@ the result as new ingredient</p></div>
     <span class="sd">&quot;&quot;&quot;the main merge function&quot;&quot;&quot;</span>
     <span class="c1"># all ingredients should have same dtype and index</span>
 
-    <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;merge: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">([</span><span class="n">i</span><span class="o">.</span><span class="n">ingred_id</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">ingredients</span><span class="p">]))</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;merge: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">([</span><span class="n">i</span><span class="o">.</span><span class="n">ingred_id</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">ingredients</span><span class="p">]))</span>
 
     <span class="c1"># assert that dtype and key are same in all dataframe</span>
     <span class="k">try</span><span class="p">:</span>
@@ -1828,9 +1971,11 @@ the result as new ingredient</p></div>
         <span class="n">log1</span> <span class="o">=</span> <span class="s2">&quot;multiple dtype/key detected: </span><span class="se">\n</span><span class="s2">&quot;</span>
         <span class="n">log2</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s2">&quot;{}: {}, {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">ingred_id</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">key</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ingredients</span><span class="p">])</span>
         <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">log1</span><span class="o">+</span><span class="n">log2</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;can&#39;t merge data with multiple dtype/key!&quot;</span><span class="p">)</span>
 
     <span class="c1"># get the dtype and index</span>
-    <span class="c1"># FIXME: handle the index key better</span>
+    <span class="c1"># we have assert dtype and key is unique, so we take it from</span>
+    <span class="c1"># the first ingredient</span>
     <span class="n">dtype</span> <span class="o">=</span> <span class="n">ingredients</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span>
 
     <span class="k">if</span> <span class="n">dtype</span> <span class="o">==</span> <span class="s1">&#39;datapoints&#39;</span><span class="p">:</span>
@@ -1849,7 +1994,8 @@ the result as new ingredient</p></div>
         <span class="n">deep</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;deep&#39;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">deep</span> <span class="o">=</span> <span class="bp">False</span>
-
+    <span class="k">if</span> <span class="n">deep</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;merge: doing deep merge&quot;</span><span class="p">)</span>
     <span class="c1"># merge data from ingredients one by one.</span>
     <span class="n">res_all</span> <span class="o">=</span> <span class="p">{}</span>
 
@@ -1882,6 +2028,7 @@ the result as new ingredient</p></div>
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">run_op</span><span class="p">(</span><span class="n">ingredient</span><span class="p">:</span> <span class="n">Ingredient</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Ingredient</span><span class="p">:</span>
 
     <span class="k">assert</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="s1">&#39;datapoints&#39;</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;run_op: &quot;</span> <span class="o">+</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">ingred_id</span><span class="p">)</span>
 
     <span class="n">data</span> <span class="o">=</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
     <span class="n">keys</span> <span class="o">=</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">key_to_list</span><span class="p">()</span>
@@ -1889,7 +2036,6 @@ the result as new ingredient</p></div>
     <span class="n">ops</span> <span class="o">=</span> <span class="n">options</span><span class="p">[</span><span class="s1">&#39;op&#39;</span><span class="p">]</span>
 
     <span class="c1"># concat all the datapoint dataframe first, and eval the ops</span>
-    <span class="c1"># TODO: concat() may be expansive. should find a way to improve.</span>
     <span class="n">to_concat</span> <span class="o">=</span> <span class="p">[</span><span class="n">v</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="n">keys</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">to_concat</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
@@ -1920,13 +2066,34 @@ the result as new ingredient</p></div>
 
     
   
+    <div class="desc"><p>Translate column values.</p>
+<p>Args:
+    ingredient: Ingredient object
+    result: ingred_id of return ingredient
+    options: dict of options</p>
+<p>available options are:
+    <code>dictionary</code>: a dictionary of oldname -&gt; newname mappings
+    <code>column</code>: the column to rename</p></div>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-ddf_utils.chef.procedure.translate_column', this);">Show source &equiv;</a></p>
   <div id="source-ddf_utils.chef.procedure.translate_column" class="source">
-    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">translate_column</span><span class="p">(</span><span class="n">ingredient</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">):</span>
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">translate_column</span><span class="p">(</span><span class="n">ingredient</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Ingredient</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Translate column values.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        ingredient: Ingredient object</span>
+<span class="sd">        result: ingred_id of return ingredient</span>
+<span class="sd">        options: dict of options</span>
+
+<span class="sd">    available options are:</span>
+<span class="sd">        `dictionary`: a dictionary of oldname -&gt; newname mappings</span>
+<span class="sd">        `column`: the column to rename</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;translate_column: &quot;</span> <span class="o">+</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">ingred_id</span><span class="p">)</span>
+
     <span class="n">rm</span> <span class="o">=</span> <span class="n">options</span><span class="p">[</span><span class="s1">&#39;dictionary&#39;</span><span class="p">]</span>
     <span class="n">column</span> <span class="o">=</span> <span class="n">options</span><span class="p">[</span><span class="s1">&#39;column&#39;</span><span class="p">]</span>
-    <span class="n">di</span> <span class="o">=</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">di</span> <span class="o">=</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">copy_data</span><span class="p">()</span>
 
     <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">df</span> <span class="ow">in</span> <span class="n">di</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
 
@@ -1935,7 +2102,7 @@ the result as new ingredient</p></div>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">result</span><span class="p">:</span>
         <span class="n">result</span> <span class="o">=</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">ingred_id</span> <span class="o">+</span> <span class="s1">&#39;-translated&#39;</span>
-    <span class="k">return</span> <span class="n">Ingredient</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">result</span><span class="p">,</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">key</span><span class="p">,</span> <span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">di</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Ingredient</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">ddf_id</span><span class="p">,</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">key</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">di</span><span class="p">)</span>
 </pre></div>
 
   </div>
@@ -1952,15 +2119,31 @@ the result as new ingredient</p></div>
 
     
   
+    <div class="desc"><p>Translate column headers</p>
+<p>Args:
+    ingredient: Ingredient object
+    result: ingred_id of return ingredient
+    options: dict of options</p>
+<p>available options are:
+    <code>dictionary</code>: a dictionary of oldname -&gt; newname mappings</p></div>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-ddf_utils.chef.procedure.translate_header', this);">Show source &equiv;</a></p>
   <div id="source-ddf_utils.chef.procedure.translate_header" class="source">
-    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">translate_header</span><span class="p">(</span><span class="n">ingredient</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">):</span>
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">translate_header</span><span class="p">(</span><span class="n">ingredient</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Ingredient</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Translate column headers</span>
 
-    <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;translate_header: &quot;</span> <span class="o">+</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">ingred_id</span><span class="p">)</span>
+<span class="sd">    Args:</span>
+<span class="sd">        ingredient: Ingredient object</span>
+<span class="sd">        result: ingred_id of return ingredient</span>
+<span class="sd">        options: dict of options</span>
+
+<span class="sd">    available options are:</span>
+<span class="sd">        `dictionary`: a dictionary of oldname -&gt; newname mappings</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;translate_header: &quot;</span> <span class="o">+</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">ingred_id</span><span class="p">)</span>
 
     <span class="n">rm</span> <span class="o">=</span> <span class="n">options</span><span class="p">[</span><span class="s1">&#39;dictionary&#39;</span><span class="p">]</span>
-    <span class="n">data</span> <span class="o">=</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">copy_data</span><span class="p">()</span>
 
     <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
         <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">rm</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>  <span class="c1"># if we need to rename the concept name</span>
@@ -1971,7 +2154,7 @@ the result as new ingredient</p></div>
 
     <span class="c1"># also rename the key</span>
     <span class="n">newkey</span> <span class="o">=</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">key</span>
-    <span class="k">if</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="s1">&#39;datapoints&#39;</span> <span class="ow">or</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="s1">&#39;concepts&#39;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">dtype</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;datapoints&#39;</span><span class="p">,</span> <span class="s1">&#39;concepts&#39;</span><span class="p">]:</span>
         <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">rm</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">key</span><span class="p">:</span>
                 <span class="n">newkey</span> <span class="o">=</span> <span class="n">newkey</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">rm</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
@@ -1982,7 +2165,7 @@ the result as new ingredient</p></div>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">result</span><span class="p">:</span>
         <span class="n">result</span> <span class="o">=</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">ingred_id</span> <span class="o">+</span> <span class="s1">&#39;-translated&#39;</span>
-    <span class="k">return</span> <span class="n">Ingredient</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">result</span><span class="p">,</span> <span class="n">newkey</span><span class="p">,</span> <span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Ingredient</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">ddf_id</span><span class="p">,</span> <span class="n">newkey</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
 </pre></div>
 
   </div>

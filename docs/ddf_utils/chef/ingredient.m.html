@@ -1046,12 +1046,12 @@ table {
           
   <ul>
     <li class="mono"><a href="#ddf_utils.chef.ingredient.Ingredient.__init__">__init__</a></li>
-    <li class="mono"><a href="#ddf_utils.chef.ingredient.Ingredient.copy">copy</a></li>
+    <li class="mono"><a href="#ddf_utils.chef.ingredient.Ingredient.copy_data">copy_data</a></li>
     <li class="mono"><a href="#ddf_utils.chef.ingredient.Ingredient.filter_index_file_name">filter_index_file_name</a></li>
     <li class="mono"><a href="#ddf_utils.chef.ingredient.Ingredient.filter_index_key_value">filter_index_key_value</a></li>
     <li class="mono"><a href="#ddf_utils.chef.ingredient.Ingredient.filter_row">filter_row</a></li>
     <li class="mono"><a href="#ddf_utils.chef.ingredient.Ingredient.get_data">get_data</a></li>
-    <li class="mono"><a href="#ddf_utils.chef.ingredient.Ingredient.get_data_copy">get_data_copy</a></li>
+    <li class="mono"><a href="#ddf_utils.chef.ingredient.Ingredient.get_data_str">get_data_str</a></li>
     <li class="mono"><a href="#ddf_utils.chef.ingredient.Ingredient.get_last_update">get_last_update</a></li>
     <li class="mono"><a href="#ddf_utils.chef.ingredient.Ingredient.key_to_list">key_to_list</a></li>
     <li class="mono"><a href="#ddf_utils.chef.ingredient.Ingredient.reset_data">reset_data</a></li>
@@ -1131,7 +1131,7 @@ table {
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        returns the type of ddf data, i.e. concepts/entities/datapoints.</span>
 
-<span class="sd">        It will be inferred from the key porperity of ingredient.</span>
+<span class="sd">        It will be inferred from the key property of ingredient.</span>
 <span class="sd">        TODO: what if key == &#39;*&#39;? Is it possible?</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;concept&#39;</span><span class="p">:</span>
@@ -1236,9 +1236,9 @@ table {
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">funcs</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="p">]()</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
 
-    <span class="k">def</span> <span class="nf">get_data_copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">get_data_str</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        this function will return the related data as it is,</span>
+<span class="sd">        this function will read the related data as strings for all columns,</span>
 <span class="sd">        using the filename as key in the result</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="s1">&#39;entities&#39;</span><span class="p">:</span>
@@ -1259,8 +1259,14 @@ table {
     <span class="k">def</span> <span class="nf">reset_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="bp">None</span>
 
-    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">copy_data</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
-        <span class="k">pass</span>
+    <span class="k">def</span> <span class="nf">copy_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;this function makes copy of self.data.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
+        <span class="c1"># v: DataFrame. DataFrame.copy() is by default deep copy,</span>
+        <span class="c1"># but I just call it explicitly here.</span>
+        <span class="k">return</span> <span class="nb">dict</span><span class="p">((</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="bp">True</span><span class="p">))</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
 
     <span class="k">def</span> <span class="nf">get_last_update</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_update</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
@@ -1427,7 +1433,7 @@ see the impletment of from_dict() method for how the object is constructed.</p><
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        returns the type of ddf data, i.e. concepts/entities/datapoints.</span>
 
-<span class="sd">        It will be inferred from the key porperity of ingredient.</span>
+<span class="sd">        It will be inferred from the key property of ingredient.</span>
 <span class="sd">        TODO: what if key == &#39;*&#39;? Is it possible?</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;concept&#39;</span><span class="p">:</span>
@@ -1532,9 +1538,9 @@ see the impletment of from_dict() method for how the object is constructed.</p><
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">funcs</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="p">]()</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
 
-    <span class="k">def</span> <span class="nf">get_data_copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">get_data_str</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        this function will return the related data as it is,</span>
+<span class="sd">        this function will read the related data as strings for all columns,</span>
 <span class="sd">        using the filename as key in the result</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="s1">&#39;entities&#39;</span><span class="p">:</span>
@@ -1555,8 +1561,14 @@ see the impletment of from_dict() method for how the object is constructed.</p><
     <span class="k">def</span> <span class="nf">reset_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="bp">None</span>
 
-    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">copy_data</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
-        <span class="k">pass</span>
+    <span class="k">def</span> <span class="nf">copy_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;this function makes copy of self.data.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
+        <span class="c1"># v: DataFrame. DataFrame.copy() is by default deep copy,</span>
+        <span class="c1"># but I just call it explicitly here.</span>
+        <span class="k">return</span> <span class="nb">dict</span><span class="p">((</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="bp">True</span><span class="p">))</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
 
     <span class="k">def</span> <span class="nf">get_last_update</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_update</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
@@ -1681,18 +1693,25 @@ see the impletment of from_dict() method for how the object is constructed.</p><
   
             
   <div class="item">
-    <div class="name def" id="ddf_utils.chef.ingredient.Ingredient.copy">
-    <p>def <span class="ident">copy</span>(</p><p>self, copy_data)</p>
+    <div class="name def" id="ddf_utils.chef.ingredient.Ingredient.copy_data">
+    <p>def <span class="ident">copy_data</span>(</p><p>self)</p>
     </div>
     
 
     
   
+    <div class="desc"><p>this function makes copy of self.data.</p></div>
   <div class="source_cont">
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-ddf_utils.chef.ingredient.Ingredient.copy', this);">Show source &equiv;</a></p>
-  <div id="source-ddf_utils.chef.ingredient.Ingredient.copy" class="source">
-    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">copy_data</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
-    <span class="k">pass</span>
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-ddf_utils.chef.ingredient.Ingredient.copy_data', this);">Show source &equiv;</a></p>
+  <div id="source-ddf_utils.chef.ingredient.Ingredient.copy_data" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">copy_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;this function makes copy of self.data.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
+    <span class="c1"># v: DataFrame. DataFrame.copy() is by default deep copy,</span>
+    <span class="c1"># but I just call it explicitly here.</span>
+    <span class="k">return</span> <span class="nb">dict</span><span class="p">((</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="bp">True</span><span class="p">))</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
 </pre></div>
 
   </div>
@@ -1842,21 +1861,21 @@ This method should only called for entities related tasks.</p></div>
   
             
   <div class="item">
-    <div class="name def" id="ddf_utils.chef.ingredient.Ingredient.get_data_copy">
-    <p>def <span class="ident">get_data_copy</span>(</p><p>self)</p>
+    <div class="name def" id="ddf_utils.chef.ingredient.Ingredient.get_data_str">
+    <p>def <span class="ident">get_data_str</span>(</p><p>self)</p>
     </div>
     
 
     
   
-    <div class="desc"><p>this function will return the related data as it is,
+    <div class="desc"><p>this function will read the related data as strings for all columns,
 using the filename as key in the result</p></div>
   <div class="source_cont">
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-ddf_utils.chef.ingredient.Ingredient.get_data_copy', this);">Show source &equiv;</a></p>
-  <div id="source-ddf_utils.chef.ingredient.Ingredient.get_data_copy" class="source">
-    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">get_data_copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-ddf_utils.chef.ingredient.Ingredient.get_data_str', this);">Show source &equiv;</a></p>
+  <div id="source-ddf_utils.chef.ingredient.Ingredient.get_data_str" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">get_data_str</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    this function will return the related data as it is,</span>
+<span class="sd">    this function will read the related data as strings for all columns,</span>
 <span class="sd">    using the filename as key in the result</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="s1">&#39;entities&#39;</span><span class="p">:</span>
@@ -1989,7 +2008,7 @@ using the filename as key in the result</p></div>
             
   
     <div class="desc"><p>returns the type of ddf data, i.e. concepts/entities/datapoints.</p>
-<p>It will be inferred from the key porperity of ingredient.
+<p>It will be inferred from the key property of ingredient.
 TODO: what if key == '*'? Is it possible?</p></div>
   <div class="source_cont">
 </div>

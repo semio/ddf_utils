@@ -12,7 +12,7 @@ from . import config
 class Ingredient(object):
     """
     ingredient class: represents an ingredient object in recipe file.
-    see the impletment of from_dict() method for how the object is constructed.
+    see the implement of from_dict() method for how the object is constructed.
     """
     def __init__(self, ingred_id, ddf_id, key, values, row_filter=None, data=None):
         self.ingred_id = ingred_id
@@ -129,7 +129,7 @@ class Ingredient(object):
 
     def filter_row(self, df):
         """return the rows selected by self.row_filter."""
-        # TODO:
+        # TODO: improve filtering function
         # 1. know more about the row_filter syntax
         # 2. The query() Method is Experimental
         if self.row_filter:

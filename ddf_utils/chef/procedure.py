@@ -12,12 +12,16 @@ import re
 import logging
 
 
-def translate_header(ingredient, *, result=None, **options):
+def translate_header(ingredient, *, result=None, **options) -> Ingredient:
+    """Translate column headers
 
+    available options are:
+        `dictionary`: a dictionary of oldname -> newname mappings
+    """
     logging.info("translate_header: " + ingredient.ingred_id)
 
     rm = options['dictionary']
-    data = ingredient.get_data().copy()
+    data = ingredient.copy_data()
 
     for k in list(data.keys()):
         if k in rm.keys():  # if we need to rename the concept name
@@ -39,16 +43,21 @@ def translate_header(ingredient, *, result=None, **options):
 
     if not result:
         result = ingredient.ingred_id + '-translated'
-    return Ingredient(result, result, newkey, "*", data=data)
+    return Ingredient(result, ingredient.ddf_id, newkey, "", data=data)
 
 
-def translate_column(ingredient, *, result=None, **options):
+def translate_column(ingredient, *, result=None, **options) -> Ingredient:
+    """Translate column values.
 
+    available options are:
+        `dictionary`: a dictionary of oldname -> newname mappings
+        `column`: the column to rename
+    """
     logging.info("translate_column: " + ingredient.ingred_id)
 
     rm = options['dictionary']
     column = options['column']
-    di = ingredient.get_data().copy()
+    di = ingredient.copy_data()
 
     for k, df in di.items():
 
@@ -57,33 +66,48 @@ def translate_column(ingredient, *, result=None, **options):
 
     if not result:
         result = ingredient.ingred_id + '-translated'
-    return Ingredient(result, result, ingredient.key, "*", data=di)
+    return Ingredient(result, ingredient.ddf_id, ingredient.key, "", data=di)
 
 
 def copy(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
-    """make copy of ingredient data, with new names"""
+    """make copy of ingredient data, with new names.
 
+    available options:
+        `dictionary`: a dictionary of oldname -> newname mappings
+    """
     logging.info("copy: " + ingredient.ingred_id)
 
     dictionary = options['dictionary']
-    data = ingredient.get_data()
+    data = ingredient.copy_data()
 
     for k, v in dictionary.items():
-        if isinstance(v, str):
+        if isinstance(v, str):  # value is str, means only make one copy
             data[v] = data[k].rename(columns={k: v}).copy()
-        else:
+        else:  # then it's a list, should make multiple copy
             for n in v:
                 data[n] = data[k].rename(columns={k: n}).copy()
 
+    # usually the old ingredient won't be used after creating copy.
+    # just reset the data to save memory
+    ingredient.reset_data()
     if not result:
         result = ingredient.ingred_id + '_'
-    return Ingredient(result, result, ingredient.key, "*", data=data)
+    return Ingredient(result, ingredient.ddf_id, ingredient.key, "", data=data)
 
 
 def merge(*ingredients: List[Ingredient], result=None, **options):
-    """the main merge function"""
-    # all ingredients should have same dtype and index
+    """the main merge function
 
+    avaliable options:
+        deep: if True, then do deep merging. Default is False
+
+    About deep merging:
+        deep merge is when we check every datapoint for existence
+        if false, overwrite is on the file level. If key-value
+        (e.g. geo,year-population_total) exists, whole file gets overwritten
+        if true, overwrite is on the row level. If values
+        (e.g. afr,2015-population_total) exists, it gets overwritten, if it doesn't it stays
+    """
     logging.info("merge: " + str([i.ingred_id for i in ingredients]))
 
     # assert that dtype and key are same in all dataframe
@@ -108,11 +132,6 @@ def merge(*ingredients: List[Ingredient], result=None, **options):
         index_col = ingredients[0].key
         newkey = index_col
 
-    # deep merge is when we check every datapoint for existence
-    # if false, overwrite is on the file level. If key-value
-    # (e.g. geo,year-population_total) exists, whole file gets overwritten
-    # if true, overwrite is on the row level. If values
-    # (e.g. afr,2015-population_total) exists, it gets overwritten, if it doesn't it stays
     if 'deep' in options.keys():
         deep = options.pop('deep')
     else:
@@ -135,6 +154,7 @@ def _merge_two(left: Dict[str, pd.DataFrame],
                right: Dict[str, pd.DataFrame],
                index_col: Union[List, str],
                dtype: str, deep=False) -> Dict[str, pd.DataFrame]:
+    """merge 2 ingredient data."""
     if len(left) == 0:
         return right
 
@@ -171,8 +191,13 @@ def _merge_two(left: Dict[str, pd.DataFrame],
 
 
 def identity(ingredient, *, result=None, **options):
-    if 'copy' in options:
-        ingredient.data = ingredient.get_data_copy()
+    """return the ingredient as is.
+
+    available options:
+        copy: if copy is True, then treat all data as string. Default: False
+    """
+    if 'copy' in options and options['copy'] is True:
+        ingredient.data = ingredient.get_data_str()
     else:
         ingredient.data = ingredient.get_data()
 
@@ -183,7 +208,15 @@ def identity(ingredient, *, result=None, **options):
 
 def filter_row(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
     """filter an ingredient based on a set of options and return
-    the result as new ingredient
+    the result as new ingredient.
+
+    Args:
+        ingredient: Ingredient object
+        result: ingred_id of return ingredient
+        options: dict of options
+
+    available options:
+        dictionary: test
     """
 
     logging.info("filter_row: " + ingredient.ingred_id)
@@ -214,8 +247,6 @@ def filter_row(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
 
         query_string = ' and '.join(queries)
 
-        # logging.debug('query sting: ' + query_string)
-
         df = df.query(query_string).copy()
         df = df.rename(columns={from_name: k})
         # drops all columns with unique contents. and update the key.
@@ -237,12 +268,15 @@ def filter_row(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
 
     if not result:
         result = ingredient.ingred_id + '-filtered'
-    return Ingredient(result, result, newkey, '*', data=res)
+    return Ingredient(result, ingredient.ingred_id, newkey, '*', data=res)
 
 
 def filter_item(ingredient: Ingredient, *, result: Optional[str]=None, **options) -> Ingredient:
-    """filter item from the ingredient data dict"""
+    """filter item from the ingredient data dict.
 
+    available options:
+        items: a list of items to filter from base ingredient
+    """
     logging.info("filter_item: " + ingredient.ingred_id)
 
     data = ingredient.get_data()
@@ -257,16 +291,24 @@ def filter_item(ingredient: Ingredient, *, result: Optional[str]=None, **options
     if not result:
         result = ingredient.ingred_id
 
-    return Ingredient(result, result, ingredient.key, '*', data=data)
-
-
-def format_data():
-    """format floating points"""
-    pass
+    return Ingredient(result, ingredient.ddf_id, ingredient.key, '', data=data)
 
 
 def align(to_align: Ingredient, base: Ingredient, *, result=None, **options) -> Ingredient:
-    """doc here"""
+    """align 2 ingredient by a column.
+
+    This function is like an automatic version of translate_column.
+    It firstly creating the mapping dictionary by searching in the base
+    ingredient for data in to_align ingredient, and then translate
+    according to the mapping file.
+
+    available options:
+        `search_cols`: a list of columns of base ingredient, to search for values
+        `to_find`: the column of ingredient to_align. The function will search the data
+        of this column in search_cols
+        `to_replace`: the column of ingredient to replace with new value. can be same
+        as to_find or a new column
+    """
     try:
         search_cols = options.pop('search_cols')
         to_find = options.pop('to_find')
@@ -334,12 +376,19 @@ def align(to_align: Ingredient, base: Ingredient, *, result=None, **options) -> 
         result = to_align.ingred_id + '-aligned'
     if to_align.dtype == 'datapoints':
         newkey = to_align.key.replace(to_find, to_replace)
-        return Ingredient(result, result, newkey, '*', data=ing_data)
+        return Ingredient(result, result, newkey, '', data=ing_data)
     else:
-        return Ingredient(result, result, to_replace, '*', data=ing_data)
+        return Ingredient(result, to_align.ddf_id, to_replace, '', data=ing_data)
 
 
 def groupby(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
+    """group ingredient data by column(s) and run aggregate function
+
+    available options:
+        by: the column(s) to group, can be a list or a string
+        aggregate: the function to aggregate. Default: sum
+    """
+
     data = ingredient.get_data()
     by = options.pop('by')
 
@@ -358,10 +407,15 @@ def groupby(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
 
     if not result:
         result = ingredient.ingred_id + '-agg'
-    return Ingredient(result, result, newkey, '*', data=data)
+    return Ingredient(result, ingredient.ddf_id, newkey, '', data=data)
 
 
 def accumulate(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
+    """run accumulate function on ingredient data.
+
+    available options:
+        op: a dictionary of concept_name: function mapping
+    """
 
     logging.info("accumulate: " + ingredient.ingred_id)
     if ingredient.dtype != 'datapoints':
@@ -406,6 +460,11 @@ def _aagr(df: pd.DataFrame, window: int=10):
 
 
 def run_op(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
+    """run math operation on each row of ingredient data.
+
+    available options:
+        op: a dictionary of concept_name: function mapping
+    """
 
     assert ingredient.dtype == 'datapoints'
     logging.info("run_op: " + ingredient.ingred_id)
