@@ -476,15 +476,14 @@ def run_op(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
 
     # concat all the datapoint dataframe first, and eval the ops
     to_concat = [v.set_index(keys) for v in data.values()]
-    try:
-        df = pd.concat(to_concat, axis=1)
-    except:
-        for i, df in enumerate(to_concat):
-            df.to_csv('tmp_'+str(i)+'.csv')
-        raise
+    df = pd.concat(to_concat, axis=1)
 
     for k, v in ops.items():
-        data[k] = df.eval(v).dropna().reset_index(name=k)
+        res = df.eval(v).dropna()  # type(res) is Series
+        res.name = k
+        if k not in df.columns:
+            df[k] = res
+        data[k] = res.reset_index()
 
     if not result:
         result = ingredient.ingred_id + '-op'
