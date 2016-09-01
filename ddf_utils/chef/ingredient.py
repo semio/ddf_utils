@@ -62,7 +62,7 @@ class Ingredient(object):
             return 'datapoints'
 
     def __repr__(self):
-        lines = []
+        lines = list()
         lines.append('Ingredient: ' + self.ingred_id)
         lines.append('dataset: '+self.ddf_id)
         lines.append('key: '+str(self.key))
@@ -156,9 +156,9 @@ class Ingredient(object):
         self.data = funcs[self.dtype]()
         return self.data
 
-    def get_data_copy(self):
+    def get_data_str(self):
         """
-        this function will return the related data as it is,
+        this function will read the related data as strings for all columns,
         using the filename as key in the result
         """
         if self.dtype == 'entities':
@@ -179,8 +179,14 @@ class Ingredient(object):
     def reset_data(self):
         self.data = None
 
-    def copy(self, copy_data: bool):
-        pass
+    def copy_data(self):
+        """this function makes copy of self.data.
+        """
+        if not self.data:
+            self.get_data()
+        # v: DataFrame. DataFrame.copy() is by default deep copy,
+        # but I just call it explicitly here.
+        return dict((k, v.copy(deep=True)) for k, v in self.data.items())
 
     def get_last_update(self):
         if self.last_update is not None:

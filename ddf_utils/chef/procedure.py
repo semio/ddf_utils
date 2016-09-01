@@ -32,7 +32,7 @@ def translate_header(ingredient, *, result=None, **options) -> Ingredient:
 
     # also rename the key
     newkey = ingredient.key
-    if ingredient.dtype == 'datapoints' or ingredient.dtype == 'concepts':
+    if ingredient.dtype in ['datapoints', 'concepts']:
         for key in rm.keys():
             if key in ingredient.key:
                 newkey = newkey.replace(key, rm[key])
@@ -450,7 +450,7 @@ def accumulate(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
     if not result:
         result = ingredient.ingred_id + '-accued'
 
-    return Ingredient(result, result, ingredient.key, '*', data=data)
+    return Ingredient(result, ingredient.ddf_id, ingredient.key, '', data=data)
 
 
 def _aagr(df: pd.DataFrame, window: int=10):
@@ -488,4 +488,4 @@ def run_op(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
 
     if not result:
         result = ingredient.ingred_id + '-op'
-    return Ingredient(result, ingredient.ddf_id, ingredient.key, '*', data=data)
+    return Ingredient(result, ingredient.ddf_id, ingredient.key, '', data=data)

@@ -1,11 +1,8 @@
 # -*- coding: utf-8 -*-
 """recipe cooking"""
 
-import os
-import pandas as pd
 import json
 import yaml
-import re
 from orderedattrdict import AttrDict
 from orderedattrdict.yamlutils import AttrDictYAMLLoader
 
@@ -16,7 +13,7 @@ from .. str import format_float_digits
 
 import logging
 
-
+# supported procedures, import from procedure.py
 supported_procs = {
     'translate_column': translate_column,
     'translate_header': translate_header,
@@ -33,7 +30,7 @@ supported_procs = {
 
 
 def _loadfile(f):
-    """load json/yaml file"""
+    """load json/yaml file, into AttrDict"""
     if re.match('.*\.json', f):
         res = json.load(open(f), object_pairs_hook=AttrDict)
     else:
