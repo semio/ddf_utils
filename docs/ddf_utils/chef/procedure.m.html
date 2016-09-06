@@ -1089,11 +1089,6 @@ table {
 <span class="k">def</span> <span class="nf">translate_header</span><span class="p">(</span><span class="n">ingredient</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Ingredient</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Translate column headers</span>
 
-<span class="sd">    Args:</span>
-<span class="sd">        ingredient: Ingredient object</span>
-<span class="sd">        result: ingred_id of return ingredient</span>
-<span class="sd">        options: dict of options</span>
-
 <span class="sd">    available options are:</span>
 <span class="sd">        `dictionary`: a dictionary of oldname -&gt; newname mappings</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1128,11 +1123,6 @@ table {
 <span class="k">def</span> <span class="nf">translate_column</span><span class="p">(</span><span class="n">ingredient</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Ingredient</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Translate column values.</span>
 
-<span class="sd">    Args:</span>
-<span class="sd">        ingredient: Ingredient object</span>
-<span class="sd">        result: ingred_id of return ingredient</span>
-<span class="sd">        options: dict of options</span>
-
 <span class="sd">    available options are:</span>
 <span class="sd">        `dictionary`: a dictionary of oldname -&gt; newname mappings</span>
 <span class="sd">        `column`: the column to rename</span>
@@ -1155,11 +1145,6 @@ table {
 
 <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="n">ingredient</span><span class="p">:</span> <span class="n">Ingredient</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Ingredient</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;make copy of ingredient data, with new names.</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        ingredient: Ingredient object</span>
-<span class="sd">        result: ingred_id of return ingredient</span>
-<span class="sd">        options: dict of options</span>
 
 <span class="sd">    available options:</span>
 <span class="sd">        `dictionary`: a dictionary of oldname -&gt; newname mappings</span>
@@ -1185,9 +1170,18 @@ table {
 
 
 <span class="k">def</span> <span class="nf">merge</span><span class="p">(</span><span class="o">*</span><span class="n">ingredients</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Ingredient</span><span class="p">],</span> <span class="n">result</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;the main merge function&quot;&quot;&quot;</span>
-    <span class="c1"># all ingredients should have same dtype and index</span>
+    <span class="sd">&quot;&quot;&quot;the main merge function</span>
 
+<span class="sd">    avaliable options:</span>
+<span class="sd">        deep: if True, then do deep merging. Default is False</span>
+
+<span class="sd">    About deep merging:</span>
+<span class="sd">        deep merge is when we check every datapoint for existence</span>
+<span class="sd">        if false, overwrite is on the file level. If key-value</span>
+<span class="sd">        (e.g. geo,year-population_total) exists, whole file gets overwritten</span>
+<span class="sd">        if true, overwrite is on the row level. If values</span>
+<span class="sd">        (e.g. afr,2015-population_total) exists, it gets overwritten, if it doesn&#39;t it stays</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;merge: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">([</span><span class="n">i</span><span class="o">.</span><span class="n">ingred_id</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">ingredients</span><span class="p">]))</span>
 
     <span class="c1"># assert that dtype and key are same in all dataframe</span>
@@ -1212,11 +1206,6 @@ table {
         <span class="n">index_col</span> <span class="o">=</span> <span class="n">ingredients</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">key</span>
         <span class="n">newkey</span> <span class="o">=</span> <span class="n">index_col</span>
 
-    <span class="c1"># deep merge is when we check every datapoint for existence</span>
-    <span class="c1"># if false, overwrite is on the file level. If key-value</span>
-    <span class="c1"># (e.g. geo,year-population_total) exists, whole file gets overwritten</span>
-    <span class="c1"># if true, overwrite is on the row level. If values</span>
-    <span class="c1"># (e.g. afr,2015-population_total) exists, it gets overwritten, if it doesn&#39;t it stays</span>
     <span class="k">if</span> <span class="s1">&#39;deep&#39;</span> <span class="ow">in</span> <span class="n">options</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
         <span class="n">deep</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;deep&#39;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
@@ -1239,6 +1228,7 @@ table {
                <span class="n">right</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">],</span>
                <span class="n">index_col</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
                <span class="n">dtype</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">deep</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;merge 2 ingredient data.&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">left</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">right</span>
 
@@ -1275,7 +1265,11 @@ table {
 
 
 <span class="k">def</span> <span class="nf">identity</span><span class="p">(</span><span class="n">ingredient</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;return the ingredient as is.&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;return the ingredient as is.</span>
+
+<span class="sd">    available options:</span>
+<span class="sd">        copy: if copy is True, then treat all data as string. Default: False</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="s1">&#39;copy&#39;</span> <span class="ow">in</span> <span class="n">options</span> <span class="ow">and</span> <span class="n">options</span><span class="p">[</span><span class="s1">&#39;copy&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>
         <span class="n">ingredient</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">get_data_str</span><span class="p">()</span>
     <span class="k">else</span><span class="p">:</span>
@@ -1290,12 +1284,12 @@ table {
     <span class="sd">&quot;&quot;&quot;filter an ingredient based on a set of options and return</span>
 <span class="sd">    the result as new ingredient.</span>
 
-<span class="sd">    Args::</span>
+<span class="sd">    Args:</span>
 <span class="sd">        ingredient: Ingredient object</span>
 <span class="sd">        result: ingred_id of return ingredient</span>
 <span class="sd">        options: dict of options</span>
 
-<span class="sd">    available options::</span>
+<span class="sd">    available options:</span>
 <span class="sd">        dictionary: test</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -1348,12 +1342,15 @@ table {
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">result</span><span class="p">:</span>
         <span class="n">result</span> <span class="o">=</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">ingred_id</span> <span class="o">+</span> <span class="s1">&#39;-filtered&#39;</span>
-    <span class="k">return</span> <span class="n">Ingredient</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">result</span><span class="p">,</span> <span class="n">newkey</span><span class="p">,</span> <span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">res</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Ingredient</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">ingred_id</span><span class="p">,</span> <span class="n">newkey</span><span class="p">,</span> <span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">res</span><span class="p">)</span>
 
 
 <span class="k">def</span> <span class="nf">filter_item</span><span class="p">(</span><span class="n">ingredient</span><span class="p">:</span> <span class="n">Ingredient</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">result</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Ingredient</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;filter item from the ingredient data dict&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;filter item from the ingredient data dict.</span>
 
+<span class="sd">    available options:</span>
+<span class="sd">        items: a list of items to filter from base ingredient</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;filter_item: &quot;</span> <span class="o">+</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">ingred_id</span><span class="p">)</span>
 
     <span class="n">data</span> <span class="o">=</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
@@ -1372,7 +1369,20 @@ table {
 
 
 <span class="k">def</span> <span class="nf">align</span><span class="p">(</span><span class="n">to_align</span><span class="p">:</span> <span class="n">Ingredient</span><span class="p">,</span> <span class="n">base</span><span class="p">:</span> <span class="n">Ingredient</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Ingredient</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;doc here&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;align 2 ingredient by a column.</span>
+
+<span class="sd">    This function is like an automatic version of translate_column.</span>
+<span class="sd">    It firstly creating the mapping dictionary by searching in the base</span>
+<span class="sd">    ingredient for data in to_align ingredient, and then translate</span>
+<span class="sd">    according to the mapping file.</span>
+
+<span class="sd">    available options:</span>
+<span class="sd">        `search_cols`: a list of columns of base ingredient, to search for values</span>
+<span class="sd">        `to_find`: the column of ingredient to_align. The function will search the data</span>
+<span class="sd">        of this column in search_cols</span>
+<span class="sd">        `to_replace`: the column of ingredient to replace with new value. can be same</span>
+<span class="sd">        as to_find or a new column</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">search_cols</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;search_cols&#39;</span><span class="p">)</span>
         <span class="n">to_find</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;to_find&#39;</span><span class="p">)</span>
@@ -1440,12 +1450,19 @@ table {
         <span class="n">result</span> <span class="o">=</span> <span class="n">to_align</span><span class="o">.</span><span class="n">ingred_id</span> <span class="o">+</span> <span class="s1">&#39;-aligned&#39;</span>
     <span class="k">if</span> <span class="n">to_align</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="s1">&#39;datapoints&#39;</span><span class="p">:</span>
         <span class="n">newkey</span> <span class="o">=</span> <span class="n">to_align</span><span class="o">.</span><span class="n">key</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">to_find</span><span class="p">,</span> <span class="n">to_replace</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">Ingredient</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">result</span><span class="p">,</span> <span class="n">newkey</span><span class="p">,</span> <span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">ing_data</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">Ingredient</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">result</span><span class="p">,</span> <span class="n">newkey</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">ing_data</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">Ingredient</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">result</span><span class="p">,</span> <span class="n">to_replace</span><span class="p">,</span> <span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">ing_data</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">Ingredient</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">to_align</span><span class="o">.</span><span class="n">ddf_id</span><span class="p">,</span> <span class="n">to_replace</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">ing_data</span><span class="p">)</span>
 
 
 <span class="k">def</span> <span class="nf">groupby</span><span class="p">(</span><span class="n">ingredient</span><span class="p">:</span> <span class="n">Ingredient</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Ingredient</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;group ingredient data by column(s) and run aggregate function</span>
+
+<span class="sd">    available options:</span>
+<span class="sd">        by: the column(s) to group, can be a list or a string</span>
+<span class="sd">        aggregate: the function to aggregate. Default: sum</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">data</span> <span class="o">=</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
     <span class="n">by</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;by&#39;</span><span class="p">)</span>
 
@@ -1464,10 +1481,15 @@ table {
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">result</span><span class="p">:</span>
         <span class="n">result</span> <span class="o">=</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">ingred_id</span> <span class="o">+</span> <span class="s1">&#39;-agg&#39;</span>
-    <span class="k">return</span> <span class="n">Ingredient</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">result</span><span class="p">,</span> <span class="n">newkey</span><span class="p">,</span> <span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Ingredient</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">ddf_id</span><span class="p">,</span> <span class="n">newkey</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
 
 
 <span class="k">def</span> <span class="nf">accumulate</span><span class="p">(</span><span class="n">ingredient</span><span class="p">:</span> <span class="n">Ingredient</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Ingredient</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;run accumulate function on ingredient data.</span>
+
+<span class="sd">    available options:</span>
+<span class="sd">        op: a dictionary of concept_name: function mapping</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;accumulate: &quot;</span> <span class="o">+</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">ingred_id</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">dtype</span> <span class="o">!=</span> <span class="s1">&#39;datapoints&#39;</span><span class="p">:</span>
@@ -1502,7 +1524,7 @@ table {
     <span class="k">if</span> <span class="ow">not</span> <span class="n">result</span><span class="p">:</span>
         <span class="n">result</span> <span class="o">=</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">ingred_id</span> <span class="o">+</span> <span class="s1">&#39;-accued&#39;</span>
 
-    <span class="k">return</span> <span class="n">Ingredient</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">result</span><span class="p">,</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">key</span><span class="p">,</span> <span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Ingredient</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">ddf_id</span><span class="p">,</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">key</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
 
 
 <span class="k">def</span> <span class="nf">_aagr</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">window</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
@@ -1512,30 +1534,33 @@ table {
 
 
 <span class="k">def</span> <span class="nf">run_op</span><span class="p">(</span><span class="n">ingredient</span><span class="p">:</span> <span class="n">Ingredient</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Ingredient</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;run math operation on each row of ingredient data.</span>
+
+<span class="sd">    available options:</span>
+<span class="sd">        op: a dictionary of concept_name: function mapping</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">assert</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="s1">&#39;datapoints&#39;</span>
     <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;run_op: &quot;</span> <span class="o">+</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">ingred_id</span><span class="p">)</span>
 
     <span class="n">data</span> <span class="o">=</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
     <span class="n">keys</span> <span class="o">=</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">key_to_list</span><span class="p">()</span>
-    <span class="c1"># TODO: load the op as ordered dict to speed up. (e.g I can create shared var at beginning)</span>
     <span class="n">ops</span> <span class="o">=</span> <span class="n">options</span><span class="p">[</span><span class="s1">&#39;op&#39;</span><span class="p">]</span>
 
     <span class="c1"># concat all the datapoint dataframe first, and eval the ops</span>
     <span class="n">to_concat</span> <span class="o">=</span> <span class="p">[</span><span class="n">v</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="n">keys</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">to_concat</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-    <span class="k">except</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">df</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">to_concat</span><span class="p">):</span>
-            <span class="n">df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s1">&#39;tmp_&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;.csv&#39;</span><span class="p">)</span>
-        <span class="k">raise</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">to_concat</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
     <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">ops</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="n">data</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">k</span><span class="p">)</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span>  <span class="c1"># type(res) is Series</span>
+        <span class="n">res</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">k</span>
+        <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="n">df</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">res</span>
+        <span class="n">data</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">result</span><span class="p">:</span>
         <span class="n">result</span> <span class="o">=</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">ingred_id</span> <span class="o">+</span> <span class="s1">&#39;-op&#39;</span>
-    <span class="k">return</span> <span class="n">Ingredient</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">ddf_id</span><span class="p">,</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">key</span><span class="p">,</span> <span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Ingredient</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">ddf_id</span><span class="p">,</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">key</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
 </pre></div>
 
   </div>
@@ -1554,10 +1579,18 @@ table {
 
     
   
+    <div class="desc"><p>run accumulate function on ingredient data.</p>
+<p>available options:
+    op: a dictionary of concept_name: function mapping</p></div>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-ddf_utils.chef.procedure.accumulate', this);">Show source &equiv;</a></p>
   <div id="source-ddf_utils.chef.procedure.accumulate" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">accumulate</span><span class="p">(</span><span class="n">ingredient</span><span class="p">:</span> <span class="n">Ingredient</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Ingredient</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;run accumulate function on ingredient data.</span>
+
+<span class="sd">    available options:</span>
+<span class="sd">        op: a dictionary of concept_name: function mapping</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;accumulate: &quot;</span> <span class="o">+</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">ingred_id</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">dtype</span> <span class="o">!=</span> <span class="s1">&#39;datapoints&#39;</span><span class="p">:</span>
@@ -1592,7 +1625,7 @@ table {
     <span class="k">if</span> <span class="ow">not</span> <span class="n">result</span><span class="p">:</span>
         <span class="n">result</span> <span class="o">=</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">ingred_id</span> <span class="o">+</span> <span class="s1">&#39;-accued&#39;</span>
 
-    <span class="k">return</span> <span class="n">Ingredient</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">result</span><span class="p">,</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">key</span><span class="p">,</span> <span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Ingredient</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">ddf_id</span><span class="p">,</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">key</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
 </pre></div>
 
   </div>
@@ -1609,12 +1642,35 @@ table {
 
     
   
-    <div class="desc"><p>doc here</p></div>
+    <div class="desc"><p>align 2 ingredient by a column.</p>
+<p>This function is like an automatic version of translate_column.
+It firstly creating the mapping dictionary by searching in the base
+ingredient for data in to_align ingredient, and then translate
+according to the mapping file.</p>
+<p>available options:
+    <code>search_cols</code>: a list of columns of base ingredient, to search for values
+    <code>to_find</code>: the column of ingredient to_align. The function will search the data
+    of this column in search_cols
+    <code>to_replace</code>: the column of ingredient to replace with new value. can be same
+    as to_find or a new column</p></div>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-ddf_utils.chef.procedure.align', this);">Show source &equiv;</a></p>
   <div id="source-ddf_utils.chef.procedure.align" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">align</span><span class="p">(</span><span class="n">to_align</span><span class="p">:</span> <span class="n">Ingredient</span><span class="p">,</span> <span class="n">base</span><span class="p">:</span> <span class="n">Ingredient</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Ingredient</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;doc here&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;align 2 ingredient by a column.</span>
+
+<span class="sd">    This function is like an automatic version of translate_column.</span>
+<span class="sd">    It firstly creating the mapping dictionary by searching in the base</span>
+<span class="sd">    ingredient for data in to_align ingredient, and then translate</span>
+<span class="sd">    according to the mapping file.</span>
+
+<span class="sd">    available options:</span>
+<span class="sd">        `search_cols`: a list of columns of base ingredient, to search for values</span>
+<span class="sd">        `to_find`: the column of ingredient to_align. The function will search the data</span>
+<span class="sd">        of this column in search_cols</span>
+<span class="sd">        `to_replace`: the column of ingredient to replace with new value. can be same</span>
+<span class="sd">        as to_find or a new column</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">search_cols</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;search_cols&#39;</span><span class="p">)</span>
         <span class="n">to_find</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;to_find&#39;</span><span class="p">)</span>
@@ -1682,9 +1738,9 @@ table {
         <span class="n">result</span> <span class="o">=</span> <span class="n">to_align</span><span class="o">.</span><span class="n">ingred_id</span> <span class="o">+</span> <span class="s1">&#39;-aligned&#39;</span>
     <span class="k">if</span> <span class="n">to_align</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="s1">&#39;datapoints&#39;</span><span class="p">:</span>
         <span class="n">newkey</span> <span class="o">=</span> <span class="n">to_align</span><span class="o">.</span><span class="n">key</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">to_find</span><span class="p">,</span> <span class="n">to_replace</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">Ingredient</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">result</span><span class="p">,</span> <span class="n">newkey</span><span class="p">,</span> <span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">ing_data</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">Ingredient</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">result</span><span class="p">,</span> <span class="n">newkey</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">ing_data</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">Ingredient</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">result</span><span class="p">,</span> <span class="n">to_replace</span><span class="p">,</span> <span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">ing_data</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">Ingredient</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">to_align</span><span class="o">.</span><span class="n">ddf_id</span><span class="p">,</span> <span class="n">to_replace</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">ing_data</span><span class="p">)</span>
 </pre></div>
 
   </div>
@@ -1702,10 +1758,6 @@ table {
     
   
     <div class="desc"><p>make copy of ingredient data, with new names.</p>
-<p>Args:
-    ingredient: Ingredient object
-    result: ingred_id of return ingredient
-    options: dict of options</p>
 <p>available options:
     <code>dictionary</code>: a dictionary of oldname -&gt; newname mappings</p></div>
   <div class="source_cont">
@@ -1713,11 +1765,6 @@ table {
   <div id="source-ddf_utils.chef.procedure.copy" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="n">ingredient</span><span class="p">:</span> <span class="n">Ingredient</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Ingredient</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;make copy of ingredient data, with new names.</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        ingredient: Ingredient object</span>
-<span class="sd">        result: ingred_id of return ingredient</span>
-<span class="sd">        options: dict of options</span>
 
 <span class="sd">    available options:</span>
 <span class="sd">        `dictionary`: a dictionary of oldname -&gt; newname mappings</span>
@@ -1756,13 +1803,18 @@ table {
 
     
   
-    <div class="desc"><p>filter item from the ingredient data dict</p></div>
+    <div class="desc"><p>filter item from the ingredient data dict.</p>
+<p>available options:
+    items: a list of items to filter from base ingredient</p></div>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-ddf_utils.chef.procedure.filter_item', this);">Show source &equiv;</a></p>
   <div id="source-ddf_utils.chef.procedure.filter_item" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">filter_item</span><span class="p">(</span><span class="n">ingredient</span><span class="p">:</span> <span class="n">Ingredient</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">result</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Ingredient</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;filter item from the ingredient data dict&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;filter item from the ingredient data dict.</span>
 
+<span class="sd">    available options:</span>
+<span class="sd">        items: a list of items to filter from base ingredient</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;filter_item: &quot;</span> <span class="o">+</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">ingred_id</span><span class="p">)</span>
 
     <span class="n">data</span> <span class="o">=</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
@@ -1796,11 +1848,11 @@ table {
   
     <div class="desc"><p>filter an ingredient based on a set of options and return
 the result as new ingredient.</p>
-<p>Args::
+<p>Args:
     ingredient: Ingredient object
     result: ingred_id of return ingredient
     options: dict of options</p>
-<p>available options::
+<p>available options:
     dictionary: test</p></div>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-ddf_utils.chef.procedure.filter_row', this);">Show source &equiv;</a></p>
@@ -1809,12 +1861,12 @@ the result as new ingredient.</p>
     <span class="sd">&quot;&quot;&quot;filter an ingredient based on a set of options and return</span>
 <span class="sd">    the result as new ingredient.</span>
 
-<span class="sd">    Args::</span>
+<span class="sd">    Args:</span>
 <span class="sd">        ingredient: Ingredient object</span>
 <span class="sd">        result: ingred_id of return ingredient</span>
 <span class="sd">        options: dict of options</span>
 
-<span class="sd">    available options::</span>
+<span class="sd">    available options:</span>
 <span class="sd">        dictionary: test</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -1867,7 +1919,7 @@ the result as new ingredient.</p>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">result</span><span class="p">:</span>
         <span class="n">result</span> <span class="o">=</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">ingred_id</span> <span class="o">+</span> <span class="s1">&#39;-filtered&#39;</span>
-    <span class="k">return</span> <span class="n">Ingredient</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">result</span><span class="p">,</span> <span class="n">newkey</span><span class="p">,</span> <span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">res</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Ingredient</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">ingred_id</span><span class="p">,</span> <span class="n">newkey</span><span class="p">,</span> <span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">res</span><span class="p">)</span>
 </pre></div>
 
   </div>
@@ -1884,10 +1936,21 @@ the result as new ingredient.</p>
 
     
   
+    <div class="desc"><p>group ingredient data by column(s) and run aggregate function</p>
+<p>available options:
+    by: the column(s) to group, can be a list or a string
+    aggregate: the function to aggregate. Default: sum</p></div>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-ddf_utils.chef.procedure.groupby', this);">Show source &equiv;</a></p>
   <div id="source-ddf_utils.chef.procedure.groupby" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">groupby</span><span class="p">(</span><span class="n">ingredient</span><span class="p">:</span> <span class="n">Ingredient</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Ingredient</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;group ingredient data by column(s) and run aggregate function</span>
+
+<span class="sd">    available options:</span>
+<span class="sd">        by: the column(s) to group, can be a list or a string</span>
+<span class="sd">        aggregate: the function to aggregate. Default: sum</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">data</span> <span class="o">=</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
     <span class="n">by</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;by&#39;</span><span class="p">)</span>
 
@@ -1906,7 +1969,7 @@ the result as new ingredient.</p>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">result</span><span class="p">:</span>
         <span class="n">result</span> <span class="o">=</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">ingred_id</span> <span class="o">+</span> <span class="s1">&#39;-agg&#39;</span>
-    <span class="k">return</span> <span class="n">Ingredient</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">result</span><span class="p">,</span> <span class="n">newkey</span><span class="p">,</span> <span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Ingredient</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">ddf_id</span><span class="p">,</span> <span class="n">newkey</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
 </pre></div>
 
   </div>
@@ -1923,12 +1986,18 @@ the result as new ingredient.</p>
 
     
   
-    <div class="desc"><p>return the ingredient as is.</p></div>
+    <div class="desc"><p>return the ingredient as is.</p>
+<p>available options:
+    copy: if copy is True, then treat all data as string. Default: False</p></div>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-ddf_utils.chef.procedure.identity', this);">Show source &equiv;</a></p>
   <div id="source-ddf_utils.chef.procedure.identity" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">identity</span><span class="p">(</span><span class="n">ingredient</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;return the ingredient as is.&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;return the ingredient as is.</span>
+
+<span class="sd">    available options:</span>
+<span class="sd">        copy: if copy is True, then treat all data as string. Default: False</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="s1">&#39;copy&#39;</span> <span class="ow">in</span> <span class="n">options</span> <span class="ow">and</span> <span class="n">options</span><span class="p">[</span><span class="s1">&#39;copy&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>
         <span class="n">ingredient</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">get_data_str</span><span class="p">()</span>
     <span class="k">else</span><span class="p">:</span>
@@ -1953,14 +2022,31 @@ the result as new ingredient.</p>
 
     
   
-    <div class="desc"><p>the main merge function</p></div>
+    <div class="desc"><p>the main merge function</p>
+<p>avaliable options:
+    deep: if True, then do deep merging. Default is False</p>
+<p>About deep merging:
+    deep merge is when we check every datapoint for existence
+    if false, overwrite is on the file level. If key-value
+    (e.g. geo,year-population_total) exists, whole file gets overwritten
+    if true, overwrite is on the row level. If values
+    (e.g. afr,2015-population_total) exists, it gets overwritten, if it doesn't it stays</p></div>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-ddf_utils.chef.procedure.merge', this);">Show source &equiv;</a></p>
   <div id="source-ddf_utils.chef.procedure.merge" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">merge</span><span class="p">(</span><span class="o">*</span><span class="n">ingredients</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Ingredient</span><span class="p">],</span> <span class="n">result</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;the main merge function&quot;&quot;&quot;</span>
-    <span class="c1"># all ingredients should have same dtype and index</span>
+    <span class="sd">&quot;&quot;&quot;the main merge function</span>
 
+<span class="sd">    avaliable options:</span>
+<span class="sd">        deep: if True, then do deep merging. Default is False</span>
+
+<span class="sd">    About deep merging:</span>
+<span class="sd">        deep merge is when we check every datapoint for existence</span>
+<span class="sd">        if false, overwrite is on the file level. If key-value</span>
+<span class="sd">        (e.g. geo,year-population_total) exists, whole file gets overwritten</span>
+<span class="sd">        if true, overwrite is on the row level. If values</span>
+<span class="sd">        (e.g. afr,2015-population_total) exists, it gets overwritten, if it doesn&#39;t it stays</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;merge: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">([</span><span class="n">i</span><span class="o">.</span><span class="n">ingred_id</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">ingredients</span><span class="p">]))</span>
 
     <span class="c1"># assert that dtype and key are same in all dataframe</span>
@@ -1985,11 +2071,6 @@ the result as new ingredient.</p>
         <span class="n">index_col</span> <span class="o">=</span> <span class="n">ingredients</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">key</span>
         <span class="n">newkey</span> <span class="o">=</span> <span class="n">index_col</span>
 
-    <span class="c1"># deep merge is when we check every datapoint for existence</span>
-    <span class="c1"># if false, overwrite is on the file level. If key-value</span>
-    <span class="c1"># (e.g. geo,year-population_total) exists, whole file gets overwritten</span>
-    <span class="c1"># if true, overwrite is on the row level. If values</span>
-    <span class="c1"># (e.g. afr,2015-population_total) exists, it gets overwritten, if it doesn&#39;t it stays</span>
     <span class="k">if</span> <span class="s1">&#39;deep&#39;</span> <span class="ow">in</span> <span class="n">options</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
         <span class="n">deep</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;deep&#39;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
@@ -2022,34 +2103,40 @@ the result as new ingredient.</p>
 
     
   
+    <div class="desc"><p>run math operation on each row of ingredient data.</p>
+<p>available options:
+    op: a dictionary of concept_name: function mapping</p></div>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-ddf_utils.chef.procedure.run_op', this);">Show source &equiv;</a></p>
   <div id="source-ddf_utils.chef.procedure.run_op" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">run_op</span><span class="p">(</span><span class="n">ingredient</span><span class="p">:</span> <span class="n">Ingredient</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Ingredient</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;run math operation on each row of ingredient data.</span>
+
+<span class="sd">    available options:</span>
+<span class="sd">        op: a dictionary of concept_name: function mapping</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">assert</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="s1">&#39;datapoints&#39;</span>
     <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;run_op: &quot;</span> <span class="o">+</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">ingred_id</span><span class="p">)</span>
 
     <span class="n">data</span> <span class="o">=</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
     <span class="n">keys</span> <span class="o">=</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">key_to_list</span><span class="p">()</span>
-    <span class="c1"># TODO: load the op as ordered dict to speed up. (e.g I can create shared var at beginning)</span>
     <span class="n">ops</span> <span class="o">=</span> <span class="n">options</span><span class="p">[</span><span class="s1">&#39;op&#39;</span><span class="p">]</span>
 
     <span class="c1"># concat all the datapoint dataframe first, and eval the ops</span>
     <span class="n">to_concat</span> <span class="o">=</span> <span class="p">[</span><span class="n">v</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="n">keys</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">to_concat</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-    <span class="k">except</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">df</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">to_concat</span><span class="p">):</span>
-            <span class="n">df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s1">&#39;tmp_&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;.csv&#39;</span><span class="p">)</span>
-        <span class="k">raise</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">to_concat</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
     <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">ops</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="n">data</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">k</span><span class="p">)</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span>  <span class="c1"># type(res) is Series</span>
+        <span class="n">res</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">k</span>
+        <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="n">df</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">res</span>
+        <span class="n">data</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">result</span><span class="p">:</span>
         <span class="n">result</span> <span class="o">=</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">ingred_id</span> <span class="o">+</span> <span class="s1">&#39;-op&#39;</span>
-    <span class="k">return</span> <span class="n">Ingredient</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">ddf_id</span><span class="p">,</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">key</span><span class="p">,</span> <span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Ingredient</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">ddf_id</span><span class="p">,</span> <span class="n">ingredient</span><span class="o">.</span><span class="n">key</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
 </pre></div>
 
   </div>
@@ -2067,10 +2154,6 @@ the result as new ingredient.</p>
     
   
     <div class="desc"><p>Translate column values.</p>
-<p>Args:
-    ingredient: Ingredient object
-    result: ingred_id of return ingredient
-    options: dict of options</p>
 <p>available options are:
     <code>dictionary</code>: a dictionary of oldname -&gt; newname mappings
     <code>column</code>: the column to rename</p></div>
@@ -2079,11 +2162,6 @@ the result as new ingredient.</p>
   <div id="source-ddf_utils.chef.procedure.translate_column" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">translate_column</span><span class="p">(</span><span class="n">ingredient</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Ingredient</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Translate column values.</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        ingredient: Ingredient object</span>
-<span class="sd">        result: ingred_id of return ingredient</span>
-<span class="sd">        options: dict of options</span>
 
 <span class="sd">    available options are:</span>
 <span class="sd">        `dictionary`: a dictionary of oldname -&gt; newname mappings</span>
@@ -2120,10 +2198,6 @@ the result as new ingredient.</p>
     
   
     <div class="desc"><p>Translate column headers</p>
-<p>Args:
-    ingredient: Ingredient object
-    result: ingred_id of return ingredient
-    options: dict of options</p>
 <p>available options are:
     <code>dictionary</code>: a dictionary of oldname -&gt; newname mappings</p></div>
   <div class="source_cont">
@@ -2131,11 +2205,6 @@ the result as new ingredient.</p>
   <div id="source-ddf_utils.chef.procedure.translate_header" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">translate_header</span><span class="p">(</span><span class="n">ingredient</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Ingredient</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Translate column headers</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        ingredient: Ingredient object</span>
-<span class="sd">        result: ingred_id of return ingredient</span>
-<span class="sd">        options: dict of options</span>
 
 <span class="sd">    available options are:</span>
 <span class="sd">        `dictionary`: a dictionary of oldname -&gt; newname mappings</span>

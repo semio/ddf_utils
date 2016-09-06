@@ -1092,7 +1092,7 @@ table {
 <span class="k">class</span> <span class="nc">Ingredient</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    ingredient class: represents an ingredient object in recipe file.</span>
-<span class="sd">    see the impletment of from_dict() method for how the object is constructed.</span>
+<span class="sd">    see the implement of from_dict() method for how the object is constructed.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ingred_id</span><span class="p">,</span> <span class="n">ddf_id</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">row_filter</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ingred_id</span> <span class="o">=</span> <span class="n">ingred_id</span>
@@ -1142,7 +1142,7 @@ table {
             <span class="k">return</span> <span class="s1">&#39;datapoints&#39;</span>
 
     <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
         <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;Ingredient: &#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">ingred_id</span><span class="p">)</span>
         <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;dataset: &#39;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">ddf_id</span><span class="p">)</span>
         <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;key: &#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">))</span>
@@ -1209,7 +1209,7 @@ table {
 
     <span class="k">def</span> <span class="nf">filter_row</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;return the rows selected by self.row_filter.&quot;&quot;&quot;</span>
-        <span class="c1"># TODO:</span>
+        <span class="c1"># TODO: improve filtering function</span>
         <span class="c1"># 1. know more about the row_filter syntax</span>
         <span class="c1"># 2. The query() Method is Experimental</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">row_filter</span><span class="p">:</span>
@@ -1387,14 +1387,14 @@ table {
       
   
     <div class="desc"><p>ingredient class: represents an ingredient object in recipe file.
-see the impletment of from_dict() method for how the object is constructed.</p></div>
+see the implement of from_dict() method for how the object is constructed.</p></div>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-ddf_utils.chef.ingredient.Ingredient', this);">Show source &equiv;</a></p>
   <div id="source-ddf_utils.chef.ingredient.Ingredient" class="source">
     <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Ingredient</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    ingredient class: represents an ingredient object in recipe file.</span>
-<span class="sd">    see the impletment of from_dict() method for how the object is constructed.</span>
+<span class="sd">    see the implement of from_dict() method for how the object is constructed.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ingred_id</span><span class="p">,</span> <span class="n">ddf_id</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">row_filter</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ingred_id</span> <span class="o">=</span> <span class="n">ingred_id</span>
@@ -1444,7 +1444,7 @@ see the impletment of from_dict() method for how the object is constructed.</p><
             <span class="k">return</span> <span class="s1">&#39;datapoints&#39;</span>
 
     <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
         <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;Ingredient: &#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">ingred_id</span><span class="p">)</span>
         <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;dataset: &#39;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">ddf_id</span><span class="p">)</span>
         <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;key: &#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">))</span>
@@ -1511,7 +1511,7 @@ see the impletment of from_dict() method for how the object is constructed.</p><
 
     <span class="k">def</span> <span class="nf">filter_row</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;return the rows selected by self.row_filter.&quot;&quot;&quot;</span>
-        <span class="c1"># TODO:</span>
+        <span class="c1"># TODO: improve filtering function</span>
         <span class="c1"># 1. know more about the row_filter syntax</span>
         <span class="c1"># 2. The query() Method is Experimental</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">row_filter</span><span class="p">:</span>
@@ -1812,7 +1812,7 @@ This method should only called for entities related tasks.</p></div>
   <div id="source-ddf_utils.chef.ingredient.Ingredient.filter_row" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">filter_row</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;return the rows selected by self.row_filter.&quot;&quot;&quot;</span>
-    <span class="c1"># TODO:</span>
+    <span class="c1"># TODO: improve filtering function</span>
     <span class="c1"># 1. know more about the row_filter syntax</span>
     <span class="c1"># 2. The query() Method is Experimental</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">row_filter</span><span class="p">:</span>
