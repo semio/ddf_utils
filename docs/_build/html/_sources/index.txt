@@ -9,7 +9,7 @@ Welcome to ddf_utils's documentation!
 Contents:
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 4
 
 
 Indices and tables
