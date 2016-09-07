@@ -1,3 +1,4 @@
 pandas
-numpy
 unidecode
+pyyaml
+orderedattrdict
