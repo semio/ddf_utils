@@ -1,0 +1,247 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ddf_utils package &#8212; ddf_utils 0.1dev documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1dev',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="ddf_utils 0.1dev documentation" href="index.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="ddf-utils-package">
+<h1>ddf_utils package<a class="headerlink" href="#ddf-utils-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="ddf_utils.chef.html">ddf_utils.chef package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ddf_utils.chef.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ddf_utils.chef.html#module-ddf_utils.chef.config">ddf_utils.chef.config module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ddf_utils.chef.html#module-ddf_utils.chef.cook">ddf_utils.chef.cook module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ddf_utils.chef.html#module-ddf_utils.chef.ingredient">ddf_utils.chef.ingredient module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ddf_utils.chef.html#module-ddf_utils.chef.procedure">ddf_utils.chef.procedure module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ddf_utils.chef.html#module-ddf_utils.chef">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-ddf_utils.ddf_reader">
+<span id="ddf-utils-ddf-reader-module"></span><h2>ddf_utils.ddf_reader module<a class="headerlink" href="#module-ddf_utils.ddf_reader" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="ddf_utils.ddf_reader.ddf_concepts">
+<code class="descclassname">ddf_utils.ddf_reader.</code><code class="descname">ddf_concepts</code><span class="sig-paren">(</span><em>ddf_id</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.ddf_reader.ddf_concepts" title="Permalink to this definition">¶</a></dt>
+<dd><p>return all concepts</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ddf_utils.ddf_reader.ddf_datapoint">
+<code class="descclassname">ddf_utils.ddf_reader.</code><code class="descname">ddf_datapoint</code><span class="sig-paren">(</span><em>ddf_id</em>, <em>concept</em>, <em>key=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.ddf_reader.ddf_datapoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>return one datapoint</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ddf_utils.ddf_reader.ddf_datapoints">
+<code class="descclassname">ddf_utils.ddf_reader.</code><code class="descname">ddf_datapoints</code><span class="sig-paren">(</span><em>ddf_id</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.ddf_reader.ddf_datapoints" title="Permalink to this definition">¶</a></dt>
+<dd><p>return all datapoints</p>
+<p>in case of there are multiple files for one concept (with different keys)
+this function will return a dictionary in the form of {(concept, keys): dataframe}</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ddf_utils.ddf_reader.ddf_entities">
+<code class="descclassname">ddf_utils.ddf_reader.</code><code class="descname">ddf_entities</code><span class="sig-paren">(</span><em>ddf_id</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.ddf_reader.ddf_entities" title="Permalink to this definition">¶</a></dt>
+<dd><p>return all entities</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ddf_utils.ddf_reader.ddf_index_cols">
+<code class="descclassname">ddf_utils.ddf_reader.</code><code class="descname">ddf_index_cols</code><span class="sig-paren">(</span><em>ddf_id</em>, <em>concept</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.ddf_reader.ddf_index_cols" title="Permalink to this definition">¶</a></dt>
+<dd><p>return the index columns for given concept</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-ddf_utils.index">
+<span id="ddf-utils-index-module"></span><h2>ddf_utils.index module<a class="headerlink" href="#module-ddf_utils.index" title="Permalink to this headline">¶</a></h2>
+<p>create ddf&#8211;index.csv</p>
+<dl class="function">
+<dt id="ddf_utils.index.concept_index">
+<code class="descclassname">ddf_utils.index.</code><code class="descname">concept_index</code><span class="sig-paren">(</span><em>path</em>, <em>concept_file</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.index.concept_index" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ddf_utils.index.create_index_file">
+<code class="descclassname">ddf_utils.index.</code><code class="descname">create_index_file</code><span class="sig-paren">(</span><em>path</em>, <em>indexfile='ddf--index.csv'</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.index.create_index_file" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ddf_utils.index.datapoint_index">
+<code class="descclassname">ddf_utils.index.</code><code class="descname">datapoint_index</code><span class="sig-paren">(</span><em>path</em>, <em>datapoint_file</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.index.datapoint_index" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ddf_utils.index.entity_index">
+<code class="descclassname">ddf_utils.index.</code><code class="descname">entity_index</code><span class="sig-paren">(</span><em>path</em>, <em>entity_file</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.index.entity_index" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-ddf_utils.io">
+<span id="ddf-utils-io-module"></span><h2>ddf_utils.io module<a class="headerlink" href="#module-ddf_utils.io" title="Permalink to this headline">¶</a></h2>
+<p>io functions for ddf files</p>
+<dl class="function">
+<dt id="ddf_utils.io.load_google_xls">
+<code class="descclassname">ddf_utils.io.</code><code class="descname">load_google_xls</code><span class="sig-paren">(</span><em>filehash</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.io.load_google_xls" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ddf_utils.io.to_csv">
+<code class="descclassname">ddf_utils.io.</code><code class="descname">to_csv</code><span class="sig-paren">(</span><em>df</em>, <em>out_dir</em>, <em>ftype</em>, <em>concept</em>, <em>by=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.io.to_csv" title="Permalink to this definition">¶</a></dt>
+<dd><p>save a ddf dataframe to csv file.
+the file path of csv will be out_dir/ddf&#8211;$ftype&#8211;$concept&#8211;$by.csv</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-ddf_utils.metadata">
+<span id="ddf-utils-metadata-module"></span><h2>ddf_utils.metadata module<a class="headerlink" href="#module-ddf_utils.metadata" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="ddf_utils.metadata.generate_metadata">
+<code class="descclassname">ddf_utils.metadata.</code><code class="descname">generate_metadata</code><span class="sig-paren">(</span><em>ddf_path</em>, <em>outpath</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.metadata.generate_metadata" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ddf_utils.metadata.to_dict_dropna">
+<code class="descclassname">ddf_utils.metadata.</code><code class="descname">to_dict_dropna</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.metadata.to_dict_dropna" title="Permalink to this definition">¶</a></dt>
+<dd><p>return a dictionary that do not contain any NaN values from a dataframe.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-ddf_utils.str">
+<span id="ddf-utils-str-module"></span><h2>ddf_utils.str module<a class="headerlink" href="#module-ddf_utils.str" title="Permalink to this headline">¶</a></h2>
+<p>string functions for ddf files</p>
+<dl class="function">
+<dt id="ddf_utils.str.fix_time_range">
+<code class="descclassname">ddf_utils.str.</code><code class="descname">fix_time_range</code><span class="sig-paren">(</span><em>s</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.str.fix_time_range" title="Permalink to this definition">¶</a></dt>
+<dd><p>change a time range to the middle of year in the range.
+e.g. fix_time_range(&#8216;1980-90&#8217;) = 1985</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ddf_utils.str.format_float_digits">
+<code class="descclassname">ddf_utils.str.</code><code class="descname">format_float_digits</code><span class="sig-paren">(</span><em>number</em>, <em>digits=5</em>, <em>threshold=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.str.format_float_digits" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ddf_utils.str.format_float_sigfig">
+<code class="descclassname">ddf_utils.str.</code><code class="descname">format_float_sigfig</code><span class="sig-paren">(</span><em>number</em>, <em>sigfig=5</em>, <em>threshold=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.str.format_float_sigfig" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ddf_utils.str.to_concept_id">
+<code class="descclassname">ddf_utils.str.</code><code class="descname">to_concept_id</code><span class="sig-paren">(</span><em>s</em>, <em>sep='_'</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.str.to_concept_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-ddf_utils">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-ddf_utils" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">ddf_utils package</a><ul>
+<li><a class="reference internal" href="#subpackages">Subpackages</a></li>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-ddf_utils.ddf_reader">ddf_utils.ddf_reader module</a></li>
+<li><a class="reference internal" href="#module-ddf_utils.index">ddf_utils.index module</a></li>
+<li><a class="reference internal" href="#module-ddf_utils.io">ddf_utils.io module</a></li>
+<li><a class="reference internal" href="#module-ddf_utils.metadata">ddf_utils.metadata module</a></li>
+<li><a class="reference internal" href="#module-ddf_utils.str">ddf_utils.str module</a></li>
+<li><a class="reference internal" href="#module-ddf_utils">Module contents</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/ddf_utils.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Semio Zheng.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="_sources/ddf_utils.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
