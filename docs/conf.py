@@ -23,7 +23,7 @@ sys.path.insert(0, os.path.abspath('../'))
 
 # fixing readthedoc problem
 # http://blog.rtwilson.com/how-to-make-your-sphinx-documentation-compile-with-readthedocs-when-youre-using-numpy-and-scipy/
-import mock
+import unittest.mock as mock
  
 MOCK_MODULES = ['numpy', 'pandas']
 for mod_name in MOCK_MODULES:
