@@ -21,6 +21,14 @@ import os
 import sys
 sys.path.insert(0, os.path.abspath('../'))
 
+# fixing readthedoc problem
+# http://blog.rtwilson.com/how-to-make-your-sphinx-documentation-compile-with-readthedocs-when-youre-using-numpy-and-scipy/
+import mock
+ 
+MOCK_MODULES = ['numpy', 'pandas']
+for mod_name in MOCK_MODULES:
+    sys.modules[mod_name] = mock.Mock()
+
 # -- General configuration ------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
