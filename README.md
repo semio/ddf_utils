@@ -32,3 +32,5 @@ level `ddf_dir` will be used (so the ddf_dir setting in sub-recipes will be igno
 ### useful API for etl tasks
 
 TBD.
+
+for now you can check the api documents at [readthedoc](https://ddf-utils.readthedocs.io/en/latest/py-modindex.html)
