@@ -1,0 +1,52 @@
+info:
+    id: cme-sg-dataset
+    base:
+        - &d1 ddf--gapminder--gapminder_world
+        - &d2 ddf--gapminder--geo_entity_domain
+        - &d3 ddf--cme
+
+config:
+    recipes_dir: /Users/semio/src/work/Gapminder/ddf--gapminder--systema_globalis/etl/recipes/
+    dictionary_dir: /Users/semio/src/work/Gapminder/ddf--gapminder--systema_globalis/etl/translation_dictionaries/
+    ddf_dir: /Users/semio/src/work/Gapminder/
+        
+include:
+    - recipe_gw_common.yaml
+
+ingredients:
+    # CME
+    - id: cme-datapoints
+      dataset: *d3
+      key: "country,year"
+      value: ['u5mr_median', 'nmr_median', 'neonatal_deaths_median']
+    - id: gw-entities-country
+      dataset: *d2
+      key:
+          - country
+      value: "*" 
+
+cooking:
+    datapoints:
+        - procedure: translate_header
+          ingredients:
+              - cme-datapoints
+          options:
+              dictionary:
+                  # country: geo
+                  year: time
+          result: cme-datapoints-translated
+        - procedure: translate_column
+          ingredients:
+              - cme-datapoints-translated
+          options:
+              base: gw-entities-country
+              dictionary:
+                  country: world_4region
+          result: cme-datapoints-translated
+        - procedure: groupby
+          ingredients:
+              - cme-datapoints-translated
+          options:
+              by: [country, time]
+
+
