@@ -64,9 +64,7 @@ def ddf_datapoint(ddf_id, concept, key=None):
     index = _get_index(ddf_id)
     path = _get_ddf_path(ddf_id)
 
-    index = index.set_index('value')
-
-    f = index.ix[concept][['key', 'file']]
+    f = index[index.value == concept][['key', 'file']]
 
     if len(f) == 0:
         raise KeyError("concept not found: " + concept)

@@ -7,10 +7,19 @@ from unidecode import unidecode
 import decimal
 
 
-def to_concept_id(s, sep='_'):
-
+def to_concept_id(s, sep='_') -> str:
+    """convert a string to alphanumeric format."""
     if s is np.nan:
         return s
+    # replace some symbol to meaningful strings
+    sub = {
+        '%': 'pct',
+        '>': 'gt',
+        '<': 'lt'
+    }
+    for k, v in sub.items():
+        if k in s:
+            s = s.replace(k, v)
 
     pattern = re.compile('[\W_]+')
     snew = unidecode(pattern.sub(sep, s.strip()).lower())

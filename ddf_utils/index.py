@@ -99,7 +99,7 @@ def create_index_file(path, indexfile='ddf--index.csv'):
         if 'datapoints' in f:
             res.append(datapoint_index(path, f))
 
-    res_df = concat(res)
+    res_df = concat(res, ignore_index=True)
     res_df = res_df.drop_duplicates()
 
     index_path = os.path.join(path, indexfile)
