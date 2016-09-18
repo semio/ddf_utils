@@ -5,6 +5,7 @@
 import pandas as pd
 import numpy as np
 from . ingredient import Ingredient
+from . import globals
 import time
 from typing import List, Union, Dict, Optional
 import re
@@ -12,7 +13,7 @@ import re
 import logging
 
 
-def translate_header(ingredient, *, result=None, **options) -> Ingredient:
+def translate_header(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
     """Translate column headers
 
     available options are:
@@ -46,17 +47,34 @@ def translate_header(ingredient, *, result=None, **options) -> Ingredient:
     return Ingredient(result, ingredient.ddf_id, newkey, "", data=data)
 
 
-def translate_column(ingredient, *, result=None, **options) -> Ingredient:
+def translate_column(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
     """Translate column values.
 
     available options are:
         `dictionary`: a dictionary of oldname -> newname mappings
         `column`: the column to rename
+        `base`: if base is provided, transform the columns base on information of base ingredient.
+        So that oldname column will be change to values from newname column.
+
+    Note:
+        if base and column are provided at same time, it will raise an error.
     """
     logging.info("translate_column: " + ingredient.ingred_id)
 
-    rm = options['dictionary']
-    column = options['column']
+    if 'column' in options.keys() and 'base' in options.keys():
+        raise ValueError("only accept column or base option, not both")
+    try:
+        column = options['column']
+        rm = options['dictionary']
+    except KeyError:
+        base_dict = options['base'].get_data()
+        assert len(options['dictionary']) == 1
+        assert len(base_dict) == 1
+        _, base_df = base_dict.popitem()
+        k, v = options['dictionary'].popitem()
+        column = k
+        rm = base_df.set_index(k)[v].to_dict()
+
     di = ingredient.copy_data()
 
     for k, df in di.items():
@@ -190,7 +208,7 @@ def _merge_two(left: Dict[str, pd.DataFrame],
     return res_data
 
 
-def identity(ingredient, *, result=None, **options):
+def identity(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
     """return the ingredient as is.
 
     available options:
@@ -308,6 +326,7 @@ def align(to_align: Ingredient, base: Ingredient, *, result=None, **options) -> 
         of this column in search_cols
         `to_replace`: the column of ingredient to replace with new value. can be same
         as to_find or a new column
+        `drop_not_found`: drop those entities not found in the base
     """
     try:
         search_cols = options.pop('search_cols')
@@ -471,7 +490,6 @@ def run_op(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
 
     data = ingredient.get_data()
     keys = ingredient.key_to_list()
-    # TODO: load the op as ordered dict to speed up. (e.g I can create shared var at beginning)
     ops = options['op']
 
     # concat all the datapoint dataframe first, and eval the ops
