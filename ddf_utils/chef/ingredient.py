@@ -6,7 +6,7 @@ import pandas as pd
 import os
 import logging
 
-from . import config
+from . import globals
 
 
 class Ingredient(object):
@@ -195,7 +195,7 @@ class Ingredient(object):
         index = self.index
 
         for f in index['file'].drop_duplicates().values:
-            path = os.path.join(config.SEARCH_PATH, self.ddf_id, f)
+            path = os.path.join(globals.SEARCH_PATH, self.ddf_id, f)
             mtime = os.path.getmtime(path)
 
             index.loc[index['file'] == f, 'last_update'] = mtime
@@ -270,7 +270,7 @@ class Ingredient(object):
 
 # helper functions for Ingredient
 def _get_ddf_path(ddf_id):
-    path = os.path.join(config.SEARCH_PATH, ddf_id)
+    path = os.path.join(globals.SEARCH_PATH, ddf_id)
     if os.path.exists(path):
         return path
     else:

@@ -7,7 +7,7 @@ from orderedattrdict import AttrDict
 from orderedattrdict.yamlutils import AttrDictYAMLLoader
 
 from . ingredient import *
-from . import config
+from . import globals
 from . procedure import *
 from .. str import format_float_digits
 
@@ -141,10 +141,8 @@ def run_recipe(recipe):
     returns a dictionary. keys are `concepts`, `entities` and `datapoints`,
     and values are ingredients return by the procedures
     """
-
-    config.SEARCH_PATH = recipe['config']['ddf_dir']
-
-    logging.debug('path for searching: ' + str(config.SEARCH_PATH))
+    logging.debug('path for searching: ' + str(globals.SEARCH_PATH))
+    globals.SEARCH_PATH = recipe['config']['ddf_dir']
 
     # load ingredients
     ings = [Ingredient.from_dict(i) for i in recipe['ingredients']]
@@ -170,6 +168,9 @@ def run_recipe(recipe):
                 result = p['result']
                 if 'options' in p.keys():
                     options = p['options']
+                    # change the 'base' option to actual ingredient 
+                    if 'base' in options.keys():
+                        options['base'] = ings_dict[options['base']]
                     out = funcs[func](*ingredient, result=result, **options)
                 else:
                     out = funcs[func](*ingredient, result=result)
