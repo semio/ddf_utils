@@ -4,18 +4,18 @@ ddf_utils.chef package
 Submodules
 ----------
 
-ddf_utils.chef.cook module
---------------------------
+ddf_utils.chef.config module
+----------------------------
 
-.. automodule:: ddf_utils.chef.cook
+.. automodule:: ddf_utils.chef.config
     :members:
     :undoc-members:
     :show-inheritance:
 
-ddf_utils.chef.globals module
------------------------------
+ddf_utils.chef.cook module
+--------------------------
 
-.. automodule:: ddf_utils.chef.globals
+.. automodule:: ddf_utils.chef.cook
     :members:
     :undoc-members:
     :show-inheritance:
