@@ -44,8 +44,8 @@
 <div class="section" id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="module-ddf_utils.chef.config">
-<span id="ddf-utils-chef-config-module"></span><h2>ddf_utils.chef.config module<a class="headerlink" href="#module-ddf_utils.chef.config" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-ddf_utils.chef.globals">
+<span id="ddf-utils-chef-config-module"></span><h2>ddf_utils.chef.config module<a class="headerlink" href="#module-ddf_utils.chef.globals" title="Permalink to this headline">¶</a></h2>
 </div>
 <div class="section" id="module-ddf_utils.chef.cook">
 <span id="ddf-utils-chef-cook-module"></span><h2>ddf_utils.chef.cook module<a class="headerlink" href="#module-ddf_utils.chef.cook" title="Permalink to this headline">¶</a></h2>
@@ -190,7 +190,8 @@ according to the mapping file.</p>
 <cite>to_find</cite>: the column of ingredient to_align. The function will search the data
 of this column in search_cols
 <cite>to_replace</cite>: the column of ingredient to replace with new value. can be same
-as to_find or a new column</dd>
+as to_find or a new column
+<cite>drop_not_found</cite>: drop those entities not found in the base</dd>
 </dl>
 </dd></dl>
 
@@ -242,7 +243,7 @@ aggregate: the function to aggregate. Default: sum</dd>
 
 <dl class="function">
 <dt id="ddf_utils.chef.procedure.identity">
-<code class="descclassname">ddf_utils.chef.procedure.</code><code class="descname">identity</code><span class="sig-paren">(</span><em>ingredient</em>, <em>*</em>, <em>result=None</em>, <em>**options</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.procedure.identity" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.chef.procedure.</code><code class="descname">identity</code><span class="sig-paren">(</span><em>ingredient: ddf_utils.chef.ingredient.Ingredient</em>, <em>*</em>, <em>result=None</em>, <em>**options</em><span class="sig-paren">)</span> &rarr; ddf_utils.chef.ingredient.Ingredient<a class="headerlink" href="#ddf_utils.chef.procedure.identity" title="Permalink to this definition">¶</a></dt>
 <dd><p>return the ingredient as is.</p>
 <dl class="docutils">
 <dt>available options:</dt>
@@ -278,18 +279,22 @@ if true, overwrite is on the row level. If values
 
 <dl class="function">
 <dt id="ddf_utils.chef.procedure.translate_column">
-<code class="descclassname">ddf_utils.chef.procedure.</code><code class="descname">translate_column</code><span class="sig-paren">(</span><em>ingredient</em>, <em>*</em>, <em>result=None</em>, <em>**options</em><span class="sig-paren">)</span> &rarr; ddf_utils.chef.ingredient.Ingredient<a class="headerlink" href="#ddf_utils.chef.procedure.translate_column" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.chef.procedure.</code><code class="descname">translate_column</code><span class="sig-paren">(</span><em>ingredient: ddf_utils.chef.ingredient.Ingredient</em>, <em>*</em>, <em>result=None</em>, <em>**options</em><span class="sig-paren">)</span> &rarr; ddf_utils.chef.ingredient.Ingredient<a class="headerlink" href="#ddf_utils.chef.procedure.translate_column" title="Permalink to this definition">¶</a></dt>
 <dd><p>Translate column values.</p>
 <dl class="docutils">
 <dt>available options are:</dt>
 <dd><cite>dictionary</cite>: a dictionary of oldname -&gt; newname mappings
-<cite>column</cite>: the column to rename</dd>
+<cite>column</cite>: the column to rename
+<cite>base</cite>: if base is provided, transform the columns base on information of base ingredient.
+So that oldname column will be change to values from newname column.</dd>
+<dt>Note:</dt>
+<dd>if base and column are provided at same time, it will raise an error.</dd>
 </dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.chef.procedure.translate_header">
-<code class="descclassname">ddf_utils.chef.procedure.</code><code class="descname">translate_header</code><span class="sig-paren">(</span><em>ingredient</em>, <em>*</em>, <em>result=None</em>, <em>**options</em><span class="sig-paren">)</span> &rarr; ddf_utils.chef.ingredient.Ingredient<a class="headerlink" href="#ddf_utils.chef.procedure.translate_header" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.chef.procedure.</code><code class="descname">translate_header</code><span class="sig-paren">(</span><em>ingredient: ddf_utils.chef.ingredient.Ingredient</em>, <em>*</em>, <em>result=None</em>, <em>**options</em><span class="sig-paren">)</span> &rarr; ddf_utils.chef.ingredient.Ingredient<a class="headerlink" href="#ddf_utils.chef.procedure.translate_header" title="Permalink to this definition">¶</a></dt>
 <dd><p>Translate column headers</p>
 <dl class="docutils">
 <dt>available options are:</dt>
@@ -313,7 +318,7 @@ if true, overwrite is on the row level. If values
   <ul>
 <li><a class="reference internal" href="#">ddf_utils.chef package</a><ul>
 <li><a class="reference internal" href="#submodules">Submodules</a></li>
-<li><a class="reference internal" href="#module-ddf_utils.chef.config">ddf_utils.chef.config module</a></li>
+<li><a class="reference internal" href="#module-ddf_utils.chef.globals">ddf_utils.chef.config module</a></li>
 <li><a class="reference internal" href="#module-ddf_utils.chef.cook">ddf_utils.chef.cook module</a></li>
 <li><a class="reference internal" href="#module-ddf_utils.chef.ingredient">ddf_utils.chef.ingredient module</a></li>
 <li><a class="reference internal" href="#module-ddf_utils.chef.procedure">ddf_utils.chef.procedure module</a></li>

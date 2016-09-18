@@ -7,7 +7,7 @@ Submodules
 ddf_utils.chef.config module
 ----------------------------
 
-.. automodule:: ddf_utils.chef.config
+.. automodule:: ddf_utils.chef.globals
     :members:
     :undoc-members:
     :show-inheritance:
