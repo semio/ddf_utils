@@ -5,14 +5,13 @@ command line utility for creating ddf from recipe
 
 usage:
 
-before running the script, environment variables should be set
+you can run the recipe with:
 
-$ export DDF_PATH='path_to_search_ddf'
-$ export DICT_PATH='path_to_search_translation_dict'
+$ runrecipe.py -i path_to_recipe.yaml -o outdir
 
-Then you can run the script with:
+or dry run (don't export the result to disk):
 
-$ runrecipe.py -i path_to_recipe -o outdir
+$ runrecipe.py -i path_to_recipe.yaml -d
 
 """
 
@@ -52,3 +51,4 @@ if __name__ == '__main__':
         ddfrecipe.dish_to_csv(res, outdir)
         print('creating index file...')
         create_index_file(outdir)
+    print("done.")
