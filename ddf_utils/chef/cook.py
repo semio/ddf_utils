@@ -94,7 +94,10 @@ def build_recipe(recipe_file, to_disk=False):
         for rcp in sub_recipes:
             # appending ingredients
             if 'ingredients' in recipe.keys():
-                ingredients = [*recipe['ingredients'], *rcp['ingredients']]
+                # ingredients = [*recipe['ingredients'], *rcp['ingredients']]  # not supportted by Python < 3.5
+                ingredients = []
+                [ingredients.append(ing) for ing in recipe['ingredients']]
+                [ingredients.append(ing) for ing in rcp['ingredients']]
                 # drop duplicated ingredients.
                 rcp_dict_tmp = {}
                 for v in ingredients:
@@ -118,7 +121,11 @@ def build_recipe(recipe_file, to_disk=False):
                     if p in recipe['cooking'].keys():
                         # NOTE: the included cooking procedures should be placed in front of
                         # the origin ones.
-                        recipe['cooking'][p] = [*rcp['cooking'][p], *recipe['cooking'][p]]
+                        # recipe['cooking'][p] = [*rcp['cooking'][p], *recipe['cooking'][p]]  # not supportted by Python < 3.5
+                        new_procs = []
+                        [new_procs.append(proc) for proc in rcp['cooking'][p]]
+                        [new_procs.append(proc) for proc in recipe['cooking'][p]]
+                        recipe['cooking'][p] = new_procs
                     else:
                         recipe['cooking'][p] = rcp['cooking'][p]
                 else:
