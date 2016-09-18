@@ -459,7 +459,7 @@ def accumulate(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
         if func in funcs:
             df = df.groupby(level=0, as_index=False).apply(funcs[func])
             df = df.reset_index()
-            df = df[[*index, k]]
+            df = df[np.r_[index, k]]
         else:
             df = eval("df.groupby(level=0).{}()".format(func))
             df = df.reset_index()
