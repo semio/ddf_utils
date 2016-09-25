@@ -2,14 +2,14 @@
 """string functions for ddf files"""
 
 import re
-import numpy as np
+import pandas as pd
 from unidecode import unidecode
 import decimal
 
 
-def to_concept_id(s, sep='_') -> str:
+def to_concept_id(s, sep='_'):
     """convert a string to alphanumeric format."""
-    if s is np.nan:
+    if pd.isnull(s):
         return s
     # replace some symbol to meaningful strings
     sub = {
@@ -76,17 +76,17 @@ def _float_to_decimal(f):
 
 
 def format_float_digits(number, digits=5, threshold=None):
+    """format the number, limit the maximum amount of digits. Removing tailing zeros."""
     # assert(digits > 0)
-    # try:
-    #     d = decimal.Decimal(number)
-    # except TypeError:
-    #     d = _float_to_decimal(float(number))
-    #FIXME: deal with nan
-
-    d = float(number)
+    if pd.isnull(number):
+        return number
+    try:
+        d = decimal.Decimal(number)
+    except TypeError:
+        d = _float_to_decimal(float(number))
 
     if threshold:
-        if abs(d) >= threshold:
+        if abs(d) <= threshold:
             return '0'
 
     s = format(d, '.{}f'.format(digits))
@@ -102,14 +102,16 @@ def format_float_digits(number, digits=5, threshold=None):
 def format_float_sigfig(number, sigfig=5, threshold=None):
     # http://stackoverflow.com/questions/2663612/nicely-representing-a-floating-point-number-in-python/2663623#2663623
     # assert(sigfig > 0)
+    if pd.isnull(number):
+        return number
     try:
         d = decimal.Decimal(number)
     except TypeError:
         d = _float_to_decimal(float(number))
 
     if threshold:
-        if abs(d) >= threshold:
-            return '0'
+        if abs(d) <= threshold:
+            d = decimal.Decimal(0)
 
     sign, digits, exponent = d.as_tuple()
 

@@ -32,14 +32,13 @@ def concept_index(path, concept_file):
 
 
 def entity_index(path, entity_file):
-
     df = DataFrame([], columns=index_columns)
 
     # get the domain/set name from file name.
     # there are 2 possible format for entity filename:
     # 1. ddf--entities--$domain.csv
     # 2. ddf--entities--$domain--$set.csv
-    match = re.match('ddf--entities--([\w_]+)-*(.*).csv', entity_file).groups()
+    match = re.match('ddf--entities--([\w_]+)-*([\w_]*).csv', entity_file).groups()
     if len(match) == 1:
         domain = match[0]
         concept = None
