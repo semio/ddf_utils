@@ -1,5 +1,4 @@
 .DS_Store
 .ipynb_checkpoints
-notebook/
 __pycache__/
 ddf_utils.egg-info/
