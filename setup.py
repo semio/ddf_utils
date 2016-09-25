@@ -12,6 +12,7 @@ setup(
     author_email='prairy.long@gmail.com',
     license='MIT',
     packages=find_packages(exclude=['contrib', 'docs', 'tests', 'scripts']),
-    install_requires=['pandas', 'unidecode', 'pyyaml', 'orderedattrdict', 'typing'],
-    scripts=['scripts/runrecipe.py']
+    install_requires=['pandas', 'unidecode', 'pyyaml', 'orderedattrdict', 'typing',
+                      'cookiecutter'],
+    scripts=['scripts/runrecipe.py', 'scripts/ddfnew.py']
 )
