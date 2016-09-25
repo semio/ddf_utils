@@ -53,8 +53,9 @@ def build_recipe(recipe_file, to_disk=False):
     # the dictionary dir to retrieve translation dictionaries
     try:
         dict_dir = recipe['config']['dictionary_dir']
+        config.DICT_PATH = dict_dir
     except KeyError:
-        dict_dir = None
+        dict_dir = config.DICT_PATH
 
     # expand all files in the options
     if 'cooking' in recipe.keys():
@@ -133,7 +134,7 @@ def build_recipe(recipe_file, to_disk=False):
                     recipe['cooking'][p] = rcp['cooking'][p]
 
         if to_disk:
-            yaml.dump(recipe, open('recipe.yaml', 'w'))
+            yaml.dump(recipe, open('recipe_dump.yaml', 'w'))
 
         return recipe
 
@@ -148,8 +149,12 @@ def run_recipe(recipe):
     returns a dictionary. keys are `concepts`, `entities` and `datapoints`,
     and values are ingredients return by the procedures
     """
+    try:
+        config.SEARCH_PATH = recipe['config']['ddf_dir']
+    except KeyError:
+        if not config.SEARCH_PATH:
+            raise ValueError("no ddf_dir configured, please check your recipe")
     logging.debug('path for searching: ' + str(config.SEARCH_PATH))
-    config.SEARCH_PATH = recipe['config']['ddf_dir']
 
     # load ingredients
     ings = [Ingredient.from_dict(i) for i in recipe['ingredients']]
