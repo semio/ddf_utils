@@ -31,6 +31,8 @@ level `ddf_dir` will be used (so the ddf_dir setting in sub-recipes will be igno
 
 ### useful API for etl tasks
 
-TBD.
+You can check the api documents at [readthedoc][1] or clone this repo and read it in
+docs/_html. Note that the chef module document is not complete in readthedoc due to a 
+bug in their system.
 
-for now you can check the api documents at [readthedoc](https://ddf-utils.readthedocs.io/en/latest/py-modindex.html)
+[1]: https://ddf-utils.readthedocs.io/en/latest/py-modindex.html
