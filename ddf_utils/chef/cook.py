@@ -143,6 +143,29 @@ def update_recipe_last_update(recipe, outdir):
     pass
 
 
+def check_dataset_availability(recipe):
+    """check availablity of all datasets required by the recipe.
+
+    raise error if some dataset not avaliable. otherwise do nothing.
+    """
+    ddf_dir = recipe.config.ddf_dir
+
+    datasets = set()
+    for ingred in recipe.ingredients:
+        datasets.add(ingred.dataset)
+
+    not_exists = []
+    for d in datasets:
+        if not os.path.exists(os.path.join(ddf_dir, d)):
+            not_exists.append(d)
+
+    if len(not_exists) > 0:
+        logging.critical("not enough datasets! please checkout following datasets:\n{}\n"\
+                            .format('\n'.join(not_exists)))
+        raise ValueError('not enough datasets')
+    return
+
+
 def run_recipe(recipe):
     """run the recipe.
 
@@ -154,7 +177,9 @@ def run_recipe(recipe):
     except KeyError:
         if not config.SEARCH_PATH:
             raise ValueError("no ddf_dir configured, please check your recipe")
-    logging.debug('path for searching: ' + str(config.SEARCH_PATH))
+    logging.info('path for searching DDF: ' + str(config.SEARCH_PATH))
+
+    check_dataset_availability(recipe)
 
     # load ingredients
     ings = [Ingredient.from_dict(i) for i in recipe['ingredients']]
@@ -180,7 +205,7 @@ def run_recipe(recipe):
                 result = p['result']
                 if 'options' in p.keys():
                     options = p['options']
-                    # change the 'base' option to actual ingredient 
+                    # change the 'base' option to actual ingredient
                     if 'base' in options.keys():
                         options['base'] = ings_dict[options['base']]
                     out = funcs[func](*ingredient, result=result, **options)
@@ -231,14 +256,15 @@ def dish_to_csv(dishes, outpath):
                     if not np.issubdtype(df[k].dtype, np.number):
                         try:
                             df[k] = df[k].astype(float)
-                            df[k] = df[k].map(lambda x: format_float_digits(x, 5))
+                            # df[k] = df[k].map(lambda x: format_float_digits(x, 5))
                         except ValueError:
                             logging.warning("data not numeric: " + k)
                     else:
-                        df[k] = df[k].map(lambda x: format_float_digits(x, 5))
-                    df[[k]].to_csv(path)
+                        pass
+                        # df[k] = df[k].map(lambda x: format_float_digits(x, 5))
+                    df[[k]].to_csv(path, float_format="%.2f")
                 else:
-                    df.to_csv(path, index=False)
+                    df.to_csv(path, index=False, float_format='%.2f')
         else:
             path = os.path.join(outpath, 'ddf--{}.csv'.format(t))
             all_data.to_csv(path, index=False)
