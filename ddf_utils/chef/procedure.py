@@ -341,10 +341,10 @@ def align(to_align: Ingredient, base: Ingredient, *, result=None, **options) -> 
         drop_not_found = options['drop_not_found']
 
     if len(base.get_data()) > 1:
-        logging.warning(base.get_data().keys())
+        logging.critical(base.get_data().keys())
         raise NotImplementedError('align to base data with multiple dataframes is not supported yet.')
 
-    logging.info("aligning: {} and {}".format(to_align.ingred_id, base.ingred_id))
+    logging.info("aligning: {} with {}".format(to_align.ingred_id, base.ingred_id))
 
     base_data = list(base.get_data().values())[0]
     ing_data = to_align.get_data()
