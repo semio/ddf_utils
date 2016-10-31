@@ -168,6 +168,13 @@ def merge(*ingredients: List[Ingredient], result=None, **options):
     return Ingredient(result, result, newkey, '*', data=res_all)
 
 
+def __get_last_item(ser):
+    if ser.last_valid_index() is None:
+        return np.nan
+    else:
+        return ser[ser.last_valid_index()]
+
+
 def _merge_two(left: Dict[str, pd.DataFrame],
                right: Dict[str, pd.DataFrame],
                index_col: Union[List, str],
@@ -180,7 +187,7 @@ def _merge_two(left: Dict[str, pd.DataFrame],
         if deep:
             for k, df in right.items():
                 if k in left.keys():
-                    left[k] = left[k].append(df)
+                    left[k] = left[k].append(df, ignore_index=True)
                     left[k] = left[k].drop_duplicates(subset=index_col, keep='last')
                     left[k] = left[k].sort_values(by=index_col)
                 else:
@@ -197,8 +204,9 @@ def _merge_two(left: Dict[str, pd.DataFrame],
         right_df = pd.concat(right.values())
 
         if deep:
-            left_df = left_df.merge(right_df, how='outer')
-            res_data = {'concept': left_df.drop_duplicates(subset='concept', keep='last')}
+            merged = left_df.append(right_df, ignore_index=True)
+            res = merged.groupby(index_col).agg(__get_last_item)
+            res_data = {'concept': res.reset_index()}
         else:
             res_data = {'concept': right_df.drop_duplicates(subset='concept', keep='last')}
     else:
@@ -324,9 +332,9 @@ def align(to_align: Ingredient, base: Ingredient, *, result=None, **options) -> 
         `search_cols`: a list of columns of base ingredient, to search for values
         `to_find`: the column of ingredient to_align. The function will search the data
         of this column in search_cols
-        `to_replace`: the column of ingredient to replace with new value. can be same
-        as to_find or a new column
-        `drop_not_found`: drop those entities not found in the base
+        `to_replace`: the column of to_align ingredient to replace with new value.
+        can be same as to_find or a new column
+        `drop_not_found`: if we should drop those entities not found in the base
     """
     try:
         search_cols = options.pop('search_cols')
