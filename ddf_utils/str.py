@@ -75,7 +75,7 @@ def _float_to_decimal(f):
     return result
 
 
-def format_float_digits(number, digits=5, threshold=None):
+def format_float_digits(number, digits=5, threshold=None, keep_decimal=False):
     """format the number, limit the maximum amount of digits. Removing tailing zeros."""
     # assert(digits > 0)
     if pd.isnull(number):
@@ -94,8 +94,12 @@ def format_float_digits(number, digits=5, threshold=None):
     if '.' in s:
         s = s.rstrip('0')
         if s[-1] == '.':
-            s = s[:-1]
-
+            if keep_decimal:
+                s = s + '0'  # keep the decimal point and one zero.
+            else:
+                s = s[:-1]
+            if s.startswith("-0"):
+                s = "0"
     return s
 
 
