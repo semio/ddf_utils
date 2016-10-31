@@ -256,15 +256,14 @@ def dish_to_csv(dishes, outpath):
                     if not np.issubdtype(df[k].dtype, np.number):
                         try:
                             df[k] = df[k].astype(float)
-                            # df[k] = df[k].map(lambda x: format_float_digits(x, 5))
+                            df[k] = df[k].map(lambda x: format_float_digits(x, 5))
                         except ValueError:
                             logging.warning("data not numeric: " + k)
                     else:
-                        pass
-                        # df[k] = df[k].map(lambda x: format_float_digits(x, 5))
-                    df[[k]].to_csv(path, float_format="%.2f")
+                        df[k] = df[k].map(lambda x: format_float_digits(x, 5))
+                    df[[k]].to_csv(path)
                 else:
-                    df.to_csv(path, index=False, float_format='%.2f')
+                    df.to_csv(path, index=False)
         else:
             path = os.path.join(outpath, 'ddf--{}.csv'.format(t))
             all_data.to_csv(path, index=False)
