@@ -73,13 +73,18 @@ def ddf_datapoint(ddf_id, concept, key=None):
         if not key:
             print("WARNING: found multiple files for concept: " + concept)
             print("using the first one in the index")
-            fn = f['file'].values[0]
-        else:
-            fn = f.loc[f['key'] == key, 'file'].values[0]
+            key = f['key'].values[0]
+        fns = f.loc[f['key'] == key, 'file'].values
     else:
-        fn = f['file'].values[0]
+        fns = f['file'].values
 
-    return pd.read_csv(os.path.join(path, fn))
+    if len(fns) == 1:
+        return pd.read_csv(os.path.join(path, fns[0]))
+    else:
+        to_concat = []
+        for fn in fns:
+            to_concat.append(pd.read_csv(os.path.join(path, fn)))
+        return pd.concat(to_concat, ignore_index=True)
 
 
 def _get_ddf_path(ddf_id):
