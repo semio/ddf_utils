@@ -26,3 +26,10 @@ def to_csv(df, out_dir, ftype, concept, by=None, **kwargs):
 def load_google_xls(filehash):
     # TODO: return the xls file with given filehash
     raise NotImplementedError
+
+
+def cleanup(path):
+    """remove all ddf files in the given path"""
+    for f in os.listdir(path):
+        if f.startswith("ddf--"):
+            os.remove(os.path.join(path, f))
