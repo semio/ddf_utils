@@ -17,11 +17,7 @@ def concept_index(path, concept_file):
 
     with open(os.path.join(path, concept_file)) as f:
         reader = csv.reader(f, delimiter=',', quotechar='"')
-        # we only need the headers for index file.
-        try:
-            header = reader.__next__()  # python3
-        except AttributeError:
-            header = reader.next()  # python2
+        header = next(reader)
 
     header.remove('concept')
     df['value'] = header
@@ -48,10 +44,7 @@ def entity_index(path, entity_file):
     with open(os.path.join(path, entity_file)) as f:
         reader = csv.reader(f, delimiter=',', quotechar='"')
         # we only need the headers for index file
-        try:
-            header = reader.__next__()  # python3
-        except AttributeError:
-            header = reader.next()  # python2
+        header = next(reader)
 
     # find out which key is used in the file.
     # the key in index should be consistent with the one in entities
