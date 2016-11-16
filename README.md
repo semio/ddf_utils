@@ -19,6 +19,8 @@ Options:
   --help  Show this message and exit.
 
 Commands:
+Commands:
+  create_datapackage  create datapackage.json
   merge_translation  merge all translation files from crowdin
   new                create a new ddf project
   run_recipe         generate new ddf dataset with recipe

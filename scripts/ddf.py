@@ -23,6 +23,7 @@ def new():
 @click.argument('path')
 @click.option('--update', '-u', 'update', flag_value=True, default=False)
 def create_datapackage(path, update):
+    """create datapackage.json"""
     from ddf_utils.index import get_datapackage
     import json
     if not update:
