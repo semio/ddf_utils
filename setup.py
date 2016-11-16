@@ -13,6 +13,6 @@ setup(
     license='MIT',
     packages=find_packages(exclude=['contrib', 'docs', 'tests', 'scripts']),
     install_requires=['pandas', 'unidecode', 'pyyaml', 'orderedattrdict', 'typing',
-                      'cookiecutter'],
-    scripts=['scripts/runrecipe.py', 'scripts/ddfnew.py']
+                      'cookiecutter', 'Click'],
+    scripts=['scripts/runrecipe.py', 'scripts/ddfnew.py', 'scripts/ddf.py']
 )
