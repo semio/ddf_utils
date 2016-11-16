@@ -55,6 +55,7 @@ def split_translations(path, split_path='langsplit', exclude_concepts=None, over
             except KeyError:
                 print('concept not found in ddf--concepts: ' + c)
                 continue
+    return
 
 
 def merge_translations(path, split_path='langsplit', lang_path='lang', overwrite=False):
@@ -69,6 +70,11 @@ def merge_translations(path, split_path='langsplit', lang_path='lang', overwrite
 
     datapackage = get_datapackage(path)
     source_lang = datapackage['language']['id']
+    # get all available translations, update it when necessary below.
+    if 'translations' not in datapackage.keys():
+        datapackage['translations'] = []
+    available_translations = [x['id'] for x in datapackage['translations']]
+    new_translations = False
 
     assert os.path.exists(split_path)
 
@@ -77,6 +83,10 @@ def merge_translations(path, split_path='langsplit', lang_path='lang', overwrite
     for lang in langs:
         if lang == source_lang:
             continue
+
+        if lang not in available_translations:
+            datapackage['translations'].append({'id': lang})
+            new_translations = True
 
         basepath = os.path.join(split_path, lang) + '/'
         target_lang_path = os.path.join(lang_path, lang)
@@ -97,4 +107,9 @@ def merge_translations(path, split_path='langsplit', lang_path='lang', overwrite
                     df_old.update(df_new)
                     df_new = df_old.copy()
                 df_new.to_csv(target_file_path)
+    # update datapackage if there are new translations
+    if new_translations:
+        with open(os.path.join(path, 'datapackage.json'), 'w') as f:
+            json.dump(datapackage, f, indent=4)
+    return
 
