@@ -21,6 +21,7 @@ class Ingredient(object):
         self.values = values
         self.row_filter = row_filter
         self.data = data
+        self._index = None
         # last_update is a dataframe contains last update
         # time for each file in this ingredient.
         self.last_update = None
@@ -44,7 +45,9 @@ class Ingredient(object):
 
     @property
     def index(self):
-        return _get_index(self.ddf_id)
+        if self._index is None:
+            self._index = _get_index(self.ddf_id)
+        return self._index
 
     @property
     def dtype(self):
@@ -289,5 +292,4 @@ def _get_index(ddf_id):
         return pd.read_csv(index_path)
     else:
         from .. index import create_index_file
-        print("no index file, creating one...")
         return create_index_file(ddf_path)

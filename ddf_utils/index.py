@@ -91,10 +91,6 @@ def create_index_file(path, indexfile='ddf--index.csv'):
 
     res_df = concat(res, ignore_index=True)
     res_df = res_df.drop_duplicates()
-
-    index_path = os.path.join(path, indexfile)
-    res_df.to_csv(index_path, index=False)
-
     return res_df
 
 
