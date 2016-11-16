@@ -97,10 +97,8 @@ def create_index_file(path, indexfile='ddf--index.csv'):
 def get_datapackage(path, update_existing=False):
     datapackage_path = os.path.join(path, 'datapackage.json')
     if os.path.exists(datapackage_path):
-        print('datapackage.json exists, using the informations form it.')
-
         with open(datapackage_path) as f:
-            datapackage_old = json.load(f)
+            datapackage_old = json.load(f, object_pairs_hook=OrderedDict)
 
         if update_existing:
             _ = datapackage_old.pop('resources')  # don't use the old resources
