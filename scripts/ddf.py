@@ -4,12 +4,14 @@
 """script for ddf dataset management tasks"""
 
 import click
+import os
 
 @click.group()
 def ddf():
     pass
 
 
+# project management
 @ddf.command()
 def new():
     """create a new ddf project"""
@@ -18,10 +20,28 @@ def new():
 
 
 @ddf.command()
-@click.option('--recipe', '-i')
-@click.option('--outdir', '-o')
+@click.argument('path')
+@click.option('--update', '-u', 'update', flag_value=True, default=False)
+def create_datapackage(path, update):
+    from ddf_utils.index import get_datapackage
+    import json
+    if not update:
+        if os.path.exists(os.path.join(path, 'datapackage.json')):
+            print('datapackage.json already exists. skipping')
+            return
+        res = get_datapackage(path)
+        with open(os.path.join(path, 'datapackage.json'), 'w') as f:
+            json.dump(res, f, indent=4)
+    else:
+        get_datapackage(path, update_existing=True)
+
+
+# chef and recipe
+@ddf.command()
+@click.option('--recipe', '-i', type=click.Path(exists=True), required=True)
+@click.option('--outdir', '-o', type=click.Path(exists=True))
 @click.option('--update', 'update', flag_value=False)  # not impletmented
-@click.option('--dry_run', '-d', 'dry_run', flag_value=True)
+@click.option('--dry_run', '-d', 'dry_run', flag_value=True, default=False)
 def run_recipe(recipe, outdir, update, dry_run):
     """generate new ddf dataset with recipe"""
     import ddf_utils.chef as ddfrecipe
@@ -42,6 +62,7 @@ def run_recipe(recipe, outdir, update, dry_run):
     print("done.")
 
 
+# Translation related tasks
 @ddf.command()
 @click.argument('path', type=click.Path(exists=True))
 @click.option('--overwrite/--no-overwrite', default=False)
