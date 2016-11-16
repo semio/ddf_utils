@@ -9,7 +9,7 @@ import json
 import os
 
 
-def split_translations(path, split_path='langsplit', exclude_concepts=None):
+def split_translations(path, split_path='langsplit', exclude_concepts=None, overwrite=False):
     datapackage = get_datapackage(path)
     split_path = os.path.join(path, split_path)
 
@@ -47,9 +47,13 @@ def split_translations(path, split_path='langsplit', exclude_concepts=None):
             try:
                 if concepts.loc[c, 'concept_type'] == 'string':
                     os.makedirs(os.path.join(basepath, file_path), exist_ok=True)
-                    df.set_index(key)[[c]].to_csv(os.path.join(basepath, file_path, '{}.csv'.format(c)))
+                    split_csv_path = os.path.join(basepath, file_path, '{}.csv'.format(c))
+                    if os.path.exists(split_csv_path) and not overwrite:
+                        print('file exists: ' + split_csv_path)
+                        continue
+                    df.set_index(key)[[c]].to_csv(split_csv_path)
             except KeyError:
-                print('concept not found: ' + c)
+                print('concept not found in ddf--concepts: ' + c)
                 continue
 
 
@@ -93,8 +97,4 @@ def merge_translations(path, split_path='langsplit', lang_path='lang', overwrite
                     df_old.update(df_new)
                     df_new = df_old.copy()
                 df_new.to_csv(target_file_path)
-
-
-
-
 
