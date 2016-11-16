@@ -212,11 +212,12 @@ def create_datapackage(path, **kwargs):
                 header.remove(concept)
                 key = concept
             else:
-                print(
-                    """There is no matching header found for {}. Using the first column header
-                    """.format(name_res)
-                )
-                key = header[0]
+                raise ValueError('no matching header found for {}!'.format(name_res))
+                # print(
+                #     """There is no matching header found for {}. Using the first column header
+                #     """.format(name_res)
+                # )
+                # key = header[0]
 
             schema['primaryKey'] = key
 
