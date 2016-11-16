@@ -20,8 +20,8 @@ def new():
 @ddf.command()
 @click.option('--recipe', '-i')
 @click.option('--outdir', '-o')
-# @click.option('--update', 'update', flag_value=True)  # not impletmented
-@click.option('--dry_run', 'dry_run', flag_value=True)
+@click.option('--update', 'update', flag_value=False)  # not impletmented
+@click.option('--dry_run', '-d', 'dry_run', flag_value=True)
 def run_recipe(recipe, outdir, update, dry_run):
     """generate new ddf dataset with recipe"""
     import ddf_utils.chef as ddfrecipe
@@ -30,7 +30,7 @@ def run_recipe(recipe, outdir, update, dry_run):
                         datefmt="%H:%M:%S"
                         )
     print('running recipe...')
-    recipe = ddfrecipe.build_recipe(recipe_file)
+    recipe = ddfrecipe.build_recipe(recipe)
     if update:
         pass
     res = ddfrecipe.run_recipe(recipe)
