@@ -2,6 +2,7 @@
 """io functions for ddf files"""
 
 import os
+import shutil
 # import pandas as pd
 
 
@@ -28,8 +29,17 @@ def load_google_xls(filehash):
     raise NotImplementedError
 
 
-def cleanup(path):
+def cleanup(path, how='ddf'):
     """remove all ddf files in the given path"""
-    for f in os.listdir(path):
-        if f.startswith("ddf--"):
-            os.remove(os.path.join(path, f))
+    # TODO: support names don't have standard ddf name format.
+    if how == 'ddf':
+        for f in os.listdir(path):
+            if f.startswith("ddf--"):
+                os.remove(os.path.join(path, f))
+        os.remove(os.path.join(path, 'datapackage.json'))
+    if how == 'lang':
+        if os.path.exists(os.path.join(path, 'lang')):
+            shutil.rmtree(os.path.join(path, 'lang'))
+    if how == 'langsplit':
+        if os.path.exists(os.path.join(path, 'langsplit')):
+            shutil.rmtree(os.path.join(path, 'langsplit'))
