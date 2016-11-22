@@ -24,7 +24,7 @@ def split_translations(path, split_path='langsplit', exclude_concepts=None, over
 
     # exclude some columns for translation by default
     if not exclude_concepts:
-        excluded_cols = ['concept', 'concept_type', 'domain']
+        exclude_concepts = ['concept', 'concept_type', 'domain']
 
     concepts = list()
     for res in datapackage['resources']:
@@ -40,7 +40,7 @@ def split_translations(path, split_path='langsplit', exclude_concepts=None, over
 
         df = pd.read_csv(os.path.join(path, file_path))
         for c in df.columns:
-            if c in excluded_cols:
+            if c in exclude_concepts:
                 continue
             if c.startswith('is--'):  # it will be boolean, skip
                 continue
@@ -51,7 +51,7 @@ def split_translations(path, split_path='langsplit', exclude_concepts=None, over
                     if os.path.exists(split_csv_path) and not overwrite:
                         print('file exists: ' + split_csv_path)
                         continue
-                    df.set_index(key)[[c]].to_csv(split_csv_path)
+                    df.set_index(key)[[c]].to_csv(split_csv_path, encoding='utf8')
             except KeyError:
                 print('concept not found in ddf--concepts: ' + c)
                 continue
@@ -106,7 +106,7 @@ def merge_translations(path, split_path='langsplit', lang_path='lang', overwrite
                     df_old = pd.read_csv(target_file_path, index_col=0)
                     df_old.update(df_new)
                     df_new = df_old.copy()
-                df_new.to_csv(target_file_path)
+                df_new.to_csv(target_file_path, encoding='utf8')
     # update datapackage if there are new translations
     if new_translations:
         with open(os.path.join(path, 'datapackage.json'), 'w') as f:
