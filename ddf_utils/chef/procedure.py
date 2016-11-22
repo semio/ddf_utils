@@ -5,7 +5,7 @@
 import pandas as pd
 import numpy as np
 from . ingredient import Ingredient
-from . import config
+from .. import config
 import time
 from typing import List, Union, Dict, Optional
 import re

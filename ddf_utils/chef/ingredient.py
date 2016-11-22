@@ -6,7 +6,7 @@ import pandas as pd
 import os
 import logging
 
-from . import config
+from .. import config
 
 
 class Ingredient(object):

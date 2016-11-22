@@ -7,7 +7,7 @@ from orderedattrdict import AttrDict
 from orderedattrdict.yamlutils import AttrDictYAMLLoader
 
 from . ingredient import *
-from . import config
+from .. import config
 from . procedure import *
 from .. str import format_float_digits
 
@@ -173,11 +173,11 @@ def run_recipe(recipe):
     and values are ingredients return by the procedures
     """
     try:
-        config.SEARCH_PATH = recipe['config']['ddf_dir']
+        config.DDF_SEARCH_PATH = recipe['config']['ddf_dir']
     except KeyError:
-        if not config.SEARCH_PATH:
+        if not config.DDF_SEARCH_PATH:
             raise ValueError("no ddf_dir configured, please check your recipe")
-    logging.info('path for searching DDF: ' + str(config.SEARCH_PATH))
+    logging.info('path for searching DDF: ' + str(config.DDF_SEARCH_PATH))
 
     check_dataset_availability(recipe)
 
