@@ -47,7 +47,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="ddf_utils.chef.html">ddf_utils.chef package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="ddf_utils.chef.html#submodules">Submodules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ddf_utils.chef.html#module-ddf_utils.chef.config">ddf_utils.chef.config module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ddf_utils.chef.html#ddf-utils-chef-config-module">ddf_utils.chef.config module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ddf_utils.chef.html#module-ddf_utils.chef.cook">ddf_utils.chef.cook module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ddf_utils.chef.html#module-ddf_utils.chef.ingredient">ddf_utils.chef.ingredient module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ddf_utils.chef.html#module-ddf_utils.chef.procedure">ddf_utils.chef.procedure module</a></li>
@@ -62,37 +62,62 @@
 </div>
 <div class="section" id="module-ddf_utils.ddf_reader">
 <span id="ddf-utils-ddf-reader-module"></span><h2>ddf_utils.ddf_reader module<a class="headerlink" href="#module-ddf_utils.ddf_reader" title="Permalink to this headline">¶</a></h2>
-<dl class="function">
-<dt id="ddf_utils.ddf_reader.ddf_concepts">
-<code class="descclassname">ddf_utils.ddf_reader.</code><code class="descname">ddf_concepts</code><span class="sig-paren">(</span><em>ddf_id</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.ddf_reader.ddf_concepts" title="Permalink to this definition">¶</a></dt>
-<dd><p>return all concepts</p>
+<p>new version of ddf_reader, base on datapackage.json</p>
+<dl class="class">
+<dt id="ddf_utils.ddf_reader.DDF">
+<em class="property">class </em><code class="descclassname">ddf_utils.ddf_reader.</code><code class="descname">DDF</code><span class="sig-paren">(</span><em>ddf_id</em>, <em>no_check_valid=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.ddf_reader.DDF" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dl class="attribute">
+<dt id="ddf_utils.ddf_reader.DDF.datapackage">
+<code class="descname">datapackage</code><a class="headerlink" href="#ddf_utils.ddf_reader.DDF.datapackage" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ddf_utils.ddf_reader.DDF.get_all_files">
+<code class="descname">get_all_files</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.ddf_reader.DDF.get_all_files" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ddf_utils.ddf_reader.DDF.get_concept_files">
+<code class="descname">get_concept_files</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.ddf_reader.DDF.get_concept_files" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ddf_utils.ddf_reader.DDF.get_concepts">
+<code class="descname">get_concepts</code><span class="sig-paren">(</span><em>concept_type='all'</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.ddf_reader.DDF.get_concepts" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ddf_utils.ddf_reader.DDF.get_datapoint_df">
+<code class="descname">get_datapoint_df</code><span class="sig-paren">(</span><em>measure</em>, <em>primaryKey=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.ddf_reader.DDF.get_datapoint_df" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ddf_utils.ddf_reader.DDF.get_datapoint_files">
+<code class="descname">get_datapoint_files</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.ddf_reader.DDF.get_datapoint_files" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ddf_utils.ddf_reader.DDF.get_datapoints">
+<code class="descname">get_datapoints</code><span class="sig-paren">(</span><em>measure=None</em>, <em>primaryKey=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.ddf_reader.DDF.get_datapoints" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ddf_utils.ddf_reader.DDF.get_entities">
+<code class="descname">get_entities</code><span class="sig-paren">(</span><em>domain=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.ddf_reader.DDF.get_entities" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 <dl class="function">
-<dt id="ddf_utils.ddf_reader.ddf_datapoint">
-<code class="descclassname">ddf_utils.ddf_reader.</code><code class="descname">ddf_datapoint</code><span class="sig-paren">(</span><em>ddf_id</em>, <em>concept</em>, <em>key=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.ddf_reader.ddf_datapoint" title="Permalink to this definition">¶</a></dt>
-<dd><p>return one datapoint</p>
-</dd></dl>
+<dt id="ddf_utils.ddf_reader.is_dataset">
+<code class="descclassname">ddf_utils.ddf_reader.</code><code class="descname">is_dataset</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.ddf_reader.is_dataset" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="function">
-<dt id="ddf_utils.ddf_reader.ddf_datapoints">
-<code class="descclassname">ddf_utils.ddf_reader.</code><code class="descname">ddf_datapoints</code><span class="sig-paren">(</span><em>ddf_id</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.ddf_reader.ddf_datapoints" title="Permalink to this definition">¶</a></dt>
-<dd><p>return all datapoints</p>
-<p>in case of there are multiple files for one concept (with different keys)
-this function will return a dictionary in the form of {(concept, keys): dataframe}</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="ddf_utils.ddf_reader.ddf_entities">
-<code class="descclassname">ddf_utils.ddf_reader.</code><code class="descname">ddf_entities</code><span class="sig-paren">(</span><em>ddf_id</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.ddf_reader.ddf_entities" title="Permalink to this definition">¶</a></dt>
-<dd><p>return all entities</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="ddf_utils.ddf_reader.ddf_index_cols">
-<code class="descclassname">ddf_utils.ddf_reader.</code><code class="descname">ddf_index_cols</code><span class="sig-paren">(</span><em>ddf_id</em>, <em>concept</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.ddf_reader.ddf_index_cols" title="Permalink to this definition">¶</a></dt>
-<dd><p>return the index columns for given concept</p>
-</dd></dl>
+<dt id="ddf_utils.ddf_reader.list_datasets">
+<code class="descclassname">ddf_utils.ddf_reader.</code><code class="descname">list_datasets</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.ddf_reader.list_datasets" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 </div>
 <div class="section" id="module-ddf_utils.index">
@@ -102,6 +127,14 @@ this function will return a dictionary in the form of {(concept, keys): datafram
 <dt id="ddf_utils.index.concept_index">
 <code class="descclassname">ddf_utils.index.</code><code class="descname">concept_index</code><span class="sig-paren">(</span><em>path</em>, <em>concept_file</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.index.concept_index" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="function">
+<dt id="ddf_utils.index.create_datapackage">
+<code class="descclassname">ddf_utils.index.</code><code class="descname">create_datapackage</code><span class="sig-paren">(</span><em>path</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.index.create_datapackage" title="Permalink to this definition">¶</a></dt>
+<dd><p>create datapackage.json base on the files in <cite>path</cite>.</p>
+<p>A DDFcsv datapackage MUST contain the fields name and resources.</p>
+<p>if name is None, then the base name of <cite>path</cite> will be used.</p>
+</dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.index.create_index_file">
@@ -118,10 +151,26 @@ this function will return a dictionary in the form of {(concept, keys): datafram
 <code class="descclassname">ddf_utils.index.</code><code class="descname">entity_index</code><span class="sig-paren">(</span><em>path</em>, <em>entity_file</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.index.entity_index" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<dl class="function">
+<dt id="ddf_utils.index.get_datapackage">
+<code class="descclassname">ddf_utils.index.</code><code class="descname">get_datapackage</code><span class="sig-paren">(</span><em>path</em>, <em>update_existing=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.index.get_datapackage" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ddf_utils.index.get_ddf_files">
+<code class="descclassname">ddf_utils.index.</code><code class="descname">get_ddf_files</code><span class="sig-paren">(</span><em>path</em>, <em>root=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.index.get_ddf_files" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </div>
 <div class="section" id="module-ddf_utils.io">
 <span id="ddf-utils-io-module"></span><h2>ddf_utils.io module<a class="headerlink" href="#module-ddf_utils.io" title="Permalink to this headline">¶</a></h2>
 <p>io functions for ddf files</p>
+<dl class="function">
+<dt id="ddf_utils.io.cleanup">
+<code class="descclassname">ddf_utils.io.</code><code class="descname">cleanup</code><span class="sig-paren">(</span><em>path</em>, <em>how='ddf'</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.io.cleanup" title="Permalink to this definition">¶</a></dt>
+<dd><p>remove all ddf files in the given path</p>
+</dd></dl>
+
 <dl class="function">
 <dt id="ddf_utils.io.load_google_xls">
 <code class="descclassname">ddf_utils.io.</code><code class="descname">load_google_xls</code><span class="sig-paren">(</span><em>filehash</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.io.load_google_xls" title="Permalink to this definition">¶</a></dt>
@@ -135,19 +184,8 @@ the file path of csv will be out_dir/ddf&#8211;$ftype&#8211;$concept&#8211;$by.c
 </dd></dl>
 
 </div>
-<div class="section" id="module-ddf_utils.metadata">
-<span id="ddf-utils-metadata-module"></span><h2>ddf_utils.metadata module<a class="headerlink" href="#module-ddf_utils.metadata" title="Permalink to this headline">¶</a></h2>
-<dl class="function">
-<dt id="ddf_utils.metadata.generate_metadata">
-<code class="descclassname">ddf_utils.metadata.</code><code class="descname">generate_metadata</code><span class="sig-paren">(</span><em>ddf_path</em>, <em>outpath</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.metadata.generate_metadata" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="ddf_utils.metadata.to_dict_dropna">
-<code class="descclassname">ddf_utils.metadata.</code><code class="descname">to_dict_dropna</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.metadata.to_dict_dropna" title="Permalink to this definition">¶</a></dt>
-<dd><p>return a dictionary that do not contain any NaN values from a dataframe.</p>
-</dd></dl>
-
+<div class="section" id="ddf-utils-metadata-module">
+<h2>ddf_utils.metadata module<a class="headerlink" href="#ddf-utils-metadata-module" title="Permalink to this headline">¶</a></h2>
 </div>
 <div class="section" id="module-ddf_utils.str">
 <span id="ddf-utils-str-module"></span><h2>ddf_utils.str module<a class="headerlink" href="#module-ddf_utils.str" title="Permalink to this headline">¶</a></h2>
@@ -161,8 +199,9 @@ e.g. fix_time_range(&#8216;1980-90&#8217;) = 1985</p>
 
 <dl class="function">
 <dt id="ddf_utils.str.format_float_digits">
-<code class="descclassname">ddf_utils.str.</code><code class="descname">format_float_digits</code><span class="sig-paren">(</span><em>number</em>, <em>digits=5</em>, <em>threshold=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.str.format_float_digits" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<code class="descclassname">ddf_utils.str.</code><code class="descname">format_float_digits</code><span class="sig-paren">(</span><em>number</em>, <em>digits=5</em>, <em>threshold=None</em>, <em>keep_decimal=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.str.format_float_digits" title="Permalink to this definition">¶</a></dt>
+<dd><p>format the number, limit the maximum amount of digits. Removing tailing zeros.</p>
+</dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.str.format_float_sigfig">
@@ -171,7 +210,7 @@ e.g. fix_time_range(&#8216;1980-90&#8217;) = 1985</p>
 
 <dl class="function">
 <dt id="ddf_utils.str.to_concept_id">
-<code class="descclassname">ddf_utils.str.</code><code class="descname">to_concept_id</code><span class="sig-paren">(</span><em>s</em>, <em>sep='_'</em><span class="sig-paren">)</span> &rarr; str<a class="headerlink" href="#ddf_utils.str.to_concept_id" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.str.</code><code class="descname">to_concept_id</code><span class="sig-paren">(</span><em>s</em>, <em>sep='_'</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.str.to_concept_id" title="Permalink to this definition">¶</a></dt>
 <dd><p>convert a string to alphanumeric format.</p>
 </dd></dl>
 
@@ -195,7 +234,7 @@ e.g. fix_time_range(&#8216;1980-90&#8217;) = 1985</p>
 <li><a class="reference internal" href="#module-ddf_utils.ddf_reader">ddf_utils.ddf_reader module</a></li>
 <li><a class="reference internal" href="#module-ddf_utils.index">ddf_utils.index module</a></li>
 <li><a class="reference internal" href="#module-ddf_utils.io">ddf_utils.io module</a></li>
-<li><a class="reference internal" href="#module-ddf_utils.metadata">ddf_utils.metadata module</a></li>
+<li><a class="reference internal" href="#ddf-utils-metadata-module">ddf_utils.metadata module</a></li>
 <li><a class="reference internal" href="#module-ddf_utils.str">ddf_utils.str module</a></li>
 <li><a class="reference internal" href="#module-ddf_utils">Module contents</a></li>
 </ul>

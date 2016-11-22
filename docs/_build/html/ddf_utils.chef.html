@@ -44,8 +44,8 @@
 <div class="section" id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="module-ddf_utils.chef.config">
-<span id="ddf-utils-chef-config-module"></span><h2>ddf_utils.chef.config module<a class="headerlink" href="#module-ddf_utils.chef.config" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="ddf-utils-chef-config-module">
+<h2>ddf_utils.chef.config module<a class="headerlink" href="#ddf-utils-chef-config-module" title="Permalink to this headline">¶</a></h2>
 </div>
 <div class="section" id="module-ddf_utils.chef.cook">
 <span id="ddf-utils-chef-cook-module"></span><h2>ddf_utils.chef.cook module<a class="headerlink" href="#module-ddf_utils.chef.cook" title="Permalink to this headline">¶</a></h2>
@@ -55,6 +55,13 @@
 <code class="descclassname">ddf_utils.chef.cook.</code><code class="descname">build_recipe</code><span class="sig-paren">(</span><em>recipe_file</em>, <em>to_disk=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.cook.build_recipe" title="Permalink to this definition">¶</a></dt>
 <dd><p>build a complete recipe file if there are includes in
 recipe file, if no includes found than return the file as is.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ddf_utils.chef.cook.check_dataset_availability">
+<code class="descclassname">ddf_utils.chef.cook.</code><code class="descname">check_dataset_availability</code><span class="sig-paren">(</span><em>recipe</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.cook.check_dataset_availability" title="Permalink to this definition">¶</a></dt>
+<dd><p>check availability of all datasets required by the recipe.</p>
+<p>raise error if some dataset not available. otherwise do nothing.</p>
 </dd></dl>
 
 <dl class="function">
@@ -105,19 +112,6 @@ TODO: what if key == &#8216;*&#8217;? Is it possible?</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="ddf_utils.chef.ingredient.Ingredient.filter_index_file_name">
-<code class="descname">filter_index_file_name</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.ingredient.Ingredient.filter_index_file_name" title="Permalink to this definition">¶</a></dt>
-<dd><p>filter index by keywords in the file names.
-This method should only called for entities related tasks.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="ddf_utils.chef.ingredient.Ingredient.filter_index_key_value">
-<code class="descname">filter_index_key_value</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.ingredient.Ingredient.filter_index_key_value" title="Permalink to this definition">¶</a></dt>
-<dd><p>filter index file by key and value</p>
-</dd></dl>
-
-<dl class="method">
 <dt id="ddf_utils.chef.ingredient.Ingredient.filter_row">
 <code class="descname">filter_row</code><span class="sig-paren">(</span><em>df</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.ingredient.Ingredient.filter_row" title="Permalink to this definition">¶</a></dt>
 <dd><p>return the rows selected by self.row_filter.</p>
@@ -130,30 +124,14 @@ This method should only called for entities related tasks.</p>
 
 <dl class="method">
 <dt id="ddf_utils.chef.ingredient.Ingredient.get_data">
-<code class="descname">get_data</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.ingredient.Ingredient.get_data" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ddf_utils.chef.ingredient.Ingredient.get_data_str">
-<code class="descname">get_data_str</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.ingredient.Ingredient.get_data_str" title="Permalink to this definition">¶</a></dt>
-<dd><p>this function will read the related data as strings for all columns,
-using the filename as key in the result</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="ddf_utils.chef.ingredient.Ingredient.get_last_update">
-<code class="descname">get_last_update</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.ingredient.Ingredient.get_last_update" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="ddf_utils.chef.ingredient.Ingredient.index">
-<code class="descname">index</code><a class="headerlink" href="#ddf_utils.chef.ingredient.Ingredient.index" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_data</code><span class="sig-paren">(</span><em>copy=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.ingredient.Ingredient.get_data" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="ddf_utils.chef.ingredient.Ingredient.key_to_list">
 <code class="descname">key_to_list</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.ingredient.Ingredient.key_to_list" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>helper function: make a list that contains primaryKey of this ingredient</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="ddf_utils.chef.ingredient.Ingredient.reset_data">
@@ -189,9 +167,9 @@ according to the mapping file.</p>
 <dd><cite>search_cols</cite>: a list of columns of base ingredient, to search for values
 <cite>to_find</cite>: the column of ingredient to_align. The function will search the data
 of this column in search_cols
-<cite>to_replace</cite>: the column of ingredient to replace with new value. can be same
-as to_find or a new column
-<cite>drop_not_found</cite>: drop those entities not found in the base</dd>
+<cite>to_replace</cite>: the column of to_align ingredient to replace with new value.
+can be same as to_find or a new column
+<cite>drop_not_found</cite>: if we should drop those entities not found in the base</dd>
 </dl>
 </dd></dl>
 
@@ -318,7 +296,7 @@ So that oldname column will be change to values from newname column.</dd>
   <ul>
 <li><a class="reference internal" href="#">ddf_utils.chef package</a><ul>
 <li><a class="reference internal" href="#submodules">Submodules</a></li>
-<li><a class="reference internal" href="#module-ddf_utils.chef.config">ddf_utils.chef.config module</a></li>
+<li><a class="reference internal" href="#ddf-utils-chef-config-module">ddf_utils.chef.config module</a></li>
 <li><a class="reference internal" href="#module-ddf_utils.chef.cook">ddf_utils.chef.cook module</a></li>
 <li><a class="reference internal" href="#module-ddf_utils.chef.ingredient">ddf_utils.chef.ingredient module</a></li>
 <li><a class="reference internal" href="#module-ddf_utils.chef.procedure">ddf_utils.chef.procedure module</a></li>
