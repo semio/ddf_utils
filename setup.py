@@ -11,6 +11,17 @@ if sys.argv[-1] == 'tag':
     os.system("git push --tags")
     sys.exit()
 
+requirements = [
+    'pandas',
+    'unidecode',
+    'pyyaml',
+    'orderedattrdict',
+    'typing',
+    'cookiecutter',
+    'Click',
+    'daff'
+]
+
 setup(
     name='ddf_utils',
     version=version,
@@ -20,8 +31,7 @@ setup(
     author_email='prairy.long@gmail.com',
     license='MIT',
     packages=find_packages(exclude=['contrib', 'docs', 'tests']),
-    install_requires=['pandas', 'unidecode', 'pyyaml', 'orderedattrdict', 'typing',
-                      'cookiecutter', 'Click'],
+    install_requires=requirements,
     entry_points={
         'console_scripts': [
             'ddf = ddf_utils.cli:ddf'
