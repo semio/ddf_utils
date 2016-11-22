@@ -144,9 +144,9 @@ def update_recipe_last_update(recipe, outdir):
 
 
 def check_dataset_availability(recipe):
-    """check availablity of all datasets required by the recipe.
+    """check availability of all datasets required by the recipe.
 
-    raise error if some dataset not avaliable. otherwise do nothing.
+    raise error if some dataset not available. otherwise do nothing.
     """
     ddf_dir = recipe.config.ddf_dir
 
@@ -225,7 +225,6 @@ def run_recipe(recipe):
             ings_dict[result] = out
 
         res[k] = out  # use the last output Ingredient object as final result.
-
     return res
 
 
@@ -242,20 +241,23 @@ def dish_to_csv(dishes, outpath):
                     if t == 'datapoints':
                         by = dish.key_to_list()
                         path = os.path.join(outpath, 'ddf--{}--{}--by--{}.csv'.format(t, k, '--'.join(by)))
-                    elif k == 'concept':
+                    elif t == 'concepts':
                         path = os.path.join(outpath, 'ddf--{}.csv'.format(t))
-                    else:  # entities
+                    elif t == 'entities':
                         domain = dish.key[0]
                         if k == domain:
                             path = os.path.join(outpath, 'ddf--{}--{}.csv'.format(t, k))
                         else:
                             path = os.path.join(outpath, 'ddf--{}--{}--{}.csv'.format(t, domain, k))
+                    else:
+                        raise ValueError('Not a correct collection: ' + t)
 
                 if t == 'datapoints':
                     df = df.set_index(by)
                     if not np.issubdtype(df[k].dtype, np.number):
                         try:
                             df[k] = df[k].astype(float)
+                            # TODO: make floating precision an option
                             df[k] = df[k].map(lambda x: format_float_digits(x, 5))
                         except ValueError:
                             logging.warning("data not numeric: " + k)

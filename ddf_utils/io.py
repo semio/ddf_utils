@@ -36,7 +36,8 @@ def cleanup(path, how='ddf'):
         for f in os.listdir(path):
             if f.startswith("ddf--"):
                 os.remove(os.path.join(path, f))
-        os.remove(os.path.join(path, 'datapackage.json'))
+        if os.path.exists(os.path.join(path, 'datapackage.json')):
+            os.remove(os.path.join(path, 'datapackage.json'))
     if how == 'lang':
         if os.path.exists(os.path.join(path, 'lang')):
             shutil.rmtree(os.path.join(path, 'lang'))
