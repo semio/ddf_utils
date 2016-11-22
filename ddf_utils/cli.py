@@ -20,10 +20,11 @@ def new():
 
 
 @ddf.command()
-@click.argument('how', default='ddf')
+@click.argument('how', default='ddf', type=click.Choice(['ddf', 'lang', 'langsplit']))
 @click.argument('path', default='./')
 @click.option('--force', flag_value=True, default=False)
 def cleanup(path, how, force):
+    """clean up ddf files or translation files"""
     from ddf_utils.io import cleanup as cl
     from ddf_utils.ddf_reader_new import is_dataset
     if force:
