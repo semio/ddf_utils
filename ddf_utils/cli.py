@@ -20,6 +20,23 @@ def new():
 
 
 @ddf.command()
+@click.argument('how', default='ddf', type=click.Choice(['ddf', 'lang', 'langsplit']))
+@click.argument('path', default='./')
+@click.option('--force', flag_value=True, default=False)
+def cleanup(path, how, force):
+    """clean up ddf files or translation files"""
+    from ddf_utils.io import cleanup as cl
+    from ddf_utils.ddf_reader_new import is_dataset
+    if force:
+        cl(path, how)
+    else:
+        if not is_dataset(path):
+            print('not a dataset path: {}. please set correct path or use --force to force run.'.format(path))
+        else:
+            cl(path, how)
+
+
+@ddf.command()
 @click.argument('path')
 @click.option('--update', '-u', 'update', flag_value=True, default=False)
 def create_datapackage(path, update):
@@ -46,6 +63,8 @@ def create_datapackage(path, update):
 def run_recipe(recipe, outdir, update, dry_run):
     """generate new ddf dataset with recipe"""
     import ddf_utils.chef as ddfrecipe
+    from ddf_utils.index import get_datapackage
+    import json
     import logging
     logging.basicConfig(level=logging.DEBUG, format='%(asctime)s -%(levelname)s- %(message)s',
                         datefmt="%H:%M:%S"
@@ -58,8 +77,10 @@ def run_recipe(recipe, outdir, update, dry_run):
     if not dry_run:
         print('saving result to disk...')
         ddfrecipe.dish_to_csv(res, outdir)
-        print('creating index file...')
-        create_index_file(outdir)
+        print('creating datapackage file...')
+        res = get_datapackage(outdir)
+        with open(os.path.join(outdir, 'datapackage.json'), 'w') as f:
+            json.dump(res, f, indent=4)
     print("done.")
 
 

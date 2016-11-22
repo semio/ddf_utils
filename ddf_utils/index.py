@@ -192,7 +192,7 @@ def create_datapackage(path, **kwargs):
 
             resources[n].update({'schema': schema})
 
-        if 'entities' in name_res:
+        elif 'entities' in name_res:
             match = re.match('ddf--entities--([\w_]+)-*([\w_]*)', name_res).groups()
             if len(match) == 1:
                 domain = match[0]
@@ -226,7 +226,7 @@ def create_datapackage(path, **kwargs):
 
             resources[n].update({'schema': schema})
 
-        if 'concepts' in name_res:
+        elif 'concepts' in name_res:
             with open(os.path.join(path, r['path'])) as f:
                 reader = csv.reader(f, delimiter=',', quotechar='"')
                 header = next(reader)
@@ -237,6 +237,10 @@ def create_datapackage(path, **kwargs):
                 schema['fields'].append({'name': h})
 
             resources[n].update({'schema': schema})
+        else: # not entity/concept/datapoint. it's not supported yet so we don't include them.
+            print("not supported file: " + name_res)
+            resources[n] = None
+
     # return
-    datapackage['resources'] = resources
+    datapackage['resources'] = [x for x in resources if x is not None]
     return datapackage

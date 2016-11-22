@@ -5,7 +5,7 @@
 import pandas as pd
 import numpy as np
 from . ingredient import Ingredient
-from . import config
+from .. import config
 import time
 from typing import List, Union, Dict, Optional
 import re
@@ -44,7 +44,7 @@ def translate_header(ingredient: Ingredient, *, result=None, **options) -> Ingre
 
     if not result:
         result = ingredient.ingred_id + '-translated'
-    return Ingredient(result, ingredient.ddf_id, newkey, "", data=data)
+    return Ingredient(result, None, newkey, None, data=data)
 
 
 def translate_column(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
@@ -84,7 +84,7 @@ def translate_column(ingredient: Ingredient, *, result=None, **options) -> Ingre
 
     if not result:
         result = ingredient.ingred_id + '-translated'
-    return Ingredient(result, ingredient.ddf_id, ingredient.key, "", data=di)
+    return Ingredient(result, None, ingredient.key, None, data=di)
 
 
 def copy(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
@@ -110,7 +110,7 @@ def copy(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
     ingredient.reset_data()
     if not result:
         result = ingredient.ingred_id + '_'
-    return Ingredient(result, ingredient.ddf_id, ingredient.key, "", data=data)
+    return Ingredient(result, None, ingredient.key, None, data=data)
 
 
 def merge(*ingredients: List[Ingredient], result=None, **options):
@@ -165,7 +165,7 @@ def merge(*ingredients: List[Ingredient], result=None, **options):
     if not result:
         result = 'all_data_merged_'+str(int(time.time() * 1000))
 
-    return Ingredient(result, result, newkey, '*', data=res_all)
+    return Ingredient(result, None, newkey, '*', data=res_all)
 
 
 def __get_last_item(ser):
@@ -223,7 +223,7 @@ def identity(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
         copy: if copy is True, then treat all data as string. Default: False
     """
     if 'copy' in options and options['copy'] is True:
-        ingredient.data = ingredient.get_data_str()
+        ingredient.data = ingredient.get_data(copy=True)
     else:
         ingredient.data = ingredient.get_data()
 
@@ -294,7 +294,7 @@ def filter_row(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
 
     if not result:
         result = ingredient.ingred_id + '-filtered'
-    return Ingredient(result, ingredient.ingred_id, newkey, '*', data=res)
+    return Ingredient(result, None, newkey, '*', data=res)
 
 
 def filter_item(ingredient: Ingredient, *, result: Optional[str]=None, **options) -> Ingredient:
@@ -317,7 +317,7 @@ def filter_item(ingredient: Ingredient, *, result: Optional[str]=None, **options
     if not result:
         result = ingredient.ingred_id
 
-    return Ingredient(result, ingredient.ddf_id, ingredient.key, '', data=data)
+    return Ingredient(result, None, ingredient.key, None, data=data)
 
 
 def align(to_align: Ingredient, base: Ingredient, *, result=None, **options) -> Ingredient:
@@ -403,9 +403,9 @@ def align(to_align: Ingredient, base: Ingredient, *, result=None, **options) -> 
         result = to_align.ingred_id + '-aligned'
     if to_align.dtype == 'datapoints':
         newkey = to_align.key.replace(to_find, to_replace)
-        return Ingredient(result, result, newkey, '', data=ing_data)
+        return Ingredient(result, None, newkey, None, data=ing_data)
     else:
-        return Ingredient(result, to_align.ddf_id, to_replace, '', data=ing_data)
+        return Ingredient(result, None, to_replace, None, data=ing_data)
 
 
 def groupby(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
@@ -434,7 +434,7 @@ def groupby(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
 
     if not result:
         result = ingredient.ingred_id + '-agg'
-    return Ingredient(result, ingredient.ddf_id, newkey, '', data=data)
+    return Ingredient(result, None, newkey, None, data=data)
 
 
 def accumulate(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
@@ -477,7 +477,7 @@ def accumulate(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
     if not result:
         result = ingredient.ingred_id + '-accued'
 
-    return Ingredient(result, ingredient.ddf_id, ingredient.key, '', data=data)
+    return Ingredient(result, None, ingredient.key, None, data=data)
 
 
 def _aagr(df: pd.DataFrame, window: int=10):
@@ -513,4 +513,4 @@ def run_op(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
 
     if not result:
         result = ingredient.ingred_id + '-op'
-    return Ingredient(result, ingredient.ddf_id, ingredient.key, '', data=data)
+    return Ingredient(result, None, ingredient.key, None, data=data)

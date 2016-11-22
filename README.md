@@ -9,16 +9,17 @@ So python 3 is required in order to run this module.
 
 ## Commandline helper
 
-we provide a helper script `ddf.py` for etl tasks. For now supported commands are:
+we provide a commandline utility `ddf` for etl tasks. For now supported commands are:
 
 ```
-$ ddf.py --help
-Usage: ddf.py [OPTIONS] COMMAND [ARGS]...
+$ ddf --help
+Usage: ddf [OPTIONS] COMMAND [ARGS]...
 
 Options:
   --help  Show this message and exit.
 
 Commands:
+  cleanup             clean up ddf files or translation files
   create_datapackage  create datapackage.json
   merge_translation   merge all translation files from crowdin
   new                 create a new ddf project
@@ -26,7 +27,7 @@ Commands:
   split_translation   split ddf files for crowdin translation
 ```
 
-for each subcommands, you can run `ddf.py <subcommand> --help` to get help
+for each subcommands, you can run `ddf <subcommand> --help` to get help
 of that subcommand
 
 ### Recipe
@@ -36,13 +37,13 @@ document for recipe: [link](https://github.com/semio/ddf--gapminder--systema_glo
 to run a recipe, simply run following:
 
 ```
-$ ddf.py run_recipe -i path_to_recipe -o outdir
+$ ddf run_recipe -i path_to_recipe -o outdir
 ```
 
 to run a recipe without saving the result into disk, run
 
 ```
-$ ddf.py run_recipe -i path_to_recipe -d
+$ ddf run_recipe -i path_to_recipe -d
 ```
 
 note that you should set `ddf_dir`/`recipes_dir`/`dictionary_dir` correct in order 
