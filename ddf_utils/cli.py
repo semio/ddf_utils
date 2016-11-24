@@ -109,12 +109,16 @@ def split_translation(path, split_path, dtype, exclude_concepts, overwrite):
 @ddf.command()
 @click.argument('path', type=click.Path(exists=True))
 @click.option('--overwrite/--no-overwrite', default=False)
+@click.option('--type', '-t', 'dtype', type=click.Choice(['json', 'csv']))
 @click.option('--split_path', default='langsplit')
 @click.option('--lang_path', default='lang')
-def merge_translation(path, split_path, lang_path, overwrite):
+def merge_translation(path, split_path, lang_path, dtype, overwrite):
     """merge all translation files from crowdin"""
-    from ddf_utils.i18n import merge_translations
-    merge_translations(path, split_path, lang_path, overwrite)
+    from ddf_utils.i18n import merge_translations_csv, merge_translations_json
+    if dtype == 'csv':
+        merge_translations_csv(path, split_path, lang_path, overwrite)
+    else:
+        merge_translations_json(path, split_path, lang_path, overwrite)
     click.echo('Done.')
 
 

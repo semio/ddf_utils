@@ -120,7 +120,7 @@ def split_translations_csv(path, split_path='langsplit', exclude_concepts=None, 
     return
 
 
-def merge_translations(path, split_path='langsplit', lang_path='lang', overwrite=False):
+def merge_translations_csv(path, split_path='langsplit', lang_path='lang', overwrite=False):
 
     if overwrite:
         # TODO: overwrite existing translation instead of update
@@ -175,3 +175,66 @@ def merge_translations(path, split_path='langsplit', lang_path='lang', overwrite
             json.dump(datapackage, f, indent=4)
     return
 
+
+def merge_translations_json(path, split_path='langsplit', lang_path='lang', overwrite=False):
+
+    if overwrite:
+        # TODO: overwrite existing translation instead of update
+        raise NotImplementedError
+
+    # make the paths full paths
+    split_path = os.path.join(path, split_path)
+    lang_path = os.path.join(path, lang_path)
+
+    datapackage = get_datapackage(path)
+    source_lang = datapackage['language']['id']
+
+    # because the primaryKey is not in the splited files, we generate
+    # a mapping for later use.
+    key_mapping = dict([(x['name'], x['schema']['primaryKey']) for x in datapackage['resources']])
+
+    # get all available translations, update it when necessary below.
+    if 'translations' not in datapackage.keys():
+        datapackage['translations'] = []
+    available_translations = [x['id'] for x in datapackage['translations']]
+    new_translations = False
+
+    assert os.path.exists(split_path)
+
+    langs = next(os.walk(split_path))[1]  # all sub folders in split path.
+
+    for lang in langs:
+        if lang == source_lang:
+            continue
+
+        if lang not in available_translations:
+            datapackage['translations'].append({'id': lang})
+            new_translations = True
+
+        basepath = os.path.join(split_path, lang) + '/'
+        target_lang_path = os.path.join(lang_path, lang)
+        os.makedirs(target_lang_path, exist_ok=True)
+
+        for root, dirs, files in os.walk(basepath):
+            jsonfiles = [x for x in files if 'json' in x]
+            if len(jsonfiles) > 0:
+                p = root.replace(basepath, '')
+                for fn in jsonfiles:
+                    name = os.path.splitext(fn)[0]
+                    target_file_path = os.path.join(target_lang_path, p, fn).replace('.json', '.csv')
+                    if not os.path.exists(os.path.join(target_lang_path, p)):
+                        os.makedirs(os.path.join(target_lang_path, p))
+                    df = pd.read_json(os.path.join(root, fn), orient='index')
+                    # add back the index name.
+                    # the index name will be missing because it's not in the json file.
+                    df.index.name = key_mapping[name]
+                    if os.path.exists(target_file_path):
+                        df_old = pd.read_csv(target_file_path, index_col=0)
+                        df_old.update(df)
+                        df = df_old.copy()
+                    df.to_csv(target_file_path, encoding='utf8')
+    # update datapackage if there are new translations
+    if new_translations:
+        with open(os.path.join(path, 'datapackage.json'), 'w') as f:
+            json.dump(datapackage, f, indent=4, ensure_ascii=False)
+    return
