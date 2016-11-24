@@ -4,12 +4,74 @@ workflow: https://docs.google.com/document/d/11d5D5CPlr6I2BqP8z0p2o_dYQC9AYUyxcL
 '"""
 
 import pandas as pd
+import numpy as np
 from . index import get_datapackage
 import json
 import os
 
+def split_translations_json(path, split_path='langsplit', exclude_concepts=None, overwrite=False):
+    datapackage = get_datapackage(path)
+    split_path = os.path.join(path, split_path)
 
-def split_translations(path, split_path='langsplit', exclude_concepts=None, overwrite=False):
+    try:
+        lang = datapackage['language']['id']
+    except KeyError:
+        print('no language tag found, assuming en')
+        lang = 'en'
+
+    basepath = os.path.join(split_path, lang)
+    os.makedirs(basepath, exist_ok=True)
+
+    # exclude some columns for translation by default
+    if not exclude_concepts:
+        exclude_concepts = ['concept_type', 'domain']
+
+    concepts = list()
+    for res in datapackage['resources']:
+        file_path = res['path']
+        key = res['schema']['primaryKey']
+        if key == 'concept':
+            concepts.append(pd.read_csv(os.path.join(path, file_path)))
+    concepts = pd.concat(concepts, ignore_index=True).set_index('concept')
+
+    for res in datapackage['resources']:
+        file_path = res['path']
+        key = res['schema']['primaryKey']
+
+        df = pd.read_csv(os.path.join(path, file_path))
+        df = df.set_index(key)
+        for c in list(df.columns):
+            if c in exclude_concepts:
+                df = df.drop(c, axis=1)
+                continue
+            if c.startswith('is--'):  # it will be boolean, skip
+                df = df.drop(c, axis=1)
+                continue
+            try:
+                if not concepts.loc[c, 'concept_type'] == 'string':
+                    df = df.drop(c, axis=1)
+                    continue
+            except KeyError:
+                print('concept not found in ddf--concepts: ' + c)
+                df = df.drop(c, axis=1)
+                continue
+        # save file to disk
+        if not np.all(pd.isnull(df)):
+            json_path = os.path.join(basepath, res['name']+'.json')
+            dir_path = os.path.dirname(json_path)
+            if os.path.exists(json_path) and not overwrite:
+                print('file exists: ' + json_path)
+                continue
+            os.makedirs(dir_path, exist_ok=True)
+            # print(json_path)
+            with open(json_path, 'w', encoding='utf8') as f:
+                df = df.fillna('')
+                content = df.to_json(orient='index')
+                json.dump(json.loads(content), f, indent=4)
+    return
+
+
+def split_translations_csv(path, split_path='langsplit', exclude_concepts=None, overwrite=False):
     datapackage = get_datapackage(path)
     split_path = os.path.join(path, split_path)
 

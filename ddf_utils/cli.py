@@ -87,13 +87,18 @@ def run_recipe(recipe, outdir, update, dry_run):
 # Translation related tasks
 @ddf.command()
 @click.argument('path', type=click.Path(exists=True))
+@click.option('--type', '-t', 'dtype', type=click.Choice(['csv', 'json']))
 @click.option('--overwrite/--no-overwrite', default=False)
 @click.option('--split_path', default='langsplit')
 @click.option('--exclude_concepts', '-x', multiple=True)
-def split_translation(path, split_path, exclude_concepts, overwrite):
+def split_translation(path, split_path, dtype, exclude_concepts, overwrite):
     """split ddf files for crowdin translation"""
-    from ddf_utils.i18n import split_translations
-    split_translations(path, split_path, exclude_concepts, overwrite)
+    from ddf_utils.i18n import split_translations_csv, split_translations_json
+    if dtype == 'csv':
+        split_translations_csv(path, split_path, exclude_concepts, overwrite)
+    elif dtype == 'json':
+        split_translations_json(path, split_path, exclude_concepts, overwrite)
+    click.echo('Done.')
 
 
 @ddf.command()
