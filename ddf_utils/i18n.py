@@ -67,7 +67,7 @@ def split_translations_json(path, split_path='langsplit', exclude_concepts=None,
             with open(json_path, 'w', encoding='utf8') as f:
                 df = df.fillna('')
                 content = df.to_json(orient='index')
-                json.dump(json.loads(content), f, indent=4)
+                json.dump(json.loads(content), f, indent=4, ensure_ascii=False)
     return
 
 
@@ -155,8 +155,8 @@ def merge_translations_csv(path, split_path='langsplit', lang_path='lang', overw
         os.makedirs(target_lang_path, exist_ok=True)
 
         for root, dirs, files in os.walk(basepath):
-            csvfiles = [x for x in files if 'csv' in x]  # there are csv files.
-            if len(csvfiles) > 0:
+            csvfiles = [x for x in files if 'csv' in x]
+            if len(csvfiles) > 0:  # there are csv files.
                 p = root.replace(basepath, '')
 
                 os.makedirs(os.path.join(target_lang_path, os.path.dirname(p)), exist_ok=True)
@@ -172,7 +172,7 @@ def merge_translations_csv(path, split_path='langsplit', lang_path='lang', overw
     # update datapackage if there are new translations
     if new_translations:
         with open(os.path.join(path, 'datapackage.json'), 'w') as f:
-            json.dump(datapackage, f, indent=4)
+            json.dump(datapackage, f, indent=4, ensure_ascii=False)
     return
 
 

@@ -26,7 +26,7 @@ def get_datapackage(path, update_existing=False, to_disk=False):
 
     if to_disk:
         with open(datapackage_path, 'w', encoding='utf8') as f:
-            json.dump(datapackage_new, f, indent=4)
+            json.dump(datapackage_new, f, indent=4, ensure_ascii=False)
     return datapackage_new
 
 

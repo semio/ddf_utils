@@ -57,7 +57,7 @@ def create_datapackage(path, update):
             return
         res = get_datapackage(path)
         with open(os.path.join(path, 'datapackage.json'), 'w', encoding='utf8') as f:
-            json.dump(res, f, indent=4)
+            json.dump(res, f, indent=4, ensure_ascii=False)
     else:
         get_datapackage(path, update_existing=True)
     click.echo('Done.')
@@ -85,7 +85,7 @@ def run_recipe(recipe, outdir, update, dry_run):
         click.echo('creating datapackage file...')
         res = get_datapackage(outdir)
         with open(os.path.join(outdir, 'datapackage.json'), 'w', encoding='utf8') as f:
-            json.dump(res, f, indent=4)
+            json.dump(res, f, indent=4, ensure_ascii=False)
     click.echo("Done.")
 
 
