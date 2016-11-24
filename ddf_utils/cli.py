@@ -33,7 +33,7 @@ def new():
 def cleanup(path, how, force):
     """clean up ddf files or translation files"""
     from ddf_utils.io import cleanup as cl
-    from ddf_utils.ddf_reader_new import is_dataset
+    from ddf_utils.ddf_reader import is_dataset
     if force:
         cl(path, how)
     else:
