@@ -1,115 +1,32 @@
 # -*- coding: utf-8 -*-
-"""create ddf--index.csv"""
+"""functions for datapackage.json"""
 
-import csv
-from pandas import DataFrame, concat
 import os
 import re
 import json
+import csv
 from collections import OrderedDict
 
 
-def concept_index(path, concept_file):
-
-    df = DataFrame([], columns=index_columns)
-
-    with open(os.path.join(path, concept_file)) as f:
-        reader = csv.reader(f, delimiter=',', quotechar='"')
-        header = next(reader)
-
-    header.remove('concept')
-    df['value'] = header
-    df['key'] = 'concept'
-    df['file'] = concept_file
-
-    return df
-
-
-def entity_index(path, entity_file):
-    df = DataFrame([], columns=index_columns)
-
-    # get the domain/set name from file name.
-    # there are 2 possible format for entity filename:
-    # 1. ddf--entities--$domain.csv
-    # 2. ddf--entities--$domain--$set.csv
-    match = re.match('ddf--entities--([\w_]+)-*([\w_]*).csv', entity_file).groups()
-    if len(match) == 1:
-        domain = match[0]
-        concept = None
-    else:
-        domain, concept = match
-
-    with open(os.path.join(path, entity_file)) as f:
-        reader = csv.reader(f, delimiter=',', quotechar='"')
-        # we only need the headers for index file
-        header = next(reader)
-
-    # find out which key is used in the file.
-    # the key in index should be consistent with the one in entities
-    if domain in header:
-        header.remove(domain)
-        key = domain
-    elif concept in header:
-        header.remove(concept)
-        key = concept
-    else:
-        raise ValueError("the header in entity file not match with file name! \
-        Please double check your entities files.")
-
-    df['value'] = header
-    df['key'] = key
-    df['file'] = entity_file
-
-    return df
-
-
-def datapoint_index(path, datapoint_file):
-    df = DataFrame([], columns=index_columns)
-
-    value, key = re.match('ddf--datapoints--([\w_]+)--by--(.*).csv', datapoint_file).groups()
-
-    key = ','.join(key.split('--'))
-
-    df['value'] = value.split('--')
-    df['key'] = key
-    df['file'] = datapoint_file
-
-    return df
-
-
-def create_index_file(path, indexfile='ddf--index.csv'):
-    fs = os.listdir(path)
-
-    res = []
-    for f in fs:
-        if 'concept' in f:
-            res.append(concept_index(path, f))
-        if 'entities' in f:
-            res.append(entity_index(path, f))
-        if 'datapoints' in f:
-            res.append(datapoint_index(path, f))
-
-    res_df = concat(res, ignore_index=True)
-    res_df = res_df.drop_duplicates()
-    return res_df
-
-
-def get_datapackage(path, update_existing=False):
+def get_datapackage(path, update_existing=False, to_disk=False):
     datapackage_path = os.path.join(path, 'datapackage.json')
+
     if os.path.exists(datapackage_path):
-        with open(datapackage_path) as f:
+        # TODO: move the json reading/writting functions to io.py
+        with open(datapackage_path, encoding='utf8') as f:
             datapackage_old = json.load(f, object_pairs_hook=OrderedDict)
 
         if update_existing:
             _ = datapackage_old.pop('resources')  # don't use the old resources
             datapackage_new = create_datapackage(path, **datapackage_old)
-            with open(datapackage_path, 'w') as f:
-                json.dump(datapackage_new, f, indent=4)
         else:
             return datapackage_old
     else:
         datapackage_new = create_datapackage(path)
 
+    if to_disk:
+        with open(datapackage_path, 'w', encoding='utf8') as f:
+            json.dump(datapackage_new, f, indent=4)
     return datapackage_new
 
 
@@ -141,13 +58,19 @@ def create_datapackage(path, **kwargs):
 
     datapackage = OrderedDict()
 
+    # setting default name / lang
     try:
         name = kwargs.pop('name')
     except KeyError:
-        print('name not specified, using the path name')
+        # print('name not specified, using the path name')
         name = os.path.basename(os.path.normpath(os.path.abspath(path)))
+    try:
+        lang = kwargs.pop('language')
+    except KeyError:
+        lang = {'id': 'en'}
 
     datapackage['name'] = name
+    datapackage['language'] = lang
 
     # add all optional settings
     for k in sorted(kwargs.keys()):
@@ -206,10 +129,8 @@ def create_datapackage(path, **kwargs):
                 header = next(reader)
 
             if domain in header:
-                header.remove(domain)
                 key = domain
             elif concept in header:
-                header.remove(concept)
                 key = concept
             else:
                 raise ValueError('no matching header found for {}!'.format(name_res))
@@ -220,18 +141,14 @@ def create_datapackage(path, **kwargs):
                 # key = header[0]
 
             schema['primaryKey'] = key
-
             for h in header:
                 schema['fields'].append({'name': h})
-
             resources[n].update({'schema': schema})
 
         elif 'concepts' in name_res:
             with open(os.path.join(path, r['path'])) as f:
                 reader = csv.reader(f, delimiter=',', quotechar='"')
                 header = next(reader)
-
-            header.remove('concept')
             schema['primaryKey'] = 'concept'
             for h in header:
                 schema['fields'].append({'name': h})
