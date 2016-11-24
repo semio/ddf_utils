@@ -47,7 +47,6 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="ddf_utils.chef.html">ddf_utils.chef package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="ddf_utils.chef.html#submodules">Submodules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ddf_utils.chef.html#ddf-utils-chef-config-module">ddf_utils.chef.config module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ddf_utils.chef.html#module-ddf_utils.chef.cook">ddf_utils.chef.cook module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ddf_utils.chef.html#module-ddf_utils.chef.ingredient">ddf_utils.chef.ingredient module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ddf_utils.chef.html#module-ddf_utils.chef.procedure">ddf_utils.chef.procedure module</a></li>
@@ -59,6 +58,14 @@
 </div>
 <div class="section" id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-ddf_utils.cli">
+<span id="ddf-utils-cli-module"></span><h2>ddf_utils.cli module<a class="headerlink" href="#module-ddf_utils.cli" title="Permalink to this headline">¶</a></h2>
+<p>script for ddf dataset management tasks</p>
+</div>
+<div class="section" id="module-ddf_utils.config">
+<span id="ddf-utils-config-module"></span><h2>ddf_utils.config module<a class="headerlink" href="#module-ddf_utils.config" title="Permalink to this headline">¶</a></h2>
+<p>global variables for ddf_utils</p>
 </div>
 <div class="section" id="module-ddf_utils.ddf_reader">
 <span id="ddf-utils-ddf-reader-module"></span><h2>ddf_utils.ddf_reader module<a class="headerlink" href="#module-ddf_utils.ddf_reader" title="Permalink to this headline">¶</a></h2>
@@ -120,14 +127,30 @@
 <dd></dd></dl>
 
 </div>
-<div class="section" id="module-ddf_utils.index">
-<span id="ddf-utils-index-module"></span><h2>ddf_utils.index module<a class="headerlink" href="#module-ddf_utils.index" title="Permalink to this headline">¶</a></h2>
-<p>create ddf&#8211;index.csv</p>
+<div class="section" id="module-ddf_utils.i18n">
+<span id="ddf-utils-i18n-module"></span><h2>ddf_utils.i18n module<a class="headerlink" href="#module-ddf_utils.i18n" title="Permalink to this headline">¶</a></h2>
+<p>i18n project management for Gapminder&#8217;s datasets.
+workflow: <a class="reference external" href="https://docs.google.com/document/d/11d5D5CPlr6I2BqP8z0p2o_dYQC9AYUyxcLGUq1WYCfk/">https://docs.google.com/document/d/11d5D5CPlr6I2BqP8z0p2o_dYQC9AYUyxcLGUq1WYCfk/</a>
+&#8216;</p>
 <dl class="function">
-<dt id="ddf_utils.index.concept_index">
-<code class="descclassname">ddf_utils.index.</code><code class="descname">concept_index</code><span class="sig-paren">(</span><em>path</em>, <em>concept_file</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.index.concept_index" title="Permalink to this definition">¶</a></dt>
+<dt id="ddf_utils.i18n.merge_translations">
+<code class="descclassname">ddf_utils.i18n.</code><code class="descname">merge_translations</code><span class="sig-paren">(</span><em>path</em>, <em>split_path='langsplit'</em>, <em>lang_path='lang'</em>, <em>overwrite=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.i18n.merge_translations" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<dl class="function">
+<dt id="ddf_utils.i18n.split_translations_csv">
+<code class="descclassname">ddf_utils.i18n.</code><code class="descname">split_translations_csv</code><span class="sig-paren">(</span><em>path</em>, <em>split_path='langsplit'</em>, <em>exclude_concepts=None</em>, <em>overwrite=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.i18n.split_translations_csv" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ddf_utils.i18n.split_translations_json">
+<code class="descclassname">ddf_utils.i18n.</code><code class="descname">split_translations_json</code><span class="sig-paren">(</span><em>path</em>, <em>split_path='langsplit'</em>, <em>exclude_concepts=None</em>, <em>overwrite=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.i18n.split_translations_json" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-ddf_utils.index">
+<span id="ddf-utils-index-module"></span><h2>ddf_utils.index module<a class="headerlink" href="#module-ddf_utils.index" title="Permalink to this headline">¶</a></h2>
+<p>functions for datapackage.json</p>
 <dl class="function">
 <dt id="ddf_utils.index.create_datapackage">
 <code class="descclassname">ddf_utils.index.</code><code class="descname">create_datapackage</code><span class="sig-paren">(</span><em>path</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.index.create_datapackage" title="Permalink to this definition">¶</a></dt>
@@ -137,23 +160,8 @@
 </dd></dl>
 
 <dl class="function">
-<dt id="ddf_utils.index.create_index_file">
-<code class="descclassname">ddf_utils.index.</code><code class="descname">create_index_file</code><span class="sig-paren">(</span><em>path</em>, <em>indexfile='ddf--index.csv'</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.index.create_index_file" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="ddf_utils.index.datapoint_index">
-<code class="descclassname">ddf_utils.index.</code><code class="descname">datapoint_index</code><span class="sig-paren">(</span><em>path</em>, <em>datapoint_file</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.index.datapoint_index" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="ddf_utils.index.entity_index">
-<code class="descclassname">ddf_utils.index.</code><code class="descname">entity_index</code><span class="sig-paren">(</span><em>path</em>, <em>entity_file</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.index.entity_index" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
 <dt id="ddf_utils.index.get_datapackage">
-<code class="descclassname">ddf_utils.index.</code><code class="descname">get_datapackage</code><span class="sig-paren">(</span><em>path</em>, <em>update_existing=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.index.get_datapackage" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.index.</code><code class="descname">get_datapackage</code><span class="sig-paren">(</span><em>path</em>, <em>update_existing=False</em>, <em>to_disk=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.index.get_datapackage" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
@@ -184,8 +192,17 @@ the file path of csv will be out_dir/ddf&#8211;$ftype&#8211;$concept&#8211;$by.c
 </dd></dl>
 
 </div>
-<div class="section" id="ddf-utils-metadata-module">
-<h2>ddf_utils.metadata module<a class="headerlink" href="#ddf-utils-metadata-module" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-ddf_utils.patch">
+<span id="ddf-utils-patch-module"></span><h2>ddf_utils.patch module<a class="headerlink" href="#module-ddf_utils.patch" title="Permalink to this headline">¶</a></h2>
+<p>functions working with patches</p>
+<dl class="function">
+<dt id="ddf_utils.patch.apply_patch">
+<code class="descclassname">ddf_utils.patch.</code><code class="descname">apply_patch</code><span class="sig-paren">(</span><em>base</em>, <em>patch</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.patch.apply_patch" title="Permalink to this definition">¶</a></dt>
+<dd><p>apply patch created with daff.
+more on the diff format, see: <a class="reference external" href="http://specs.frictionlessdata.io/tabular-diff-format/">http://specs.frictionlessdata.io/tabular-diff-format/</a></p>
+<p>return: the updated DataFrame.</p>
+</dd></dl>
+
 </div>
 <div class="section" id="module-ddf_utils.str">
 <span id="ddf-utils-str-module"></span><h2>ddf_utils.str module<a class="headerlink" href="#module-ddf_utils.str" title="Permalink to this headline">¶</a></h2>
@@ -215,6 +232,16 @@ e.g. fix_time_range(&#8216;1980-90&#8217;) = 1985</p>
 </dd></dl>
 
 </div>
+<div class="section" id="module-ddf_utils.transform">
+<span id="ddf-utils-transform-module"></span><h2>ddf_utils.transform module<a class="headerlink" href="#module-ddf_utils.transform" title="Permalink to this headline">¶</a></h2>
+<p>functions for common tasks on ddf datasets</p>
+<dl class="function">
+<dt id="ddf_utils.transform.translate_column">
+<code class="descclassname">ddf_utils.transform.</code><code class="descname">translate_column</code><span class="sig-paren">(</span><em>df</em>, <em>column</em>, <em>dictionary_type</em>, <em>dictionary</em>, <em>target_column=None</em>, <em>base_df=None</em>, <em>not_found='drop'</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.transform.translate_column" title="Permalink to this definition">¶</a></dt>
+<dd><p>doc here</p>
+</dd></dl>
+
+</div>
 <div class="section" id="module-ddf_utils">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-ddf_utils" title="Permalink to this headline">¶</a></h2>
 </div>
@@ -231,11 +258,15 @@ e.g. fix_time_range(&#8216;1980-90&#8217;) = 1985</p>
 <li><a class="reference internal" href="#">ddf_utils package</a><ul>
 <li><a class="reference internal" href="#subpackages">Subpackages</a></li>
 <li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-ddf_utils.cli">ddf_utils.cli module</a></li>
+<li><a class="reference internal" href="#module-ddf_utils.config">ddf_utils.config module</a></li>
 <li><a class="reference internal" href="#module-ddf_utils.ddf_reader">ddf_utils.ddf_reader module</a></li>
+<li><a class="reference internal" href="#module-ddf_utils.i18n">ddf_utils.i18n module</a></li>
 <li><a class="reference internal" href="#module-ddf_utils.index">ddf_utils.index module</a></li>
 <li><a class="reference internal" href="#module-ddf_utils.io">ddf_utils.io module</a></li>
-<li><a class="reference internal" href="#ddf-utils-metadata-module">ddf_utils.metadata module</a></li>
+<li><a class="reference internal" href="#module-ddf_utils.patch">ddf_utils.patch module</a></li>
 <li><a class="reference internal" href="#module-ddf_utils.str">ddf_utils.str module</a></li>
+<li><a class="reference internal" href="#module-ddf_utils.transform">ddf_utils.transform module</a></li>
 <li><a class="reference internal" href="#module-ddf_utils">Module contents</a></li>
 </ul>
 </li>

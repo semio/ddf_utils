@@ -4,14 +4,6 @@ ddf_utils.chef package
 Submodules
 ----------
 
-ddf_utils.chef.config module
-----------------------------
-
-.. automodule:: ddf_utils.chef.config
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 ddf_utils.chef.cook module
 --------------------------
 
