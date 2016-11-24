@@ -5,11 +5,18 @@
 
 import click
 import os
+import logging
 
 @click.group()
-def ddf():
-    pass
-
+@click.option('--debug/--no-debug', default=False)
+def ddf(debug):
+    if debug:
+        level = logging.DEBUG
+    else:
+        level = logging.WARNING
+    logging.basicConfig(level=level, format='%(asctime)s -%(levelname)s- %(message)s',
+                        datefmt="%H:%M:%S"
+                        )
 
 # project management
 @ddf.command()
@@ -34,6 +41,7 @@ def cleanup(path, how, force):
             print('not a dataset path: {}. please set correct path or use --force to force run.'.format(path))
         else:
             cl(path, how)
+    click.echo('Done.')
 
 
 @ddf.command()
@@ -48,10 +56,11 @@ def create_datapackage(path, update):
             print('datapackage.json already exists. skipping')
             return
         res = get_datapackage(path)
-        with open(os.path.join(path, 'datapackage.json'), 'w') as f:
+        with open(os.path.join(path, 'datapackage.json'), 'w', encoding='utf8') as f:
             json.dump(res, f, indent=4)
     else:
         get_datapackage(path, update_existing=True)
+    click.echo('Done.')
 
 
 # chef and recipe
@@ -65,23 +74,19 @@ def run_recipe(recipe, outdir, update, dry_run):
     import ddf_utils.chef as ddfrecipe
     from ddf_utils.index import get_datapackage
     import json
-    import logging
-    logging.basicConfig(level=logging.DEBUG, format='%(asctime)s -%(levelname)s- %(message)s',
-                        datefmt="%H:%M:%S"
-                        )
-    print('running recipe...')
+    click.echo('running recipe...')
     recipe = ddfrecipe.build_recipe(recipe)
     if update:
         pass
     res = ddfrecipe.run_recipe(recipe)
     if not dry_run:
-        print('saving result to disk...')
+        click.echo('saving result to disk...')
         ddfrecipe.dish_to_csv(res, outdir)
-        print('creating datapackage file...')
+        click.echo('creating datapackage file...')
         res = get_datapackage(outdir)
-        with open(os.path.join(outdir, 'datapackage.json'), 'w') as f:
+        with open(os.path.join(outdir, 'datapackage.json'), 'w', encoding='utf8') as f:
             json.dump(res, f, indent=4)
-    print("done.")
+    click.echo("Done.")
 
 
 # Translation related tasks
@@ -110,6 +115,7 @@ def merge_translation(path, split_path, lang_path, overwrite):
     """merge all translation files from crowdin"""
     from ddf_utils.i18n import merge_translations
     merge_translations(path, split_path, lang_path, overwrite)
+    click.echo('Done.')
 
 
 if __name__ == '__main__':

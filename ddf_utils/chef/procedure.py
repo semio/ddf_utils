@@ -6,11 +6,14 @@ import pandas as pd
 import numpy as np
 from . ingredient import Ingredient
 from .. import config
+from .. import transform
 import time
 from typing import List, Union, Dict, Optional
 import re
 
 import logging
+
+logger = logging.getLogger(__name__)
 
 
 def translate_header(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
@@ -19,7 +22,7 @@ def translate_header(ingredient: Ingredient, *, result=None, **options) -> Ingre
     available options are:
         `dictionary`: a dictionary of oldname -> newname mappings
     """
-    logging.info("translate_header: " + ingredient.ingred_id)
+    logger.info("translate_header: " + ingredient.ingred_id)
 
     rm = options['dictionary']
     data = ingredient.copy_data()
@@ -59,7 +62,7 @@ def translate_column(ingredient: Ingredient, *, result=None, **options) -> Ingre
     Note:
         if base and column are provided at same time, it will raise an error.
     """
-    logging.info("translate_column: " + ingredient.ingred_id)
+    logger.info("translate_column: " + ingredient.ingred_id)
 
     if 'column' in options.keys() and 'base' in options.keys():
         raise ValueError("only accept column or base option, not both")
@@ -93,7 +96,7 @@ def copy(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
     available options:
         `dictionary`: a dictionary of oldname -> newname mappings
     """
-    logging.info("copy: " + ingredient.ingred_id)
+    logger.info("copy: " + ingredient.ingred_id)
 
     dictionary = options['dictionary']
     data = ingredient.copy_data()
@@ -126,7 +129,7 @@ def merge(*ingredients: List[Ingredient], result=None, **options):
         if true, overwrite is on the row level. If values
         (e.g. afr,2015-population_total) exists, it gets overwritten, if it doesn't it stays
     """
-    logging.info("merge: " + str([i.ingred_id for i in ingredients]))
+    logger.info("merge: " + str([i.ingred_id for i in ingredients]))
 
     # assert that dtype and key are same in all dataframe
     try:
@@ -135,7 +138,7 @@ def merge(*ingredients: List[Ingredient], result=None, **options):
     except (AssertionError, TypeError):
         log1 = "multiple dtype/key detected: \n"
         log2 = "\n".join(["{}: {}, {}".format(x.ingred_id, x.dtype, x.key) for x in ingredients])
-        logging.warning(log1+log2)
+        logger.warning(log1+log2)
         raise ValueError("can't merge data with multiple dtype/key!")
 
     # get the dtype and index
@@ -155,7 +158,7 @@ def merge(*ingredients: List[Ingredient], result=None, **options):
     else:
         deep = False
     if deep:
-        logging.info("merge: doing deep merge")
+        logger.info("merge: doing deep merge")
     # merge data from ingredients one by one.
     res_all = {}
 
@@ -245,7 +248,7 @@ def filter_row(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
         dictionary: test
     """
 
-    logging.info("filter_row: " + ingredient.ingred_id)
+    logger.info("filter_row: " + ingredient.ingred_id)
 
     data = ingredient.get_data()
     dictionary = options.pop('dictionary')
@@ -281,7 +284,7 @@ def filter_row(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
         for c in df.columns:
             if ingredient.dtype == 'datapoints':
                 if c in v.keys() and len(df[c].unique()) > 1:
-                    logging.debug("column {} have multiple values: {}".format(c, df[c].unique()))
+                    logger.debug("column {} have multiple values: {}".format(c, df[c].unique()))
                 elif len(df[c].unique()) <= 1:
                     df = df.drop(c, axis=1)
                     if c in keys:
@@ -303,7 +306,7 @@ def filter_item(ingredient: Ingredient, *, result: Optional[str]=None, **options
     available options:
         items: a list of items to filter from base ingredient
     """
-    logging.info("filter_item: " + ingredient.ingred_id)
+    logger.info("filter_item: " + ingredient.ingred_id)
 
     data = ingredient.get_data()
     items = options.pop('items')
@@ -311,7 +314,7 @@ def filter_item(ingredient: Ingredient, *, result: Optional[str]=None, **options
     try:
         data = dict([(k, data[k]) for k in items])
     except KeyError:
-        logging.debug("keys in {}: {}".format(ingredient.ingred_id, str(list(data.keys()))))
+        logger.debug("keys in {}: {}".format(ingredient.ingred_id, str(list(data.keys()))))
         raise
 
     if not result:
@@ -349,10 +352,10 @@ def align(to_align: Ingredient, base: Ingredient, *, result=None, **options) -> 
         drop_not_found = options['drop_not_found']
 
     if len(base.get_data()) > 1:
-        logging.critical(base.get_data().keys())
+        logger.critical(base.get_data().keys())
         raise NotImplementedError('align to base data with multiple dataframes is not supported yet.')
 
-    logging.info("aligning: {} with {}".format(to_align.ingred_id, base.ingred_id))
+    logger.info("aligning: {} with {}".format(to_align.ingred_id, base.ingred_id))
 
     base_data = list(base.get_data().values())[0]
     ing_data = to_align.get_data()
@@ -379,7 +382,7 @@ def align(to_align: Ingredient, base: Ingredient, *, result=None, **options) -> 
             if len(filtered) == 1:
                 mapping[f] = filtered.index[0]
             elif len(filtered) > 1:
-                logging.warning("multiple match found: "+f)
+                logger.warning("multiple match found: "+f)
                 mapping[f] = filtered.index[0]
             else:
                 no_match.append(f)
@@ -397,7 +400,7 @@ def align(to_align: Ingredient, base: Ingredient, *, result=None, **options) -> 
         ing_data[k] = df_
 
     if len(no_match) > 0:
-        logging.warning("no match found for: " + str(set(no_match)))
+        logger.warning("no match found for: " + str(set(no_match)))
 
     if not result:
         result = to_align.ingred_id + '-aligned'
@@ -419,12 +422,12 @@ def groupby(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
     data = ingredient.get_data()
     by = options.pop('by')
 
-    logging.info("groupby: " + ingredient.ingred_id)
+    logger.info("groupby: " + ingredient.ingred_id)
 
     try:
         agg = options.pop('aggregate')
     except KeyError:
-        logging.warning("no aggregate function found, assuming sum()")
+        logger.warning("no aggregate function found, assuming sum()")
         agg = 'sum'
 
     for k, df in data.items():
@@ -444,7 +447,7 @@ def accumulate(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
         op: a dictionary of concept_name: function mapping
     """
 
-    logging.info("accumulate: " + ingredient.ingred_id)
+    logger.info("accumulate: " + ingredient.ingred_id)
     if ingredient.dtype != 'datapoints':
         raise ValueError("only datapoint support this function!")
 
@@ -494,7 +497,7 @@ def run_op(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
     """
 
     assert ingredient.dtype == 'datapoints'
-    logging.info("run_op: " + ingredient.ingred_id)
+    logger.info("run_op: " + ingredient.ingred_id)
 
     data = ingredient.get_data()
     keys = ingredient.key_to_list()
