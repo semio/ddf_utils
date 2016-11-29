@@ -29,9 +29,16 @@ def new():
 @ddf.command()
 @click.argument('how', default='ddf', type=click.Choice(['ddf', 'lang', 'langsplit']))
 @click.argument('path', default='./')
-@click.option('--force', flag_value=True, default=False)
+@click.option('--force', flag_value=True, default=False, help='force deletion')
 def cleanup(path, how, force):
-    """clean up ddf files or translation files"""
+    """clean up ddf files or translation files.
+
+    :arguments
+
+    \b
+    how: what to clean, choose from 'ddf', 'lang' and 'langsplit'
+    path: the dataset path
+    """
     from ddf_utils.io import cleanup as cl
     from ddf_utils.ddf_reader import is_dataset
     if force:
@@ -46,14 +53,14 @@ def cleanup(path, how, force):
 
 @ddf.command()
 @click.argument('path')
-@click.option('--update', '-u', 'update', flag_value=True, default=False)
+@click.option('--update', '-u', 'update', flag_value=True, default=False, help='update existing datapackage.json')
 def create_datapackage(path, update):
     """create datapackage.json"""
     from ddf_utils.index import get_datapackage
     import json
     if not update:
         if os.path.exists(os.path.join(path, 'datapackage.json')):
-            print('datapackage.json already exists. skipping')
+            click.echo('datapackage.json already exists. skipping')
             return
         res = get_datapackage(path)
         with open(os.path.join(path, 'datapackage.json'), 'w', encoding='utf8') as f:
@@ -67,8 +74,8 @@ def create_datapackage(path, update):
 @ddf.command()
 @click.option('--recipe', '-i', type=click.Path(exists=True), required=True)
 @click.option('--outdir', '-o', type=click.Path(exists=True))
-@click.option('--update', 'update', flag_value=False)  # not impletmented
-@click.option('--dry_run', '-d', 'dry_run', flag_value=True, default=False)
+@click.option('--update', 'update', flag_value=False, help='Not implemented yet')  # not impletmented
+@click.option('--dry_run', '-d', 'dry_run', flag_value=True, default=False, help="don't save output to disk")
 def run_recipe(recipe, outdir, update, dry_run):
     """generate new ddf dataset with recipe"""
     import ddf_utils.chef as ddfrecipe
@@ -92,10 +99,11 @@ def run_recipe(recipe, outdir, update, dry_run):
 # Translation related tasks
 @ddf.command()
 @click.argument('path', type=click.Path(exists=True))
-@click.option('--type', '-t', 'dtype', type=click.Choice(['csv', 'json']))
-@click.option('--overwrite/--no-overwrite', default=False)
-@click.option('--split_path', default='langsplit')
-@click.option('--exclude_concepts', '-x', multiple=True)
+@click.option('--type', '-t', 'dtype', type=click.Choice(['csv', 'json']), help='split file type')
+@click.option('--overwrite/--no-overwrite', default=False, help='overwrite existing files or not')
+@click.option('--split_path', default='langsplit', help='path to langsplit folder')
+@click.option('--exclude_concept', '-x', 'exclude_concepts', multiple=True,
+              help='concepts to exclude', metavar='concept')
 def split_translation(path, split_path, dtype, exclude_concepts, overwrite):
     """split ddf files for crowdin translation"""
     from ddf_utils.i18n import split_translations_csv, split_translations_json
@@ -105,7 +113,7 @@ def split_translation(path, split_path, dtype, exclude_concepts, overwrite):
         split_translations_json(path, split_path, exclude_concepts, overwrite)
     click.echo('Done.')
 
-
+#TODO: docs
 @ddf.command()
 @click.argument('path', type=click.Path(exists=True))
 @click.option('--overwrite/--no-overwrite', default=False)

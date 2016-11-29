@@ -178,10 +178,6 @@ def merge_translations_csv(path, split_path='langsplit', lang_path='lang', overw
 
 def merge_translations_json(path, split_path='langsplit', lang_path='lang', overwrite=False):
 
-    if overwrite:
-        # TODO: overwrite existing translation instead of update
-        raise NotImplementedError
-
     # make the paths full paths
     split_path = os.path.join(path, split_path)
     lang_path = os.path.join(path, lang_path)
@@ -228,7 +224,7 @@ def merge_translations_json(path, split_path='langsplit', lang_path='lang', over
                     # add back the index name.
                     # the index name will be missing because it's not in the json file.
                     df.index.name = key_mapping[name]
-                    if os.path.exists(target_file_path):
+                    if os.path.exists(target_file_path) and not overwrite:
                         df_old = pd.read_csv(target_file_path, index_col=0)
                         df_old.update(df)
                         df = df_old.copy()
