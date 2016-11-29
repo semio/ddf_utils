@@ -26,7 +26,7 @@ supported_procs = {
     'groupby': groupby,
     'accumulate': accumulate,
     'copy': copy,
-    'add_concepts': add_concetps
+    'add_concepts': add_concepts
 }
 
 

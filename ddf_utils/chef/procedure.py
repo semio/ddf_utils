@@ -526,7 +526,7 @@ def add_concepts(ingredient: Ingredient,
     """add missing concepts to a concept ingredient from other ingredients.
     """
 
-    if not Ingredient.dtype == 'concepts':
+    if not ingredient.dtype == 'concepts':
         raise ValueError('only concepts ingredient should call this method!')
 
     concepts = ingredient.get_data()['concepts'].set_index('concept')
@@ -541,5 +541,5 @@ def add_concepts(ingredient: Ingredient,
                 concepts.ix[k, 'concept_type'] = 'string'
     if not result:
         result = ingredient.ingred_id + 'concepts_added'
-    return Ingredient(result, None, ingredient,key, None, data=concepts.reset_index())
+    return Ingredient(result, None, ingredient.key, None, data=concepts.reset_index())
 
