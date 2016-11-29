@@ -25,7 +25,8 @@ supported_procs = {
     'filter_item': filter_item,
     'groupby': groupby,
     'accumulate': accumulate,
-    'copy': copy
+    'copy': copy,
+    'add_concepts': add_concepts
 }
 
 
@@ -205,9 +206,12 @@ def run_recipe(recipe):
                 result = p['result']
                 if 'options' in p.keys():
                     options = p['options']
-                    # change the 'base' option to actual ingredient
+                    # change the 'base'/'source_ingredients' option to actual ingredient
+                    # TODO: find better way to handle the ingredients in options
                     if 'base' in options.keys():
                         options['base'] = ings_dict[options['base']]
+                    if 'source_ingredients' in options.keys():
+                        options['source_ingredients'] = [ings_dict[x] for x in options['source_ingredients']]
                     out = funcs[func](*ingredient, result=result, **options)
                 else:
                     out = funcs[func](*ingredient, result=result)
