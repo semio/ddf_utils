@@ -517,3 +517,29 @@ def run_op(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
     if not result:
         result = ingredient.ingred_id + '-op'
     return Ingredient(result, None, ingredient.key, None, data=data)
+
+
+def add_concepts(ingredient: Ingredient,
+                 source_ingredients: List[Ingredient],
+                 result=None,
+                 **options) -> Ingredient:
+    """add missing concepts to a concept ingredient from other ingredients.
+    """
+
+    if not Ingredient.dtype == 'concepts':
+        raise ValueError('only concepts ingredient should call this method!')
+
+    concepts = ingredient.get_data()['concepts'].set_index('concept')
+    for i in source_ingredients:
+        data = i.get_data()
+        for k, df in data.items():
+            if k in concepts.index:
+                continue
+            if df[k].dtype == 'float64':
+                concepts.ix[k, 'concept_type'] = 'measure'
+            else:
+                concepts.ix[k, 'concept_type'] = 'string'
+    if not result:
+        result = ingredient.ingred_id + 'concepts_added'
+    return Ingredient(result, None, ingredient,key, None, data=concepts.reset_index())
+
