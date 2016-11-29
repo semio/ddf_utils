@@ -119,13 +119,10 @@ class Ingredient(object):
             return dict((k, ent[k]) for k in values)
 
     def _get_data_concepts(self, copy):
-        conc = {
-            'concepts': self.ddf.get_concepts()
-        }
         if self.values == '*':
-            return conc
+            return {'concepts': self.ddf.get_concepts()}
         else:
-            return conc[values]
+            return {'concepts': self.ddf.get_concepts()[self.values]}
 
     def filter_row(self, df):
         """return the rows selected by self.row_filter."""
