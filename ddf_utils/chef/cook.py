@@ -188,19 +188,25 @@ def run_recipe(recipe):
 
     # cooking
     funcs = supported_procs
-    res = {}
+    dishes = {}
 
     for k, pceds in recipe['cooking'].items():
 
         print("running "+k)
+        dishes[k] = list()
 
         for p in pceds:
             func = p['procedure']
 
-            if func not in funcs.keys():
+            if func not in funcs.keys() and func != 'serve':
                 raise NotImplementedError("Not supported: " + func)
 
             ingredient = [ings_dict[i] for i in p['ingredients']]
+
+            if func == 'serve':
+                for i in ingredient:
+                    dishes[k].append(i)
+                continue
 
             # change the 'base'/'source_ingredients' option to actual ingredient
             # TODO: find better way to handle the ingredients in options
@@ -226,51 +232,52 @@ def run_recipe(recipe):
 
             if result in ings_dict.keys():
                 logging.warning("overwriting existing ingredient: " + result)
-
             ings_dict[result] = out
 
-        res[k] = out  # use the last output Ingredient object as final result.
-    return res
+        # if there is no seving procedures, use the last output Ingredient object as final result.
+        if len(dishes[k]) == 0:
+            logger.warning('serving last procedure output for {}: {}'.format(k, out.ingred_id))
+            dishes[k].append(out)
+    return dishes
 
 
 def dish_to_csv(dishes, outpath):
-    for t, dish in dishes.items():
-
-        all_data = dish.get_data()
-
-        if isinstance(all_data, dict):
-            for k, df in all_data.items():
-                if re.match('ddf--.*.csv', k):
-                    path = os.path.join(outpath, k)
-                else:
-                    if t == 'datapoints':
-                        by = dish.key_to_list()
-                        path = os.path.join(outpath, 'ddf--{}--{}--by--{}.csv'.format(t, k, '--'.join(by)))
-                    elif t == 'concepts':
-                        path = os.path.join(outpath, 'ddf--{}.csv'.format(t))
-                    elif t == 'entities':
-                        domain = dish.key[0]
-                        if k == domain:
-                            path = os.path.join(outpath, 'ddf--{}--{}.csv'.format(t, k))
+    for t, ds in dishes.items():
+        for dish in ds:
+            all_data = dish.get_data()
+            if isinstance(all_data, dict):
+                for k, df in all_data.items():
+                    if re.match('ddf--.*.csv', k):
+                        path = os.path.join(outpath, k)
+                    else:
+                        if t == 'datapoints':
+                            by = dish.key_to_list()
+                            path = os.path.join(outpath, 'ddf--{}--{}--by--{}.csv'.format(t, k, '--'.join(by)))
+                        elif t == 'concepts':
+                            path = os.path.join(outpath, 'ddf--{}.csv'.format(t))
+                        elif t == 'entities':
+                            domain = dish.key[0]
+                            if k == domain:
+                                path = os.path.join(outpath, 'ddf--{}--{}.csv'.format(t, k))
+                            else:
+                                path = os.path.join(outpath, 'ddf--{}--{}--{}.csv'.format(t, domain, k))
                         else:
-                            path = os.path.join(outpath, 'ddf--{}--{}--{}.csv'.format(t, domain, k))
-                    else:
-                        raise ValueError('Not a correct collection: ' + t)
+                            raise ValueError('Not a correct collection: ' + t)
 
-                if t == 'datapoints':
-                    df = df.set_index(by)
-                    if not np.issubdtype(df[k].dtype, np.number):
-                        try:
-                            df[k] = df[k].astype(float)
-                            # TODO: make floating precision an option
+                    if t == 'datapoints':
+                        df = df.set_index(by)
+                        if not np.issubdtype(df[k].dtype, np.number):
+                            try:
+                                df[k] = df[k].astype(float)
+                                # TODO: make floating precision an option
+                                df[k] = df[k].map(lambda x: format_float_digits(x, 5))
+                            except ValueError:
+                                logging.warning("data not numeric: " + k)
+                        else:
                             df[k] = df[k].map(lambda x: format_float_digits(x, 5))
-                        except ValueError:
-                            logging.warning("data not numeric: " + k)
+                        df[[k]].to_csv(path)
                     else:
-                        df[k] = df[k].map(lambda x: format_float_digits(x, 5))
-                    df[[k]].to_csv(path)
-                else:
-                    df.to_csv(path, index=False)
-        else:
-            path = os.path.join(outpath, 'ddf--{}.csv'.format(t))
-            all_data.to_csv(path, index=False)
+                        df.to_csv(path, index=False)
+            else:
+                path = os.path.join(outpath, 'ddf--{}.csv'.format(t))
+                all_data.to_csv(path, index=False)
