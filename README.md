@@ -7,6 +7,15 @@ So python 3 is required in order to run this module.
 
 ```$ pip3 install git+https://github.com/semio/ddf_utils.git```
 
+### For Windows users
+
+If you encounter `failed to create process.` when you run the `ddf` command, please
+try updating setuptools to latest version:
+
+`> pip3 install -U setuptools`
+
+and then reinstall ddf_utils should fix the problem.
+
 ## Commandline helper
 
 we provide a commandline utility `ddf` for etl tasks. For now supported commands are:
