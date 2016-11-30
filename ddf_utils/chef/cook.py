@@ -202,22 +202,23 @@ def run_recipe(recipe):
 
             ingredient = [ings_dict[i] for i in p['ingredients']]
 
+            # change the 'base'/'source_ingredients' option to actual ingredient
+            # TODO: find better way to handle the ingredients in options
+            if 'options' in p.keys():
+                options = p['options']
+                if 'base' in options.keys():
+                    options['base'] = ings_dict[options['base']]
+                if 'source_ingredients' in options.keys():
+                    options['source_ingredients'] = [ings_dict[x] for x in options['source_ingredients']]
+
             if 'result' in p.keys():
                 result = p['result']
                 if 'options' in p.keys():
-                    options = p['options']
-                    # change the 'base'/'source_ingredients' option to actual ingredient
-                    # TODO: find better way to handle the ingredients in options
-                    if 'base' in options.keys():
-                        options['base'] = ings_dict[options['base']]
-                    if 'source_ingredients' in options.keys():
-                        options['source_ingredients'] = [ings_dict[x] for x in options['source_ingredients']]
                     out = funcs[func](*ingredient, result=result, **options)
                 else:
                     out = funcs[func](*ingredient, result=result)
             else:
                 if 'options' in p.keys():
-                    options = p['options']
                     out = funcs[func](*ingredient, **options)
                 else:
                     out = funcs[func](*ingredient)
