@@ -247,22 +247,23 @@ def dish_to_csv(dishes, outpath):
             all_data = dish.get_data()
             if isinstance(all_data, dict):
                 for k, df in all_data.items():
-                    if re.match('ddf--.*.csv', k):
-                        path = os.path.join(outpath, k)
-                    else:
-                        if t == 'datapoints':
-                            by = dish.key_to_list()
-                            path = os.path.join(outpath, 'ddf--{}--{}--by--{}.csv'.format(t, k, '--'.join(by)))
-                        elif t == 'concepts':
-                            path = os.path.join(outpath, 'ddf--{}.csv'.format(t))
-                        elif t == 'entities':
-                            domain = dish.key[0]
-                            if k == domain:
-                                path = os.path.join(outpath, 'ddf--{}--{}.csv'.format(t, k))
-                            else:
-                                path = os.path.join(outpath, 'ddf--{}--{}--{}.csv'.format(t, domain, k))
+                    # change boolean into string
+                    for i, v in df.dtypes.iteritems():
+                        if v == 'bool':
+                            df[i] = df[i].map(lambda x: str(x).upper())
+                    if t == 'datapoints':
+                        by = dish.key_to_list()
+                        path = os.path.join(outpath, 'ddf--{}--{}--by--{}.csv'.format(t, k, '--'.join(by)))
+                    elif t == 'concepts':
+                        path = os.path.join(outpath, 'ddf--{}.csv'.format(t))
+                    elif t == 'entities':
+                        domain = dish.key[0]
+                        if k == domain:
+                            path = os.path.join(outpath, 'ddf--{}--{}.csv'.format(t, k))
                         else:
-                            raise ValueError('Not a correct collection: ' + t)
+                            path = os.path.join(outpath, 'ddf--{}--{}--{}.csv'.format(t, domain, k))
+                    else:
+                        raise ValueError('Not a correct collection: ' + t)
 
                     if t == 'datapoints':
                         df = df.set_index(by)
