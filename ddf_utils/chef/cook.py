@@ -26,7 +26,7 @@ supported_procs = {
     'groupby': groupby,
     'accumulate': accumulate,
     'copy': copy,
-    'add_concepts': add_concepts
+    'extract_concepts': extract_concepts
 }
 
 
@@ -208,14 +208,16 @@ def run_recipe(recipe):
                     dishes[k].append(i)
                 continue
 
-            # change the 'base'/'source_ingredients' option to actual ingredient
+            # change the 'base' option to actual ingredient
             # TODO: find better way to handle the ingredients in options
             if 'options' in p.keys():
                 options = p['options']
                 if 'base' in options.keys():
                     options['base'] = ings_dict[options['base']]
-                if 'source_ingredients' in options.keys():
-                    options['source_ingredients'] = [ings_dict[x] for x in options['source_ingredients']]
+                for opt in options.keys():
+                    if isinstance(options[opt], dict):
+                        if 'base' in options[opt].keys():
+                            options[opt]['base'] = ings_dict[options[opt]['base']]
 
             if 'result' in p.keys():
                 result = p['result']
