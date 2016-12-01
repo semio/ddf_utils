@@ -535,7 +535,7 @@ def add_concepts(ingredient: Ingredient,
         for k, df in data.items():
             if k in concepts.index:
                 continue
-            if df[k].dtype == 'float64':
+            if np.issubdtype(df[k].dtype, np.number):
                 concepts.ix[k, 'concept_type'] = 'measure'
             else:
                 concepts.ix[k, 'concept_type'] = 'string'
