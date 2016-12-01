@@ -247,6 +247,10 @@ def dish_to_csv(dishes, outpath):
             all_data = dish.get_data()
             if isinstance(all_data, dict):
                 for k, df in all_data.items():
+                    # change boolean into string
+                    for i, v in df.dtypes.iteritems():
+                        if v == 'bool':
+                            df[i] = df[i].map(lambda x: str(x).upper())
                     if t == 'datapoints':
                         by = dish.key_to_list()
                         path = os.path.join(outpath, 'ddf--{}--{}--by--{}.csv'.format(t, k, '--'.join(by)))
