@@ -275,9 +275,9 @@ def dish_to_csv(dishes, outpath):
                                 logging.warning("data not numeric: " + k)
                         else:
                             df[k] = df[k].map(lambda x: format_float_digits(x, 5))
-                        df[[k]].to_csv(path)
+                        df[[k]].to_csv(path, encoding='utf8')
                     else:
-                        df.to_csv(path, index=False)
+                        df.to_csv(path, index=False, encoding='utf8')
             else:
                 path = os.path.join(outpath, 'ddf--{}.csv'.format(t))
-                all_data.to_csv(path, index=False)
+                all_data.to_csv(path, index=False, encoding='utf8')
