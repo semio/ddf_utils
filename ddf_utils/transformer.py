@@ -178,5 +178,40 @@ def aagr(df: pd.DataFrame, window: int=10):  # TODO: create a op.py file for thi
     return pct.rolling(window).apply(np.mean).dropna()
 
 
-def trend_bridge(df):
-    pass
+def trend_bridge(old_data, new_data, bridge_length):
+    """smoothing data between series.
+
+    To avoid getting artificial stairs in the data, we smooth between to
+    series. Sometime one source is systematically higher than another source,
+    and if we jump from one to another in a single year, this looks like an
+    actual change in the data.
+
+    Parameters
+    ----------
+    old_data : Series
+    new_data : Series
+    bridge_length : int
+        the length of bridge
+
+    Returns
+    -------
+    bridge_data : the bridged data
+    """
+    assert new_data.index[0] < old_data.index[-1]  # assume old data and new data have overlaps
+
+    bridge_end = new_data.index[0]
+    bridge_start = bridge_end - bridge_length
+
+    assert bridge_start > old_data.index[0]
+
+    bridge_height = new_data.ix[bridge_end] - old_data.ix[bridge_end]
+    fraction = bridge_height / bridge_length
+
+    bridge_data = old_data.copy()
+
+    for i, row in bridge_data.ix[bridge_start:bridge_end].iteritems():
+        if i == bridge_end:
+            break
+        bridge_data.ix[i:bridge_end] = bridge_data.ix[i:bridge_end] + fraction
+
+    return bridge_data
