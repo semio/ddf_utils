@@ -7,27 +7,12 @@ from orderedattrdict import AttrDict
 from orderedattrdict.yamlutils import AttrDictYAMLLoader
 
 from . ingredient import *
+from . dag import DAG, IngredientNode, ProcedureNode
 from .. import config
 from . procedure import *
 from .. str import format_float_digits
 
 import logging
-
-# supported procedures, import from procedure.py
-supported_procs = {
-    'translate_column': translate_column,
-    'translate_header': translate_header,
-    'identity': identity,
-    'merge': merge,
-    'run_op': run_op,
-    'filter_row': filter_row,
-    'align': align,
-    'filter_item': filter_item,
-    'groupby': groupby,
-    'accumulate': accumulate,
-    'copy': copy,
-    'extract_concepts': extract_concepts
-}
 
 
 def _loadfile(f):
@@ -167,45 +152,43 @@ def check_dataset_availability(recipe):
     return
 
 
-def _replace_options_with_ingredients(ings_dict, proc):
-    options = None
-    # change the 'base' option to actual ingredient
-    # TODO: find better way to handle the ingredients in options
-    if 'options' in proc.keys():
-        options = proc['options']
-        if 'base' in options.keys():
-            options['base'] = ings_dict[options['base']]
-        for opt in options.keys():
-            if isinstance(options[opt], dict):
-                if 'base' in options[opt].keys():
-                    options[opt]['base'] = ings_dict[options[opt]['base']]
-    return options
+def build_dag(recipe):
 
-
-def run_procedure(ings_dict, proc):
-    """run a procedure
-    """
-    funcs = supported_procs
-    func = proc['procedure']
-    ingredient = [ings_dict[i] for i in proc['ingredients']]
-    options = _replace_options_with_ingredients(ings_dict, proc)
-
-    if 'result' in proc.keys():
-        result = proc['result']
-        if 'options' in proc.keys():
-            out = funcs[func](*ingredient, result=result, **options)
+    def add_dependency(dag, upstream_id, downstream):
+        if not dag.has_task(upstream_id):
+            upstream = ProcedureNode(upstream_id, None, dag)
+            dag.add_task(upstream)
         else:
-            out = funcs[func](*ingredient, result=result)
-    else:
-        if 'options' in proc.keys():
-            out = funcs[func](*ingredient, **options)
-        else:
-            out = funcs[func](*ingredient)
-        result = out.ingred_id
-    if result in ings_dict.keys():
-        logging.warning("overwriting existing ingredient: " + result)
-    ings_dict[result] = out
-    return result, out
+            upstream = dag.get_task(ing)
+        dag.add_dependency(upstream.node_id, downstream.node_id)
+
+    dag = DAG()
+    ingredients = [Ingredient.from_dict(x) for x in recipe.ingredients]
+    ingredients_names = [x.ingred_id for x in ingredients]
+
+    # adding ingredient nodes
+    for i in ingredients:
+        dag.add_task(IngredientNode(i.ingred_id, i, dag))
+
+    for k, d in recipe.cooking.items():
+        for proc in d:
+            task = ProcedureNode(proc.result, proc, dag)
+            dag.add_task(task)
+            # add nodes from base ingredients
+            for ing in proc.ingredients:
+                add_dependency(dag, ing, task)
+            # also add nodes from options
+            if 'options' in proc.keys():
+                options = proc['options']
+                if 'base' in options.keys():
+                    add_dependency(dag, options['base'], task)
+                for opt in options.keys():
+                    if isinstance(opt, dict) and 'base' in opt.keys():
+                        add_dependency(dag, options[opt]['base'], task)
+            # detect cycles in recipe after adding all related nodes
+            task.detect_downstream_cycle()
+            # dag.tree_view()
+    return dag
 
 
 def run_recipe(recipe):
@@ -221,14 +204,13 @@ def run_recipe(recipe):
             raise ValueError("no ddf_dir configured, please check your recipe")
     logging.info('path for searching DDF: ' + str(config.DDF_SEARCH_PATH))
 
+    # check all datasets availability
     check_dataset_availability(recipe)
 
-    # load ingredients
-    ings = [Ingredient.from_dict(i) for i in recipe['ingredients']]
-    ings_dict = dict([[i.ingred_id, i] for i in ings])
+    # create DAG of recipe
+    dag = build_dag(recipe)
 
-    # cooking
-    funcs = supported_procs
+    # now run the recipe
     dishes = {}
 
     for k, pceds in recipe['cooking'].items():
@@ -238,14 +220,11 @@ def run_recipe(recipe):
 
         for p in pceds:
             func = p['procedure']
-            if func not in funcs.keys() and func != 'serve':
-                raise NotImplementedError("Not supported: " + func)
             if func == 'serve':
-                ingredient = [ings_dict[i] for i in proc['ingredients']]
-                for i in ingredient:
-                    dishes[k].append(i)
+                ingredients = [dag.get_task(x).evaluate() for x in proc['ingrediens']]
+                [dishes[k].append(i) for i in ingredients]
                 continue
-            result, out = run_procedure(ings_dict, p)
+            out = dag.get_task(p['result']).evaluate()
         # if there is no seving procedures, use the last output Ingredient object as final result.
         if len(dishes[k]) == 0:
             logger.warning('serving last procedure output for {}: {}'.format(k, out.ingred_id))
