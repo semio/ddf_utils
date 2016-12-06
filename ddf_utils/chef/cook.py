@@ -199,6 +199,9 @@ def build_dag(recipe):
     for i in serving:
         if not dag.has_task(i):
             raise ValueError('Ingredient not found: ' + i)
+    for i in recipe['serving']:
+        if not dag.has_task(i):
+            raise ValueError('Ingredient not found: ' + i)
     # display the tree
     # dag.tree_view()
     return dag
@@ -238,10 +241,18 @@ def run_recipe(recipe):
                 [dishes[k].append(i) for i in ingredients]
                 continue
             out = dag.get_task(p['result']).evaluate()
-        # if there is no seving procedures, use the last output Ingredient object as final result.
-        if len(dishes[k]) == 0:
+        # if there is no seving procedures/section, use the last output Ingredient object as final result.
+        if len(dishes[k]) == 0 and 'serving' not in recipe.keys():
             logger.warning('serving last procedure output for {}: {}'.format(k, out.ingred_id))
             dishes[k].append(out)
+    # update dishes when there is serving section
+    if 'serving' in recipe.keys():
+        for i in recipe['serving']:
+            ing = dag.get_task(i).evaluate()
+            if ing.dtype in dishes.keys():
+                dishes[ing.dtype].append(ing)
+            else:
+                dishes[ing.dtype] = [ing]
     return dishes
 
 
