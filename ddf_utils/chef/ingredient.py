@@ -15,15 +15,14 @@ class Ingredient(object):
     ingredient class: represents an ingredient object in recipe file.
     see the implement of from_dict() method for how the object is constructed.
     """
-    def __init__(self, ingred_id, ddf_id, key, values, row_filter=None, data=None):
+    def __init__(self, ingred_id,
+                 ddf_id=None, key=None, values=None, row_filter=None, data=None):
         self.ingred_id = ingred_id
         self.key = key
         self.values = values
         self.row_filter = row_filter
-        if ddf_id:
-            self.ddf = DDF(ddf_id)
-        else:
-            self.ddf = None
+        self._ddf_id = ddf_id
+        self._ddf = None
         self.data = data
 
     @classmethod
@@ -38,6 +37,16 @@ class Ingredient(object):
             row_filter = None
 
         return cls(ingred_id, ddf_id, key, values, row_filter)
+
+    @property
+    def ddf(self):
+        if self._ddf:
+            return self._ddf
+        else:
+            if self._ddf_id:
+                self._ddf = DDF(self._ddf_id)
+                return self._ddf
+        return None
 
     @property
     def ddf_path(self):
@@ -59,21 +68,7 @@ class Ingredient(object):
             return 'datapoints'
 
     def __repr__(self):
-        lines = list()
-        lines.append('Ingredient: ' + self.ingred_id)
-        lines.append('Data type: '+self.dtype)
-        if self.ddf:
-            lines.append('Dataset: '+self.ddf.ddf_id)
-        else:
-            lines.append('Dataset: None')
-        lines.append('Key: '+str(self.key))
-        lines.append('Values: '+str(self.values))
-        if self.row_filter:
-            lines.append('Row_filter: Yes')
-        else:
-            lines.append('Row_filter: No')
-
-        return '\n'.join(lines)
+        return '<Ingredient: {}>'.format(self.ingred_id)
 
     def _get_data_datapoint(self, copy):
         data = dict()

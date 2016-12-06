@@ -519,27 +519,38 @@ def run_op(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
     return Ingredient(result, None, ingredient.key, None, data=data)
 
 
-def add_concepts(ingredient: Ingredient,
-                 source_ingredients: List[Ingredient],
-                 result=None,
-                 **options) -> Ingredient:
-    """add missing concepts to a concept ingredient from other ingredients.
+def extract_concepts(*ingredients: List[Ingredient],
+                     result=None,
+                     **options) -> Ingredient:
+    """extract concepts from other ingredients.
     """
+    if options:
+        base = options['join']['base']
+        try:
+            join = options['join']['type']
+        except KeyError:
+            join = 'full_outer'
+        concepts = base.get_data()['concepts'].set_index('concept')
+    else:
+        concepts = pd.DataFrame([], columns=['concept', 'concept_type']).set_index('concept')
 
-    if not ingredient.dtype == 'concepts':
-        raise ValueError('only concepts ingredient should call this method!')
+    new_concepts = set()
 
-    concepts = ingredient.get_data()['concepts'].set_index('concept')
-    for i in source_ingredients:
+    for i in ingredients:
         data = i.get_data()
         for k, df in data.items():
+            # TODO: add logic for concepts/entities ingredients
+            new_concepts.add(k)
             if k in concepts.index:
                 continue
             if np.issubdtype(df[k].dtype, np.number):
                 concepts.ix[k, 'concept_type'] = 'measure'
             else:
                 concepts.ix[k, 'concept_type'] = 'string'
+    if join == 'ingredients_outer':
+        # ingredients_outer join: only keep concepts appears in ingredients
+        concepts = concepts.ix[new_concepts]
     if not result:
-        result = ingredient.ingred_id + 'concepts_added'
-    return Ingredient(result, None, ingredient.key, None, data=concepts.reset_index())
+        result = 'concepts_extracted'
+    return Ingredient(result, None, 'concept', None, data=concepts.reset_index())
 
