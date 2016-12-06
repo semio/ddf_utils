@@ -199,9 +199,10 @@ def build_dag(recipe):
     for i in serving:
         if not dag.has_task(i):
             raise ValueError('Ingredient not found: ' + i)
-    for i in recipe['serving']:
-        if not dag.has_task(i):
-            raise ValueError('Ingredient not found: ' + i)
+    if 'serving' in recipe.keys():
+        for i in recipe['serving']:
+            if not dag.has_task(i):
+                raise ValueError('Ingredient not found: ' + i)
     # display the tree
     # dag.tree_view()
     return dag
