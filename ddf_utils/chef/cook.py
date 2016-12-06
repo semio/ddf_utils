@@ -165,6 +165,7 @@ def build_dag(recipe):
     dag = DAG()
     ingredients = [Ingredient.from_dict(x) for x in recipe.ingredients]
     ingredients_names = [x.ingred_id for x in ingredients]
+    serving = []
 
     # adding ingredient nodes
     for i in ingredients:
@@ -172,7 +173,14 @@ def build_dag(recipe):
 
     for k, d in recipe.cooking.items():
         for proc in d:
-            task = ProcedureNode(proc.result, proc, dag)
+            if proc['procedure'] == 'serve':
+                [serving.append(x) for x in proc.ingredients]
+                continue
+            try:
+                task = ProcedureNode(proc.result, proc, dag)
+            except KeyError:
+                logger.critical('Please set the result id for procedure: ' + proc['procedure'])
+                raise
             dag.add_task(task)
             # add nodes from base ingredients
             for ing in proc.ingredients:
@@ -187,7 +195,12 @@ def build_dag(recipe):
                         add_dependency(dag, options[opt]['base'], task)
             # detect cycles in recipe after adding all related nodes
             task.detect_downstream_cycle()
-            # dag.tree_view()
+    # check if all serving ingredients are available
+    for i in serving:
+        if not dag.has_task(i):
+            raise ValueError('Ingredient not found: ' + i)
+    # display the tree
+    # dag.tree_view()
     return dag
 
 
@@ -221,7 +234,7 @@ def run_recipe(recipe):
         for p in pceds:
             func = p['procedure']
             if func == 'serve':
-                ingredients = [dag.get_task(x).evaluate() for x in proc['ingrediens']]
+                ingredients = [dag.get_task(x).evaluate() for x in p['ingredients']]
                 [dishes[k].append(i) for i in ingredients]
                 continue
             out = dag.get_task(p['result']).evaluate()
