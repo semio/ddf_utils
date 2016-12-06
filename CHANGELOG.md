@@ -7,4 +7,4 @@
     - recipe cooking procedures can be written in any order. Chef will check dependencies
     - new show-tree option to display a tree view of procedures/ingredients in recipe
 - added support for serve section
-
+- renamed procedure `add_concepts` to `extract_concepts` #40
