@@ -21,10 +21,8 @@ class Ingredient(object):
         self.key = key
         self.values = values
         self.row_filter = row_filter
-        if ddf_id:
-            self.ddf = DDF(ddf_id)
-        else:
-            self.ddf = None
+        self._ddf_id = ddf_id
+        self._ddf = None
         self.data = data
 
     @classmethod
@@ -39,6 +37,16 @@ class Ingredient(object):
             row_filter = None
 
         return cls(ingred_id, ddf_id, key, values, row_filter)
+
+    @property
+    def ddf(self):
+        if self._ddf:
+            return self._ddf
+        else:
+            if self._ddf_id:
+                self._ddf = DDF(self._ddf_id)
+                return self._ddf
+        return None
 
     @property
     def ddf_path(self):
