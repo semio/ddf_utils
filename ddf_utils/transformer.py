@@ -3,6 +3,7 @@
 """functions for common tasks on ddf datasets"""
 
 import pandas as pd
+import numpy as np
 import json
 import logging
 
@@ -215,3 +216,26 @@ def trend_bridge(old_data, new_data, bridge_length):
         bridge_data.ix[i:bridge_end] = bridge_data.ix[i:bridge_end] + fraction
 
     return bridge_data
+
+
+def extract_concepts(dfs, base=None, join='full_outer'):
+    if base is not None:
+        concepts = base.set_index('concept')
+    else:
+        concepts = pd.DataFrame([], columns=['concept', 'concept_type']).set_index('concept')
+
+    new_concepts = set()
+
+    for df in dfs:
+        for c in df.columns:
+            new_concepts.add(c)
+            if c in concepts.index:  # if the concept is in base, just use base data
+                continue
+            if np.issubdtype(df[c].dtype, np.number):
+                concepts.ix[c, 'concept_type'] = 'measure'
+            else:  # TODO: add logic for concepts/entities ingredients
+                concepts.ix[c, 'concept_type'] = 'string'
+    if join == 'ingredients_outer':
+        # ingredients_outer join: only keep concepts appears in ingredients
+        concepts = concepts.ix[new_concepts]
+    return concepts.reset_index()
