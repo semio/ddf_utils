@@ -10,20 +10,64 @@ from .. import config
 from ..ddf_reader import DDF
 
 
-class Ingredient(object):
+class BaseIngredient(object):
+    def __init__(self, ingred_id, key, data=None):
+        self.ingred_id = ingred_id
+        self.key = key
+        self.data = data
+
+    @property
+    def dtype(self):
+        """
+        returns the type of ddf data, i.e. concepts/entities/datapoints.
+
+        It will be inferred from the key property of ingredient.
+        TODO: what if key == '*'? Is it possible?
+        """
+        if self.key == 'concept':
+            return 'concepts'
+        elif isinstance(self.key, list):
+            return 'entities'
+        else:
+            return 'datapoints'
+
+    def key_to_list(self):
+        """helper function: make a list that contains primaryKey of this ingredient"""
+        if self.dtype == "datapoints":
+            return self.key.split(',')
+        else:
+            assert isinstance(self.key, str)
+            return [self.key]
+
+    def get_data(self):
+        return self.data
+
+    def copy_data(self):
+        """this function makes copy of self.data.
+        """
+        if not self.data:
+            self.get_data()
+        # v: DataFrame. DataFrame.copy() is by default deep copy,
+        # but I just call it explicitly here.
+        return dict((k, v.copy(deep=True)) for k, v in self.data.items())
+
+    def reset_data(self):
+        self.data = None
+        return
+
+
+class Ingredient(BaseIngredient):
     """
     ingredient class: represents an ingredient object in recipe file.
     see the implement of from_dict() method for how the object is constructed.
     """
     def __init__(self, ingred_id,
                  ddf_id=None, key=None, values=None, row_filter=None, data=None):
-        self.ingred_id = ingred_id
-        self.key = key
+        super(Ingredient, self).__init__(ingred_id, key, data)
         self.values = values
         self.row_filter = row_filter
         self._ddf_id = ddf_id
         self._ddf = None
-        self.data = data
 
     @classmethod
     def from_dict(cls, data):
@@ -51,21 +95,6 @@ class Ingredient(object):
     @property
     def ddf_path(self):
         return self.ddf.dataset_path
-
-    @property
-    def dtype(self):
-        """
-        returns the type of ddf data, i.e. concepts/entities/datapoints.
-
-        It will be inferred from the key property of ingredient.
-        TODO: what if key == '*'? Is it possible?
-        """
-        if self.key == 'concept':
-            return 'concepts'
-        elif isinstance(self.key, list):
-            return 'entities'
-        else:
-            return 'datapoints'
 
     def __repr__(self):
         return '<Ingredient: {}>'.format(self.ingred_id)
@@ -131,7 +160,7 @@ class Ingredient(object):
 
         return df
 
-    def get_data(self, copy=False):
+    def get_data(self, copy=False, key_as_index=False):
         funcs = {
             'datapoints': self._get_data_datapoint,
             'entities': self._get_data_entities,
@@ -147,25 +176,19 @@ class Ingredient(object):
                 else:
                     data[k] = data[k].reset_index()
             self.data = data
+        if key_as_index:
+            # TODO set index when requiring data
+            pass
         return self.data
 
+
+class ProcedureResult(BaseIngredient):
+    def __init__(self, ingred_id, key, data):
+        super(ProcedureResult, self).__init__(ingred_id, key, data)
+
+    def __repr__(self):
+        return '<ProcedureResult: {}>'.format(self.ingred_id)
+
     def reset_data(self):
-        self.data = None
-        return
-
-    def copy_data(self):
-        """this function makes copy of self.data.
-        """
-        if not self.data:
-            self.get_data()
-        # v: DataFrame. DataFrame.copy() is by default deep copy,
-        # but I just call it explicitly here.
-        return dict((k, v.copy(deep=True)) for k, v in self.data.items())
-
-    def key_to_list(self):
-        """helper function: make a list that contains primaryKey of this ingredient"""
-        if self.dtype == "datapoints":
-            return self.key.split(',')
-        else:
-            assert isinstance(self.key, str)
-            return [self.key]
+        # TODO: allowing reset data? It can not be reconstructed.
+        raise NotImplementedError('')

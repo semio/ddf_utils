@@ -4,7 +4,7 @@
 
 import pandas as pd
 import numpy as np
-from . ingredient import Ingredient
+from . ingredient import BaseIngredient, Ingredient, ProcedureResult
 from .. import config
 from .. import transformer
 import time
@@ -13,10 +13,10 @@ import re
 
 import logging
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('Chef')
 
 
-def translate_header(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
+def translate_header(ingredient: BaseIngredient, *, result=None, **options) -> ProcedureResult:
     """Translate column headers
 
     available options are:
@@ -47,10 +47,10 @@ def translate_header(ingredient: Ingredient, *, result=None, **options) -> Ingre
 
     if not result:
         result = ingredient.ingred_id + '-translated'
-    return Ingredient(result, None, newkey, None, data=data)
+    return ProcedureResult(result, newkey, data=data)
 
 
-def translate_column(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
+def translate_column(ingredient: BaseIngredient, *, result=None, **options) -> ProcedureResult:
     """Translate column values.
 
     available options are:
@@ -87,10 +87,10 @@ def translate_column(ingredient: Ingredient, *, result=None, **options) -> Ingre
 
     if not result:
         result = ingredient.ingred_id + '-translated'
-    return Ingredient(result, None, ingredient.key, None, data=di)
+    return ProcedureResult(result, ingredient.key, data=di)
 
 
-def copy(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
+def copy(ingredient: BaseIngredient, *, result=None, **options) -> ProcedureResult:
     """make copy of ingredient data, with new names.
 
     available options:
@@ -113,10 +113,10 @@ def copy(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
     ingredient.reset_data()
     if not result:
         result = ingredient.ingred_id + '_'
-    return Ingredient(result, None, ingredient.key, None, data=data)
+    return ProcedureResult(result, ingredient.key, data=data)
 
 
-def merge(*ingredients: List[Ingredient], result=None, **options):
+def merge(*ingredients: List[BaseIngredient], result=None, **options) -> ProcedureResult:
     """the main merge function
 
     avaliable options:
@@ -168,7 +168,7 @@ def merge(*ingredients: List[Ingredient], result=None, **options):
     if not result:
         result = 'all_data_merged_'+str(int(time.time() * 1000))
 
-    return Ingredient(result, None, newkey, '*', data=res_all)
+    return ProcedureResult(result, newkey, data=res_all)
 
 
 def __get_last_item(ser):
@@ -219,7 +219,7 @@ def _merge_two(left: Dict[str, pd.DataFrame],
     return res_data
 
 
-def identity(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
+def identity(ingredient: BaseIngredient, *, result=None, **options) -> BaseIngredient:
     """return the ingredient as is.
 
     available options:
@@ -235,7 +235,7 @@ def identity(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
     return ingredient
 
 
-def filter_row(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
+def filter_row(ingredient: BaseIngredient, *, result=None, **options) -> ProcedureResult:
     """filter an ingredient based on a set of options and return
     the result as new ingredient.
 
@@ -297,10 +297,10 @@ def filter_row(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
 
     if not result:
         result = ingredient.ingred_id + '-filtered'
-    return Ingredient(result, None, newkey, '*', data=res)
+    return ProcedureResult(result, newkey, data=res)
 
 
-def filter_item(ingredient: Ingredient, *, result: Optional[str]=None, **options) -> Ingredient:
+def filter_item(ingredient: BaseIngredient, *, result: Optional[str]=None, **options) -> ProcedureResult:
     """filter item from the ingredient data dict.
 
     available options:
@@ -320,10 +320,10 @@ def filter_item(ingredient: Ingredient, *, result: Optional[str]=None, **options
     if not result:
         result = ingredient.ingred_id
 
-    return Ingredient(result, None, ingredient.key, None, data=data)
+    return ProcedureResult(result, ingredient.key, data=data)
 
 
-def align(to_align: Ingredient, base: Ingredient, *, result=None, **options) -> Ingredient:
+def align(to_align: BaseIngredient, base: Ingredient, *, result=None, **options) -> ProcedureResult:
     """align 2 ingredient by a column.
 
     This function is like an automatic version of translate_column.
@@ -406,12 +406,12 @@ def align(to_align: Ingredient, base: Ingredient, *, result=None, **options) -> 
         result = to_align.ingred_id + '-aligned'
     if to_align.dtype == 'datapoints':
         newkey = to_align.key.replace(to_find, to_replace)
-        return Ingredient(result, None, newkey, None, data=ing_data)
+        return ProcedureResult(result, newkey, data=ing_data)
     else:
-        return Ingredient(result, None, to_replace, None, data=ing_data)
+        return ProcedureResult(result, to_replace, data=ing_data)
 
 
-def groupby(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
+def groupby(ingredient: BaseIngredient, *, result=None, **options) -> ProcedureResult:
     """group ingredient data by column(s) and run aggregate function
 
     available options:
@@ -437,10 +437,10 @@ def groupby(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
 
     if not result:
         result = ingredient.ingred_id + '-agg'
-    return Ingredient(result, None, newkey, None, data=data)
+    return ProcedureResult(result, newkey, data=data)
 
 
-def accumulate(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
+def accumulate(ingredient: BaseIngredient, *, result=None, **options) -> ProcedureResult:
     """run accumulate function on ingredient data.
 
     available options:
@@ -480,7 +480,7 @@ def accumulate(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
     if not result:
         result = ingredient.ingred_id + '-accued'
 
-    return Ingredient(result, None, ingredient.key, None, data=data)
+    return ProcedureResult(result, ingredient.key, data=data)
 
 
 def _aagr(df: pd.DataFrame, window: int=10):
@@ -489,7 +489,7 @@ def _aagr(df: pd.DataFrame, window: int=10):
     return pct.rolling(window).apply(np.mean).dropna()
 
 
-def run_op(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
+def run_op(ingredient: BaseIngredient, *, result=None, **options) -> ProcedureResult:
     """run math operation on each row of ingredient data.
 
     available options:
@@ -516,12 +516,11 @@ def run_op(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
 
     if not result:
         result = ingredient.ingred_id + '-op'
-    return Ingredient(result, None, ingredient.key, None, data=data)
+    return ProcedureResult(result, ingredient.key, data=data)
 
 
-def extract_concepts(*ingredients: List[Ingredient],
-                     result=None,
-                     **options) -> Ingredient:
+def extract_concepts(*ingredients: List[BaseIngredient],
+                     result=None, **options) -> ProcedureResult:
     """extract concepts from other ingredients.
     """
     if options:
@@ -552,5 +551,6 @@ def extract_concepts(*ingredients: List[Ingredient],
         concepts = concepts.ix[new_concepts]
     if not result:
         result = 'concepts_extracted'
-    return Ingredient(result, None, 'concept', None, data=concepts.reset_index())
+    return ProcedureResult(result, 'concept', data=concepts.reset_index())
+
 
