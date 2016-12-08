@@ -1,0 +1,7 @@
+concept,name,concept_type
+name,Name,string
+year,Year,time
+country,Country,entity_domain
+sex,Sex,entity_domain
+agriculture_thousands,Agriculture ('000),measure
+agriculture_percentage,Agriculture (%),measure

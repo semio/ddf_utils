@@ -1,0 +1,347 @@
+{
+    "name": "ddf--gapminder--geo_entity_domain",
+    "language": {
+        "id": "en"
+    },
+    "resources": [
+        {
+            "path": "ddf--concepts.csv",
+            "name": "ddf--concepts",
+            "schema": {
+                "fields": [
+                    {
+                        "name": "concept"
+                    },
+                    {
+                        "name": "name"
+                    },
+                    {
+                        "name": "concept_type"
+                    },
+                    {
+                        "name": "domain"
+                    },
+                    {
+                        "name": "indicator_url"
+                    },
+                    {
+                        "name": "color"
+                    },
+                    {
+                        "name": "scales"
+                    },
+                    {
+                        "name": "drill_up"
+                    },
+                    {
+                        "name": "unit"
+                    },
+                    {
+                        "name": "tags"
+                    }
+                ],
+                "primaryKey": "concept"
+            }
+        },
+        {
+            "path": "ddf--entities--geo--country.csv",
+            "name": "ddf--entities--geo--country",
+            "schema": {
+                "fields": [
+                    {
+                        "name": "country"
+                    },
+                    {
+                        "name": "gwid"
+                    },
+                    {
+                        "name": "name"
+                    },
+                    {
+                        "name": "world_6region"
+                    },
+                    {
+                        "name": "income_groups"
+                    },
+                    {
+                        "name": "landlocked"
+                    },
+                    {
+                        "name": "g77_and_oecd_countries"
+                    },
+                    {
+                        "name": "main_religion_2008"
+                    },
+                    {
+                        "name": "gapminder_list"
+                    },
+                    {
+                        "name": "alternative_1"
+                    },
+                    {
+                        "name": "alternative_2"
+                    },
+                    {
+                        "name": "alternative_3"
+                    },
+                    {
+                        "name": "alternative_4_cdiac"
+                    },
+                    {
+                        "name": "pandg"
+                    },
+                    {
+                        "name": "god_id"
+                    },
+                    {
+                        "name": "alt_5"
+                    },
+                    {
+                        "name": "upper_case_name"
+                    },
+                    {
+                        "name": "code"
+                    },
+                    {
+                        "name": "number"
+                    },
+                    {
+                        "name": "arb1"
+                    },
+                    {
+                        "name": "arb2"
+                    },
+                    {
+                        "name": "arb3"
+                    },
+                    {
+                        "name": "arb4"
+                    },
+                    {
+                        "name": "arb5"
+                    },
+                    {
+                        "name": "arb6"
+                    },
+                    {
+                        "name": "is--country"
+                    },
+                    {
+                        "name": "world_4region"
+                    },
+                    {
+                        "name": "latitude"
+                    },
+                    {
+                        "name": "longitude"
+                    }
+                ],
+                "primaryKey": "country"
+            }
+        },
+        {
+            "path": "ddf--entities--geo--g77_and_oecd_countries.csv",
+            "name": "ddf--entities--geo--g77_and_oecd_countries",
+            "schema": {
+                "fields": [
+                    {
+                        "name": "g77_and_oecd_countries"
+                    },
+                    {
+                        "name": "rank"
+                    },
+                    {
+                        "name": "name"
+                    },
+                    {
+                        "name": "gwid"
+                    },
+                    {
+                        "name": "is--g77_and_oecd_countries"
+                    }
+                ],
+                "primaryKey": "g77_and_oecd_countries"
+            }
+        },
+        {
+            "path": "ddf--entities--geo--global.csv",
+            "name": "ddf--entities--geo--global",
+            "schema": {
+                "fields": [
+                    {
+                        "name": "geo"
+                    },
+                    {
+                        "name": "is--global"
+                    },
+                    {
+                        "name": "name"
+                    },
+                    {
+                        "name": "latitude"
+                    },
+                    {
+                        "name": "longitude"
+                    }
+                ],
+                "primaryKey": "geo"
+            }
+        },
+        {
+            "path": "ddf--entities--geo--income_groups.csv",
+            "name": "ddf--entities--geo--income_groups",
+            "schema": {
+                "fields": [
+                    {
+                        "name": "income_groups"
+                    },
+                    {
+                        "name": "name"
+                    },
+                    {
+                        "name": "gwid"
+                    },
+                    {
+                        "name": "is--income_groups"
+                    },
+                    {
+                        "name": "rank"
+                    }
+                ],
+                "primaryKey": "income_groups"
+            }
+        },
+        {
+            "path": "ddf--entities--geo--landlocked.csv",
+            "name": "ddf--entities--geo--landlocked",
+            "schema": {
+                "fields": [
+                    {
+                        "name": "landlocked"
+                    },
+                    {
+                        "name": "rank"
+                    },
+                    {
+                        "name": "name"
+                    },
+                    {
+                        "name": "gwid"
+                    },
+                    {
+                        "name": "is--landlocked"
+                    }
+                ],
+                "primaryKey": "landlocked"
+            }
+        },
+        {
+            "path": "ddf--entities--geo--main_religion_2008.csv",
+            "name": "ddf--entities--geo--main_religion_2008",
+            "schema": {
+                "fields": [
+                    {
+                        "name": "main_religion_2008"
+                    },
+                    {
+                        "name": "rank"
+                    },
+                    {
+                        "name": "name"
+                    },
+                    {
+                        "name": "gwid"
+                    },
+                    {
+                        "name": "is--main_religion_2008"
+                    }
+                ],
+                "primaryKey": "main_religion_2008"
+            }
+        },
+        {
+            "path": "ddf--entities--geo--world_4region.csv",
+            "name": "ddf--entities--geo--world_4region",
+            "schema": {
+                "fields": [
+                    {
+                        "name": "geo"
+                    },
+                    {
+                        "name": "rank"
+                    },
+                    {
+                        "name": "is--world_4region"
+                    },
+                    {
+                        "name": "name"
+                    },
+                    {
+                        "name": "name_short"
+                    },
+                    {
+                        "name": "name_long"
+                    },
+                    {
+                        "name": "description"
+                    },
+                    {
+                        "name": "latitude"
+                    },
+                    {
+                        "name": "longitude"
+                    },
+                    {
+                        "name": "color"
+                    },
+                    {
+                        "name": "shape_lores_svg"
+                    }
+                ],
+                "primaryKey": "geo"
+            }
+        },
+        {
+            "path": "ddf--entities--geo--world_6region.csv",
+            "name": "ddf--entities--geo--world_6region",
+            "schema": {
+                "fields": [
+                    {
+                        "name": "geo"
+                    },
+                    {
+                        "name": "rank"
+                    },
+                    {
+                        "name": "is--world_6region"
+                    },
+                    {
+                        "name": "name"
+                    },
+                    {
+                        "name": "name_short"
+                    },
+                    {
+                        "name": "name_long"
+                    },
+                    {
+                        "name": "description"
+                    },
+                    {
+                        "name": "latitude"
+                    },
+                    {
+                        "name": "longitude"
+                    },
+                    {
+                        "name": "color"
+                    },
+                    {
+                        "name": "shape_lores_svg"
+                    }
+                ],
+                "primaryKey": "geo"
+            }
+        }
+    ]
+}
