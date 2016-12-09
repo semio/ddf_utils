@@ -15,6 +15,7 @@ def _translate_column_inline(df, column, target_column, dictionary, not_found):
     if not_found == 'drop':
         df_new[target_column] = df_new[column].map(
             lambda x: dictionary[x] if x in dictionary.keys() else None)
+        df_new = df_new.dropna(subset=[target_column])
     if not_found == 'error':
         df_new[target_column] = df_new[column].map(
             lambda x: dictionary[x])
@@ -27,8 +28,8 @@ def _translate_column_inline(df, column, target_column, dictionary, not_found):
 
 def _translate_column_df(df, column, target_column, dictionary, base_df, not_found):
 
-    mapping = {}
-    no_match = []
+    mapping = dict()
+    no_match = set()
 
     search_cols = dictionary['key']
     if isinstance(search_cols, str):
@@ -53,9 +54,12 @@ def _translate_column_df(df, column, target_column, dictionary, base_df, not_fou
             logging.warning("multiple match found: "+f)
             mapping[f] = filtered.index[0]
         else:
-            no_match.append(f)
+            no_match.add(f)
 
     base_df = base_df.reset_index()
+
+    if len(no_match) > 0:
+        logging.warning('no match found: ' + str(no_match))
 
     if not_found == 'error' and len(no_match) > 0:
         raise ValueError('missing keys in dictionary. please check your input.')
