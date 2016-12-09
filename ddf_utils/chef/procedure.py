@@ -5,6 +5,7 @@
 import pandas as pd
 import numpy as np
 from . ingredient import BaseIngredient, Ingredient, ProcedureResult
+from .helpers import read_opt
 from .. import config
 from .. import transformer
 import time
@@ -64,26 +65,34 @@ def translate_column(ingredient: BaseIngredient, *, result=None, **options) -> P
     """
     logger.info("translate_column: " + ingredient.ingred_id)
 
-    if 'column' in options.keys() and 'base' in options.keys():
-        raise ValueError("only accept column or base option, not both")
-    try:
-        column = options['column']
-        rm = options['dictionary']
-    except KeyError:
-        base_dict = options['base'].get_data()
-        assert len(options['dictionary']) == 1
-        assert len(base_dict) == 1
-        _, base_df = base_dict.popitem()
-        k, v = options['dictionary'].popitem()
-        column = k
-        rm = base_df.set_index(k)[v].to_dict()
+    from ..transformer import translate_column as tc
 
     di = ingredient.copy_data()
 
-    for k, df in di.items():
+    # reading options
+    column = read_opt(options, 'column', required=True)
+    target_column = read_opt(options, 'target_column')
+    not_found = read_opt(options, 'not_found', default='drop')
+    dictionary = read_opt(options, 'dictionary', required=True)
 
-        df = df.set_index(column)
-        di[k] = df.rename(index=rm).reset_index()
+    # find out the type of dictionary.
+    if isinstance(dictionary, str):
+        dict_type = 'file'
+        base_df = None
+    else:
+        if 'base' in dictionary.keys():
+            dict_type = 'dataframe'
+            base = dictionary.pop('base')
+            base_data = base.get_data()
+            if len(base_data) > 1:
+                raise ValueError('only support ingredient with 1 item')
+            base_df = list(base_data.values())[0]
+        else:
+            dict_type = 'inline'
+            base_df = None
+
+    for k, df in di.items():
+        di[k] = tc(df, column, dict_type, dictionary, target_column, base_df, not_found)
 
     if not result:
         result = ingredient.ingred_id + '-translated'
