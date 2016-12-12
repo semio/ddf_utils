@@ -5,7 +5,7 @@
 import pandas as pd
 import numpy as np
 from . ingredient import BaseIngredient, Ingredient, ProcedureResult
-from .helpers import read_opt
+from .helpers import read_opt, mkfunc
 from .. import config
 from .. import transformer
 import time
@@ -420,33 +420,71 @@ def align(to_align: BaseIngredient, base: Ingredient, *, result=None, **options)
         return ProcedureResult(result, to_replace, data=ing_data)
 
 
-def groupby(ingredient: BaseIngredient, *, result=None, **options) -> ProcedureResult:
+def groupby(ingredient: BaseIngredient, *, result, **options) -> ProcedureResult:
     """group ingredient data by column(s) and run aggregate function
 
     available options:
-        by: the column(s) to group, can be a list or a string
-        aggregate: the function to aggregate. Default: sum
-    """
+        groubby: the column(s) to group, can be a list or a string
+        aggregate/transform/filter: the function to run. only one of them should be supplied.
 
-    data = ingredient.get_data()
-    by = options.pop('by')
+    The function block should have below format:
+
+    aggregate:
+      column1: funcname1
+      column2: funcname2
+
+    or
+
+    aggregate:
+      column:
+        function: funcname
+        param1: foo
+        param2: bar
+
+    other columns not mentioned will be dropped.
+    """
 
     logger.info("groupby: " + ingredient.ingred_id)
 
-    try:
-        agg = options.pop('aggregate')
-    except KeyError:
-        logger.warning("no aggregate function found, assuming sum()")
-        agg = 'sum'
+    data = ingredient.get_data()
+    by = options.pop('groupby')
 
-    for k, df in data.items():
-        df = df.groupby(by=by).agg({k: agg})
-        newkey = ','.join(df.index.names)
-        data[k] = df.reset_index()
+    # only one of aggregate/transform/filter should be in options.
+    assert len(list(options.keys())) == 1
+    comp_type = list(options.keys())[0]
+    assert comp_type in ['aggregate', 'transform', 'filter']
 
-    if not result:
-        result = ingredient.ingred_id + '-agg'
-    return ProcedureResult(result, newkey, data=data)
+    if comp_type == 'aggregate':  # only aggregate should change the key of ingredient
+        if isinstance(by, list):
+            newkey = ','.join(by)
+        else:
+            newkey = by
+            by = [by]
+        logger.debug("changing the key to: " + str(newkey))
+    else:
+        newkey = ingredient.key
+        by = [by]
+
+    newdata = dict()
+
+    if comp_type == 'aggregate':
+        for k, func in options[comp_type].items():
+            func = mkfunc(func)
+            newdata[k] = data[k].groupby(by=by).agg({k: func}).reset_index()
+    if comp_type == 'transform':
+        for k, func in options[comp_type].items():
+            func = mkfunc(func)
+            df = data[k].set_index(ingredient.key_to_list())
+            levels = [df.index.names.index(x) for x in by]
+            newdata[k] = df.groupby(level=levels)[k].transform(func).reset_index()
+    if comp_type == 'filter':
+        for k, func in options[comp_type].items():
+            func = mkfunc(func)
+            df = data[k].set_index(ingredient.key_to_list())
+            levels = [df.index.names.index(x) for x in by]
+            newdata[k] = df.groupby(level=levels)[k].filter(func).reset_index()
+
+    return ProcedureResult(result, newkey, data=newdata)
 
 
 def accumulate(ingredient: BaseIngredient, *, result=None, **options) -> ProcedureResult:
@@ -563,3 +601,9 @@ def extract_concepts(*ingredients: List[BaseIngredient],
     return ProcedureResult(result, 'concept', data=concepts.reset_index())
 
 
+def trend_bridge(ingredient: BaseIngredient, result, **options) -> ProcedureResult:
+    """run trend bridge on ingredients
+    """
+    from ..transformer import trend_bridge as tb
+
+    raise NotImplementedError('')

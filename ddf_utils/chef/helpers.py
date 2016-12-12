@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from functools import wraps
+from functools import wraps, partial
+import numpy as np
+from .. import ops
 import logging
 
 
@@ -10,6 +12,14 @@ def read_opt(options, key, required=False, default=None):
     if required:
         raise KeyError('field {} is mandantory'.format(key))
     return default
+
+
+def mkfunc(options):
+    if isinstance(options, str):
+        return getattr(np, options)
+    else:
+        func = getattr(ops, options.pop('function'))
+        return partial(func, **options)
 
 
 def log_shape(func):

@@ -1,0 +1,46 @@
+info:
+    id: test_groupby
+
+ingredients:
+    - id: datapoints-ilo
+      dataset: ddf--ilo--kilm_employment_sector
+      key: "country,sex,year"
+      value: "*"
+
+cooking:
+    datapoints:
+        - procedure: groupby
+          ingredients:
+              - datapoints-ilo
+          options:
+              groupby:
+                  - country
+                  - year
+              aggregate:
+                  agriculture_thousands: sum
+                  agriculture_percentage: sum
+          result: datapoints-by-country-year 
+        - procedure: groupby
+          ingredients:
+              - datapoints-by-country-year
+          options:
+              groupby: country
+              filter:
+                agriculture_percentage:
+                      function: gt
+                      how: all
+                      val: 100
+          result: grouped-datapoints-1
+        - procedure: groupby
+          ingredients:
+              - datapoints-by-country-year
+          options:
+              groupby: country
+              transform:
+                  agriculture_thousands:
+                      function: zcore
+          result: grouped-datapoints-2
+
+serving:
+    - grouped-datapoints-1
+    - grouped-datapoints-2
