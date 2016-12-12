@@ -134,7 +134,10 @@ def check_dataset_availability(recipe):
 
     raise error if some dataset not available. otherwise do nothing.
     """
-    ddf_dir = recipe.config.ddf_dir
+    try:
+        ddf_dir = recipe.config.ddf_dir
+    except (KeyError, AttributeError):
+        ddf_dir = config.DDF_SEARCH_PATH
 
     datasets = set()
     for ingred in recipe.ingredients:
