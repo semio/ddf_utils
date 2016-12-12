@@ -166,23 +166,6 @@ def translate_header(df, dictionary, dictionary_type='inline'):
         raise ValueError('dictionary not supported: '+dictionary_type)
 
 
-def aagr(df: pd.DataFrame, window: int=10):  # TODO: create a op.py file for this kind of functions?
-    """average annual growth rate
-
-    Parameters
-    ----------
-    window : `int`
-        the rolling window size
-
-    Returns
-    -------
-    return : `DataFrame`
-        The rolling apply result
-    """
-    pct = df.pct_change()
-    return pct.rolling(window).apply(np.mean).dropna()
-
-
 def trend_bridge(old_data, new_data, bridge_length):
     """smoothing data between series.
 
