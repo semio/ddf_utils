@@ -533,10 +533,8 @@ def window(ingredient: BaseIngredient, result, **options) -> ProcedureResult:
             # There is a bug when running rolling on with groupby in pandas.
             # see https://github.com/pandas-dev/pandas/issues/13966
             # We will implement this later when we found work around or it's fixed
-            # for now, the we assume only 2 dimensions in the dataframe and don't
-            # use the `on` parameter in rolling.
-            if len(df.index.names) > 2:
-                raise NotImplementedError('Not supporting more than 2 dimensions for now.')
+            # for now, we don't use the `on` parameter in rolling.
+            # FIXME: add back the `on` parameter.
             newdata[k] = (df.groupby(level=levels, group_keys=False)
                           .rolling(window=size, min_periods=min_periods, center=center)
                           .agg(func).reset_index().dropna())
