@@ -1,0 +1,37 @@
+info:
+    id: test_window
+
+ingredients:
+    - id: bp-datapoints
+      dataset: ddf--bp--energy
+      key: 'geo,year'
+      value: '*'
+
+cooking:
+    datapoints:
+        - procedure: window
+          ingredients:
+              - bp-datapoints
+          options:
+              window:
+                  column: year
+                  size: 3
+                  # min_periods: 1
+              aggregate:
+                  biofuels_production_kboed: mean
+          result: rolling_datapoints_1
+        - procedure: window
+          ingredients:
+              - bp-datapoints
+          options:
+              window:
+                  column: year
+                  size: expanding
+                  min_periods: 1
+              aggregate:
+                  biofuels_production_ktoe: sum
+          result: rolling_datapoints_2
+
+serving:
+    - rolling_datapoints_1
+    - rolling_datapoints_2

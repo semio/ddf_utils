@@ -3,6 +3,7 @@
 """functions for common tasks on ddf datasets"""
 
 import pandas as pd
+import numpy as np
 import json
 import logging
 
@@ -14,6 +15,7 @@ def _translate_column_inline(df, column, target_column, dictionary, not_found):
     if not_found == 'drop':
         df_new[target_column] = df_new[column].map(
             lambda x: dictionary[x] if x in dictionary.keys() else None)
+        df_new = df_new.dropna(subset=[target_column])
     if not_found == 'error':
         df_new[target_column] = df_new[column].map(
             lambda x: dictionary[x])
@@ -26,8 +28,8 @@ def _translate_column_inline(df, column, target_column, dictionary, not_found):
 
 def _translate_column_df(df, column, target_column, dictionary, base_df, not_found):
 
-    mapping = {}
-    no_match = []
+    mapping = dict()
+    no_match = set()
 
     search_cols = dictionary['key']
     if isinstance(search_cols, str):
@@ -52,9 +54,12 @@ def _translate_column_df(df, column, target_column, dictionary, base_df, not_fou
             logging.warning("multiple match found: "+f)
             mapping[f] = filtered.index[0]
         else:
-            no_match.append(f)
+            no_match.add(f)
 
     base_df = base_df.reset_index()
+
+    if len(no_match) > 0:
+        logging.warning('no match found: ' + str(no_match))
 
     if not_found == 'error' and len(no_match) > 0:
         raise ValueError('missing keys in dictionary. please check your input.')
@@ -161,23 +166,6 @@ def translate_header(df, dictionary, dictionary_type='inline'):
         raise ValueError('dictionary not supported: '+dictionary_type)
 
 
-def aagr(df: pd.DataFrame, window: int=10):  # TODO: create a op.py file for this kind of functions?
-    """average annual growth rate
-
-    Parameters
-    ----------
-    window : `int`
-        the rolling window size
-
-    Returns
-    -------
-    return : `DataFrame`
-        The rolling apply result
-    """
-    pct = df.pct_change()
-    return pct.rolling(window).apply(np.mean).dropna()
-
-
 def trend_bridge(old_data, new_data, bridge_length):
     """smoothing data between series.
 
@@ -215,3 +203,26 @@ def trend_bridge(old_data, new_data, bridge_length):
         bridge_data.ix[i:bridge_end] = bridge_data.ix[i:bridge_end] + fraction
 
     return bridge_data
+
+
+def extract_concepts(dfs, base=None, join='full_outer'):
+    if base is not None:
+        concepts = base.set_index('concept')
+    else:
+        concepts = pd.DataFrame([], columns=['concept', 'concept_type']).set_index('concept')
+
+    new_concepts = set()
+
+    for df in dfs:
+        for c in df.columns:
+            new_concepts.add(c)
+            if c in concepts.index:  # if the concept is in base, just use base data
+                continue
+            if np.issubdtype(df[c].dtype, np.number):
+                concepts.ix[c, 'concept_type'] = 'measure'
+            else:  # TODO: add logic for concepts/entities ingredients
+                concepts.ix[c, 'concept_type'] = 'string'
+    if join == 'ingredients_outer':
+        # ingredients_outer join: only keep concepts appears in ingredients
+        concepts = concepts.ix[new_concepts]
+    return concepts.reset_index()

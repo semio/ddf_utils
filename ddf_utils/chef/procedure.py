@@ -4,7 +4,8 @@
 
 import pandas as pd
 import numpy as np
-from . ingredient import Ingredient
+from . ingredient import BaseIngredient, Ingredient, ProcedureResult
+from .helpers import read_opt, mkfunc
 from .. import config
 from .. import transformer
 import time
@@ -13,10 +14,10 @@ import re
 
 import logging
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('Chef')
 
 
-def translate_header(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
+def translate_header(ingredient: BaseIngredient, *, result=None, **options) -> ProcedureResult:
     """Translate column headers
 
     available options are:
@@ -47,10 +48,10 @@ def translate_header(ingredient: Ingredient, *, result=None, **options) -> Ingre
 
     if not result:
         result = ingredient.ingred_id + '-translated'
-    return Ingredient(result, None, newkey, None, data=data)
+    return ProcedureResult(result, newkey, data=data)
 
 
-def translate_column(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
+def translate_column(ingredient: BaseIngredient, *, result=None, **options) -> ProcedureResult:
     """Translate column values.
 
     available options are:
@@ -64,33 +65,41 @@ def translate_column(ingredient: Ingredient, *, result=None, **options) -> Ingre
     """
     logger.info("translate_column: " + ingredient.ingred_id)
 
-    if 'column' in options.keys() and 'base' in options.keys():
-        raise ValueError("only accept column or base option, not both")
-    try:
-        column = options['column']
-        rm = options['dictionary']
-    except KeyError:
-        base_dict = options['base'].get_data()
-        assert len(options['dictionary']) == 1
-        assert len(base_dict) == 1
-        _, base_df = base_dict.popitem()
-        k, v = options['dictionary'].popitem()
-        column = k
-        rm = base_df.set_index(k)[v].to_dict()
+    from ..transformer import translate_column as tc
 
     di = ingredient.copy_data()
 
-    for k, df in di.items():
+    # reading options
+    column = read_opt(options, 'column', required=True)
+    target_column = read_opt(options, 'target_column')
+    not_found = read_opt(options, 'not_found', default='drop')
+    dictionary = read_opt(options, 'dictionary', required=True)
 
-        df = df.set_index(column)
-        di[k] = df.rename(index=rm).reset_index()
+    # find out the type of dictionary.
+    if isinstance(dictionary, str):
+        dict_type = 'file'
+        base_df = None
+    else:
+        if 'base' in dictionary.keys():
+            dict_type = 'dataframe'
+            base = dictionary.pop('base')
+            base_data = base.get_data()
+            if len(base_data) > 1:
+                raise ValueError('only support ingredient with 1 item')
+            base_df = list(base_data.values())[0]
+        else:
+            dict_type = 'inline'
+            base_df = None
+
+    for k, df in di.items():
+        di[k] = tc(df, column, dict_type, dictionary, target_column, base_df, not_found)
 
     if not result:
         result = ingredient.ingred_id + '-translated'
-    return Ingredient(result, None, ingredient.key, None, data=di)
+    return ProcedureResult(result, ingredient.key, data=di)
 
 
-def copy(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
+def copy(ingredient: BaseIngredient, *, result=None, **options) -> ProcedureResult:
     """make copy of ingredient data, with new names.
 
     available options:
@@ -113,10 +122,10 @@ def copy(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
     ingredient.reset_data()
     if not result:
         result = ingredient.ingred_id + '_'
-    return Ingredient(result, None, ingredient.key, None, data=data)
+    return ProcedureResult(result, ingredient.key, data=data)
 
 
-def merge(*ingredients: List[Ingredient], result=None, **options):
+def merge(*ingredients: List[BaseIngredient], result=None, **options) -> ProcedureResult:
     """the main merge function
 
     avaliable options:
@@ -168,7 +177,7 @@ def merge(*ingredients: List[Ingredient], result=None, **options):
     if not result:
         result = 'all_data_merged_'+str(int(time.time() * 1000))
 
-    return Ingredient(result, None, newkey, '*', data=res_all)
+    return ProcedureResult(result, newkey, data=res_all)
 
 
 def __get_last_item(ser):
@@ -219,7 +228,7 @@ def _merge_two(left: Dict[str, pd.DataFrame],
     return res_data
 
 
-def identity(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
+def identity(ingredient: BaseIngredient, *, result=None, **options) -> BaseIngredient:
     """return the ingredient as is.
 
     available options:
@@ -235,7 +244,7 @@ def identity(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
     return ingredient
 
 
-def filter_row(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
+def filter_row(ingredient: BaseIngredient, *, result=None, **options) -> ProcedureResult:
     """filter an ingredient based on a set of options and return
     the result as new ingredient.
 
@@ -297,10 +306,10 @@ def filter_row(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
 
     if not result:
         result = ingredient.ingred_id + '-filtered'
-    return Ingredient(result, None, newkey, '*', data=res)
+    return ProcedureResult(result, newkey, data=res)
 
 
-def filter_item(ingredient: Ingredient, *, result: Optional[str]=None, **options) -> Ingredient:
+def filter_item(ingredient: BaseIngredient, *, result: Optional[str]=None, **options) -> ProcedureResult:
     """filter item from the ingredient data dict.
 
     available options:
@@ -320,10 +329,10 @@ def filter_item(ingredient: Ingredient, *, result: Optional[str]=None, **options
     if not result:
         result = ingredient.ingred_id
 
-    return Ingredient(result, None, ingredient.key, None, data=data)
+    return ProcedureResult(result, ingredient.key, data=data)
 
 
-def align(to_align: Ingredient, base: Ingredient, *, result=None, **options) -> Ingredient:
+def align(to_align: BaseIngredient, base: Ingredient, *, result=None, **options) -> ProcedureResult:
     """align 2 ingredient by a column.
 
     This function is like an automatic version of translate_column.
@@ -406,41 +415,132 @@ def align(to_align: Ingredient, base: Ingredient, *, result=None, **options) -> 
         result = to_align.ingred_id + '-aligned'
     if to_align.dtype == 'datapoints':
         newkey = to_align.key.replace(to_find, to_replace)
-        return Ingredient(result, None, newkey, None, data=ing_data)
+        return ProcedureResult(result, newkey, data=ing_data)
     else:
-        return Ingredient(result, None, to_replace, None, data=ing_data)
+        return ProcedureResult(result, to_replace, data=ing_data)
 
 
-def groupby(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
+def groupby(ingredient: BaseIngredient, *, result, **options) -> ProcedureResult:
     """group ingredient data by column(s) and run aggregate function
 
     available options:
-        by: the column(s) to group, can be a list or a string
-        aggregate: the function to aggregate. Default: sum
-    """
+        groubby: the column(s) to group, can be a list or a string
+        aggregate/transform/filter: the function to run. only one of them should be supplied.
 
-    data = ingredient.get_data()
-    by = options.pop('by')
+    The function block should have below format:
+
+    aggregate:
+      column1: funcname1
+      column2: funcname2
+
+    or
+
+    aggregate:
+      column:
+        function: funcname
+        param1: foo
+        param2: bar
+
+    other columns not mentioned will be dropped.
+    """
 
     logger.info("groupby: " + ingredient.ingred_id)
 
-    try:
-        agg = options.pop('aggregate')
-    except KeyError:
-        logger.warning("no aggregate function found, assuming sum()")
-        agg = 'sum'
+    data = ingredient.get_data()
+    by = options.pop('groupby')
 
-    for k, df in data.items():
-        df = df.groupby(by=by).agg({k: agg})
-        newkey = ','.join(df.index.names)
-        data[k] = df.reset_index()
+    # only one of aggregate/transform/filter should be in options.
+    assert len(list(options.keys())) == 1
+    comp_type = list(options.keys())[0]
+    assert comp_type in ['aggregate', 'transform', 'filter']
 
-    if not result:
-        result = ingredient.ingred_id + '-agg'
-    return Ingredient(result, None, newkey, None, data=data)
+    if comp_type == 'aggregate':  # only aggregate should change the key of ingredient
+        if isinstance(by, list):
+            newkey = ','.join(by)
+        else:
+            newkey = by
+            by = [by]
+        logger.debug("changing the key to: " + str(newkey))
+    else:
+        newkey = ingredient.key
+        by = [by]
+
+    newdata = dict()
+
+    # TODO: support apply function to all items?
+    if comp_type == 'aggregate':
+        for k, func in options[comp_type].items():
+            func = mkfunc(func)
+            newdata[k] = data[k].groupby(by=by).agg({k: func}).reset_index()
+    if comp_type == 'transform':
+        for k, func in options[comp_type].items():
+            func = mkfunc(func)
+            df = data[k].set_index(ingredient.key_to_list())
+            levels = [df.index.names.index(x) for x in by]
+            newdata[k] = df.groupby(level=levels)[k].transform(func).reset_index()
+    if comp_type == 'filter':
+        for k, func in options[comp_type].items():
+            func = mkfunc(func)
+            df = data[k].set_index(ingredient.key_to_list())
+            levels = [df.index.names.index(x) for x in by]
+            newdata[k] = df.groupby(level=levels)[k].filter(func).reset_index()
+
+    return ProcedureResult(result, newkey, data=newdata)
 
 
-def accumulate(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
+def window(ingredient: BaseIngredient, result, **options) -> ProcedureResult:
+    """apply functions on a rolling window
+
+    available options:
+    window: dictionary
+        window definition. options are:
+        column: str, column which window is created from
+        size: int or 'expanding', if int then rolling window, if expanding then expanding window
+        min_periods: int, as in pandas
+        center: bool, as in pandas
+    aggregate: dictionary
+        aggregation functions, format should be
+        column: func or column: {function: func, param1: foo, param2: baz, ...}
+    """
+
+    logger.info('window: ' + ingredient.ingred_id)
+
+    # reading options
+    window = options.pop('window')
+    aggregate = options.pop('aggregate')
+
+    column = read_opt(window, 'column', required=True)
+    size = read_opt(window, 'size', required=True)
+    min_periods = read_opt(window, 'min_periods', default=None)
+    center = read_opt(window, 'center', default=False)
+
+    data = ingredient.get_data()
+    newdata = dict()
+
+    for k, func in aggregate.items():
+        f = mkfunc(func)
+        # keys for grouping. in multidimensional data like datapoints, we want create
+        # groups before rolling. Just group all key column except the column to aggregate.
+        keys = ingredient.key_to_list()
+        keys.remove(column)
+        df = data[k].set_index(ingredient.key_to_list())
+        levels = [df.index.names.index(x) for x in keys]
+        if size == 'expanding':
+            newdata[k] = (df.groupby(level=levels, group_keys=False)
+                          .expanding(on=column, min_periods=min_periods, center=center)
+                          .agg(func).reset_index().dropna())
+        else:
+            # There is a bug when running rolling on with groupby in pandas.
+            # see https://github.com/pandas-dev/pandas/issues/13966
+            # We will implement this later when we found work around or it's fixed
+            # for now, we don't use the `on` parameter in rolling.
+            # FIXME: add back the `on` parameter.
+            newdata[k] = (df.groupby(level=levels, group_keys=False)
+                          .rolling(window=size, min_periods=min_periods, center=center)
+                          .agg(func).reset_index().dropna())
+    return ProcedureResult(result, ingredient.key, newdata)
+
+def accumulate(ingredient: BaseIngredient, *, result=None, **options) -> ProcedureResult:
     """run accumulate function on ingredient data.
 
     available options:
@@ -480,7 +580,7 @@ def accumulate(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
     if not result:
         result = ingredient.ingred_id + '-accued'
 
-    return Ingredient(result, None, ingredient.key, None, data=data)
+    return ProcedureResult(result, ingredient.key, data=data)
 
 
 def _aagr(df: pd.DataFrame, window: int=10):
@@ -489,7 +589,7 @@ def _aagr(df: pd.DataFrame, window: int=10):
     return pct.rolling(window).apply(np.mean).dropna()
 
 
-def run_op(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
+def run_op(ingredient: BaseIngredient, *, result=None, **options) -> ProcedureResult:
     """run math operation on each row of ingredient data.
 
     available options:
@@ -516,12 +616,11 @@ def run_op(ingredient: Ingredient, *, result=None, **options) -> Ingredient:
 
     if not result:
         result = ingredient.ingred_id + '-op'
-    return Ingredient(result, None, ingredient.key, None, data=data)
+    return ProcedureResult(result, ingredient.key, data=data)
 
 
-def extract_concepts(*ingredients: List[Ingredient],
-                     result=None,
-                     **options) -> Ingredient:
+def extract_concepts(*ingredients: List[BaseIngredient],
+                     result=None, **options) -> ProcedureResult:
     """extract concepts from other ingredients.
     """
     if options:
@@ -552,5 +651,12 @@ def extract_concepts(*ingredients: List[Ingredient],
         concepts = concepts.ix[new_concepts]
     if not result:
         result = 'concepts_extracted'
-    return Ingredient(result, None, 'concept', None, data=concepts.reset_index())
+    return ProcedureResult(result, 'concept', data=concepts.reset_index())
 
+
+def trend_bridge(ingredient: BaseIngredient, result, **options) -> ProcedureResult:
+    """run trend bridge on ingredients
+    """
+    from ..transformer import trend_bridge as tb
+
+    raise NotImplementedError('')

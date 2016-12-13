@@ -1,0 +1,6 @@
+concept,concept_type,name
+geo,entity_domain,Geo
+biofuels_production_kboed,measure,Biofuels Production - Kboed
+biofuels_production_ktoe,measure,Biofuels Production - Ktoe
+name,string,Name
+year,time,Year

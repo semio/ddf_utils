@@ -1,26 +1,45 @@
-# basic info
+# TODO: A recipe to test all the procedures.
+# for now procedures that needs to test:
+# supported_procs = {
+#     'translate_column': translate_column,
+#     'translate_header': translate_header,
+#     'identity': identity,
+#     'merge': merge,
+#     'run_op': run_op,
+#     'filter_row': filter_row,
+#     'align': align,
+#     'filter_item': filter_item,
+#     'groupby': groupby,
+#     'accumulate': accumulate,
+#     'copy': copy,
+#     'extract_concepts': extract_concepts
+# }
+# And also the include / serve section for result building
+
 info:
     id: test_ddf_util
 
-config:
-    ddf_dir: /Users/semio/src/work/Gapminder/
-    recipes_dir: /Users/semio/src/work/Gapminder/ddf_utils/tests/recipes
+# config:
+#     ddf_dir: /Users/semio/src/work/Gapminder/
+#     recipes_dir: /Users/semio/src/work/Gapminder/ddf_utils/tests/recipes
 
-include:
-    - recipe_bp.yaml
-    - recipe_cme.yaml
+# include:
+#     - recipe_bp.yaml
+#     - recipe_cme.yaml
 
-cooking:
-    concepts:
-        - procedure: merge
-          ingredients:
-              - cme-concepts-final
-              - bp-concepts-final
-          options:
-              deep: true
+# cooking:
+#     concepts:
+#         - procedure: merge
+#           ingredients:
+#               - cme-concepts-final
+#               - bp-concepts-final
+#           options:
+#               deep: true
+#           result: final-concepts
 
-    datapoints:
-        - procedure: merge
-          ingredients:
-              - cme-datapoints-final
-              - bp-datapoints-final
+#     datapoints:
+#         - procedure: merge
+#           ingredients:
+#               - cme-datapoints-final
+#               - bp-datapoints-final
+#           result: final-datapoints

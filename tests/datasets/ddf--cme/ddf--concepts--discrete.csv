@@ -1,0 +1,6 @@
+concept,name,concept_type
+iso_code,ISO Code,string
+countryname,CountryName,string
+country,Country,entity_domain
+year,Year,time
+name,"Name Changed",string

@@ -111,7 +111,7 @@ def build_recipe(recipe_file, to_disk=False):
                         # recipe['cooking'][p] = [*rcp['cooking'][p], *recipe['cooking'][p]]  # not supportted by Python < 3.5
                         new_procs = []
                         [new_procs.append(proc) for proc in rcp['cooking'][p]]
-                        [new_procs.append(proc) for proc in recipe['cooking'][p]]
+                        [new_procs.append(proc) for proc in recipe['cooking'][p] if proc not in new_procs]
                         recipe['cooking'][p] = new_procs
                     else:
                         recipe['cooking'][p] = rcp['cooking'][p]
@@ -134,7 +134,10 @@ def check_dataset_availability(recipe):
 
     raise error if some dataset not available. otherwise do nothing.
     """
-    ddf_dir = recipe.config.ddf_dir
+    try:
+        ddf_dir = recipe.config.ddf_dir
+    except (KeyError, AttributeError):
+        ddf_dir = config.DDF_SEARCH_PATH
 
     datasets = set()
     for ingred in recipe.ingredients:
