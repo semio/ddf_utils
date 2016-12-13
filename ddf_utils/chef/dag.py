@@ -3,23 +3,7 @@
 """the DAG module of chef"""
 
 import pandas as pd
-from . procedure import *
-
-# supported procedures
-supported_procs = {
-    'translate_column': translate_column,
-    'translate_header': translate_header,
-    'identity': identity,
-    'merge': merge,
-    'run_op': run_op,
-    'filter_row': filter_row,
-    'align': align,
-    'filter_item': filter_item,
-    'groupby': groupby,
-    'accumulate': accumulate,
-    'copy': copy,
-    'extract_concepts': extract_concepts
-}
+from . import procedure as pc
 
 
 class BaseNode():
@@ -94,12 +78,12 @@ class ProcedureNode(BaseNode):
     def evaluate(self):
         if self.result_ingredient:
             return self.result_ingredient
-        funcs = supported_procs
-        func = self.procedure['procedure']
 
-        # raise error if procedure not supported
-        if func not in funcs.keys() and func != 'serve':
-            raise NotImplementedError("Not supported: " + func)
+        # get the procedure function, raise error if procedure not supported
+        try:
+            func = getattr(pc, self.procedure['procedure'])
+        except AttributeError:
+            raise NotImplementedError("Not supported: " + self.procedure['procedure'])
 
         # check the base ingredients and convert the string id to actual ingredient
         ingredients = []
@@ -121,7 +105,7 @@ class ProcedureNode(BaseNode):
         else:
             options = dict()
 
-        self.result_ingredient = funcs[func](*ingredients, result=self.procedure['result'], **options)
+        self.result_ingredient = func(*ingredients, result=self.procedure['result'], **options)
         return self.result_ingredient
 
 
