@@ -467,6 +467,7 @@ def groupby(ingredient: BaseIngredient, *, result, **options) -> ProcedureResult
 
     newdata = dict()
 
+    # TODO: support apply function to all items?
     if comp_type == 'aggregate':
         for k, func in options[comp_type].items():
             func = mkfunc(func)
@@ -486,6 +487,60 @@ def groupby(ingredient: BaseIngredient, *, result, **options) -> ProcedureResult
 
     return ProcedureResult(result, newkey, data=newdata)
 
+
+def window(ingredient: BaseIngredient, result, **options) -> ProcedureResult:
+    """apply functions on a rolling window
+
+    available options:
+    window: dictionary
+        window definition. options are:
+        column: str, column which window is created from
+        size: int or 'expanding', if int then rolling window, if expanding then expanding window
+        min_periods: int, as in pandas
+        center: bool, as in pandas
+    aggregate: dictionary
+        aggregation functions, format should be
+        column: func or column: {function: func, param1: foo, param2: baz, ...}
+    """
+
+    logger.info('window: ' + ingredient.ingred_id)
+
+    # reading options
+    window = options.pop('window')
+    aggregate = options.pop('aggregate')
+
+    column = read_opt(window, 'column', required=True)
+    size = read_opt(window, 'size', required=True)
+    min_periods = read_opt(window, 'min_periods', default=None)
+    center = read_opt(window, 'center', default=False)
+
+    data = ingredient.get_data()
+    newdata = dict()
+
+    for k, func in aggregate.items():
+        f = mkfunc(func)
+        # keys for grouping. in multidimensional data like datapoints, we want create
+        # groups before rolling. Just group all key column except the column to aggregate.
+        keys = ingredient.key_to_list()
+        keys.remove(column)
+        df = data[k].set_index(ingredient.key_to_list())
+        levels = [df.index.names.index(x) for x in keys]
+        if size == 'expanding':
+            newdata[k] = (df.groupby(level=levels, group_keys=False)
+                          .expanding(on=column, min_periods=min_periods, center=center)
+                          .agg(func).reset_index().dropna())
+        else:
+            # There is a bug when running rolling on with groupby in pandas.
+            # see https://github.com/pandas-dev/pandas/issues/13966
+            # We will implement this later when we found work around or it's fixed
+            # for now, the we assume only 2 dimensions in the dataframe and don't
+            # use the `on` parameter in rolling.
+            if len(df.index.names) > 2:
+                raise NotImplementedError('Not supporting more than 2 dimensions for now.')
+            newdata[k] = (df.groupby(level=levels, group_keys=False)
+                          .rolling(window=size, min_periods=min_periods, center=center)
+                          .agg(func).reset_index().dropna())
+    return ProcedureResult(result, ingredient.key, newdata)
 
 def accumulate(ingredient: BaseIngredient, *, result=None, **options) -> ProcedureResult:
     """run accumulate function on ingredient data.
