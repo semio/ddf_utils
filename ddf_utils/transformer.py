@@ -26,17 +26,30 @@ def _translate_column_inline(df, column, target_column, dictionary, not_found):
     return df_new
 
 
-def _translate_column_df(df, column, target_column, dictionary, base_df, not_found):
+def _generate_mappng_dict1(df, column, dictionary, base_df, not_found):
+
+    search_col = dictionary['key']
+    idx_col = dictionary['value']
+
+    if base_df.set_index(idx_col).index.has_duplicates:
+        logging.warning('there are duplicated keys in the base dataframe')
+
+    if search_col == idx_col:
+        mapping_all = dict([(x, x) for x in base_df[idx_col].values])
+    else:
+        mapping_all = base_df.set_index(idx_col)[search_col].to_dict()
+    return mapping_all
+
+
+def _generate_mapping_dict2(df, column, dictionary, base_df, not_found):
 
     mapping = dict()
     no_match = set()
 
     search_cols = dictionary['key']
-    if isinstance(search_cols, str):
-        search_cols = [search_cols]
+    idx_col = dictionary['value']
 
-    assert isinstance(dictionary['value'], str)
-    base_df = base_df.set_index(dictionary['value'])
+    assert isinstance(idx_col, str)
 
     for f in df[column].values:
         bools = []
@@ -49,14 +62,12 @@ def _translate_column_df(df, column, target_column, dictionary, base_df, not_fou
         filtered = base_df[mask]
 
         if len(filtered) == 1:
-            mapping[f] = filtered.index[0]
+            mapping[f] = filtered[idx_col].iloc[0]
         elif len(filtered) > 1:
             logging.warning("multiple match found: "+f)
-            mapping[f] = filtered.index[0]
+            mapping[f] = filtered[idx_col].iloc[0]
         else:
             no_match.add(f)
-
-    base_df = base_df.reset_index()
 
     if len(no_match) > 0:
         logging.warning('no match found: ' + str(no_match))
@@ -64,7 +75,21 @@ def _translate_column_df(df, column, target_column, dictionary, base_df, not_fou
     if not_found == 'error' and len(no_match) > 0:
         raise ValueError('missing keys in dictionary. please check your input.')
     else:
-        return _translate_column_inline(df, column, target_column, mapping, not_found)
+        return mapping
+
+
+def _translate_column_df(df, column, target_column, dictionary, base_df, not_found):
+
+    search_cols = dictionary['key']
+    if isinstance(search_cols, str):
+        mapping = _generate_mappng_dict1(df, column, dictionary, base_df, not_found)
+    else:
+        if len(search_cols) == 1:
+            dictionary['key'] = search_cols[0]
+            mapping = _generate_mappng_dict1(df, column, dictionary, base_df, not_found)
+        else:
+            mapping = _generate_mapping_dict2(df, column, dictionary, base_df, not_found)
+    return _translate_column_inline(df, column, target_column, mapping, not_found)
 
 
 def translate_column(df, column, dictionary_type, dictionary,

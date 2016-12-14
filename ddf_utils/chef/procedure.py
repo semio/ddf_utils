@@ -92,6 +92,7 @@ def translate_column(ingredient: BaseIngredient, *, result=None, **options) -> P
             base_df = None
 
     for k, df in di.items():
+        logger.debug("running on: " + k)
         di[k] = tc(df, column, dict_type, dictionary, target_column, base_df, not_found)
 
     if not result:
