@@ -36,10 +36,6 @@ def build_recipe(recipe_file, to_disk=False, **kwargs):
     # sub recipe paths.
     base_dir = os.path.dirname(recipe_file)
 
-    # setting ddf search path if option is provided
-    if 'ddf_dir' in kwargs.keys():
-        config.DDF_SEARCH_PATH = kwargs['ddf_dir']
-
     # the dictionary dir to retrieve translation dictionaries
     try:
         dict_dir = recipe['config']['dictionary_dir']
@@ -67,6 +63,12 @@ def build_recipe(recipe_file, to_disk=False, **kwargs):
                         path = os.path.join(base_dir, dict_dir, opt_dict)
 
                     recipe['cooking'][p][i]['options']['dictionary'] = _loadfile(path)
+
+    # setting ddf search path if option is provided
+    if 'ddf_dir' in kwargs.keys():
+        if 'config' not in recipe.keys():
+            recipe['config'] = AttrDict()
+        recipe.config.ddf_dir = kwargs['ddf_dir']
 
     if 'include' not in recipe.keys():
         return recipe

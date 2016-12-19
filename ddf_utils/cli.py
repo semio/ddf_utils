@@ -84,7 +84,10 @@ def run_recipe(recipe, outdir, ddf_dir, update, dry_run, show_tree):
     from ddf_utils.index import get_datapackage
     import json
     click.echo('building recipe...')
-    recipe = chef.build_recipe(recipe, ddf_dir=ddf_dir)
+    if ddf_dir:
+        recipe = chef.build_recipe(recipe, ddf_dir=ddf_dir)
+    else:
+        recipe = chef.build_recipe(recipe)
     if show_tree:
         dag = chef.cook.build_dag(recipe)
         dag.tree_view()
