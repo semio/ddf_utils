@@ -35,7 +35,7 @@ def get_ddf_files(path, root=None):
 
     # don't include hidden and lang/etl dir.
     sub_dirs = [x for x in info[1] if (not x.startswith('.') and not x in ['lang', 'etl', 'langsplit'])]
-    files = [x for x in info[2] if (x.startswith('ddf--') and x != 'ddf--index.csv')]
+    files = [x for x in info[2] if (x.startswith('ddf--') and x != 'ddf--index.csv' and x.endswith('.csv'))]
 
     for f in files:
         if root:
@@ -86,6 +86,7 @@ def create_datapackage(path, **kwargs):
 
         if name_res in names_sofar.keys():
             names_sofar[name_res] = names_sofar[name_res] + 1
+            # adding a tail to the recource name, because it should be unique
             name_res = name_res + '-' + str(names_sofar[name_res])
         else:
             names_sofar[name_res] = 0
@@ -133,6 +134,7 @@ def create_datapackage(path, **kwargs):
             elif concept in header:
                 key = concept
             else:
+                # FIXME: error when the recource name have a tail (ddf--entities--country-2)
                 raise ValueError('no matching header found for {}!'.format(name_res))
                 # print(
                 #     """There is no matching header found for {}. Using the first column header
