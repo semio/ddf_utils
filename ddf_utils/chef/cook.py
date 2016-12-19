@@ -26,7 +26,7 @@ def _loadfile(f):
 
 
 # functions for reading/running recipe
-def build_recipe(recipe_file, to_disk=False):
+def build_recipe(recipe_file, to_disk=False, **kwargs):
     """build a complete recipe file if there are includes in
     recipe file, if no includes found than return the file as is.
     """
@@ -35,6 +35,10 @@ def build_recipe(recipe_file, to_disk=False):
     # the base dir of recipe file. for building paths for dictionary_dir and
     # sub recipe paths.
     base_dir = os.path.dirname(recipe_file)
+
+    # setting ddf search path if option is provided
+    if 'ddf_dir' in kwargs.keys():
+        config.DDF_SEARCH_PATH = kwargs['ddf_dir']
 
     # the dictionary dir to retrieve translation dictionaries
     try:
