@@ -453,54 +453,6 @@ def window(ingredient: BaseIngredient, result, **options) -> ProcedureResult:
                           .agg(func).reset_index().dropna())
     return ProcedureResult(result, ingredient.key, newdata)
 
-def accumulate(ingredient: BaseIngredient, *, result=None, **options) -> ProcedureResult:
-    """run accumulate function on ingredient data.
-
-    available options:
-        op: a dictionary of concept_name: function mapping
-    """
-
-    logger.info("accumulate: " + ingredient.ingred_id)
-    if ingredient.dtype != 'datapoints':
-        raise ValueError("only datapoint support this function!")
-
-    ops = options.pop('op')
-
-    data = ingredient.get_data()
-    index = ingredient.key_to_list()
-
-    funcs = {
-        'aagr': _aagr
-    }
-
-    for k, func in ops.items():
-        df = data[k]
-        df = df.groupby(by=index).agg('sum')
-        assert re.match('[a-z_]+', func)  # only lower case chars allowed, for security
-        # assuming level0 index is geo
-        # because we should run accumulate for each country
-        # TODO: https://github.com/semio/ddf_utils/issues/25
-        if func in funcs:
-            df = df.groupby(level=0, as_index=False).apply(funcs[func])
-            df = df.reset_index()
-            df = df[index + [k]]
-        else:
-            df = eval("df.groupby(level=0).{}()".format(func))
-            df = df.reset_index()
-
-        data[k] = df
-
-    if not result:
-        result = ingredient.ingred_id + '-accued'
-
-    return ProcedureResult(result, ingredient.key, data=data)
-
-
-def _aagr(df: pd.DataFrame, window: int=10):
-    """average annual growth rate"""
-    pct = df.pct_change()
-    return pct.rolling(window).apply(np.mean).dropna()
-
 
 def run_op(ingredient: BaseIngredient, *, result=None, **options) -> ProcedureResult:
     """run math operation on each row of ingredient data.
