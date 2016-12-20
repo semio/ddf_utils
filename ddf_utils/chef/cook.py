@@ -8,9 +8,9 @@ from orderedattrdict.yamlutils import AttrDictYAMLLoader
 
 from . ingredient import *
 from . dag import DAG, IngredientNode, ProcedureNode
+from . helpers import read_opt
 from .. import config
 from . procedure import *
-from .. str import format_float_digits
 
 import logging
 
@@ -209,9 +209,11 @@ def build_dag(recipe):
         if not dag.has_task(i):
             raise ValueError('Ingredient not found: ' + i)
     if 'serving' in recipe.keys():
+        if len(serving) > 0:
+            raise ValueError('can not have serve procedure and serving section at same time!')
         for i in recipe['serving']:
-            if not dag.has_task(i):
-                raise ValueError('Ingredient not found: ' + i)
+            if not dag.has_task(i['id']):
+                raise ValueError('Ingredient not found: ' + i['id'])
     # display the tree
     # dag.tree_view()
     return dag
@@ -248,62 +250,27 @@ def run_recipe(recipe):
             func = p['procedure']
             if func == 'serve':
                 ingredients = [dag.get_task(x).evaluate() for x in p['ingredients']]
-                [dishes[k].append(i) for i in ingredients]
+                opts = read_opt(p, 'options', default=dict())
+                [dishes[k].append({'ingredient': i, 'options': opts}) for i in ingredients]
                 continue
             out = dag.get_task(p['result']).evaluate()
         # if there is no seving procedures/section, use the last output Ingredient object as final result.
         if len(dishes[k]) == 0 and 'serving' not in recipe.keys():
             logger.warning('serving last procedure output for {}: {}'.format(k, out.ingred_id))
-            dishes[k].append(out)
+            dishes[k].append({'ingredient': out, 'options': dict()})
     # update dishes when there is serving section
     if 'serving' in recipe.keys():
         for i in recipe['serving']:
-            ing = dag.get_task(i).evaluate()
+            opts = read_opt(i, 'options', default=dict())
+            ing = dag.get_task(i['id']).evaluate()
             if ing.dtype in dishes.keys():
-                dishes[ing.dtype].append(ing)
+                dishes[ing.dtype].append({'ingredient': ing, 'options': opts})
             else:
-                dishes[ing.dtype] = [ing]
+                dishes[ing.dtype] = [{'ingredient': ing, 'options': opts}]
     return dishes
 
 
 def dish_to_csv(dishes, outpath):
     for t, ds in dishes.items():
         for dish in ds:
-            all_data = dish.get_data()
-            if isinstance(all_data, dict):
-                for k, df in all_data.items():
-                    # change boolean into string
-                    for i, v in df.dtypes.iteritems():
-                        if v == 'bool':
-                            df[i] = df[i].map(lambda x: str(x).upper())
-                    if t == 'datapoints':
-                        by = dish.key_to_list()
-                        path = os.path.join(outpath, 'ddf--{}--{}--by--{}.csv'.format(t, k, '--'.join(by)))
-                    elif t == 'concepts':
-                        path = os.path.join(outpath, 'ddf--{}.csv'.format(t))
-                    elif t == 'entities':
-                        domain = dish.key[0]
-                        if k == domain:
-                            path = os.path.join(outpath, 'ddf--{}--{}.csv'.format(t, k))
-                        else:
-                            path = os.path.join(outpath, 'ddf--{}--{}--{}.csv'.format(t, domain, k))
-                    else:
-                        raise ValueError('Not a correct collection: ' + t)
-
-                    if t == 'datapoints':
-                        df = df.set_index(by)
-                        if not np.issubdtype(df[k].dtype, np.number):
-                            try:
-                                df[k] = df[k].astype(float)
-                                # TODO: make floating precision an option
-                                df[k] = df[k].map(lambda x: format_float_digits(x, 5))
-                            except ValueError:
-                                logging.warning("data not numeric: " + k)
-                        else:
-                            df[k] = df[k].map(lambda x: format_float_digits(x, 5))
-                        df[[k]].to_csv(path, encoding='utf8')
-                    else:
-                        df.to_csv(path, index=False, encoding='utf8')
-            else:
-                path = os.path.join(outpath, 'ddf--{}.csv'.format(t))
-                all_data.to_csv(path, index=False, encoding='utf8')
+            dish['ingredient'].serve(outpath, **dish['options'])

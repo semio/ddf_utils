@@ -3,6 +3,9 @@
 """main ingredient class"""
 
 import pandas as pd
+import numpy as np
+from ..str import format_float_digits
+from .helpers import read_opt
 import os
 import logging
 
@@ -54,6 +57,44 @@ class BaseIngredient(object):
     def reset_data(self):
         self.data = None
         return
+
+    def serve(self, outpath, **options):
+        data = self.get_data().copy()
+        t = self.dtype
+        assert isinstance(data, dict)
+        for k, df in data.items():
+            # change boolean into string
+            for i, v in df.dtypes.iteritems():
+                if v == 'bool':
+                    df[i] = df[i].map(lambda x: str(x).upper())
+            if t == 'datapoints':
+                by = self.key_to_list()
+                path = os.path.join(outpath, 'ddf--{}--{}--by--{}.csv'.format(t, k, '--'.join(by)))
+            elif t == 'concepts':
+                path = os.path.join(outpath, 'ddf--{}.csv'.format(t))
+            elif t == 'entities':
+                domain = self.key[0]
+                if k == domain:
+                    path = os.path.join(outpath, 'ddf--{}--{}.csv'.format(t, k))
+                else:
+                    path = os.path.join(outpath, 'ddf--{}--{}--{}.csv'.format(t, domain, k))
+            else:
+                raise ValueError('Not a correct collection: ' + t)
+            # formatting numbers for datapoints
+            if t == 'datapoints':
+                digits = read_opt(options, 'digits', default=5)
+                df = df.set_index(by)
+                if not np.issubdtype(df[k].dtype, np.number):
+                    try:
+                        df[k] = df[k].astype(float)
+                        df[k] = df[k].map(lambda x: format_float_digits(x, digits))
+                    except ValueError:
+                        logging.warning("data not numeric: " + k)
+                else:
+                    df[k] = df[k].map(lambda x: format_float_digits(x, digits))
+                df[[k]].to_csv(path, encoding='utf8')
+            else:
+                df.to_csv(path, index=False, encoding='utf8')
 
 
 class Ingredient(BaseIngredient):
