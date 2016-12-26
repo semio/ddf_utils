@@ -4,6 +4,32 @@ from functools import wraps, partial
 import numpy as np
 from .. import ops
 import logging
+import click
+
+
+def prompt_select(selects, text_before=None):
+
+    def value_proc(v):
+        if v == 'n':
+            return -1
+        if v == 'q':
+            import sys
+            sys.exit()
+        return int(v)
+
+    if text_before:
+        click.echo(text_before)
+    select_text = []
+
+    for i, v in enumerate(selects):
+        select_text.append('{}: {}'.format(i+1, v))
+    select_text = '\n'.join(select_text)
+    click.echo(select_text)
+
+    prompt_text = 'Please select a value ({} ~ {}), or "n" to skip, "q" to quit'\
+                  .format(1, len(selects))
+    val = click.prompt(prompt_text, value_proc=value_proc)
+    return val
 
 
 def read_opt(options, key, required=False, default=None):
