@@ -331,7 +331,7 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
     (master_doc, 'ddf_utils', 'ddf_utils Documentation',
-     author, 'ddf_utils', 'One line description of project.',
+     author, 'ddf_utils', 'Utilities for working with DDF datasets',
      'Miscellaneous'),
 ]
 

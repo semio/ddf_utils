@@ -59,6 +59,14 @@ ddf_utils.io module
     :undoc-members:
     :show-inheritance:
 
+ddf_utils.ops module
+--------------------
+
+.. automodule:: ddf_utils.ops
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 ddf_utils.patch module
 ----------------------
 
@@ -78,7 +86,7 @@ ddf_utils.str module
 ddf_utils.transform module
 --------------------------
 
-.. automodule:: ddf_utils.transform
+.. automodule:: ddf_utils.transformer
     :members:
     :undoc-members:
     :show-inheritance:

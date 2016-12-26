@@ -17,13 +17,15 @@
         VERSION:     '0.1dev',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="ddf_utils 0.1dev documentation" href="index.html" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -50,6 +52,7 @@
 <li class="toctree-l2"><a class="reference internal" href="ddf_utils.chef.html#module-ddf_utils.chef.cook">ddf_utils.chef.cook module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ddf_utils.chef.html#module-ddf_utils.chef.ingredient">ddf_utils.chef.ingredient module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ddf_utils.chef.html#module-ddf_utils.chef.procedure">ddf_utils.chef.procedure module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ddf_utils.chef.html#module-ddf_utils.chef.dag">ddf_utils.chef.dag module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ddf_utils.chef.html#module-ddf_utils.chef">Module contents</a></li>
 </ul>
 </li>
@@ -133,8 +136,13 @@
 workflow: <a class="reference external" href="https://docs.google.com/document/d/11d5D5CPlr6I2BqP8z0p2o_dYQC9AYUyxcLGUq1WYCfk/">https://docs.google.com/document/d/11d5D5CPlr6I2BqP8z0p2o_dYQC9AYUyxcLGUq1WYCfk/</a>
 &#8216;</p>
 <dl class="function">
-<dt id="ddf_utils.i18n.merge_translations">
-<code class="descclassname">ddf_utils.i18n.</code><code class="descname">merge_translations</code><span class="sig-paren">(</span><em>path</em>, <em>split_path='langsplit'</em>, <em>lang_path='lang'</em>, <em>overwrite=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.i18n.merge_translations" title="Permalink to this definition">¶</a></dt>
+<dt id="ddf_utils.i18n.merge_translations_csv">
+<code class="descclassname">ddf_utils.i18n.</code><code class="descname">merge_translations_csv</code><span class="sig-paren">(</span><em>path</em>, <em>split_path='langsplit'</em>, <em>lang_path='lang'</em>, <em>overwrite=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.i18n.merge_translations_csv" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ddf_utils.i18n.merge_translations_json">
+<code class="descclassname">ddf_utils.i18n.</code><code class="descname">merge_translations_json</code><span class="sig-paren">(</span><em>path</em>, <em>split_path='langsplit'</em>, <em>lang_path='lang'</em>, <em>overwrite=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.i18n.merge_translations_json" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
@@ -192,6 +200,44 @@ the file path of csv will be out_dir/ddf&#8211;$ftype&#8211;$concept&#8211;$by.c
 </dd></dl>
 
 </div>
+<div class="section" id="ddf-utils-ops-module">
+<h2>ddf_utils.ops module<a class="headerlink" href="#ddf-utils-ops-module" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-ddf_utils.ops"></span><p>commonly used calculation methods</p>
+<dl class="function">
+<dt id="ddf_utils.ops.aagr">
+<code class="descclassname">ddf_utils.ops.</code><code class="descname">aagr</code><span class="sig-paren">(</span><em>df: &lt;Mock name='mock.DataFrame' id='4421752368'&gt;</em>, <em>window: int = 10</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.ops.aagr" title="Permalink to this definition">¶</a></dt>
+<dd><p>average annual growth rate</p>
+<dl class="docutils">
+<dt>window</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier"><cite>int</cite></span><dd>the rolling window size</dd>
+</dl>
+<dl class="docutils">
+<dt>return</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier"><cite>DataFrame</cite></span><dd>The rolling apply result</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="ddf_utils.ops.between">
+<code class="descclassname">ddf_utils.ops.</code><code class="descname">between</code><span class="sig-paren">(</span><em>x</em>, <em>upper</em>, <em>lower</em>, <em>how='all'</em>, <em>include_upper=False</em>, <em>include_lower=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.ops.between" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ddf_utils.ops.gt">
+<code class="descclassname">ddf_utils.ops.</code><code class="descname">gt</code><span class="sig-paren">(</span><em>x</em>, <em>val</em>, <em>how='all'</em>, <em>include_eq=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.ops.gt" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ddf_utils.ops.lt">
+<code class="descclassname">ddf_utils.ops.</code><code class="descname">lt</code><span class="sig-paren">(</span><em>x</em>, <em>val</em>, <em>how='all'</em>, <em>include_eq=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.ops.lt" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ddf_utils.ops.zcore">
+<code class="descclassname">ddf_utils.ops.</code><code class="descname">zcore</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.ops.zcore" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
 <div class="section" id="module-ddf_utils.patch">
 <span id="ddf-utils-patch-module"></span><h2>ddf_utils.patch module<a class="headerlink" href="#module-ddf_utils.patch" title="Permalink to this headline">¶</a></h2>
 <p>functions working with patches</p>
@@ -232,13 +278,93 @@ e.g. fix_time_range(&#8216;1980-90&#8217;) = 1985</p>
 </dd></dl>
 
 </div>
-<div class="section" id="module-ddf_utils.transform">
-<span id="ddf-utils-transform-module"></span><h2>ddf_utils.transform module<a class="headerlink" href="#module-ddf_utils.transform" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-ddf_utils.transformer">
+<span id="ddf-utils-transform-module"></span><h2>ddf_utils.transform module<a class="headerlink" href="#module-ddf_utils.transformer" title="Permalink to this headline">¶</a></h2>
 <p>functions for common tasks on ddf datasets</p>
 <dl class="function">
-<dt id="ddf_utils.transform.translate_column">
-<code class="descclassname">ddf_utils.transform.</code><code class="descname">translate_column</code><span class="sig-paren">(</span><em>df</em>, <em>column</em>, <em>dictionary_type</em>, <em>dictionary</em>, <em>target_column=None</em>, <em>base_df=None</em>, <em>not_found='drop'</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.transform.translate_column" title="Permalink to this definition">¶</a></dt>
-<dd><p>doc here</p>
+<dt id="ddf_utils.transformer.extract_concepts">
+<code class="descclassname">ddf_utils.transformer.</code><code class="descname">extract_concepts</code><span class="sig-paren">(</span><em>dfs</em>, <em>base=None</em>, <em>join='full_outer'</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.transformer.extract_concepts" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ddf_utils.transformer.translate_column">
+<code class="descclassname">ddf_utils.transformer.</code><code class="descname">translate_column</code><span class="sig-paren">(</span><em>df</em>, <em>column</em>, <em>dictionary_type</em>, <em>dictionary</em>, <em>target_column=None</em>, <em>base_df=None</em>, <em>not_found='drop'</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.transformer.translate_column" title="Permalink to this definition">¶</a></dt>
+<dd><p>change values in a column base on a mapping dictionary.</p>
+<p>The dictionary can be provided as a python dictionary, pandas dataframe or read from file.</p>
+<dl class="docutils">
+<dt>df</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier"><cite>DataFrame</cite></span><dd>The dataframe to be translated</dd>
+<dt>column</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier"><cite>str</cite></span><dd>The column to be translated</dd>
+<dt>dictionary_type</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier"><cite>str</cite></span><dd>The type of dictionary, choose from <cite>inline</cite>, <cite>file</cite> and <cite>dataframe</cite></dd>
+<dt>dictionary</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier"><cite>str</cite> or <cite>dict</cite></span><dd>The dictionary. Depanding on the <cite>dictionary_type</cite>, the value of this parameter should be:
+<cite>inline</cite>: <cite>dict</cite>
+<cite>file</cite>: the file path, <cite>str</cite>
+<cite>dataframe</cite>: <cite>dict</cite>, must have <cite>key</cite> and <cite>value</cite> keys. see examples in examples section.</dd>
+<dt>target_column</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier"><cite>str</cite>, optional</span><dd>The column to store translated resluts. If this is None, then the one set with <cite>column</cite> will be replaced.</dd>
+<dt><cite>base_df</cite></dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier"><cite>DataFrame</cite>, optional</span><dd>When <cite>dictionary_type</cite> is <cite>dataframe</cite>, this option should be set</dd>
+<dt><cite>not_found</cite>: <cite>str</cite></dt>
+<dd>What to do if key in the dictionary is not found in the dataframe to be translated.
+avaliable options are <cite>drop</cite>, <cite>error</cite>, <cite>include</cite></dd>
+</dl>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">([[</span><span class="s1">&#39;geo&#39;</span><span class="p">,</span> <span class="s1">&#39;Geographical places&#39;</span><span class="p">],</span> <span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">,</span> <span class="s1">&#39;Year&#39;</span><span class="p">]],</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;concept&#39;</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span>
+<span class="go">  concept                 name</span>
+<span class="go">0     geo  Geographical places</span>
+<span class="go">1    time                 Year</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tf</span><span class="o">.</span><span class="n">translate_column</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="s1">&#39;concept&#39;</span><span class="p">,</span> <span class="s1">&#39;inline&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;geo&#39;</span><span class="p">:</span> <span class="s1">&#39;country&#39;</span><span class="p">,</span> <span class="s1">&#39;time&#39;</span><span class="p">:</span> <span class="s1">&#39;year&#39;</span><span class="p">})</span>
+<span class="go">   concept                 name</span>
+<span class="go">0  country  Geographical places</span>
+<span class="go">1     year                 Year</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">base_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">([[</span><span class="s1">&#39;geo&#39;</span><span class="p">,</span> <span class="s1">&#39;country&#39;</span><span class="p">],</span> <span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">,</span> <span class="s1">&#39;year&#39;</span><span class="p">]],</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;concept&#39;</span><span class="p">,</span> <span class="s1">&#39;alternative_name&#39;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">base_df</span>
+<span class="go">  concept alternative_name</span>
+<span class="go">0     geo          country</span>
+<span class="go">1    time             year</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tf</span><span class="o">.</span><span class="n">translate_column</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="s1">&#39;concept&#39;</span><span class="p">,</span> <span class="s1">&#39;dataframe&#39;</span><span class="p">,</span>
+<span class="gp">... </span>                    <span class="p">{</span><span class="s1">&#39;key&#39;</span><span class="p">:</span> <span class="s1">&#39;concept&#39;</span><span class="p">,</span> <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="s1">&#39;alternative_name&#39;</span><span class="p">},</span>
+<span class="gp">... </span>                    <span class="n">target_column</span><span class="o">=</span><span class="s1">&#39;new_name&#39;</span><span class="p">,</span> <span class="n">base_df</span><span class="o">=</span><span class="n">base_df</span><span class="p">)</span>
+<span class="go">  concept                 name new_name</span>
+<span class="go">0     geo  Geographical places  country</span>
+<span class="go">1    time                 Year     year</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="ddf_utils.transformer.translate_header">
+<code class="descclassname">ddf_utils.transformer.</code><code class="descname">translate_header</code><span class="sig-paren">(</span><em>df</em>, <em>dictionary</em>, <em>dictionary_type='inline'</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.transformer.translate_header" title="Permalink to this definition">¶</a></dt>
+<dd><p>change the headers of a dataframe base on a mapping dictionary.</p>
+<dl class="docutils">
+<dt>df</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier"><cite>DataFrame</cite></span><dd>The dataframe to be translated</dd>
+<dt>dictionary_type</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier"><cite>str</cite>, default to <cite>inline</cite></span><dd>The type of dictionary, choose from <cite>inline</cite> or <cite>file</cite></dd>
+<dt>dictionary</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier"><cite>dict</cite> or <cite>str</cite></span><dd>The mapping dictionary or path of mapping file</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="ddf_utils.transformer.trend_bridge">
+<code class="descclassname">ddf_utils.transformer.</code><code class="descname">trend_bridge</code><span class="sig-paren">(</span><em>old_data</em>, <em>new_data</em>, <em>bridge_length</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.transformer.trend_bridge" title="Permalink to this definition">¶</a></dt>
+<dd><p>smoothing data between series.</p>
+<p>To avoid getting artificial stairs in the data, we smooth between to
+series. Sometime one source is systematically higher than another source,
+and if we jump from one to another in a single year, this looks like an
+actual change in the data.</p>
+<p>old_data : Series
+new_data : Series
+bridge_length : int</p>
+<blockquote>
+<div>the length of bridge</div></blockquote>
+<p>bridge_data : the bridged data</p>
 </dd></dl>
 
 </div>
@@ -264,9 +390,10 @@ e.g. fix_time_range(&#8216;1980-90&#8217;) = 1985</p>
 <li><a class="reference internal" href="#module-ddf_utils.i18n">ddf_utils.i18n module</a></li>
 <li><a class="reference internal" href="#module-ddf_utils.index">ddf_utils.index module</a></li>
 <li><a class="reference internal" href="#module-ddf_utils.io">ddf_utils.io module</a></li>
+<li><a class="reference internal" href="#ddf-utils-ops-module">ddf_utils.ops module</a></li>
 <li><a class="reference internal" href="#module-ddf_utils.patch">ddf_utils.patch module</a></li>
 <li><a class="reference internal" href="#module-ddf_utils.str">ddf_utils.str module</a></li>
-<li><a class="reference internal" href="#module-ddf_utils.transform">ddf_utils.transform module</a></li>
+<li><a class="reference internal" href="#module-ddf_utils.transformer">ddf_utils.transform module</a></li>
 <li><a class="reference internal" href="#module-ddf_utils">Module contents</a></li>
 </ul>
 </li>
@@ -281,7 +408,7 @@ e.g. fix_time_range(&#8216;1980-90&#8217;) = 1985</p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="_sources/ddf_utils.txt"
+      <li><a href="_sources/ddf_utils.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
@@ -303,11 +430,11 @@ e.g. fix_time_range(&#8216;1980-90&#8217;) = 1985</p>
       &copy;2016, Semio Zheng.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.6</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
       
       |
-      <a href="_sources/ddf_utils.txt"
+      <a href="_sources/ddf_utils.rst.txt"
           rel="nofollow">Page source</a>
     </div>
 
