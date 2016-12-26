@@ -83,7 +83,7 @@ ddf_utils.str module
     :undoc-members:
     :show-inheritance:
 
-ddf_utils.transform module
+ddf_utils.transformer module
 --------------------------
 
 .. automodule:: ddf_utils.transformer
