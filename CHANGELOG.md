@@ -8,3 +8,10 @@
     - new show-tree option to display a tree view of procedures/ingredients in recipe
 - added support for serve section
 - renamed procedure `add_concepts` to `extract_concepts` #40
+
+## version 0.28. 2016-12-13
+
+- new proecedures: `window` (#25)
+- updated `groupby` procedure (#25)
+- updated `translate_column` procedure to include the function in `align` (#3)
+- minor improvements
