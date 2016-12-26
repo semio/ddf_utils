@@ -18,7 +18,7 @@ def apply_patch(base, patch):
     base_df = pd.read_csv(base, header=None)
     patch_df = pd.read_csv(patch, header=None)
 
-    base_list = base_df.values.tolist() 
+    base_list = base_df.values.tolist()
     if d.patch(base_list, patch_df.values.tolist()):
         new_df = pd.DataFrame(base_list[1:], columns=base_list[0])
     else:
