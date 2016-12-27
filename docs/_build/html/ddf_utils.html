@@ -33,7 +33,10 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="ddf_utils 0.1dev documentation" href="index.html"/> 
+    <link rel="top" title="ddf_utils 0.1dev documentation" href="index.html"/>
+        <link rel="up" title="API References" href="modules.html"/>
+        <link rel="next" title="ddf_utils.chef package" href="ddf_utils.chef.html"/>
+        <link rel="prev" title="API References" href="modules.html"/> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -82,9 +85,31 @@
           
             
             
-                <ul>
+                <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="recipe.html">Recipe Manual (draft)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="recipe.html">Cooking with recipes (draft)</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">API References</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">ddf_utils package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#subpackages">Subpackages</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="ddf_utils.chef.html">ddf_utils.chef package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-ddf_utils.cli">ddf_utils.cli module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-ddf_utils.config">ddf_utils.config module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-ddf_utils.ddf_reader">ddf_utils.ddf_reader module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-ddf_utils.i18n">ddf_utils.i18n module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-ddf_utils.index">ddf_utils.index module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-ddf_utils.io">ddf_utils.io module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-ddf_utils.ops">ddf_utils.ops module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-ddf_utils.patch">ddf_utils.patch module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-ddf_utils.str">ddf_utils.str module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-ddf_utils.transformer">ddf_utils.transformer module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-ddf_utils">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 
             
@@ -114,6 +139,8 @@
 <div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
     <li><a href="index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="modules.html">API References</a> &raquo;</li>
       
     <li>ddf_utils package</li>
       <li class="wy-breadcrumbs-aside">
@@ -293,7 +320,7 @@ the file path of csv will be out_dir/ddf&#8211;$ftype&#8211;$concept&#8211;$by.c
 <p>commonly used calculation methods</p>
 <dl class="function">
 <dt id="ddf_utils.ops.aagr">
-<code class="descclassname">ddf_utils.ops.</code><code class="descname">aagr</code><span class="sig-paren">(</span><em>df: &lt;Mock name='mock.DataFrame' id='4528100128'&gt;</em>, <em>window: int = 10</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.ops.aagr" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.ops.</code><code class="descname">aagr</code><span class="sig-paren">(</span><em>df: &lt;Mock name='mock.DataFrame' id='4543458048'&gt;</em>, <em>window: int = 10</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.ops.aagr" title="Permalink to this definition">¶</a></dt>
 <dd><p>average annual growth rate</p>
 <dl class="docutils">
 <dt>window</dt>
@@ -366,9 +393,9 @@ e.g. fix_time_range(&#8216;1980-90&#8217;) = 1985</p>
 </dd></dl>
 
 </div>
-<div class="section" id="ddf-utils-transformer-module">
-<h2>ddf_utils.transformer module<a class="headerlink" href="#ddf-utils-transformer-module" title="Permalink to this headline">¶</a></h2>
-<span class="target" id="module-ddf_utils.transformer"></span><p>functions for common tasks on ddf datasets</p>
+<div class="section" id="module-ddf_utils.transformer">
+<span id="ddf-utils-transformer-module"></span><h2>ddf_utils.transformer module<a class="headerlink" href="#module-ddf_utils.transformer" title="Permalink to this headline">¶</a></h2>
+<p>functions for common tasks on ddf datasets</p>
 <dl class="function">
 <dt id="ddf_utils.transformer.extract_concepts">
 <code class="descclassname">ddf_utils.transformer.</code><code class="descname">extract_concepts</code><span class="sig-paren">(</span><em>dfs</em>, <em>base=None</em>, <em>join='full_outer'</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.transformer.extract_concepts" title="Permalink to this definition">¶</a></dt>
@@ -465,6 +492,15 @@ bridge_length : int</p>
            </div>
           </div>
           <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="ddf_utils.chef.html" class="btn btn-neutral float-right" title="ddf_utils.chef package" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="modules.html" class="btn btn-neutral" title="API References" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
   
 
   <hr/>

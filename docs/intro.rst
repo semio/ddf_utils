@@ -36,10 +36,15 @@ try updating setuptools to latest version:
 Usage
 -----
 
+ddf_utils can be use as a library and also a commandline utility.
+
+Library
+~~~~~~~
+
 ddf_utils' helper functions are divided into a few modules based on their
 domain, namely:
 
-- :py:mod:`chef <ddf_utils.chef>`: Recipe cooking functions. See :doc:`recipe`
+- :py:mod:`chef <ddf_utils.chef.cook>`: Recipe cooking functions. See :doc:`recipe`
   for how to write recipes
 - :py:mod:`ddf_reader <ddf_utils.ddf_reader>`: Reader for reading data from DDF datasets
 - :py:mod:`i18n <ddf_utils.i18n>`: Splitting/merging translation files
@@ -57,7 +62,7 @@ see above links for documents for each module.
 Command line helper
 ~~~~~~~~~~~~~~~~~~~
 
-we provide a commandline utility ddf for common etl tasks. For now supported
+We provide a commandline utility ddf for common etl tasks. For now supported
 commands are:
 
 ::
@@ -77,4 +82,4 @@ commands are:
     run_recipe          generate new ddf dataset with recipe
     split_translation   split ddf files for crowdin translation
 
-
+run ``ddf <command> --help`` for detail usage on each command.

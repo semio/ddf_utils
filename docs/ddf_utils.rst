@@ -84,7 +84,7 @@ ddf_utils.str module
     :show-inheritance:
 
 ddf_utils.transformer module
---------------------------
+----------------------------
 
 .. automodule:: ddf_utils.transformer
     :members:

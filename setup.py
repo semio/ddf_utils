@@ -19,7 +19,7 @@ requirements = [
     'typing',
     'cookiecutter',
     'Click',
-    'daff==1.3.19'
+    'daff'
 ]
 
 setup(

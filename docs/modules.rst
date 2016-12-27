@@ -1,8 +1,7 @@
-ddf_utils
-=========
+API References
+==============
 
 .. toctree::
    :maxdepth: 4
 
    ddf_utils
-   setup
