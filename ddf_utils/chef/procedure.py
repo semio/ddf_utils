@@ -413,7 +413,7 @@ def groupby(ingredient: BaseIngredient, *, result, **options) -> ProcedureResult
 
     The function block should have below format:
 
-    .. highlight:: YAML
+    .. highlight:: yaml
 
     ::
 
@@ -501,7 +501,7 @@ def window(ingredient: BaseIngredient, result, **options) -> ProcedureResult:
 
     An example of rolling windows:
 
-    .. highlight:: YAML
+    .. highlight:: yaml
 
     ::
 

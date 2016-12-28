@@ -417,13 +417,13 @@ the result as new ingredient.</p>
 </table>
 <p class="rubric">Examples</p>
 <p>The function block should have below format:</p>
-<div class="highlight-YAML"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">aggregate</span><span class="p p-Indicator">:</span>
+<div class="highlight-yaml"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">aggregate</span><span class="p p-Indicator">:</span>
   <span class="l l-Scalar l-Scalar-Plain">column1</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">func_name1</span>
   <span class="l l-Scalar l-Scalar-Plain">column2</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">func_name2</span>
 </pre></div>
 </div>
 <p>or</p>
-<div class="highlight-YAML"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">aggrgrate</span><span class="p p-Indicator">:</span>
+<div class="highlight-yaml"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">aggrgrate</span><span class="p p-Indicator">:</span>
   <span class="l l-Scalar l-Scalar-Plain">column1</span><span class="p p-Indicator">:</span>
     <span class="l l-Scalar l-Scalar-Plain">function</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">func_name</span>
     <span class="l l-Scalar l-Scalar-Plain">param1</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">foo</span>
@@ -590,7 +590,7 @@ See <a class="reference internal" href="ddf_utils.html#ddf_utils.transformer.tra
 </table>
 <p class="rubric">Examples</p>
 <p>An example of rolling windows:</p>
-<div class="highlight-YAML"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">procedure</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">window</span>
+<div class="highlight-yaml"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">procedure</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">window</span>
 <span class="l l-Scalar l-Scalar-Plain">ingredients</span><span class="p p-Indicator">:</span>
     <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">ingredient_to_roll</span>
 <span class="l l-Scalar l-Scalar-Plain">result</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">new_ingredient_id</span>

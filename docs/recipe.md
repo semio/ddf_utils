@@ -192,6 +192,7 @@ options:
 **notes**
 
 - if `dictionary` option is a dictionary, it should be a dictionary of oldname -> newname mappings; if it's a string, the string should be a json file name that contains such dictionary.
+- currently chef only support one ingredient in the `ingredients` parameter
 
 ### translate_column
 
@@ -219,6 +220,8 @@ dictionary:
 	key: str or list  # the columns to be the keys of the dictionary, can accept a list
 	value: str  # the column to be the values of the the dictionary, must be one column
 ```
+
+- currently chef only support one ingredient in the `ingredients` parameter
 
 **examples**
 
@@ -252,10 +255,12 @@ ingredients:  # list of ingredient id
   - ingredient_id
 result: str  # new ingledient id
 options:
-  pass
+  copy: bool  # if true, treat all data as string, default is false
 ```
 
+**notes**
 
+- currently chef only support one ingredient in the `ingredients` parameter
 
 ### merge
 
@@ -264,13 +269,19 @@ options:
 ```yaml
 procedure: merge
 ingredients:  # list of ingredient id
-  - ingredient_id
+  - ingredient_id_1
+  - ingredient_id_2
+  - ingredient_id_3
+  # ...
 result: str  # new ingledient id
 options:
-  pass
+  deep: bool  # use deep merge if true
 ```
 
+**notes**
 
+- The ingredients will be merged one by one in the order of how they are provided to this function. Later ones will overwrite the pervious merged results.
+- **deep merge** is when we check every datapoint for existence if false, overwrite is on the file level. If key-value (e.g. geo,year-population_total) exists, whole file gets overwritten if true, overwrite is on the row level. If values (e.g. afr,2015-population_total) exists, it gets overwritten, if it doesn’t it stays
 
 ### groupby
 
@@ -282,10 +293,30 @@ ingredients:  # list of ingredient id
   - ingredient_id
 result: str  # new ingledient id
 options:
-  pass
+  groupby: str or list  # colunm(s) to group
+  aggregate: dict  # function block
+  transform: dict  # function block
+  filter: dict  # function block
 ```
 
+**notes**
 
+- Only one of `aggregate`, `transform` or `filter` can be used in one procedure.
+- Any columns not mentioned in groupby or functions are dropped.
+- Currently chef only support one ingredient in the `ingredients` parameter
+
+**function block**
+
+Two styles of function block are supported, and they can mix in one procedure:
+
+```yaml
+aggregate:  # or transform, filter
+  col1: sum  # run sum to col1
+  col2: mean
+  col3:  # run foo to col3 with param1=baz
+    function: foo
+    param1: baz
+```
 
 ### window
 
@@ -297,10 +328,30 @@ ingredients:  # list of ingredient id
   - ingredient_id
 result: str  # new ingledient id
 options:
-  pass
+  window:
+    column: str  # column which window is created from
+    size: int or 'expanding'  # if int then rolling window, if expanding then expanding window
+    min_periods: int  # as in pandas
+    center: bool  # as in pandas
+  aggregate: dict
 ```
 
+**function block**
 
+Two styles of function block are supported, and they can mix in one procedure:
+
+```yaml
+aggregate:
+  col1: sum  # run rolling sum to col1
+  col2: mean  # run rolling mean to col2
+  col3:  # run foo to col3 with param1=baz
+    function: foo
+    param1: baz
+```
+
+**notes**
+
+- currently chef only support one ingredient in the `ingredients` parameter
 
 ### filter_row
 
@@ -312,10 +363,27 @@ ingredients:  # list of ingredient id
   - ingredient_id
 result: str  # new ingledient id
 options:
-  pass
+  dictionary: dict  # filter definition block
 ```
 
+**filter definition**
 
+A filter definitioin block have following format:
+
+```yaml
+new_column_name:
+  from: column_name_to_filter
+  key_col_1: object  # type should match the data type of the key column, can be a list
+  key_col_2: object
+```
+
+ **example**
+
+An example can be found in this [github issue](https://github.com/semio/ddf_utils/issues/2#issuecomment-254132615).
+
+**notes**
+
+- currently chef only support one ingredient in the `ingredients` parameter
 
 ### filter_item
 
@@ -327,10 +395,12 @@ ingredients:  # list of ingredient id
   - ingredient_id
 result: str  # new ingledient id
 options:
-  pass
+  items: list  # a list of items should be in the result ingredient
 ```
 
+**notes**
 
+- currently chef only support one ingredient in the `ingredients` parameter
 
 ### run_op
 
@@ -342,10 +412,26 @@ ingredients:  # list of ingredient id
   - ingredient_id
 result: str  # new ingledient id
 options:
-  pass
+  op: dict  # column name -> calculation mappings
 ```
 
+**notes**
 
+- currently chef only support one ingredient in the `ingredients` parameter
+
+**Examples**
+
+for exmaple, if we want to add 2 columns, `col_a` and `col_b`, to create an new column, we can write
+
+```yaml
+procedure: run_op
+ingredients:
+  - ingredient_to_run
+result: new_ingredient_id
+options:
+  op:
+    new_col_name: "col_a + col_b"
+```
 
 ### copy
 
@@ -357,10 +443,24 @@ ingredients:  # list of ingredient id
   - ingredient_id
 result: str  # new ingledient id
 options:
-  pass
+  dictionary: dict  # old name -> new name mappings
 ```
 
+**dictionary object**
 
+The `dictionary` option should be in following format:
+
+```yaml
+dictionary:
+  col1: copy_1_1  # string
+  col2:  # list of string 
+    - copy_2_1
+    - copy_2_2
+```
+
+**notes**
+
+- currently chef only support one ingredient in the `ingredients` parameter
 
 ### extract_concepts
 
@@ -369,30 +469,24 @@ options:
 ```yaml
 procedure: extract_concepts
 ingredients:  # list of ingredient id
-  - ingredient_id
+  - ingredient_id_1
+  - ingredient_id_2
 result: str  # new ingledient id
 options:
-  pass
+  join:  # optional
+    base: str  # base concept ingredient id
+    type: {'full_outer', 'ingredients_outer'}  # default is full_outer
 ```
 
+**notes**
 
+- all concepts in ingredients in the `ingredients` parameter will be extracted to a new concept ingredient
+- `join` option is optional; if precent then the `base` will merge with concepts from `ingredients`
+- `full_outer` join means get the union of concepts; `ingredients_outer` means only keep concepts from `ingredients`
 
 ### trend_bridge
 
-(WIP)
-
-**usage and options**
-
-```yaml
-procedure: trend_bridge
-ingredients:  # list of ingredient id
-  - ingredient_id
-result: str  # new ingledient id
-options:
-  pass
-```
-
-
+(WIP) see discussion [here](https://github.com/semio/ddf_utils/issues/42).
 
 
 ### General guideline for writing recipes
