@@ -320,16 +320,20 @@ the file path of csv will be out_dir/ddf&#8211;$ftype&#8211;$concept&#8211;$by.c
 <p>commonly used calculation methods</p>
 <dl class="function">
 <dt id="ddf_utils.ops.aagr">
-<code class="descclassname">ddf_utils.ops.</code><code class="descname">aagr</code><span class="sig-paren">(</span><em>df: &lt;Mock name='mock.DataFrame' id='4543458048'&gt;</em>, <em>window: int = 10</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.ops.aagr" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.ops.</code><code class="descname">aagr</code><span class="sig-paren">(</span><em>df: &lt;Mock name='mock.DataFrame' id='4436365552'&gt;</em>, <em>window: int = 10</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.ops.aagr" title="Permalink to this definition">¶</a></dt>
 <dd><p>average annual growth rate</p>
-<dl class="docutils">
-<dt>window</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier"><cite>int</cite></span><dd>the rolling window size</dd>
-</dl>
-<dl class="docutils">
-<dt>return</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier"><cite>DataFrame</cite></span><dd>The rolling apply result</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>window</strong> (<cite>int</cite>) &#8211; the rolling window size</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>return</strong> &#8211; The rolling apply result</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><cite>DataFrame</cite></td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
@@ -406,26 +410,28 @@ e.g. fix_time_range(&#8216;1980-90&#8217;) = 1985</p>
 <code class="descclassname">ddf_utils.transformer.</code><code class="descname">translate_column</code><span class="sig-paren">(</span><em>df</em>, <em>column</em>, <em>dictionary_type</em>, <em>dictionary</em>, <em>target_column=None</em>, <em>base_df=None</em>, <em>not_found='drop'</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.transformer.translate_column" title="Permalink to this definition">¶</a></dt>
 <dd><p>change values in a column base on a mapping dictionary.</p>
 <p>The dictionary can be provided as a python dictionary, pandas dataframe or read from file.</p>
-<dl class="docutils">
-<dt>df</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier"><cite>DataFrame</cite></span><dd>The dataframe to be translated</dd>
-<dt>column</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier"><cite>str</cite></span><dd>The column to be translated</dd>
-<dt>dictionary_type</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier"><cite>str</cite></span><dd>The type of dictionary, choose from <cite>inline</cite>, <cite>file</cite> and <cite>dataframe</cite></dd>
-<dt>dictionary</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier"><cite>str</cite> or <cite>dict</cite></span><dd>The dictionary. Depanding on the <cite>dictionary_type</cite>, the value of this parameter should be:
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>df</strong> (<cite>DataFrame</cite>) &#8211; The dataframe to be translated</li>
+<li><strong>column</strong> (<cite>str</cite>) &#8211; The column to be translated</li>
+<li><strong>dictionary_type</strong> (<cite>str</cite>) &#8211; The type of dictionary, choose from <cite>inline</cite>, <cite>file</cite> and <cite>dataframe</cite></li>
+<li><strong>dictionary</strong> (<cite>str</cite> or <cite>dict</cite>) &#8211; The dictionary. Depanding on the <cite>dictionary_type</cite>, the value of this parameter should be:
 <cite>inline</cite>: <cite>dict</cite>
 <cite>file</cite>: the file path, <cite>str</cite>
-<cite>dataframe</cite>: <cite>dict</cite>, must have <cite>key</cite> and <cite>value</cite> keys. see examples in examples section.</dd>
-<dt>target_column</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier"><cite>str</cite>, optional</span><dd>The column to store translated resluts. If this is None, then the one set with <cite>column</cite> will be replaced.</dd>
-<dt><cite>base_df</cite></dt>
- <span class="classifier-delimiter">:</span> <span class="classifier"><cite>DataFrame</cite>, optional</span><dd>When <cite>dictionary_type</cite> is <cite>dataframe</cite>, this option should be set</dd>
-<dt><cite>not_found</cite>: <cite>str</cite></dt>
-<dd>What to do if key in the dictionary is not found in the dataframe to be translated.
-avaliable options are <cite>drop</cite>, <cite>error</cite>, <cite>include</cite></dd>
-</dl>
+<cite>dataframe</cite>: <cite>dict</cite>, must have <cite>key</cite> and <cite>value</cite> keys. see examples in examples section.</li>
+<li><strong>target_column</strong> (<cite>str</cite>, optional) &#8211; The column to store translated resluts. If this is None, then the one set with <cite>column</cite> will be replaced.</li>
+<li><strong>base_df</strong> (<cite>DataFrame</cite>, optional) &#8211; When <cite>dictionary_type</cite> is <cite>dataframe</cite>, this option should be set</li>
+<li><strong>not_found</strong> (<cite>str</cite>) &#8211; What to do if key in the dictionary is not found in the dataframe to be translated.
+avaliable options are <cite>drop</cite>, <cite>error</cite>, <cite>include</cite></li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">([[</span><span class="s1">&#39;geo&#39;</span><span class="p">,</span> <span class="s1">&#39;Geographical places&#39;</span><span class="p">],</span> <span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">,</span> <span class="s1">&#39;Year&#39;</span><span class="p">]],</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;concept&#39;</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">df</span>
 <span class="go">  concept                 name</span>
@@ -456,14 +462,19 @@ avaliable options are <cite>drop</cite>, <cite>error</cite>, <cite>include</cite
 <dt id="ddf_utils.transformer.translate_header">
 <code class="descclassname">ddf_utils.transformer.</code><code class="descname">translate_header</code><span class="sig-paren">(</span><em>df</em>, <em>dictionary</em>, <em>dictionary_type='inline'</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.transformer.translate_header" title="Permalink to this definition">¶</a></dt>
 <dd><p>change the headers of a dataframe base on a mapping dictionary.</p>
-<dl class="docutils">
-<dt>df</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier"><cite>DataFrame</cite></span><dd>The dataframe to be translated</dd>
-<dt>dictionary_type</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier"><cite>str</cite>, default to <cite>inline</cite></span><dd>The type of dictionary, choose from <cite>inline</cite> or <cite>file</cite></dd>
-<dt>dictionary</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier"><cite>dict</cite> or <cite>str</cite></span><dd>The mapping dictionary or path of mapping file</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>df</strong> (<cite>DataFrame</cite>) &#8211; The dataframe to be translated</li>
+<li><strong>dictionary_type</strong> (<cite>str</cite>, default to <cite>inline</cite>) &#8211; The type of dictionary, choose from <cite>inline</cite> or <cite>file</cite></li>
+<li><strong>dictionary</strong> (<cite>dict</cite> or <cite>str</cite>) &#8211; The mapping dictionary or path of mapping file</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
@@ -474,12 +485,25 @@ avaliable options are <cite>drop</cite>, <cite>error</cite>, <cite>include</cite
 series. Sometime one source is systematically higher than another source,
 and if we jump from one to another in a single year, this looks like an
 actual change in the data.</p>
-<p>old_data : Series
-new_data : Series
-bridge_length : int</p>
-<blockquote>
-<div>the length of bridge</div></blockquote>
-<p>bridge_data : the bridged data</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>old_data</strong> (<em>Series</em>) &#8211; </li>
+<li><strong>new_data</strong> (<em>Series</em>) &#8211; </li>
+<li><strong>bridge_length</strong> (<em>int</em>) &#8211; the length of bridge</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>bridge_data</strong></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">the bridged data</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </div>

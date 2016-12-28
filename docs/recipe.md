@@ -45,15 +45,15 @@ Inside `config` section, we define the configuration of dirs. currently we
 can set below path:
 
 - `ddf_dir`: the directory that contains all ddf csv repos. Must set this
-variable in the main recipe to run with chef, or provide as an command line option
-using the `ddf` utility.
+  variable in the main recipe to run with chef, or provide as an command line option
+  using the `ddf` utility.
 - `recipes_dir`: the directory contains all recipes to include. Must set this 
-variable if we have `include` section. If relative path is provided, the path will be related
-to the path of the recipe.
+  variable if we have `include` section. If relative path is provided, the path will be related
+  to the path of the recipe.
 - `dictionary_dir`: the directory contains all translation files. Must set this
-variable if we have json file in the options of procedures. (translation
-will be discussed later). If relative path is provided, the path will be related
-to the path of the recipe.
+  variable if we have json file in the options of procedures. (translation
+  will be discussed later). If relative path is provided, the path will be related
+  to the path of the recipe.
 
 ### include section
 
@@ -70,7 +70,7 @@ _concepts_.
 The basic format of a procedure is:
 
 ```yaml
-procedure: pro_name
+procedure: proc_name
 ingredients:
   - ingredient_to_run_the_proc
 options:  # options object to pass to the procedure
@@ -135,14 +135,14 @@ Internally, the process to generate a dataset have following steps:
 
 - read the main recipe into Python object
 - if there is include section, read each file in the include list and expand the 
-main recipe
+  main recipe
 - if there is file name in dictionary option of each procedure, try to expand them 
-if the option value is a filename
+  if the option value is a filename
 - check if all datasets are available
 - build a procedure dependency tree, check if there are loops in it
 - if there is no `serve` procedure and `serving` section, the last procedure result for each
-section will be served. If there is `serve` procedure or `serving` section, chef will serve
-the result as described
+  section will be served. If there is `serve` procedure or `serving` section, chef will serve
+  the result as described
 - run the procedures for each ingredient to be served and their dependencies
 - save output to disk
 
@@ -161,38 +161,242 @@ run_recipe(path_to_recipe, outdir)
 
 ## Available procedures
 
-supported procedures currently:
+Currently supported procedures:
 
-- translate_header
-    - translate the headers of the datapoints
-- translate_column
-    - translate the values in a column
-- identity
-    - identity function = nothing changes
-- merge
-    - merge ingredients together on the keys
-- align
-    - align two columns in two ingredients
-    - discussion: https://github.com/semio/ddf_utils/issues/3
-- groupby
-    - group ingredient data by keys
-    - discussion: https://github.com/semio/ddf_utils/issues/4
-- filter_row
-    - filter ingredient data by values
-    - discussion: https://github.com/semio/ddf_utils/issues/2
-- filter_item
-    - filter ingredient data by concepts
-    - discussion: https://github.com/semio/ddf_utils/issues/14
-- run_op
-    - run math operations on ingredient
-    - discussion: https://github.com/semio/ddf_utils/issues/7
-- accumulate
-    - run cumulative functions over an ingredient
-- copy
-    - make copy of indicators of ingredient
+- [translate_header](#translate-header): translate the headers
+- [translate_column](#translate-column): translate the values in a column
+- [identity](#identity): identity function = nothing changes
+- [merge](#merge): merge ingredients together on the keys
+- [groupby](#groubby): group ingredient by columns and do aggregate/filter/transform
+- [window](#window): run function on rolling window
+- [filter_row](#filter-row): filter ingredient data by column values
+- [filter_item](#filter-item): filter ingredient data by concepts
+- [run_op](#run-op): run math operations on ingredient columns
+- [copy](#copy): make copy of columns of ingredient data
+- [extract_concepts](#extract-concepts): generate concepts ingredient from other ingredients
+- [trend_bridge](#trend-bridge)(WIP): connect 2 ingredients and make custom smoothing
+
+### translate_header
+
+**usage and options**
+
+```yaml
+procedure: translate_header
+ingredients:  # list of ingredient id
+  - ingredient_id
+result: str  # new ingledient id
+options:
+  dictionary: str or dict  # file name or mappings dictionary
+```
+
+**notes**
+
+- if `dictionary` option is a dictionary, it should be a dictionary of oldname -> newname mappings; if it's a string, the string should be a json file name that contains such dictionary.
+
+### translate_column
+
+**usage and options**
+
+```yaml
+procedure: translate_column
+ingredients:  # list of ingredient id
+  - ingredient_id
+result: str  # new ingledient id
+options:
+  column: str  # the column to be translated
+  target_column: str  # optinoal, the target column to store the translated data
+  not_found: {'drop', 'include', 'error'}  # optional, the behavior when there is values not found in the mapping dictionary, default is 'drop'
+  dictionary: str or dict  # file name or mappings dictionary
+```
+
+**notes**
+
+- If `base` is provided in `dictionary`, `key` and `value` should also in `dictionary`. In this case chef will generate a mapping dictionary using the `base` ingredient. The dictionary format will be:
+
+```yaml
+dictionary:
+	base: str  # ingredient name
+	key: str or list  # the columns to be the keys of the dictionary, can accept a list
+	value: str  # the column to be the values of the the dictionary, must be one column
+```
+
+**examples**
+
+here is an example when we translate the BP geo names into Gapminder's
+
+```yaml
+procedure: translate_column
+ingredients:
+	- bp-geo
+options:
+	column: name
+	target_column: geo_new
+	dictionary:
+		base: gw-countries
+		key: ['alternative_1', 'alternative_2', 'alternative_3',
+			'alternative_4_cdiac', 'pandg', 'god_id', 'alt_5', 'upper_case_name',
+			'iso3166_1_alpha2', 'iso3166_1_alpha3', 'arb1', 'arb2', 'arb3', 'arb4',
+			'arb5', 'arb6', 'name']
+		value: country
+	not_found: drop
+result: geo-aligned
+```
+
+### identity
+
+**usage and options**
+
+```yaml
+procedure: identity
+ingredients:  # list of ingredient id
+  - ingredient_id
+result: str  # new ingledient id
+options:
+  pass
+```
+
+
+
+### merge
+
+**usage and options**
+
+```yaml
+procedure: merge
+ingredients:  # list of ingredient id
+  - ingredient_id
+result: str  # new ingledient id
+options:
+  pass
+```
+
+
+
+### groupby
+
+**usage and options**
+
+```yaml
+procedure: groupby
+ingredients:  # list of ingredient id
+  - ingredient_id
+result: str  # new ingledient id
+options:
+  pass
+```
+
+
+
+### window
+
+**usage and options**
+
+```yaml
+procedure: window
+ingredients:  # list of ingredient id
+  - ingredient_id
+result: str  # new ingledient id
+options:
+  pass
+```
+
+
+
+### filter_row
+
+**usage and options**
+
+```yaml
+procedure: filter_row
+ingredients:  # list of ingredient id
+  - ingredient_id
+result: str  # new ingledient id
+options:
+  pass
+```
+
+
+
+### filter_item
+
+**usage and options**
+
+```yaml
+procedure: filter_item
+ingredients:  # list of ingredient id
+  - ingredient_id
+result: str  # new ingledient id
+options:
+  pass
+```
+
+
+
+### run_op
+
+**usage and options**
+
+```yaml
+procedure: run_op
+ingredients:  # list of ingredient id
+  - ingredient_id
+result: str  # new ingledient id
+options:
+  pass
+```
+
+
+
+### copy
+
+**usage and options**
+
+```yaml
+procedure: copy
+ingredients:  # list of ingredient id
+  - ingredient_id
+result: str  # new ingledient id
+options:
+  pass
+```
+
+
+
+### extract_concepts
+
+**usage and options**
+
+```yaml
+procedure: extract_concepts
+ingredients:  # list of ingredient id
+  - ingredient_id
+result: str  # new ingledient id
+options:
+  pass
+```
+
+
+
+### trend_bridge
+
+(WIP)
+
+**usage and options**
+
+```yaml
+procedure: trend_bridge
+ingredients:  # list of ingredient id
+  - ingredient_id
+result: str  # new ingledient id
+options:
+  pass
+```
+
+
+
 
 ### General guideline for writing recipes
 
 - if you need to use `translate_header`/`translate_column`/`align`/`copy` in your
-recipe, place them at the beginning of recipe. This can improve the performance
-of running the recipe.
+  recipe, place them at the beginning of recipe. This can improve the performance
+  of running the recipe.

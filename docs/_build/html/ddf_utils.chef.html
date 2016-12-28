@@ -299,27 +299,71 @@ see the implement of from_dict() method for how the object is constructed.</p>
 <dl class="function">
 <dt id="ddf_utils.chef.procedure.copy">
 <code class="descclassname">ddf_utils.chef.procedure.</code><code class="descname">copy</code><span class="sig-paren">(</span><em>ingredient: ddf_utils.chef.ingredient.BaseIngredient</em>, <em>*</em>, <em>result=None</em>, <em>**options</em><span class="sig-paren">)</span> &rarr; ddf_utils.chef.ingredient.ProcedureResult<a class="headerlink" href="#ddf_utils.chef.procedure.copy" title="Permalink to this definition">¶</a></dt>
-<dd><p>make copy of ingredient data, with new names.</p>
-<dl class="docutils">
-<dt>available options:</dt>
-<dd><cite>dictionary</cite>: a dictionary of oldname -&gt; newname mappings</dd>
-</dl>
+<dd><p>make copy of ingredient data columns, with new names.</p>
+<p>A dictionary should be provided, for example:</p>
+<div class="highlight-json"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="nt">&quot;col1&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;copy1_1&quot;</span><span class="p">,</span> <span class="s2">&quot;copy1_2&quot;</span><span class="p">],</span>
+    <span class="nt">&quot;col2&quot;</span><span class="p">:</span> <span class="s2">&quot;copy2&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>where &#8216;col1&#8217; and &#8216;col2&#8217; should be existing columns in the input ingredient</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Keyword Arguments:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><strong>dictionary</strong> (<em>dict</em>) &#8211; a dictionary of oldname -&gt; newname mappings</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.chef.procedure.extract_concepts">
 <code class="descclassname">ddf_utils.chef.procedure.</code><code class="descname">extract_concepts</code><span class="sig-paren">(</span><em>*ingredients: typing.List[ddf_utils.chef.ingredient.BaseIngredient], result=None, **options</em><span class="sig-paren">)</span> &rarr; ddf_utils.chef.ingredient.ProcedureResult<a class="headerlink" href="#ddf_utils.chef.procedure.extract_concepts" title="Permalink to this definition">¶</a></dt>
 <dd><p>extract concepts from other ingredients.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>ingredients</strong> &#8211; any numbers of ingredient that needs to extract concepts from</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Keyword Arguments:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><strong>join</strong> (<em>dict</em><em>, </em><em>optional</em>) &#8211; the base ingredient to join</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-yaml"><div class="highlight"><pre><span></span><span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">procedure</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">extract_concepts</span>
+  <span class="l l-Scalar l-Scalar-Plain">ingredients</span><span class="p p-Indicator">:</span> <span class="p p-Indicator">[</span><span class="s">&quot;foo&quot;</span><span class="p p-Indicator">,</span><span class="s">&quot;bar&quot;</span><span class="p p-Indicator">]</span>
+  <span class="l l-Scalar l-Scalar-Plain">result</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">concepts_final</span>
+  <span class="l l-Scalar l-Scalar-Plain">options</span><span class="p p-Indicator">:</span>
+      <span class="l l-Scalar l-Scalar-Plain">join</span><span class="p p-Indicator">:</span>
+          <span class="l l-Scalar l-Scalar-Plain">base</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">concept_ingredient_id</span>
+          <span class="l l-Scalar l-Scalar-Plain">type</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">full_outer || ingredients_outer</span> <span class="c1"># default full_outer</span>
+</pre></div>
+</div>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="ddf_utils.html#ddf_utils.transformer.extract_concepts" title="ddf_utils.transformer.extract_concepts"><code class="xref py py-func docutils literal"><span class="pre">ddf_utils.transformer.extract_concepts()</span></code></a> : related function in transformer
+module</p>
+</div>
 </dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.chef.procedure.filter_item">
 <code class="descclassname">ddf_utils.chef.procedure.</code><code class="descname">filter_item</code><span class="sig-paren">(</span><em>ingredient: ddf_utils.chef.ingredient.BaseIngredient</em>, <em>*</em>, <em>result: typing.Union[str</em>, <em>NoneType] = None</em>, <em>**options</em><span class="sig-paren">)</span> &rarr; ddf_utils.chef.ingredient.ProcedureResult<a class="headerlink" href="#ddf_utils.chef.procedure.filter_item" title="Permalink to this definition">¶</a></dt>
-<dd><p>filter item from the ingredient data dict.</p>
-<dl class="docutils">
-<dt>available options:</dt>
-<dd>items: a list of items to filter from base ingredient</dd>
-</dl>
+<dd><p>filter items from the ingredient data</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Keyword Arguments:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><strong>items</strong> (<em>list</em>) &#8211; a list of items to filter from base ingredient</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
@@ -327,42 +371,65 @@ see the implement of from_dict() method for how the object is constructed.</p>
 <code class="descclassname">ddf_utils.chef.procedure.</code><code class="descname">filter_row</code><span class="sig-paren">(</span><em>ingredient: ddf_utils.chef.ingredient.BaseIngredient</em>, <em>*</em>, <em>result=None</em>, <em>**options</em><span class="sig-paren">)</span> &rarr; ddf_utils.chef.ingredient.ProcedureResult<a class="headerlink" href="#ddf_utils.chef.procedure.filter_row" title="Permalink to this definition">¶</a></dt>
 <dd><p>filter an ingredient based on a set of options and return
 the result as new ingredient.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>ingredient: Ingredient object
-result: ingred_id of return ingredient
-options: dict of options</dd>
-<dt>available options:</dt>
-<dd>dictionary: test</dd>
-</dl>
+<p>A dictionary should be provided in options with the following format:</p>
+<div class="highlight-yaml"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">dictionary</span><span class="p p-Indicator">:</span>
+  <span class="l l-Scalar l-Scalar-Plain">new_key_in_new_ingredient</span><span class="p p-Indicator">:</span>
+    <span class="l l-Scalar l-Scalar-Plain">from</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">old_key_in_old_ingredient</span>
+    <span class="l l-Scalar l-Scalar-Plain">filter_col_1</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">filter_val_1</span>
+    <span class="l l-Scalar l-Scalar-Plain">filter_col_2</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">filter_val_2</span>
+</pre></div>
+</div>
+<p>See a detail example in this <a class="reference external" href="https://github.com/semio/ddf_utils/issues/2#issuecomment-254132615">github issue</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>ingredient</strong> (<a class="reference internal" href="#ddf_utils.chef.ingredient.BaseIngredient" title="ddf_utils.chef.ingredient.BaseIngredient"><em>BaseIngredient</em></a>) &#8211; </li>
+<li><strong>result</strong> (<cite>str</cite>) &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Keyword Arguments:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first last"><strong>dictionary</strong> (<em>dict</em>) &#8211; The filter description dictionary</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.chef.procedure.groupby">
 <code class="descclassname">ddf_utils.chef.procedure.</code><code class="descname">groupby</code><span class="sig-paren">(</span><em>ingredient: ddf_utils.chef.ingredient.BaseIngredient</em>, <em>*</em>, <em>result</em>, <em>**options</em><span class="sig-paren">)</span> &rarr; ddf_utils.chef.ingredient.ProcedureResult<a class="headerlink" href="#ddf_utils.chef.procedure.groupby" title="Permalink to this definition">¶</a></dt>
 <dd><p>group ingredient data by column(s) and run aggregate function</p>
-<dl class="docutils">
-<dt>available options:</dt>
-<dd>groubby: the column(s) to group, can be a list or a string
-aggregate/transform/filter: the function to run. only one of them should be supplied.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Keyword Arguments:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><ul class="first last simple">
+<li><strong>groubby</strong> (<cite>str</cite> or <cite>list</cite>) &#8211; the column(s) to group, can be a list or a string</li>
+<li><strong>aggregate/transform/filter</strong> (<cite>dict</cite>) &#8211; the function to run. only one of <cite>aggregate</cite>, <cite>transform</cite> and <cite>filter</cite> should be supplied.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
 <p>The function block should have below format:</p>
-<dl class="docutils">
-<dt>aggregate:</dt>
-<dd>column1: funcname1
-column2: funcname2</dd>
-</dl>
+<div class="highlight-YAML"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">aggregate</span><span class="p p-Indicator">:</span>
+  <span class="l l-Scalar l-Scalar-Plain">column1</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">func_name1</span>
+  <span class="l l-Scalar l-Scalar-Plain">column2</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">func_name2</span>
+</pre></div>
+</div>
 <p>or</p>
-<dl class="docutils">
-<dt>aggregate:</dt>
-<dd><dl class="first last docutils">
-<dt>column:</dt>
-<dd>function: funcname
-param1: foo
-param2: bar</dd>
-</dl>
-</dd>
-</dl>
+<div class="highlight-YAML"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">aggrgrate</span><span class="p p-Indicator">:</span>
+  <span class="l l-Scalar l-Scalar-Plain">column1</span><span class="p p-Indicator">:</span>
+    <span class="l l-Scalar l-Scalar-Plain">function</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">func_name</span>
+    <span class="l l-Scalar l-Scalar-Plain">param1</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">foo</span>
+    <span class="l l-Scalar l-Scalar-Plain">param2</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">baz</span>
+</pre></div>
+</div>
 <p>other columns not mentioned will be dropped.</p>
 </dd></dl>
 
@@ -370,86 +437,175 @@ param2: bar</dd>
 <dt id="ddf_utils.chef.procedure.identity">
 <code class="descclassname">ddf_utils.chef.procedure.</code><code class="descname">identity</code><span class="sig-paren">(</span><em>ingredient: ddf_utils.chef.ingredient.BaseIngredient</em>, <em>*</em>, <em>result=None</em>, <em>**options</em><span class="sig-paren">)</span> &rarr; ddf_utils.chef.ingredient.BaseIngredient<a class="headerlink" href="#ddf_utils.chef.procedure.identity" title="Permalink to this definition">¶</a></dt>
 <dd><p>return the ingredient as is.</p>
-<dl class="docutils">
-<dt>available options:</dt>
-<dd>copy: if copy is True, then treat all data as string. Default: False</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Keyword Arguments:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><strong>copy</strong> (<em>bool</em><em>, </em><em>optional</em>) &#8211; if copy is True, then treat all data as string. Default: False</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.chef.procedure.merge">
 <code class="descclassname">ddf_utils.chef.procedure.</code><code class="descname">merge</code><span class="sig-paren">(</span><em>*ingredients: typing.List[ddf_utils.chef.ingredient.BaseIngredient], result=None, **options</em><span class="sig-paren">)</span> &rarr; ddf_utils.chef.ingredient.ProcedureResult<a class="headerlink" href="#ddf_utils.chef.procedure.merge" title="Permalink to this definition">¶</a></dt>
-<dd><p>the main merge function</p>
-<dl class="docutils">
-<dt>avaliable options:</dt>
-<dd>deep: if True, then do deep merging. Default is False</dd>
-<dt>About deep merging:</dt>
-<dd>deep merge is when we check every datapoint for existence
+<dd><p>merge a list of ingredients</p>
+<p>The ingredients will be merged one by one in the order of how they are provided to this function.
+Later ones will overwrite the pervious merged results.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>BaseIngredient</strong> &#8211; Any numbers of ingredients to be merged</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Keyword Arguments:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><strong>deep</strong> (<cite>bool</cite>, optional) &#8211; if True, then do deep merging. Default is False</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p><strong>deep merge</strong> is when we check every datapoint for existence
 if false, overwrite is on the file level. If key-value
 (e.g. geo,year-population_total) exists, whole file gets overwritten
 if true, overwrite is on the row level. If values
-(e.g. afr,2015-population_total) exists, it gets overwritten, if it doesn&#8217;t it stays</dd>
-</dl>
+(e.g. afr,2015-population_total) exists, it gets overwritten, if it doesn&#8217;t it stays</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.chef.procedure.run_op">
 <code class="descclassname">ddf_utils.chef.procedure.</code><code class="descname">run_op</code><span class="sig-paren">(</span><em>ingredient: ddf_utils.chef.ingredient.BaseIngredient</em>, <em>*</em>, <em>result=None</em>, <em>**options</em><span class="sig-paren">)</span> &rarr; ddf_utils.chef.ingredient.ProcedureResult<a class="headerlink" href="#ddf_utils.chef.procedure.run_op" title="Permalink to this definition">¶</a></dt>
 <dd><p>run math operation on each row of ingredient data.</p>
-<dl class="docutils">
-<dt>available options:</dt>
-<dd>op: a dictionary of concept_name: function mapping</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Keyword Arguments:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><strong>op</strong> (<em>dict</em>) &#8211; a dictionary of concept_name -&gt; function mapping</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<p>for exmaple, if we want to add 2 columns, col_a and col_b, to create an new column, we can write</p>
+<div class="highlight-yaml"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">procedure</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">run_op</span>
+<span class="l l-Scalar l-Scalar-Plain">ingredients</span><span class="p p-Indicator">:</span>
+  <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">ingredient_to_run</span>
+<span class="l l-Scalar l-Scalar-Plain">result</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">new_ingredient_id</span>
+<span class="l l-Scalar l-Scalar-Plain">options</span><span class="p p-Indicator">:</span>
+  <span class="l l-Scalar l-Scalar-Plain">op</span><span class="p p-Indicator">:</span>
+    <span class="l l-Scalar l-Scalar-Plain">new_col_name</span><span class="p p-Indicator">:</span> <span class="s">&quot;col_a</span><span class="nv"> </span><span class="s">+</span><span class="nv"> </span><span class="s">col_b&quot;</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.chef.procedure.translate_column">
 <code class="descclassname">ddf_utils.chef.procedure.</code><code class="descname">translate_column</code><span class="sig-paren">(</span><em>ingredient: ddf_utils.chef.ingredient.BaseIngredient</em>, <em>*</em>, <em>result=None</em>, <em>**options</em><span class="sig-paren">)</span> &rarr; ddf_utils.chef.ingredient.ProcedureResult<a class="headerlink" href="#ddf_utils.chef.procedure.translate_column" title="Permalink to this definition">¶</a></dt>
 <dd><p>Translate column values.</p>
-<dl class="docutils">
-<dt>available options are:</dt>
-<dd><cite>dictionary</cite>: a dictionary of oldname -&gt; newname mappings
-<cite>column</cite>: the column to rename
-<cite>base</cite>: if base is provided, transform the columns base on information of base ingredient.
-So that oldname column will be change to values from newname column.</dd>
-<dt>Note:</dt>
-<dd>if base and column are provided at same time, it will raise an error.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Keyword Arguments:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><ul class="first last simple">
+<li><strong>dictionary</strong> (<em>dict</em>) &#8211; A dictionary of oldname -&gt; newname mappings.
+If &#8216;base&#8217; is provided in the dictionary, &#8216;key&#8217; and &#8216;value&#8217; should also in the dictionary.
+See <a class="reference internal" href="ddf_utils.html#ddf_utils.transformer.translate_column" title="ddf_utils.transformer.translate_column"><code class="xref py py-func docutils literal"><span class="pre">ddf_utils.transformer.translate_column()</span></code></a> for more on how this is handled.</li>
+<li><strong>column</strong> (<cite>str</cite>) &#8211; the column to be translated</li>
+<li><strong>target_column</strong> (<cite>str</cite>, optional) &#8211; the target column to store the translated data. If this is not set then the <cite>column</cite> cloumn will be replaced</li>
+<li><strong>not_found</strong> (<em>{'drop'</em><em>, </em><em>'include'</em><em>, </em><em>'error'}</em><em>, </em><em>optional</em>) &#8211; the behavior when there is values not found in the mapping dictionary, default is &#8216;drop&#8217;</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="ddf_utils.html#ddf_utils.transformer.translate_column" title="ddf_utils.transformer.translate_column"><code class="xref py py-func docutils literal"><span class="pre">ddf_utils.transformer.translate_column()</span></code></a> : related function in transformer module</p>
+</div>
 </dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.chef.procedure.translate_header">
 <code class="descclassname">ddf_utils.chef.procedure.</code><code class="descname">translate_header</code><span class="sig-paren">(</span><em>ingredient: ddf_utils.chef.ingredient.BaseIngredient</em>, <em>*</em>, <em>result=None</em>, <em>**options</em><span class="sig-paren">)</span> &rarr; ddf_utils.chef.ingredient.ProcedureResult<a class="headerlink" href="#ddf_utils.chef.procedure.translate_header" title="Permalink to this definition">¶</a></dt>
 <dd><p>Translate column headers</p>
-<dl class="docutils">
-<dt>available options are:</dt>
-<dd><cite>dictionary</cite>: a dictionary of oldname -&gt; newname mappings</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>ingredient</strong> (<a class="reference internal" href="#ddf_utils.chef.ingredient.BaseIngredient" title="ddf_utils.chef.ingredient.BaseIngredient"><em>BaseIngredient</em></a>) &#8211; The ingredient to translate</li>
+<li><strong>result</strong> (<cite>str</cite>) &#8211; The result ingredient id</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Keyword Arguments:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first last"><strong>dictionary</strong> (<em>dict</em>) &#8211; a dictionary of oldname -&gt; newname mappings</p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="ddf_utils.html#ddf_utils.transformer.translate_header" title="ddf_utils.transformer.translate_header"><code class="xref py py-func docutils literal"><span class="pre">ddf_utils.transformer.translate_header()</span></code></a> : Related function in transformer module</p>
+</div>
 </dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.chef.procedure.trend_bridge">
 <code class="descclassname">ddf_utils.chef.procedure.</code><code class="descname">trend_bridge</code><span class="sig-paren">(</span><em>ingredient: ddf_utils.chef.ingredient.BaseIngredient</em>, <em>result</em>, <em>**options</em><span class="sig-paren">)</span> &rarr; ddf_utils.chef.ingredient.ProcedureResult<a class="headerlink" href="#ddf_utils.chef.procedure.trend_bridge" title="Permalink to this definition">¶</a></dt>
 <dd><p>run trend bridge on ingredients</p>
+<p>(Not Implemented Yet)</p>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="ddf_utils.html#ddf_utils.transformer.trend_bridge" title="ddf_utils.transformer.trend_bridge"><code class="xref py py-func docutils literal"><span class="pre">ddf_utils.transformer.trend_bridge()</span></code></a> : related function in transformer module</p>
+</div>
 </dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.chef.procedure.window">
 <code class="descclassname">ddf_utils.chef.procedure.</code><code class="descname">window</code><span class="sig-paren">(</span><em>ingredient: ddf_utils.chef.ingredient.BaseIngredient</em>, <em>result</em>, <em>**options</em><span class="sig-paren">)</span> &rarr; ddf_utils.chef.ingredient.ProcedureResult<a class="headerlink" href="#ddf_utils.chef.procedure.window" title="Permalink to this definition">¶</a></dt>
 <dd><p>apply functions on a rolling window</p>
-<p>available options:
-window: dictionary</p>
-<blockquote>
-<div>window definition. options are:
-column: str, column which window is created from
-size: int or &#8216;expanding&#8217;, if int then rolling window, if expanding then expanding window
-min_periods: int, as in pandas
-center: bool, as in pandas</div></blockquote>
-<dl class="docutils">
-<dt>aggregate: dictionary</dt>
-<dd>aggregation functions, format should be
-column: func or column: {function: func, param1: foo, param2: baz, ...}</dd>
-</dl>
+<p>An window object should be provided in options, with following parameters:</p>
+<ul class="simple">
+<li><cite>column</cite>: str, column which window is created from</li>
+<li><cite>size</cite>: int or &#8216;expanding&#8217;, if int then rolling window, if expanding then expanding window</li>
+<li><cite>min_periods</cite>: int, as in pandas</li>
+<li><cite>center</cite>: bool, as in pandas</li>
+</ul>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Keyword Arguments:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><ul class="first last simple">
+<li><strong>window</strong> (<em>dict</em>) &#8211; window definition.</li>
+<li><strong>aggregate</strong> (<em>dictionary</em>) &#8211; aggregation functions, format should be
+<code class="docutils literal"><span class="pre">column:</span> <span class="pre">func</span></code> or <code class="docutils literal"><span class="pre">column:</span> <span class="pre">{function:</span> <span class="pre">func,</span> <span class="pre">param1:</span> <span class="pre">foo,</span> <span class="pre">param2:</span> <span class="pre">baz,</span> <span class="pre">...}</span></code></li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<p>An example of rolling windows:</p>
+<div class="highlight-YAML"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">procedure</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">window</span>
+<span class="l l-Scalar l-Scalar-Plain">ingredients</span><span class="p p-Indicator">:</span>
+    <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">ingredient_to_roll</span>
+<span class="l l-Scalar l-Scalar-Plain">result</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">new_ingredient_id</span>
+<span class="l l-Scalar l-Scalar-Plain">options</span><span class="p p-Indicator">:</span>
+  <span class="l l-Scalar l-Scalar-Plain">window</span><span class="p p-Indicator">:</span>
+    <span class="l l-Scalar l-Scalar-Plain">column</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">year</span>
+    <span class="l l-Scalar l-Scalar-Plain">size</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">10</span>
+    <span class="l l-Scalar l-Scalar-Plain">min_periods</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">1</span>
+    <span class="l l-Scalar l-Scalar-Plain">center</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">false</span>
+  <span class="l l-Scalar l-Scalar-Plain">aggregate</span><span class="p p-Indicator">:</span>
+    <span class="l l-Scalar l-Scalar-Plain">column_to_aggregate</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">sum</span>
+</pre></div>
+</div>
+<p class="rubric">Notes</p>
+<p>Any column not mentioned in the <cite>aggregate</cite> block will be dropped in the returned ingredient.</p>
 </dd></dl>
 
 </div>

@@ -7,3 +7,4 @@ cookiecutter
 Click
 daff
 sphinx_rtd_theme
+numpydoc
