@@ -59,7 +59,7 @@ class BaseIngredient(object):
         return
 
     def serve(self, outpath, **options):
-        data = self.get_data().copy()
+        data = self.copy_data()
         t = self.dtype
         assert isinstance(data, dict)
         for k, df in data.items():
