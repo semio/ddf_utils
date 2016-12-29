@@ -11,7 +11,7 @@ import pytest
 
 @pytest.fixture(scope='session')
 def recipe_file():
-    fn = 'recipes/test.yaml'
+    fn = 'recipes/test_groupby.yaml'
     return fn
 
 
