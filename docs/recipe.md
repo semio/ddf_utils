@@ -122,13 +122,13 @@ serving:
 To run a recipe, you can use the `ddf run_recipe` command:
 
 ```shell
-$ ddf run_recipe -i path_to_recipe.ml -o output_dir
+$ ddf run_recipe -i path_to_recipe.yaml -o output_dir
 ```
 
 You can specify the path where your datasets are stored:
 
 ```shell
-$ ddf run_recipe -i path_to_recipe.yml -o output_dir --ddf_dir path_to_datasets
+$ ddf run_recipe -i path_to_recipe.yaml -o output_dir --ddf_dir path_to_datasets
 ```
 
 Internally, the process to generate a dataset have following steps:
