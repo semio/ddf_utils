@@ -1,12 +1,18 @@
 # -*- coding: utf-8 -*-
 
-"""the DAG module of chef"""
+"""the DAG model of chef
+
+The DAG consists of 2 types of nodes: IngredientNode and ProcedureNode.
+each node will have a `evaluate()` function, which will return an ingredient
+on eval.
+"""
 
 import pandas as pd
 from . import procedure as pc
 
 
 class BaseNode():
+    """The base node which IngredientNode and ProcedureNode inherit from"""
     def __init__(self, node_id, dag):
         self.node_id = node_id
         self.dag = dag
@@ -61,6 +67,10 @@ class BaseNode():
 
 
 class IngredientNode(BaseNode):
+    """Node for storing dataset ingredients.
+
+    The evaluate() function of this type of node will return the ingredient as is.
+    """
     def __init__(self, node_id, ingredient, dag):
         super(IngredientNode, self).__init__(node_id, dag)
         self.ingredient = ingredient
@@ -70,6 +80,11 @@ class IngredientNode(BaseNode):
 
 
 class ProcedureNode(BaseNode):
+    """The node for storing procedure results
+
+    The evaluate() function will run a procedure according to `self.procedure`, using
+    other nodes' data. Other nodes will be evaluated if it's needed.
+    """
     def __init__(self, node_id, procedure, dag):
         super(ProcedureNode, self).__init__(node_id, dag)
         self.procedure = procedure
@@ -110,6 +125,14 @@ class ProcedureNode(BaseNode):
 
 
 class DAG():
+    """The DAG model.
+
+    .. note::
+
+        the "task" in the functions is equal to "node". We will change to use
+        same name later.
+
+    """
     def __init__(self, task_dict=None):
         if not task_dict:
             self._task_dict = dict()
@@ -118,6 +141,7 @@ class DAG():
 
     @property
     def roots(self):
+        """return the roots of the DAG"""
         return [t for t in self.tasks if not t.downstream_list]
 
     @property
@@ -133,6 +157,7 @@ class DAG():
         raise AttributeError('can not set task_dict manually')
 
     def add_task(self, task):
+        """add a node to DAG"""
         if task.node_id in self.task_dict.keys():
             # only overwirte case is when procedure in ProcedureNode is None.
             if (isinstance(task, ProcedureNode) and

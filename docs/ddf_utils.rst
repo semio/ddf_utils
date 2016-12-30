@@ -5,8 +5,9 @@ Subpackages
 -----------
 
 .. toctree::
+   :maxdepth: 4
 
-    ddf_utils.chef
+   ddf_utils.chef
 
 Submodules
 ----------
@@ -91,11 +92,3 @@ ddf_utils.transformer module
     :undoc-members:
     :show-inheritance:
 
-
-Module contents
----------------
-
-.. automodule:: ddf_utils
-    :members:
-    :undoc-members:
-    :show-inheritance:

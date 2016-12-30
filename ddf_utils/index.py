@@ -51,7 +51,7 @@ def get_ddf_files(path, root=None):
 def create_datapackage(path, **kwargs):
     """create datapackage.json base on the files in `path`.
 
-    A DDFcsv datapackage MUST contain the fields name and resources.
+    A DDFcsv datapackage MUST contain the fields `name` and `resources`.
 
     if name is None, then the base name of `path` will be used.
     """

@@ -11,6 +11,11 @@ from . import config
 
 # main class for ddf reading
 class DDF():
+    """DDF reader class
+
+    The reader instance accepts an dataset id on init and search the dataset in path
+    set by the `DDF_SEARCH_PATH` global variable.
+    """
     def __init__(self, ddf_id, no_check_valid=False):
         dataset_path = os.path.join(config.DDF_SEARCH_PATH, ddf_id)
         if not no_check_valid:
@@ -21,19 +26,37 @@ class DDF():
 
     @property
     def datapackage(self):
+        """the datapackage object. create one if it doesn't exist"""
         if not self._datapackage:
             self._datapackage = get_datapackage(self.dataset_path)
         return self._datapackage
 
     def get_all_files(self):
+        """return a list of all files in this dataset"""
         resources = self.datapackage['resources']
         return [x['path'] for x in resources]
 
     def get_concept_files(self):
+        """return a list of all concept files"""
         resources = self.datapackage['resources']
         return [x['path'] for x in resources if x['schema']['primaryKey'] == 'concept']
 
     def get_concepts(self, concept_type='all', **kwargs):
+        """get concepts from the concept table
+
+        Args
+        ----
+        concept_type : `str` or `list`
+            the concept type(s) to filter, if 'all' is provided, all concepts will be returned
+        **kwargs : dict
+            keyword arguments provided to :py:func:`pandas.read_csv`
+
+        Returns
+        -------
+        DataFrame
+            concept table
+
+        """
         concept_files = self.get_concept_files()
         all_concepts = pd.concat([
                 pd.read_csv(os.path.join(self.dataset_path, x),
@@ -46,6 +69,21 @@ class DDF():
             return all_concepts[all_concepts.concept_type.isin(concept_type)]
 
     def get_entities(self, domain=None, **kwargs):
+        """get entities from one or all domains
+
+        Args
+        ----
+        domain : `str`, optional
+            the domain to filter, if not provided, all domain will be returned
+        **kwargs : dict
+            keyword arguments provided to :py:func:`pandas.read_csv`
+
+        Returns
+        -------
+        dict
+            a dictionary like ``{entity_set_name : DataFrame}``
+
+        """
         resources = self.datapackage['resources']
         entity_concepts = self.get_concepts(['entity_domain', 'entity_set'])
 
@@ -64,6 +102,7 @@ class DDF():
         return entities
 
     def get_datapoint_files(self):
+        """return a list of datapoints files"""
         datapoints = dict()
         resources = self.datapackage['resources']
 
@@ -91,6 +130,20 @@ class DDF():
         )
 
     def get_datapoints(self, measure=None, primaryKey=None):
+        """get datapoints, filter by concept or primaryKey
+
+        Args
+        ----
+        measure : `str`, optional
+            only get this measure
+        primaryKey : `str`, optional
+            only get this primaryKey
+
+        Returns
+        -------
+        dict
+            A dictionary like ``{ measure_name : { primaryKeys : DataFrame }}``
+        """
         datapoint_files = self.get_datapoint_files()
         datapoints = dict()
 
@@ -121,6 +174,17 @@ class DDF():
         return datapoints
 
     def get_datapoint_df(self, measure, primaryKey=None):
+        """get datapoints by measure, returns a DataFrame
+
+        Args
+        ----
+        measure : `str`
+            the measure to get
+        primaryKey : `str`, optional
+            the primaryKey to get, if not provided and the datapoint have multiple
+            primaryKeys avaliable, the first primaryKey in datapackage will be returned
+
+        """
         datapoint_files = self.get_datapoint_files()
         datapoints = dict()
 
@@ -144,6 +208,11 @@ class DDF():
 # helper functions:
 # check if a directory is dataset root dir
 def is_dataset(path):
+    """check if a directory is a dataset directory
+
+    This function checks if ddf--index.csv and datapackage.json exists
+    to judge if the dir is a dataset.
+    """
     index_path = os.path.join(path, 'ddf--index.csv')
     datapackage_path = os.path.join(path, 'datapackage.json')
     if os.path.exists(index_path) or os.path.exists(datapackage_path):
@@ -154,6 +223,7 @@ def is_dataset(path):
 
 # function for listing all ddf projects
 def list_datasets():
+    """list all availabile datasets"""
     datasets = []
     for d in next(os.walk(config.DDF_SEARCH_PATH))[1]:
         dataset_path = os.path.join(config.DDF_SEARCH_PATH, d)

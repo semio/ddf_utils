@@ -1,7 +1,10 @@
 #-*- coding: utf-8 -*-
 """i18n project management for Gapminder's datasets.
-workflow: https://docs.google.com/document/d/11d5D5CPlr6I2BqP8z0p2o_dYQC9AYUyxcLGUq1WYCfk/
-'"""
+
+The workflow is described in this `google doc`_
+
+.. _google doc: https://docs.google.com/document/d/11d5D5CPlr6I2BqP8z0p2o_dYQC9AYUyxcLGUq1WYCfk/
+"""
 
 import pandas as pd
 import numpy as np
@@ -10,6 +13,7 @@ import json
 import os
 
 def split_translations_json(path, split_path='langsplit', exclude_concepts=None, overwrite=False):
+    """split all string concepts and save them as json files"""
     datapackage = get_datapackage(path)
     split_path = os.path.join(path, split_path)
 
@@ -72,6 +76,7 @@ def split_translations_json(path, split_path='langsplit', exclude_concepts=None,
 
 
 def split_translations_csv(path, split_path='langsplit', exclude_concepts=None, overwrite=False):
+    """split all string concepts and save them as csv files"""
     datapackage = get_datapackage(path)
     split_path = os.path.join(path, split_path)
 
@@ -121,7 +126,7 @@ def split_translations_csv(path, split_path='langsplit', exclude_concepts=None, 
 
 
 def merge_translations_csv(path, split_path='langsplit', lang_path='lang', overwrite=False):
-
+    """merge all translated csv files and update datapackage.json"""
     if overwrite:
         # TODO: overwrite existing translation instead of update
         raise NotImplementedError
@@ -177,7 +182,7 @@ def merge_translations_csv(path, split_path='langsplit', lang_path='lang', overw
 
 
 def merge_translations_json(path, split_path='langsplit', lang_path='lang', overwrite=False):
-
+    """merge all translated json files and update datapackage.json"""
     # make the paths full paths
     split_path = os.path.join(path, split_path)
     lang_path = os.path.join(path, lang_path)

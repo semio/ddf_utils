@@ -27,8 +27,29 @@ def _loadfile(f):
 
 # functions for reading/running recipe
 def build_recipe(recipe_file, to_disk=False, **kwargs):
-    """build a complete recipe file if there are includes in
-    recipe file, if no includes found than return the file as is.
+    """build a complete recipe object.
+
+    This function will check each part of recipe, convert string (the ingredient ids,
+    dictionaries file names) into actual objects.
+
+    If there are includes in recipe file, this function will run recurivly.
+    If no includes found then return the parsed object as is.
+
+    Parameters
+    ----------
+    recipe_file : `str`
+        path to recipe file
+
+    Keyword Args
+    ------------
+    to_disk : bool
+        if true, save the parsed reslut to a yaml file in working dir
+
+    Other Parameters
+    ----------------
+    ddf_dir : `str`
+        path to search for DDF datasets, will overwrite the contfig in recipe
+
     """
     recipe = _loadfile(recipe_file)
 
@@ -162,6 +183,10 @@ def check_dataset_availability(recipe):
 
 
 def build_dag(recipe):
+    """build a DAG model for the recipe.
+
+    For more detail for DAG model, see :py:mod:`ddf_utils.chef.dag`.
+    """
 
     def add_dependency(dag, upstream_id, downstream):
         if not dag.has_task(upstream_id):
@@ -223,7 +248,25 @@ def run_recipe(recipe):
     """run the recipe.
 
     returns a dictionary. keys are `concepts`, `entities` and `datapoints`,
-    and values are ingredients return by the procedures
+    and values are ingredients defined in the `serve` procedures or `serving` section.
+    for example:
+
+    .. code-block:: python
+
+        {
+            "concepts": [{"ingredient": DataFrame1, "options": None}]
+            "datapoints": [
+                {
+                    "ingredient": DataFrame2,
+                    "options": {"digits": 5}
+                },
+                {
+                    "ingredient": DataFrame3,
+                    "options": {"digits": 1}
+                },
+            ]
+        }
+
     """
     try:
         config.DDF_SEARCH_PATH = recipe['config']['ddf_dir']
@@ -271,6 +314,7 @@ def run_recipe(recipe):
 
 
 def dish_to_csv(dishes, outpath):
+    """save the recipe output to disk"""
     for t, ds in dishes.items():
         for dish in ds:
             dish['ingredient'].serve(outpath, **dish['options'])

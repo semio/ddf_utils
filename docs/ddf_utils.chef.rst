@@ -4,6 +4,11 @@ ddf_utils.chef package
 Submodules
 ----------
 
+.. toctree::
+
+   ddf_utils.chef
+
+
 ddf_utils.chef.cook module
 --------------------------
 
@@ -36,11 +41,10 @@ ddf_utils.chef.dag module
     :undoc-members:
     :show-inheritance:
 
+ddf_utils.chef.helpers module
+-------------------------------
 
-Module contents
----------------
-
-.. automodule:: ddf_utils.chef
+.. automodule:: ddf_utils.chef.helpers
     :members:
     :undoc-members:
     :show-inheritance:
