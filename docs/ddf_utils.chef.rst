@@ -4,11 +4,6 @@ ddf_utils.chef package
 Submodules
 ----------
 
-.. toctree::
-
-   ddf_utils.chef
-
-
 ddf_utils.chef.cook module
 --------------------------
 
