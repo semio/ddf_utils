@@ -481,7 +481,7 @@ options:
 **notes**
 
 - all concepts in ingredients in the `ingredients` parameter will be extracted to a new concept ingredient
-- `join` option is optional; if precent then the `base` will merge with concepts from `ingredients`
+- `join` option is optional; if present then the `base` will merge with concepts from `ingredients`
 - `full_outer` join means get the union of concepts; `ingredients_outer` means only keep concepts from `ingredients`
 
 ### trend_bridge

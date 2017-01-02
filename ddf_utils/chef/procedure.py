@@ -20,6 +20,17 @@ logger = logging.getLogger('Chef')
 def translate_header(ingredient: BaseIngredient, *, result=None, **options) -> ProcedureResult:
     """Translate column headers
 
+    Procedure format:
+
+    .. code-block:: yaml
+
+       procedure: translate_header
+       ingredients:  # list of ingredient id
+         - ingredient_id
+       result: str  # new ingledient id
+       options:
+         dictionary: str or dict  # file name or mappings dictionary
+
     Parameters
     ----------
     ingredient : BaseIngredient
@@ -66,6 +77,31 @@ def translate_header(ingredient: BaseIngredient, *, result=None, **options) -> P
 
 def translate_column(ingredient: BaseIngredient, *, result=None, **options) -> ProcedureResult:
     """Translate column values.
+
+    Procedure format:
+
+    .. code-block:: yaml
+
+       procedure: translate_column
+       ingredients:  # list of ingredient id
+         - ingredient_id
+       result: str  # new ingledient id
+       options:
+         column: str  # the column to be translated
+         target_column: str  # optinoal, the target column to store the translated data
+         not_found: {'drop', 'include', 'error'}  # optional, the behavior when there is values not found in the mapping dictionary, default is 'drop'
+         dictionary: str or dict  # file name or mappings dictionary
+
+    If base is provided in dictionary, key and value should also in dictionary.
+    In this case chef will generate a mapping dictionary using the base ingredient.
+    The dictionary format will be:
+
+    .. code-block:: yaml
+
+       dictionary:
+	     base: str  # ingredient name
+	     key: str or list  # the columns to be the keys of the dictionary, can accept a list
+	     value: str  # the column to be the values of the the dictionary, must be one column
 
     Keyword Args
     ------------
@@ -124,14 +160,26 @@ def translate_column(ingredient: BaseIngredient, *, result=None, **options) -> P
 def copy(ingredient: BaseIngredient, *, result=None, **options) -> ProcedureResult:
     """make copy of ingredient data columns, with new names.
 
-    A dictionary should be provided, for example:
+    Procedure format:
 
-    .. code-block:: json
+    .. code-block:: yaml
 
-        {
-            "col1": ["copy1_1", "copy1_2"],
-            "col2": "copy2"
-        }
+       procedure: copy
+       ingredients:  # list of ingredient id
+         - ingredient_id
+       result: str  # new ingledient id
+       options:
+       dictionary: dict  # old name -> new name mappings
+
+    An example of dictionary:
+
+    .. code-block:: yaml
+
+       dictionary:
+         col1: copy_1_1  # string
+         col2:  # list of string
+           - copy_2_1
+           - copy_2_2
 
     where 'col1' and 'col2' should be existing columns in the input ingredient
 
@@ -166,6 +214,20 @@ def merge(*ingredients: List[BaseIngredient], result=None, **options) -> Procedu
 
     The ingredients will be merged one by one in the order of how they are provided to this function.
     Later ones will overwrite the pervious merged results.
+
+    Procedure format:
+
+    .. code-block:: yaml
+
+       procedure: merge
+       ingredients:  # list of ingredient id
+         - ingredient_id_1
+         - ingredient_id_2
+         - ingredient_id_3
+         # ...
+       result: str  # new ingledient id
+       options:
+         deep: bool  # use deep merge if true
 
     Parameters
     ----------
@@ -298,6 +360,17 @@ def filter_row(ingredient: BaseIngredient, *, result=None, **options) -> Procedu
     """filter an ingredient based on a set of options and return
     the result as new ingredient.
 
+    Procedure format:
+
+    .. code-block:: yaml
+
+       procedure: filter_row
+       ingredients:  # list of ingredient id
+         - ingredient_id
+       result: str  # new ingledient id
+       options:
+         dictionary: dict  # filter definition block
+
     A dictionary should be provided in options with the following format:
 
     .. code-block:: yaml
@@ -376,6 +449,17 @@ def filter_row(ingredient: BaseIngredient, *, result=None, **options) -> Procedu
 def filter_item(ingredient: BaseIngredient, *, result: Optional[str]=None, **options) -> ProcedureResult:
     """filter items from the ingredient data
 
+    Procedure format:
+
+    .. code-block:: yaml
+
+       procedure: filter_item
+       ingredients:  # list of ingredient id
+         - ingredient_id
+       result: str  # new ingledient id
+       options:
+         items: list  # a list of items should be in the result ingredient
+
     Keyword Args
     ------------
     items: list
@@ -401,19 +485,23 @@ def filter_item(ingredient: BaseIngredient, *, result: Optional[str]=None, **opt
 def groupby(ingredient: BaseIngredient, *, result, **options) -> ProcedureResult:
     """group ingredient data by column(s) and run aggregate function
 
-    Keyword Args
-    ------------
-    groubby : `str` or `list`
-        the column(s) to group, can be a list or a string
-    aggregate/transform/filter : `dict`
-        the function to run. only one of `aggregate`, `transform` and `filter` should be supplied.
+    .. highlight:: yaml
 
-    Examples
-    --------
+    Procedure format:
+
+    ::
+
+       procedure: groupby
+       ingredients:  # list of ingredient id
+         - ingredient_id
+       result: str  # new ingledient id
+       options:
+         groupby: str or list  # colunm(s) to group
+         aggregate: dict  # function block
+         transform: dict  # function block
+         filter: dict  # function block
 
     The function block should have below format:
-
-    .. highlight:: yaml
 
     ::
 
@@ -431,7 +519,19 @@ def groupby(ingredient: BaseIngredient, *, result, **options) -> ProcedureResult
             param1: foo
             param2: baz
 
-    other columns not mentioned will be dropped.
+
+    Keyword Args
+    ------------
+    groubby : `str` or `list`
+        the column(s) to group, can be a list or a string
+    aggregate/transform/filter : `dict`
+        the function to run. only one of `aggregate`, `transform` and `filter` should be supplied.
+
+    Note
+    ----
+    - Only one of ``aggregate``, ``transform`` or ``filter`` can be used in one procedure.
+    - Any columns not mentioned in groupby or functions are dropped.
+
     """
 
     logger.info("groupby: " + ingredient.ingred_id)
@@ -481,20 +581,41 @@ def groupby(ingredient: BaseIngredient, *, result, **options) -> ProcedureResult
 def window(ingredient: BaseIngredient, result, **options) -> ProcedureResult:
     """apply functions on a rolling window
 
-    An window object should be provided in options, with following parameters:
+    .. highlight:: yaml
 
-    - `column`: str, column which window is created from
-    - `size`: int or 'expanding', if int then rolling window, if expanding then expanding window
-    - `min_periods`: int, as in pandas
-    - `center`: bool, as in pandas
+    Procedure format:
+
+    ::
+
+       procedure: window
+       ingredients:  # list of ingredient id
+         - ingredient_id
+       result: str  # new ingledient id
+       options:
+         window:
+           column: str  # column which window is created from
+           size: int or 'expanding'  # if int then rolling window, if expanding then expanding window
+           min_periods: int  # as in pandas
+           center: bool  # as in pandas
+           aggregate: dict
+
+    Two styles of function block are supported, and they can mix in one procedure:
+
+    ::
+
+       aggregate:
+         col1: sum  # run rolling sum to col1
+         col2: mean  # run rolling mean to col2
+         col3:  # run foo to col3 with param1=baz
+       function: foo
+       param1: baz
 
     Keyword Args
     ------------
     window: dict
-        window definition.
-    aggregate: dictionary
-        aggregation functions, format should be
-        ``column: func`` or ``column: {function: func, param1: foo, param2: baz, ...}``
+        window definition, see above for the dictionary format
+    aggregate: dict
+        aggregation functions
 
     Examples
     --------
@@ -564,6 +685,17 @@ def window(ingredient: BaseIngredient, result, **options) -> ProcedureResult:
 def run_op(ingredient: BaseIngredient, *, result=None, **options) -> ProcedureResult:
     """run math operation on each row of ingredient data.
 
+    Procedure format:
+
+    .. code-block:: yaml
+
+       procedure: filter_item
+       ingredients:  # list of ingredient id
+         - ingredient_id
+       result: str  # new ingledient id
+       options:
+         items: list  # a list of items should be in the result ingredient
+
     Keyword Args
     ------------
     op: dict
@@ -613,6 +745,23 @@ def extract_concepts(*ingredients: List[BaseIngredient],
                      result=None, **options) -> ProcedureResult:
     """extract concepts from other ingredients.
 
+    .. highlight:: yaml
+
+    Procedure format:
+
+    ::
+
+       procedure: extract_concepts
+       ingredients:  # list of ingredient id
+         - ingredient_id_1
+         - ingredient_id_2
+       result: str  # new ingledient id
+       options:
+         join:  # optional
+           base: str  # base concept ingredient id
+           type: {'full_outer', 'ingredients_outer'}  # default is full_outer
+
+
     Parameters
     ----------
     ingredients
@@ -623,25 +772,21 @@ def extract_concepts(*ingredients: List[BaseIngredient],
     join : dict, optional
         the base ingredient to join
 
-    Examples
-    --------
-
-    .. highlight:: yaml
-
-    ::
-
-        - procedure: extract_concepts
-          ingredients: ["foo","bar"]
-          result: concepts_final
-          options:
-              join:
-                  base: concept_ingredient_id
-                  type: full_outer || ingredients_outer # default full_outer
 
     See Also
     --------
     :py:func:`ddf_utils.transformer.extract_concepts` : related function in transformer
     module
+
+    Note
+    ----
+    - all concepts in ingredients in the ``ingredients`` parameter will be extracted
+      to a new concept ingredient
+    - ``join`` option is optional; if present then the ``base`` will merge with concepts
+      from ``ingredients``
+    - ``full_outer`` join means get the union of concepts; ``ingredients_outer`` means
+      only keep concepts from ``ingredients``
+
     """
     if options:
         base = options['join']['base']
