@@ -791,7 +791,7 @@ def extract_concepts(*ingredients: List[BaseIngredient],
       only keep concepts from ``ingredients``
 
     """
-    if options:
+    if 'join' in options.keys():
         base = options['join']['base']
         try:
             join = options['join']['type']
@@ -800,6 +800,7 @@ def extract_concepts(*ingredients: List[BaseIngredient],
         concepts = base.get_data()['concepts'].set_index('concept')
     else:
         concepts = pd.DataFrame([], columns=['concept', 'concept_type']).set_index('concept')
+        join = 'full_outer'
 
     new_concepts = set()
 
@@ -819,7 +820,7 @@ def extract_concepts(*ingredients: List[BaseIngredient],
         concepts = concepts.ix[new_concepts]
     if not result:
         result = 'concepts_extracted'
-    return ProcedureResult(result, 'concept', data=concepts.reset_index())
+    return ProcedureResult(result, 'concept', data={'concepts': concepts.reset_index()})
 
 
 def trend_bridge(ingredient: BaseIngredient, result, **options) -> ProcedureResult:
