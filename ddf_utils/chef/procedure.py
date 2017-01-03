@@ -561,19 +561,22 @@ def groupby(ingredient: BaseIngredient, *, result, **options) -> ProcedureResult
     if comp_type == 'aggregate':
         for k, func in options[comp_type].items():
             func = mkfunc(func)
-            newdata[k] = data[k].groupby(by=by).agg({k: func}).reset_index()
+            newdata[k] = (data[k].groupby(by=by).agg({k: func})
+                          .reset_index().dropna())
     if comp_type == 'transform':
         for k, func in options[comp_type].items():
             func = mkfunc(func)
             df = data[k].set_index(ingredient.key_to_list())
             levels = [df.index.names.index(x) for x in by]
-            newdata[k] = df.groupby(level=levels)[k].transform(func).reset_index()
+            newdata[k] = (df.groupby(level=levels)[k].transform(func)
+                          .reset_index().dropna())
     if comp_type == 'filter':
         for k, func in options[comp_type].items():
             func = mkfunc(func)
             df = data[k].set_index(ingredient.key_to_list())
             levels = [df.index.names.index(x) for x in by]
-            newdata[k] = df.groupby(level=levels)[k].filter(func).reset_index()
+            newdata[k] = (df.groupby(level=levels)[k].filter(func)
+                          .reset_index().dropna())
 
     return ProcedureResult(result, newkey, data=newdata)
 
