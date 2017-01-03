@@ -1,43 +1,159 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 
-<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
-  <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>ddf_utils package &#8212; ddf_utils 0.1dev documentation</title>
-    
-    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
-        VERSION:     '0.1dev',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="ddf_utils 0.1dev documentation" href="index.html" />
-   
-  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
   
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
-
-  </head>
-  <body role="document">
+  <title>ddf_utils package &mdash; ddf_utils 0.1dev documentation</title>
   
 
-    <div class="document">
-      <div class="documentwrapper">
-        <div class="bodywrapper">
-          <div class="body" role="main">
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="ddf_utils 0.1dev documentation" href="index.html"/>
+        <link rel="up" title="API References" href="modules.html"/>
+        <link rel="next" title="ddf_utils.chef package" href="ddf_utils.chef.html"/>
+        <link rel="prev" title="API References" href="modules.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> ddf_utils
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="recipe.html">Cooking with recipes (draft)</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">API References</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">ddf_utils package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#subpackages">Subpackages</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="ddf_utils.chef.html">ddf_utils.chef package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-ddf_utils.cli">ddf_utils.cli module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-ddf_utils.config">ddf_utils.config module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-ddf_utils.ddf_reader">ddf_utils.ddf_reader module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-ddf_utils.i18n">ddf_utils.i18n module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-ddf_utils.index">ddf_utils.index module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-ddf_utils.io">ddf_utils.io module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-ddf_utils.ops">ddf_utils.ops module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-ddf_utils.patch">ddf_utils.patch module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-ddf_utils.str">ddf_utils.str module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-ddf_utils.transformer">ddf_utils.transformer module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">ddf_utils</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="modules.html">API References</a> &raquo;</li>
+      
+    <li>ddf_utils package</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/ddf_utils.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
             
   <div class="section" id="ddf-utils-package">
 <h1>ddf_utils package<a class="headerlink" href="#ddf-utils-package" title="Permalink to this headline">¶</a></h1>
@@ -50,7 +166,8 @@
 <li class="toctree-l2"><a class="reference internal" href="ddf_utils.chef.html#module-ddf_utils.chef.cook">ddf_utils.chef.cook module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ddf_utils.chef.html#module-ddf_utils.chef.ingredient">ddf_utils.chef.ingredient module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ddf_utils.chef.html#module-ddf_utils.chef.procedure">ddf_utils.chef.procedure module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ddf_utils.chef.html#module-ddf_utils.chef">Module contents</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ddf_utils.chef.html#module-ddf_utils.chef.dag">ddf_utils.chef.dag module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ddf_utils.chef.html#module-ddf_utils.chef.helpers">ddf_utils.chef.helpers module</a></li>
 </ul>
 </li>
 </ul>
@@ -74,78 +191,168 @@
 <dt id="ddf_utils.ddf_reader.DDF">
 <em class="property">class </em><code class="descclassname">ddf_utils.ddf_reader.</code><code class="descname">DDF</code><span class="sig-paren">(</span><em>ddf_id</em>, <em>no_check_valid=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.ddf_reader.DDF" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>DDF reader class</p>
+<p>The reader instance accepts an dataset id on init and search the dataset in path
+set by the <cite>DDF_SEARCH_PATH</cite> global variable.</p>
 <dl class="attribute">
 <dt id="ddf_utils.ddf_reader.DDF.datapackage">
 <code class="descname">datapackage</code><a class="headerlink" href="#ddf_utils.ddf_reader.DDF.datapackage" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>the datapackage object. create one if it doesn&#8217;t exist</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="ddf_utils.ddf_reader.DDF.get_all_files">
 <code class="descname">get_all_files</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.ddf_reader.DDF.get_all_files" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>return a list of all files in this dataset</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="ddf_utils.ddf_reader.DDF.get_concept_files">
 <code class="descname">get_concept_files</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.ddf_reader.DDF.get_concept_files" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>return a list of all concept files</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="ddf_utils.ddf_reader.DDF.get_concepts">
 <code class="descname">get_concepts</code><span class="sig-paren">(</span><em>concept_type='all'</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.ddf_reader.DDF.get_concepts" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>get concepts from the concept table</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>concept_type</strong> (<cite>str</cite> or <cite>list</cite>) &#8211; the concept type(s) to filter, if &#8216;all&#8217; is provided, all concepts will be returned</li>
+<li><strong>**kwargs</strong> (<em>dict</em>) &#8211; keyword arguments provided to <code class="xref py py-func docutils literal"><span class="pre">pandas.read_csv()</span></code></li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">concept table</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">DataFrame</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="method">
 <dt id="ddf_utils.ddf_reader.DDF.get_datapoint_df">
 <code class="descname">get_datapoint_df</code><span class="sig-paren">(</span><em>measure</em>, <em>primaryKey=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.ddf_reader.DDF.get_datapoint_df" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>get datapoints by measure, returns a DataFrame</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>measure</strong> (<cite>str</cite>) &#8211; the measure to get</li>
+<li><strong>primaryKey</strong> (<cite>str</cite>, optional) &#8211; the primaryKey to get, if not provided and the datapoint have multiple
+primaryKeys avaliable, the first primaryKey in datapackage will be returned</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="method">
 <dt id="ddf_utils.ddf_reader.DDF.get_datapoint_files">
 <code class="descname">get_datapoint_files</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.ddf_reader.DDF.get_datapoint_files" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>return a list of datapoints files</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="ddf_utils.ddf_reader.DDF.get_datapoints">
 <code class="descname">get_datapoints</code><span class="sig-paren">(</span><em>measure=None</em>, <em>primaryKey=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.ddf_reader.DDF.get_datapoints" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>get datapoints, filter by concept or primaryKey</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>measure</strong> (<cite>str</cite>, optional) &#8211; only get this measure</li>
+<li><strong>primaryKey</strong> (<cite>str</cite>, optional) &#8211; only get this primaryKey</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A dictionary like <code class="docutils literal"><span class="pre">{</span> <span class="pre">measure_name</span> <span class="pre">:</span> <span class="pre">{</span> <span class="pre">primaryKeys</span> <span class="pre">:</span> <span class="pre">DataFrame</span> <span class="pre">}}</span></code></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">dict</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="method">
 <dt id="ddf_utils.ddf_reader.DDF.get_entities">
 <code class="descname">get_entities</code><span class="sig-paren">(</span><em>domain=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.ddf_reader.DDF.get_entities" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>get entities from one or all domains</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>domain</strong> (<cite>str</cite>, optional) &#8211; the domain to filter, if not provided, all domain will be returned</li>
+<li><strong>**kwargs</strong> (<em>dict</em>) &#8211; keyword arguments provided to <code class="xref py py-func docutils literal"><span class="pre">pandas.read_csv()</span></code></li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">a dictionary like <code class="docutils literal"><span class="pre">{entity_set_name</span> <span class="pre">:</span> <span class="pre">DataFrame}</span></code></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">dict</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 </dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.ddf_reader.is_dataset">
 <code class="descclassname">ddf_utils.ddf_reader.</code><code class="descname">is_dataset</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.ddf_reader.is_dataset" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>check if a directory is a dataset directory</p>
+<p>This function checks if ddf&#8211;index.csv and datapackage.json exists
+to judge if the dir is a dataset.</p>
+</dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.ddf_reader.list_datasets">
 <code class="descclassname">ddf_utils.ddf_reader.</code><code class="descname">list_datasets</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.ddf_reader.list_datasets" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>list all availabile datasets</p>
+</dd></dl>
 
 </div>
 <div class="section" id="module-ddf_utils.i18n">
 <span id="ddf-utils-i18n-module"></span><h2>ddf_utils.i18n module<a class="headerlink" href="#module-ddf_utils.i18n" title="Permalink to this headline">¶</a></h2>
-<p>i18n project management for Gapminder&#8217;s datasets.
-workflow: <a class="reference external" href="https://docs.google.com/document/d/11d5D5CPlr6I2BqP8z0p2o_dYQC9AYUyxcLGUq1WYCfk/">https://docs.google.com/document/d/11d5D5CPlr6I2BqP8z0p2o_dYQC9AYUyxcLGUq1WYCfk/</a>
-&#8216;</p>
+<p>i18n project management for Gapminder&#8217;s datasets.</p>
+<p>The workflow is described in this <a class="reference external" href="https://docs.google.com/document/d/11d5D5CPlr6I2BqP8z0p2o_dYQC9AYUyxcLGUq1WYCfk/">google doc</a></p>
 <dl class="function">
-<dt id="ddf_utils.i18n.merge_translations">
-<code class="descclassname">ddf_utils.i18n.</code><code class="descname">merge_translations</code><span class="sig-paren">(</span><em>path</em>, <em>split_path='langsplit'</em>, <em>lang_path='lang'</em>, <em>overwrite=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.i18n.merge_translations" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dt id="ddf_utils.i18n.merge_translations_csv">
+<code class="descclassname">ddf_utils.i18n.</code><code class="descname">merge_translations_csv</code><span class="sig-paren">(</span><em>path</em>, <em>split_path='langsplit'</em>, <em>lang_path='lang'</em>, <em>overwrite=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.i18n.merge_translations_csv" title="Permalink to this definition">¶</a></dt>
+<dd><p>merge all translated csv files and update datapackage.json</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ddf_utils.i18n.merge_translations_json">
+<code class="descclassname">ddf_utils.i18n.</code><code class="descname">merge_translations_json</code><span class="sig-paren">(</span><em>path</em>, <em>split_path='langsplit'</em>, <em>lang_path='lang'</em>, <em>overwrite=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.i18n.merge_translations_json" title="Permalink to this definition">¶</a></dt>
+<dd><p>merge all translated json files and update datapackage.json</p>
+</dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.i18n.split_translations_csv">
 <code class="descclassname">ddf_utils.i18n.</code><code class="descname">split_translations_csv</code><span class="sig-paren">(</span><em>path</em>, <em>split_path='langsplit'</em>, <em>exclude_concepts=None</em>, <em>overwrite=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.i18n.split_translations_csv" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>split all string concepts and save them as csv files</p>
+</dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.i18n.split_translations_json">
 <code class="descclassname">ddf_utils.i18n.</code><code class="descname">split_translations_json</code><span class="sig-paren">(</span><em>path</em>, <em>split_path='langsplit'</em>, <em>exclude_concepts=None</em>, <em>overwrite=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.i18n.split_translations_json" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>split all string concepts and save them as json files</p>
+</dd></dl>
 
 </div>
 <div class="section" id="module-ddf_utils.index">
@@ -155,7 +362,7 @@ workflow: <a class="reference external" href="https://docs.google.com/document/d
 <dt id="ddf_utils.index.create_datapackage">
 <code class="descclassname">ddf_utils.index.</code><code class="descname">create_datapackage</code><span class="sig-paren">(</span><em>path</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.index.create_datapackage" title="Permalink to this definition">¶</a></dt>
 <dd><p>create datapackage.json base on the files in <cite>path</cite>.</p>
-<p>A DDFcsv datapackage MUST contain the fields name and resources.</p>
+<p>A DDFcsv datapackage MUST contain the fields <cite>name</cite> and <cite>resources</cite>.</p>
 <p>if name is None, then the base name of <cite>path</cite> will be used.</p>
 </dd></dl>
 
@@ -190,6 +397,48 @@ workflow: <a class="reference external" href="https://docs.google.com/document/d
 <dd><p>save a ddf dataframe to csv file.
 the file path of csv will be out_dir/ddf&#8211;$ftype&#8211;$concept&#8211;$by.csv</p>
 </dd></dl>
+
+</div>
+<div class="section" id="module-ddf_utils.ops">
+<span id="ddf-utils-ops-module"></span><h2>ddf_utils.ops module<a class="headerlink" href="#module-ddf_utils.ops" title="Permalink to this headline">¶</a></h2>
+<p>commonly used calculation methods</p>
+<dl class="function">
+<dt id="ddf_utils.ops.aagr">
+<code class="descclassname">ddf_utils.ops.</code><code class="descname">aagr</code><span class="sig-paren">(</span><em>df: &lt;Mock name='mock.DataFrame' id='4423711768'&gt;</em>, <em>window: int = 10</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.ops.aagr" title="Permalink to this definition">¶</a></dt>
+<dd><p>average annual growth rate</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>window</strong> (<cite>int</cite>) &#8211; the rolling window size</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>return</strong> &#8211; The rolling apply result</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><cite>DataFrame</cite></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="ddf_utils.ops.between">
+<code class="descclassname">ddf_utils.ops.</code><code class="descname">between</code><span class="sig-paren">(</span><em>x</em>, <em>upper</em>, <em>lower</em>, <em>how='all'</em>, <em>include_upper=False</em>, <em>include_lower=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.ops.between" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ddf_utils.ops.gt">
+<code class="descclassname">ddf_utils.ops.</code><code class="descname">gt</code><span class="sig-paren">(</span><em>x</em>, <em>val</em>, <em>how='all'</em>, <em>include_eq=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.ops.gt" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ddf_utils.ops.lt">
+<code class="descclassname">ddf_utils.ops.</code><code class="descname">lt</code><span class="sig-paren">(</span><em>x</em>, <em>val</em>, <em>how='all'</em>, <em>include_eq=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.ops.lt" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ddf_utils.ops.zcore">
+<code class="descclassname">ddf_utils.ops.</code><code class="descname">zcore</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.ops.zcore" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 </div>
 <div class="section" id="module-ddf_utils.patch">
@@ -232,87 +481,184 @@ e.g. fix_time_range(&#8216;1980-90&#8217;) = 1985</p>
 </dd></dl>
 
 </div>
-<div class="section" id="module-ddf_utils.transform">
-<span id="ddf-utils-transform-module"></span><h2>ddf_utils.transform module<a class="headerlink" href="#module-ddf_utils.transform" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-ddf_utils.transformer">
+<span id="ddf-utils-transformer-module"></span><h2>ddf_utils.transformer module<a class="headerlink" href="#module-ddf_utils.transformer" title="Permalink to this headline">¶</a></h2>
 <p>functions for common tasks on ddf datasets</p>
 <dl class="function">
-<dt id="ddf_utils.transform.translate_column">
-<code class="descclassname">ddf_utils.transform.</code><code class="descname">translate_column</code><span class="sig-paren">(</span><em>df</em>, <em>column</em>, <em>dictionary_type</em>, <em>dictionary</em>, <em>target_column=None</em>, <em>base_df=None</em>, <em>not_found='drop'</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.transform.translate_column" title="Permalink to this definition">¶</a></dt>
-<dd><p>doc here</p>
+<dt id="ddf_utils.transformer.extract_concepts">
+<code class="descclassname">ddf_utils.transformer.</code><code class="descname">extract_concepts</code><span class="sig-paren">(</span><em>dfs</em>, <em>base=None</em>, <em>join='full_outer'</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.transformer.extract_concepts" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ddf_utils.transformer.translate_column">
+<code class="descclassname">ddf_utils.transformer.</code><code class="descname">translate_column</code><span class="sig-paren">(</span><em>df</em>, <em>column</em>, <em>dictionary_type</em>, <em>dictionary</em>, <em>target_column=None</em>, <em>base_df=None</em>, <em>not_found='drop'</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.transformer.translate_column" title="Permalink to this definition">¶</a></dt>
+<dd><p>change values in a column base on a mapping dictionary.</p>
+<p>The dictionary can be provided as a python dictionary, pandas dataframe or read from file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>df</strong> (<cite>DataFrame</cite>) &#8211; The dataframe to be translated</li>
+<li><strong>column</strong> (<cite>str</cite>) &#8211; The column to be translated</li>
+<li><strong>dictionary_type</strong> (<cite>str</cite>) &#8211; The type of dictionary, choose from <cite>inline</cite>, <cite>file</cite> and <cite>dataframe</cite></li>
+<li><strong>dictionary</strong> (<cite>str</cite> or <cite>dict</cite>) &#8211; The dictionary. Depanding on the <cite>dictionary_type</cite>, the value of this parameter should be:
+<cite>inline</cite>: <cite>dict</cite>
+<cite>file</cite>: the file path, <cite>str</cite>
+<cite>dataframe</cite>: <cite>dict</cite>, must have <cite>key</cite> and <cite>value</cite> keys. see examples in examples section.</li>
+<li><strong>target_column</strong> (<cite>str</cite>, optional) &#8211; The column to store translated resluts. If this is None, then the one set with <cite>column</cite> will be replaced.</li>
+<li><strong>base_df</strong> (<cite>DataFrame</cite>, optional) &#8211; When <cite>dictionary_type</cite> is <cite>dataframe</cite>, this option should be set</li>
+<li><strong>not_found</strong> (<cite>str</cite>) &#8211; What to do if key in the dictionary is not found in the dataframe to be translated.
+avaliable options are <cite>drop</cite>, <cite>error</cite>, <cite>include</cite></li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">([[</span><span class="s1">&#39;geo&#39;</span><span class="p">,</span> <span class="s1">&#39;Geographical places&#39;</span><span class="p">],</span> <span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">,</span> <span class="s1">&#39;Year&#39;</span><span class="p">]],</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;concept&#39;</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span>
+<span class="go">  concept                 name</span>
+<span class="go">0     geo  Geographical places</span>
+<span class="go">1    time                 Year</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tf</span><span class="o">.</span><span class="n">translate_column</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="s1">&#39;concept&#39;</span><span class="p">,</span> <span class="s1">&#39;inline&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;geo&#39;</span><span class="p">:</span> <span class="s1">&#39;country&#39;</span><span class="p">,</span> <span class="s1">&#39;time&#39;</span><span class="p">:</span> <span class="s1">&#39;year&#39;</span><span class="p">})</span>
+<span class="go">   concept                 name</span>
+<span class="go">0  country  Geographical places</span>
+<span class="go">1     year                 Year</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">base_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">([[</span><span class="s1">&#39;geo&#39;</span><span class="p">,</span> <span class="s1">&#39;country&#39;</span><span class="p">],</span> <span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">,</span> <span class="s1">&#39;year&#39;</span><span class="p">]],</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;concept&#39;</span><span class="p">,</span> <span class="s1">&#39;alternative_name&#39;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">base_df</span>
+<span class="go">  concept alternative_name</span>
+<span class="go">0     geo          country</span>
+<span class="go">1    time             year</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tf</span><span class="o">.</span><span class="n">translate_column</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="s1">&#39;concept&#39;</span><span class="p">,</span> <span class="s1">&#39;dataframe&#39;</span><span class="p">,</span>
+<span class="gp">... </span>                    <span class="p">{</span><span class="s1">&#39;key&#39;</span><span class="p">:</span> <span class="s1">&#39;concept&#39;</span><span class="p">,</span> <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="s1">&#39;alternative_name&#39;</span><span class="p">},</span>
+<span class="gp">... </span>                    <span class="n">target_column</span><span class="o">=</span><span class="s1">&#39;new_name&#39;</span><span class="p">,</span> <span class="n">base_df</span><span class="o">=</span><span class="n">base_df</span><span class="p">)</span>
+<span class="go">  concept                 name new_name</span>
+<span class="go">0     geo  Geographical places  country</span>
+<span class="go">1    time                 Year     year</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="ddf_utils.transformer.translate_header">
+<code class="descclassname">ddf_utils.transformer.</code><code class="descname">translate_header</code><span class="sig-paren">(</span><em>df</em>, <em>dictionary</em>, <em>dictionary_type='inline'</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.transformer.translate_header" title="Permalink to this definition">¶</a></dt>
+<dd><p>change the headers of a dataframe base on a mapping dictionary.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>df</strong> (<cite>DataFrame</cite>) &#8211; The dataframe to be translated</li>
+<li><strong>dictionary_type</strong> (<cite>str</cite>, default to <cite>inline</cite>) &#8211; The type of dictionary, choose from <cite>inline</cite> or <cite>file</cite></li>
+<li><strong>dictionary</strong> (<cite>dict</cite> or <cite>str</cite>) &#8211; The mapping dictionary or path of mapping file</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="ddf_utils.transformer.trend_bridge">
+<code class="descclassname">ddf_utils.transformer.</code><code class="descname">trend_bridge</code><span class="sig-paren">(</span><em>old_data</em>, <em>new_data</em>, <em>bridge_length</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.transformer.trend_bridge" title="Permalink to this definition">¶</a></dt>
+<dd><p>smoothing data between series.</p>
+<p>To avoid getting artificial stairs in the data, we smooth between to
+series. Sometime one source is systematically higher than another source,
+and if we jump from one to another in a single year, this looks like an
+actual change in the data.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>old_data</strong> (<em>Series</em>) &#8211; </li>
+<li><strong>new_data</strong> (<em>Series</em>) &#8211; </li>
+<li><strong>bridge_length</strong> (<em>int</em>) &#8211; the length of bridge</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>bridge_data</strong></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">the bridged data</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </div>
-<div class="section" id="module-ddf_utils">
-<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-ddf_utils" title="Permalink to this headline">¶</a></h2>
-</div>
 </div>
 
 
+           </div>
           </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="ddf_utils.chef.html" class="btn btn-neutral float-right" title="ddf_utils.chef package" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="modules.html" class="btn btn-neutral" title="API References" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Semio Zheng.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper">
-  <h3><a href="index.html">Table Of Contents</a></h3>
-  <ul>
-<li><a class="reference internal" href="#">ddf_utils package</a><ul>
-<li><a class="reference internal" href="#subpackages">Subpackages</a></li>
-<li><a class="reference internal" href="#submodules">Submodules</a></li>
-<li><a class="reference internal" href="#module-ddf_utils.cli">ddf_utils.cli module</a></li>
-<li><a class="reference internal" href="#module-ddf_utils.config">ddf_utils.config module</a></li>
-<li><a class="reference internal" href="#module-ddf_utils.ddf_reader">ddf_utils.ddf_reader module</a></li>
-<li><a class="reference internal" href="#module-ddf_utils.i18n">ddf_utils.i18n module</a></li>
-<li><a class="reference internal" href="#module-ddf_utils.index">ddf_utils.index module</a></li>
-<li><a class="reference internal" href="#module-ddf_utils.io">ddf_utils.io module</a></li>
-<li><a class="reference internal" href="#module-ddf_utils.patch">ddf_utils.patch module</a></li>
-<li><a class="reference internal" href="#module-ddf_utils.str">ddf_utils.str module</a></li>
-<li><a class="reference internal" href="#module-ddf_utils.transform">ddf_utils.transform module</a></li>
-<li><a class="reference internal" href="#module-ddf_utils">Module contents</a></li>
-</ul>
-</li>
-</ul>
-<div class="relations">
-<h3>Related Topics</h3>
-<ul>
-  <li><a href="index.html">Documentation overview</a><ul>
-  </ul></li>
-</ul>
-</div>
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="_sources/ddf_utils.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div>
-<div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
-    <form class="search" action="search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
-    </form>
-</div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
-        </div>
-      </div>
-      <div class="clearer"></div>
-    </div>
-    <div class="footer">
-      &copy;2016, Semio Zheng.
-      
-      |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.6</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
-      
-      |
-      <a href="_sources/ddf_utils.txt"
-          rel="nofollow">Page source</a>
-    </div>
 
-    
+    </section>
 
-    
-  </body>
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.1dev',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
 </html>

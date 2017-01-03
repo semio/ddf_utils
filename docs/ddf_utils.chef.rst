@@ -28,11 +28,18 @@ ddf_utils.chef.procedure module
     :undoc-members:
     :show-inheritance:
 
+ddf_utils.chef.dag module
+-------------------------------
 
-Module contents
----------------
+.. automodule:: ddf_utils.chef.dag
+    :members:
+    :undoc-members:
+    :show-inheritance:
 
-.. automodule:: ddf_utils.chef
+ddf_utils.chef.helpers module
+-------------------------------
+
+.. automodule:: ddf_utils.chef.helpers
     :members:
     :undoc-members:
     :show-inheritance:

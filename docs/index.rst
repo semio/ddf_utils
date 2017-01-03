@@ -9,7 +9,11 @@ Welcome to ddf_utils's documentation!
 Contents:
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 2
+
+   intro
+   recipe
+   modules
 
 
 Indices and tables

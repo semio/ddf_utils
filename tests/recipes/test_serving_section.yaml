@@ -40,3 +40,9 @@ cooking:
                   agriculture_thousands:
                       function: zcore
           result: grouped-datapoints-2
+
+serving:
+    - id: grouped-datapoints-1
+    - id: grouped-datapoints-2
+      options:
+          digits: 2

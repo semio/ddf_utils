@@ -20,8 +20,32 @@ logger = logging.getLogger('Chef')
 def translate_header(ingredient: BaseIngredient, *, result=None, **options) -> ProcedureResult:
     """Translate column headers
 
-    available options are:
-        `dictionary`: a dictionary of oldname -> newname mappings
+    Procedure format:
+
+    .. code-block:: yaml
+
+       procedure: translate_header
+       ingredients:  # list of ingredient id
+         - ingredient_id
+       result: str  # new ingledient id
+       options:
+         dictionary: str or dict  # file name or mappings dictionary
+
+    Parameters
+    ----------
+    ingredient : BaseIngredient
+        The ingredient to translate
+    result : `str`
+        The result ingredient id
+
+    Keyword Args
+    ------------
+    dictionary: dict
+        a dictionary of oldname -> newname mappings
+
+    See Also
+    --------
+    :py:func:`ddf_utils.transformer.translate_header` : Related function in transformer module
     """
     logger.info("translate_header: " + ingredient.ingred_id)
 
@@ -54,14 +78,47 @@ def translate_header(ingredient: BaseIngredient, *, result=None, **options) -> P
 def translate_column(ingredient: BaseIngredient, *, result=None, **options) -> ProcedureResult:
     """Translate column values.
 
-    available options are:
-        `dictionary`: a dictionary of oldname -> newname mappings
-        `column`: the column to rename
-        `base`: if base is provided, transform the columns base on information of base ingredient.
-        So that oldname column will be change to values from newname column.
+    Procedure format:
 
-    Note:
-        if base and column are provided at same time, it will raise an error.
+    .. code-block:: yaml
+
+       procedure: translate_column
+       ingredients:  # list of ingredient id
+         - ingredient_id
+       result: str  # new ingledient id
+       options:
+         column: str  # the column to be translated
+         target_column: str  # optinoal, the target column to store the translated data
+         not_found: {'drop', 'include', 'error'}  # optional, the behavior when there is values not found in the mapping dictionary, default is 'drop'
+         dictionary: str or dict  # file name or mappings dictionary
+
+    If base is provided in dictionary, key and value should also in dictionary.
+    In this case chef will generate a mapping dictionary using the base ingredient.
+    The dictionary format will be:
+
+    .. code-block:: yaml
+
+       dictionary:
+	     base: str  # ingredient name
+	     key: str or list  # the columns to be the keys of the dictionary, can accept a list
+	     value: str  # the column to be the values of the the dictionary, must be one column
+
+    Keyword Args
+    ------------
+    dictionary: dict
+        A dictionary of oldname -> newname mappings.
+        If 'base' is provided in the dictionary, 'key' and 'value' should also in the dictionary.
+        See :py:func:`ddf_utils.transformer.translate_column` for more on how this is handled.
+    column: `str`
+        the column to be translated
+    target_column : `str`, optional
+        the target column to store the translated data. If this is not set then the `column` cloumn will be replaced
+    not_found : {'drop', 'include', 'error'}, optional
+        the behavior when there is values not found in the mapping dictionary, default is 'drop'
+
+    See Also
+    --------
+    :py:func:`ddf_utils.transformer.translate_column` : related function in transformer module
     """
     logger.info("translate_column: " + ingredient.ingred_id)
 
@@ -92,6 +149,7 @@ def translate_column(ingredient: BaseIngredient, *, result=None, **options) -> P
             base_df = None
 
     for k, df in di.items():
+        logger.debug("running on: " + k)
         di[k] = tc(df, column, dict_type, dictionary, target_column, base_df, not_found)
 
     if not result:
@@ -100,10 +158,36 @@ def translate_column(ingredient: BaseIngredient, *, result=None, **options) -> P
 
 
 def copy(ingredient: BaseIngredient, *, result=None, **options) -> ProcedureResult:
-    """make copy of ingredient data, with new names.
+    """make copy of ingredient data columns, with new names.
 
-    available options:
-        `dictionary`: a dictionary of oldname -> newname mappings
+    Procedure format:
+
+    .. code-block:: yaml
+
+       procedure: copy
+       ingredients:  # list of ingredient id
+         - ingredient_id
+       result: str  # new ingledient id
+       options:
+       dictionary: dict  # old name -> new name mappings
+
+    An example of dictionary:
+
+    .. code-block:: yaml
+
+       dictionary:
+         col1: copy_1_1  # string
+         col2:  # list of string
+           - copy_2_1
+           - copy_2_2
+
+    where 'col1' and 'col2' should be existing columns in the input ingredient
+
+    Keyword Args
+    ------------
+    dictionary: dict
+        a dictionary of oldname -> newname mappings
+
     """
     logger.info("copy: " + ingredient.ingred_id)
 
@@ -126,17 +210,42 @@ def copy(ingredient: BaseIngredient, *, result=None, **options) -> ProcedureResu
 
 
 def merge(*ingredients: List[BaseIngredient], result=None, **options) -> ProcedureResult:
-    """the main merge function
+    """merge a list of ingredients
 
-    avaliable options:
-        deep: if True, then do deep merging. Default is False
+    The ingredients will be merged one by one in the order of how they are provided to this function.
+    Later ones will overwrite the pervious merged results.
 
-    About deep merging:
-        deep merge is when we check every datapoint for existence
-        if false, overwrite is on the file level. If key-value
-        (e.g. geo,year-population_total) exists, whole file gets overwritten
-        if true, overwrite is on the row level. If values
-        (e.g. afr,2015-population_total) exists, it gets overwritten, if it doesn't it stays
+    Procedure format:
+
+    .. code-block:: yaml
+
+       procedure: merge
+       ingredients:  # list of ingredient id
+         - ingredient_id_1
+         - ingredient_id_2
+         - ingredient_id_3
+         # ...
+       result: str  # new ingledient id
+       options:
+         deep: bool  # use deep merge if true
+
+    Parameters
+    ----------
+    BaseIngredient
+        Any numbers of ingredients to be merged
+
+    Keyword Args
+    ------------
+    deep: `bool`, optional
+        if True, then do deep merging. Default is False
+
+    Notes
+    -----
+    **deep merge** is when we check every datapoint for existence
+    if false, overwrite is on the file level. If key-value
+    (e.g. geo,year-population_total) exists, whole file gets overwritten
+    if true, overwrite is on the row level. If values
+    (e.g. afr,2015-population_total) exists, it gets overwritten, if it doesn't it stays
     """
     logger.info("merge: " + str([i.ingred_id for i in ingredients]))
 
@@ -181,6 +290,7 @@ def merge(*ingredients: List[BaseIngredient], result=None, **options) -> Procedu
 
 
 def __get_last_item(ser):
+    """get the last vaild item of a Series, or Nan."""
     if ser.last_valid_index() is None:
         return np.nan
     else:
@@ -231,8 +341,10 @@ def _merge_two(left: Dict[str, pd.DataFrame],
 def identity(ingredient: BaseIngredient, *, result=None, **options) -> BaseIngredient:
     """return the ingredient as is.
 
-    available options:
-        copy: if copy is True, then treat all data as string. Default: False
+    Keyword Args
+    ------------
+    copy: bool, optional
+        if copy is True, then treat all data as string. Default: False
     """
     if 'copy' in options and options['copy'] is True:
         ingredient.data = ingredient.get_data(copy=True)
@@ -240,7 +352,7 @@ def identity(ingredient: BaseIngredient, *, result=None, **options) -> BaseIngre
         ingredient.data = ingredient.get_data()
 
     if result:
-        ingredient.ingred_id = result
+        ingredient.ingred_id = result + '-identity'
     return ingredient
 
 
@@ -248,13 +360,38 @@ def filter_row(ingredient: BaseIngredient, *, result=None, **options) -> Procedu
     """filter an ingredient based on a set of options and return
     the result as new ingredient.
 
-    Args:
-        ingredient: Ingredient object
-        result: ingred_id of return ingredient
-        options: dict of options
+    Procedure format:
 
-    available options:
-        dictionary: test
+    .. code-block:: yaml
+
+       procedure: filter_row
+       ingredients:  # list of ingredient id
+         - ingredient_id
+       result: str  # new ingledient id
+       options:
+         dictionary: dict  # filter definition block
+
+    A dictionary should be provided in options with the following format:
+
+    .. code-block:: yaml
+
+        dictionary:
+          new_key_in_new_ingredient:
+            from: old_key_in_old_ingredient
+            filter_col_1: filter_val_1
+            filter_col_2: filter_val_2
+
+    See a detail example in this `github issue <https://github.com/semio/ddf_utils/issues/2#issuecomment-254132615>`_
+
+    Parameters
+    ----------
+    ingredient: BaseIngredient
+    result: `str`
+
+    Keyword Args
+    ------------
+    dictionary: dict
+        The filter description dictionary
     """
 
     logger.info("filter_row: " + ingredient.ingred_id)
@@ -310,10 +447,23 @@ def filter_row(ingredient: BaseIngredient, *, result=None, **options) -> Procedu
 
 
 def filter_item(ingredient: BaseIngredient, *, result: Optional[str]=None, **options) -> ProcedureResult:
-    """filter item from the ingredient data dict.
+    """filter items from the ingredient data
 
-    available options:
-        items: a list of items to filter from base ingredient
+    Procedure format:
+
+    .. code-block:: yaml
+
+       procedure: filter_item
+       ingredients:  # list of ingredient id
+         - ingredient_id
+       result: str  # new ingledient id
+       options:
+         items: list  # a list of items should be in the result ingredient
+
+    Keyword Args
+    ------------
+    items: list
+        a list of items to filter from base ingredient
     """
     logger.info("filter_item: " + ingredient.ingred_id)
 
@@ -332,116 +482,56 @@ def filter_item(ingredient: BaseIngredient, *, result: Optional[str]=None, **opt
     return ProcedureResult(result, ingredient.key, data=data)
 
 
-def align(to_align: BaseIngredient, base: Ingredient, *, result=None, **options) -> ProcedureResult:
-    """align 2 ingredient by a column.
-
-    This function is like an automatic version of translate_column.
-    It firstly creating the mapping dictionary by searching in the base
-    ingredient for data in to_align ingredient, and then translate
-    according to the mapping file.
-
-    available options:
-        `search_cols`: a list of columns of base ingredient, to search for values
-        `to_find`: the column of ingredient to_align. The function will search the data
-        of this column in search_cols
-        `to_replace`: the column of to_align ingredient to replace with new value.
-        can be same as to_find or a new column
-        `drop_not_found`: if we should drop those entities not found in the base
-    """
-    try:
-        search_cols = options.pop('search_cols')
-        to_find = options.pop('to_find')
-        to_replace = options.pop('to_replace')
-    except KeyError:
-        raise KeyError("not enough parameters! please check your recipe")
-
-    if 'drop_not_found' not in options:
-        drop_not_found = True
-    else:
-        drop_not_found = options['drop_not_found']
-
-    if len(base.get_data()) > 1:
-        logger.critical(base.get_data().keys())
-        raise NotImplementedError('align to base data with multiple dataframes is not supported yet.')
-
-    logger.info("aligning: {} with {}".format(to_align.ingred_id, base.ingred_id))
-
-    base_data = list(base.get_data().values())[0]
-    ing_data = to_align.get_data()
-
-    base_data = base_data.set_index(base.key)
-
-    mapping = {}
-    no_match = []
-
-    for k, df in ing_data.items():
-        for f in df[to_find].unique():
-            if f in mapping:
-                continue
-
-            # filtering name in all search_cols
-            bools = []
-            for sc in search_cols:
-                bools.append(base_data[sc] == f)
-            mask = bools[0]
-            for m in bools[1:]:
-                mask = mask | m
-            filtered = base_data[mask]
-
-            if len(filtered) == 1:
-                mapping[f] = filtered.index[0]
-            elif len(filtered) > 1:
-                logger.warning("multiple match found: "+f)
-                mapping[f] = filtered.index[0]
-            else:
-                no_match.append(f)
-
-        if drop_not_found:
-            # drop those entities not found in the mappings
-            df_ = df[df[to_find].isin(mapping.keys())].copy()
-        else:
-            df_ = df.copy()
-
-        for old, new in mapping.items():
-            if not pd.isnull(new):
-                df_.at[df_[to_find] == old, to_replace] = new
-
-        ing_data[k] = df_
-
-    if len(no_match) > 0:
-        logger.warning("no match found for: " + str(set(no_match)))
-
-    if not result:
-        result = to_align.ingred_id + '-aligned'
-    if to_align.dtype == 'datapoints':
-        newkey = to_align.key.replace(to_find, to_replace)
-        return ProcedureResult(result, newkey, data=ing_data)
-    else:
-        return ProcedureResult(result, to_replace, data=ing_data)
-
-
 def groupby(ingredient: BaseIngredient, *, result, **options) -> ProcedureResult:
     """group ingredient data by column(s) and run aggregate function
 
-    available options:
-        groubby: the column(s) to group, can be a list or a string
-        aggregate/transform/filter: the function to run. only one of them should be supplied.
+    .. highlight:: yaml
+
+    Procedure format:
+
+    ::
+
+       procedure: groupby
+       ingredients:  # list of ingredient id
+         - ingredient_id
+       result: str  # new ingledient id
+       options:
+         groupby: str or list  # colunm(s) to group
+         aggregate: dict  # function block
+         transform: dict  # function block
+         filter: dict  # function block
 
     The function block should have below format:
 
-    aggregate:
-      column1: funcname1
-      column2: funcname2
+    ::
+
+      aggregate:
+        column1: func_name1
+        column2: func_name2
 
     or
 
-    aggregate:
-      column:
-        function: funcname
-        param1: foo
-        param2: bar
+    ::
 
-    other columns not mentioned will be dropped.
+        aggrgrate:
+          column1:
+            function: func_name
+            param1: foo
+            param2: baz
+
+
+    Keyword Args
+    ------------
+    groubby : `str` or `list`
+        the column(s) to group, can be a list or a string
+    aggregate/transform/filter : `dict`
+        the function to run. only one of `aggregate`, `transform` and `filter` should be supplied.
+
+    Note
+    ----
+    - Only one of ``aggregate``, ``transform`` or ``filter`` can be used in one procedure.
+    - Any columns not mentioned in groupby or functions are dropped.
+
     """
 
     logger.info("groupby: " + ingredient.ingred_id)
@@ -471,19 +561,22 @@ def groupby(ingredient: BaseIngredient, *, result, **options) -> ProcedureResult
     if comp_type == 'aggregate':
         for k, func in options[comp_type].items():
             func = mkfunc(func)
-            newdata[k] = data[k].groupby(by=by).agg({k: func}).reset_index()
+            newdata[k] = (data[k].groupby(by=by).agg({k: func})
+                          .reset_index().dropna())
     if comp_type == 'transform':
         for k, func in options[comp_type].items():
             func = mkfunc(func)
             df = data[k].set_index(ingredient.key_to_list())
             levels = [df.index.names.index(x) for x in by]
-            newdata[k] = df.groupby(level=levels)[k].transform(func).reset_index()
+            newdata[k] = (df.groupby(level=levels)[k].transform(func)
+                          .reset_index().dropna())
     if comp_type == 'filter':
         for k, func in options[comp_type].items():
             func = mkfunc(func)
             df = data[k].set_index(ingredient.key_to_list())
             levels = [df.index.names.index(x) for x in by]
-            newdata[k] = df.groupby(level=levels)[k].filter(func).reset_index()
+            newdata[k] = (df.groupby(level=levels)[k].filter(func)
+                          .reset_index().dropna())
 
     return ProcedureResult(result, newkey, data=newdata)
 
@@ -491,16 +584,67 @@ def groupby(ingredient: BaseIngredient, *, result, **options) -> ProcedureResult
 def window(ingredient: BaseIngredient, result, **options) -> ProcedureResult:
     """apply functions on a rolling window
 
-    available options:
-    window: dictionary
-        window definition. options are:
-        column: str, column which window is created from
-        size: int or 'expanding', if int then rolling window, if expanding then expanding window
-        min_periods: int, as in pandas
-        center: bool, as in pandas
-    aggregate: dictionary
-        aggregation functions, format should be
-        column: func or column: {function: func, param1: foo, param2: baz, ...}
+    .. highlight:: yaml
+
+    Procedure format:
+
+    ::
+
+       procedure: window
+       ingredients:  # list of ingredient id
+         - ingredient_id
+       result: str  # new ingledient id
+       options:
+         window:
+           column: str  # column which window is created from
+           size: int or 'expanding'  # if int then rolling window, if expanding then expanding window
+           min_periods: int  # as in pandas
+           center: bool  # as in pandas
+           aggregate: dict
+
+    Two styles of function block are supported, and they can mix in one procedure:
+
+    ::
+
+       aggregate:
+         col1: sum  # run rolling sum to col1
+         col2: mean  # run rolling mean to col2
+         col3:  # run foo to col3 with param1=baz
+       function: foo
+       param1: baz
+
+    Keyword Args
+    ------------
+    window: dict
+        window definition, see above for the dictionary format
+    aggregate: dict
+        aggregation functions
+
+    Examples
+    --------
+
+    An example of rolling windows:
+
+    .. highlight:: yaml
+
+    ::
+
+        procedure: window
+        ingredients:
+            - ingredient_to_roll
+        result: new_ingredient_id
+        options:
+          window:
+            column: year
+            size: 10
+            min_periods: 1
+            center: false
+          aggregate:
+            column_to_aggregate: sum
+
+    Notes
+    -----
+    Any column not mentioned in the `aggregate` block will be dropped in the returned ingredient.
     """
 
     logger.info('window: ' + ingredient.ingred_id)
@@ -540,60 +684,41 @@ def window(ingredient: BaseIngredient, result, **options) -> ProcedureResult:
                           .agg(func).reset_index().dropna())
     return ProcedureResult(result, ingredient.key, newdata)
 
-def accumulate(ingredient: BaseIngredient, *, result=None, **options) -> ProcedureResult:
-    """run accumulate function on ingredient data.
-
-    available options:
-        op: a dictionary of concept_name: function mapping
-    """
-
-    logger.info("accumulate: " + ingredient.ingred_id)
-    if ingredient.dtype != 'datapoints':
-        raise ValueError("only datapoint support this function!")
-
-    ops = options.pop('op')
-
-    data = ingredient.get_data()
-    index = ingredient.key_to_list()
-
-    funcs = {
-        'aagr': _aagr
-    }
-
-    for k, func in ops.items():
-        df = data[k]
-        df = df.groupby(by=index).agg('sum')
-        assert re.match('[a-z_]+', func)  # only lower case chars allowed, for security
-        # assuming level0 index is geo
-        # because we should run accumulate for each country
-        # TODO: https://github.com/semio/ddf_utils/issues/25
-        if func in funcs:
-            df = df.groupby(level=0, as_index=False).apply(funcs[func])
-            df = df.reset_index()
-            df = df[index + [k]]
-        else:
-            df = eval("df.groupby(level=0).{}()".format(func))
-            df = df.reset_index()
-
-        data[k] = df
-
-    if not result:
-        result = ingredient.ingred_id + '-accued'
-
-    return ProcedureResult(result, ingredient.key, data=data)
-
-
-def _aagr(df: pd.DataFrame, window: int=10):
-    """average annual growth rate"""
-    pct = df.pct_change()
-    return pct.rolling(window).apply(np.mean).dropna()
-
 
 def run_op(ingredient: BaseIngredient, *, result=None, **options) -> ProcedureResult:
     """run math operation on each row of ingredient data.
 
-    available options:
-        op: a dictionary of concept_name: function mapping
+    Procedure format:
+
+    .. code-block:: yaml
+
+       procedure: filter_item
+       ingredients:  # list of ingredient id
+         - ingredient_id
+       result: str  # new ingledient id
+       options:
+         items: list  # a list of items should be in the result ingredient
+
+    Keyword Args
+    ------------
+    op: dict
+        a dictionary of concept_name -> function mapping
+
+    Examples
+    --------
+    .. highlight:: yaml
+
+    for exmaple, if we want to add 2 columns, col_a and col_b, to create an new column, we can write
+
+    ::
+
+        procedure: run_op
+        ingredients:
+          - ingredient_to_run
+        result: new_ingredient_id
+        options:
+          op:
+            new_col_name: "col_a + col_b"
     """
 
     assert ingredient.dtype == 'datapoints'
@@ -622,8 +747,51 @@ def run_op(ingredient: BaseIngredient, *, result=None, **options) -> ProcedureRe
 def extract_concepts(*ingredients: List[BaseIngredient],
                      result=None, **options) -> ProcedureResult:
     """extract concepts from other ingredients.
+
+    .. highlight:: yaml
+
+    Procedure format:
+
+    ::
+
+       procedure: extract_concepts
+       ingredients:  # list of ingredient id
+         - ingredient_id_1
+         - ingredient_id_2
+       result: str  # new ingledient id
+       options:
+         join:  # optional
+           base: str  # base concept ingredient id
+           type: {'full_outer', 'ingredients_outer'}  # default is full_outer
+
+
+    Parameters
+    ----------
+    ingredients
+        any numbers of ingredient that needs to extract concepts from
+
+    Keyword Args
+    ------------
+    join : dict, optional
+        the base ingredient to join
+
+
+    See Also
+    --------
+    :py:func:`ddf_utils.transformer.extract_concepts` : related function in transformer
+    module
+
+    Note
+    ----
+    - all concepts in ingredients in the ``ingredients`` parameter will be extracted
+      to a new concept ingredient
+    - ``join`` option is optional; if present then the ``base`` will merge with concepts
+      from ``ingredients``
+    - ``full_outer`` join means get the union of concepts; ``ingredients_outer`` means
+      only keep concepts from ``ingredients``
+
     """
-    if options:
+    if 'join' in options.keys():
         base = options['join']['base']
         try:
             join = options['join']['type']
@@ -632,6 +800,7 @@ def extract_concepts(*ingredients: List[BaseIngredient],
         concepts = base.get_data()['concepts'].set_index('concept')
     else:
         concepts = pd.DataFrame([], columns=['concept', 'concept_type']).set_index('concept')
+        join = 'full_outer'
 
     new_concepts = set()
 
@@ -651,11 +820,17 @@ def extract_concepts(*ingredients: List[BaseIngredient],
         concepts = concepts.ix[new_concepts]
     if not result:
         result = 'concepts_extracted'
-    return ProcedureResult(result, 'concept', data=concepts.reset_index())
+    return ProcedureResult(result, 'concept', data={'concepts': concepts.reset_index()})
 
 
 def trend_bridge(ingredient: BaseIngredient, result, **options) -> ProcedureResult:
     """run trend bridge on ingredients
+
+    (Not Implemented Yet)
+
+    See Also
+    --------
+    :py:func:`ddf_utils.transformer.trend_bridge` : related function in transformer module
     """
     from ..transformer import trend_bridge as tb
 

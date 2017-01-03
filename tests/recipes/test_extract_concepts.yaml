@@ -1,0 +1,30 @@
+info:
+    id: test_extract_concepts
+
+ingredients:
+    - id: cme-datapoints
+      dataset: ddf--cme
+      key: "country,year"
+      value: "*"
+    - id: geo-concepts
+      dataset: ddf--gapminder--geo_entity_domain
+      key: concept
+      value: "*"
+
+cooking:
+    concepts:
+        - procedure: translate_header
+          ingredients:
+              - cme-datapoints
+          options:
+              dictionary:
+                country: geo
+          result: cme-datapoints-translated
+        - procedure: extract_concepts
+          ingredients:
+              - cme-datapoints-translated
+          result: res
+          options:
+              join:
+                  base: geo-concepts
+                  type: full_outer

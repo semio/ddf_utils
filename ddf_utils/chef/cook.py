@@ -8,9 +8,9 @@ from orderedattrdict.yamlutils import AttrDictYAMLLoader
 
 from . ingredient import *
 from . dag import DAG, IngredientNode, ProcedureNode
+from . helpers import read_opt
 from .. import config
 from . procedure import *
-from .. str import format_float_digits
 
 import logging
 
@@ -26,9 +26,30 @@ def _loadfile(f):
 
 
 # functions for reading/running recipe
-def build_recipe(recipe_file, to_disk=False):
-    """build a complete recipe file if there are includes in
-    recipe file, if no includes found than return the file as is.
+def build_recipe(recipe_file, to_disk=False, **kwargs):
+    """build a complete recipe object.
+
+    This function will check each part of recipe, convert string (the ingredient ids,
+    dictionaries file names) into actual objects.
+
+    If there are includes in recipe file, this function will run recurivly.
+    If no includes found then return the parsed object as is.
+
+    Parameters
+    ----------
+    recipe_file : `str`
+        path to recipe file
+
+    Keyword Args
+    ------------
+    to_disk : bool
+        if true, save the parsed reslut to a yaml file in working dir
+
+    Other Parameters
+    ----------------
+    ddf_dir : `str`
+        path to search for DDF datasets, will overwrite the contfig in recipe
+
     """
     recipe = _loadfile(recipe_file)
 
@@ -63,6 +84,12 @@ def build_recipe(recipe_file, to_disk=False):
                         path = os.path.join(base_dir, dict_dir, opt_dict)
 
                     recipe['cooking'][p][i]['options']['dictionary'] = _loadfile(path)
+
+    # setting ddf search path if option is provided
+    if 'ddf_dir' in kwargs.keys():
+        if 'config' not in recipe.keys():
+            recipe['config'] = AttrDict()
+        recipe.config.ddf_dir = kwargs['ddf_dir']
 
     if 'include' not in recipe.keys():
         return recipe
@@ -156,6 +183,10 @@ def check_dataset_availability(recipe):
 
 
 def build_dag(recipe):
+    """build a DAG model for the recipe.
+
+    For more detail for DAG model, see :py:mod:`ddf_utils.chef.dag`.
+    """
 
     def add_dependency(dag, upstream_id, downstream):
         if not dag.has_task(upstream_id):
@@ -203,9 +234,11 @@ def build_dag(recipe):
         if not dag.has_task(i):
             raise ValueError('Ingredient not found: ' + i)
     if 'serving' in recipe.keys():
+        if len(serving) > 0:
+            raise ValueError('can not have serve procedure and serving section at same time!')
         for i in recipe['serving']:
-            if not dag.has_task(i):
-                raise ValueError('Ingredient not found: ' + i)
+            if not dag.has_task(i['id']):
+                raise ValueError('Ingredient not found: ' + i['id'])
     # display the tree
     # dag.tree_view()
     return dag
@@ -215,7 +248,25 @@ def run_recipe(recipe):
     """run the recipe.
 
     returns a dictionary. keys are `concepts`, `entities` and `datapoints`,
-    and values are ingredients return by the procedures
+    and values are ingredients defined in the `serve` procedures or `serving` section.
+    for example:
+
+    .. code-block:: python
+
+        {
+            "concepts": [{"ingredient": DataFrame1, "options": None}]
+            "datapoints": [
+                {
+                    "ingredient": DataFrame2,
+                    "options": {"digits": 5}
+                },
+                {
+                    "ingredient": DataFrame3,
+                    "options": {"digits": 1}
+                },
+            ]
+        }
+
     """
     try:
         config.DDF_SEARCH_PATH = recipe['config']['ddf_dir']
@@ -242,62 +293,28 @@ def run_recipe(recipe):
             func = p['procedure']
             if func == 'serve':
                 ingredients = [dag.get_task(x).evaluate() for x in p['ingredients']]
-                [dishes[k].append(i) for i in ingredients]
+                opts = read_opt(p, 'options', default=dict())
+                [dishes[k].append({'ingredient': i, 'options': opts}) for i in ingredients]
                 continue
             out = dag.get_task(p['result']).evaluate()
         # if there is no seving procedures/section, use the last output Ingredient object as final result.
         if len(dishes[k]) == 0 and 'serving' not in recipe.keys():
             logger.warning('serving last procedure output for {}: {}'.format(k, out.ingred_id))
-            dishes[k].append(out)
+            dishes[k].append({'ingredient': out, 'options': dict()})
     # update dishes when there is serving section
     if 'serving' in recipe.keys():
         for i in recipe['serving']:
-            ing = dag.get_task(i).evaluate()
+            opts = read_opt(i, 'options', default=dict())
+            ing = dag.get_task(i['id']).evaluate()
             if ing.dtype in dishes.keys():
-                dishes[ing.dtype].append(ing)
+                dishes[ing.dtype].append({'ingredient': ing, 'options': opts})
             else:
-                dishes[ing.dtype] = [ing]
+                dishes[ing.dtype] = [{'ingredient': ing, 'options': opts}]
     return dishes
 
 
 def dish_to_csv(dishes, outpath):
+    """save the recipe output to disk"""
     for t, ds in dishes.items():
         for dish in ds:
-            all_data = dish.get_data()
-            if isinstance(all_data, dict):
-                for k, df in all_data.items():
-                    # change boolean into string
-                    for i, v in df.dtypes.iteritems():
-                        if v == 'bool':
-                            df[i] = df[i].map(lambda x: str(x).upper())
-                    if t == 'datapoints':
-                        by = dish.key_to_list()
-                        path = os.path.join(outpath, 'ddf--{}--{}--by--{}.csv'.format(t, k, '--'.join(by)))
-                    elif t == 'concepts':
-                        path = os.path.join(outpath, 'ddf--{}.csv'.format(t))
-                    elif t == 'entities':
-                        domain = dish.key[0]
-                        if k == domain:
-                            path = os.path.join(outpath, 'ddf--{}--{}.csv'.format(t, k))
-                        else:
-                            path = os.path.join(outpath, 'ddf--{}--{}--{}.csv'.format(t, domain, k))
-                    else:
-                        raise ValueError('Not a correct collection: ' + t)
-
-                    if t == 'datapoints':
-                        df = df.set_index(by)
-                        if not np.issubdtype(df[k].dtype, np.number):
-                            try:
-                                df[k] = df[k].astype(float)
-                                # TODO: make floating precision an option
-                                df[k] = df[k].map(lambda x: format_float_digits(x, 5))
-                            except ValueError:
-                                logging.warning("data not numeric: " + k)
-                        else:
-                            df[k] = df[k].map(lambda x: format_float_digits(x, 5))
-                        df[[k]].to_csv(path, encoding='utf8')
-                    else:
-                        df.to_csv(path, index=False, encoding='utf8')
-            else:
-                path = os.path.join(outpath, 'ddf--{}.csv'.format(t))
-                all_data.to_csv(path, index=False, encoding='utf8')
+            dish['ingredient'].serve(outpath, **dish['options'])

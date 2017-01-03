@@ -1,0 +1,11 @@
+pandas
+unidecode
+pyyaml
+orderedattrdict
+typing
+cookiecutter
+Click
+daff
+sphinx_rtd_theme
+sphinxcontrib-napoleon
+recommonmark

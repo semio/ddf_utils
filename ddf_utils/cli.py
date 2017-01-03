@@ -74,16 +74,20 @@ def create_datapackage(path, update):
 @ddf.command()
 @click.option('--recipe', '-i', type=click.Path(exists=True), required=True)
 @click.option('--outdir', '-o', type=click.Path(exists=True))
+@click.option('--ddf_dir', type=click.Path(exists=True), default=None)
 @click.option('--update', 'update', flag_value=False, help='Not implemented yet')  # not impletmented
 @click.option('--dry_run', '-d', 'dry_run', flag_value=True, default=False, help="don't save output to disk")
 @click.option('--show-tree', 'show_tree', flag_value=True, default=False, help='show the dependency tree')
-def run_recipe(recipe, outdir, update, dry_run, show_tree):
+def run_recipe(recipe, outdir, ddf_dir, update, dry_run, show_tree):
     """generate new ddf dataset with recipe"""
     import ddf_utils.chef as chef
     from ddf_utils.index import get_datapackage
     import json
     click.echo('building recipe...')
-    recipe = chef.build_recipe(recipe)
+    if ddf_dir:
+        recipe = chef.build_recipe(recipe, ddf_dir=ddf_dir)
+    else:
+        recipe = chef.build_recipe(recipe)
     if show_tree:
         dag = chef.cook.build_dag(recipe)
         dag.tree_view()

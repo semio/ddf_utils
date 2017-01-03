@@ -7,24 +7,24 @@ import os
 import tempfile
 import shutil
 import logging
+import common
 import pytest
+import glob
 
-@pytest.fixture(scope='session')
-def recipe_file():
-    fn = 'recipes/test.yaml'
-    return fn
+all_test_recipes = glob.glob('recipes/test_*')
 
-
-def test_build_recipe(recipe_file):
-    recipe = chef.build_recipe(recipe_file)
-    # res = chef.run_recipe(recipe)
-    # chef.dish_to_csv(res, outdir)
-    assert 1
+@pytest.fixture(scope='session',
+                params=all_test_recipes)
+def recipe_file(request):
+    return request.param
 
 
-def test_run_recipe(recipe_file):
-    outdir = tempfile.mkdtemp()
-    print('tmpdir: ' + outdir)
+def test_run_recipe(recipe_file, to_disk=False):
+    print('running test: ' + recipe_file)
     recipe = chef.build_recipe(recipe_file)
     res = chef.run_recipe(recipe)
+    if to_disk:
+        outdir = tempfile.mkdtemp()
+        print('tmpdir: ' + outdir)
+        chef.dish_to_csv(res, outdir)
     assert 1
