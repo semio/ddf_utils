@@ -1,0 +1,28 @@
+info:
+    id: test-merge
+
+ingredients:
+    - id: cme-datapoints
+      dataset: ddf--cme
+      key: "country,year"
+      value: "*"
+    - id: bp-datapoints
+      dataset: ddf--bp--energy
+      key: "geo,year"
+      value: "*"
+
+cooking:
+    datapoints:
+        - procedure: translate_header
+          ingredients:
+              - cme-datapoints
+          result: cme-datapoints-translated
+          options:
+              dictionary:
+                  country: geo
+
+        - procedure: merge
+          ingredients:
+              - cme-datapoints-translated
+              - bp-datapoints
+          result: res

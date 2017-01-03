@@ -1,0 +1,19 @@
+info:
+    id: test-run_op
+
+ingredients:
+    - id: cme-datapoints
+      dataset: ddf--cme
+      key: "country,year"
+      value: "*"
+
+cooking:
+    datapoints:
+        - procedure: run_op
+          ingredients:
+              - cme-datapoints
+          result: res
+          options:
+              op:
+                  mean_imr: |
+                      (imr_lower + imr_upper) / 2

@@ -1,0 +1,35 @@
+info:
+    id: test-filter_row
+
+ingredients:
+    - id: cme-datapoints
+      dataset: ddf--cme
+      key: "country,year"
+      value: "*"
+
+cooking:
+    datapoints:
+        - procedure: filter_row
+          ingredients:
+              - cme-datapoints
+          result: res
+          options:
+              dictionary:
+                imr_lower_afg:
+                    from: imr_lower
+                    country: afg
+                imr_upper_usa_1990s:
+                    from: imr_upper
+                    country: usa
+                    year:
+                        - 1990
+                        - 1991
+                        - 1992
+                        - 1993
+                        - 1994
+                        - 1995
+                        - 1996
+                        - 1997
+                        - 1998
+                        - 1999
+                        - 2000

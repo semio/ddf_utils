@@ -1,0 +1,21 @@
+info:
+    id: test-copy
+
+ingredients:
+    - id: cme-datapoints
+      dataset: ddf--cme
+      key: "country,year"
+      value: "*"
+
+cooking:
+    datapoints:
+        - procedure: copy
+          ingredients:
+              - cme-datapoints
+          result: res
+          options:
+              dictionary:
+                  imr_lower:
+                      - imr_lower_1
+                      - imr_lower_2
+                  imr_upper: imr_upper_1

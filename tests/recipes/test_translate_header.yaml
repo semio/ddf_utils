@@ -1,0 +1,19 @@
+info:
+    id: test-translate_header
+
+ingredients:
+    - id: cme-datapoints
+      dataset: ddf--cme
+      key: "country,year"
+      value: "*"
+
+cooking:
+    datapoints:
+        - procedure: translate_header
+          ingredients:
+              - cme-datapoints
+          result: res
+          options:
+              dictionary:
+                  country: geo
+                  year: time
