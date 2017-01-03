@@ -2,7 +2,7 @@
 
 ## What is recipe
 
-Recipe is an [Domain-specific language(DSL)][1] for DDF datasets, to manipulate existing
+Recipe is a [Domain-specific language(DSL)][1] for DDF datasets, to manipulate existing
 datasets and create new ones.
 By reading and running the recipe executor(Chef), one can generate a new dataset based
 on the `ingredients` and `procedures` described in the recipe.
