@@ -37,7 +37,7 @@ def _generate_mappng_dict1(df, column, dictionary, base_df, not_found):
     if search_col == idx_col:
         mapping_all = dict([(x, x) for x in base_df[idx_col].values])
     else:
-        mapping_all = base_df.set_index(idx_col)[search_col].to_dict()
+        mapping_all = base_df.set_index(search_col)[idx_col].to_dict()
     return mapping_all
 
 
