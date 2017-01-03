@@ -163,12 +163,12 @@ run_recipe(path_to_recipe, outdir)
 
 Currently supported procedures:
 
-- [translate_header](#translate-header): translate the headers
-- [translate_column](#translate-column): translate the values in a column
-- [identity](#identity): identity function = nothing changes
-- [merge](#merge): merge ingredients together on the keys
+- [translate_header](#translate-header): change ingredient data header according to a mapping dictionary
+- [translate_column](#translate-column): change column values of ingredient data according to a mapping dictionary
+- [identity](#identity): return the ingredient as is
+- [merge](#merge): merge ingredients together on their keys
 - [groupby](#groubby): group ingredient by columns and do aggregate/filter/transform
-- [window](#window): run function on rolling window
+- [window](#window): run function on rolling windows
 - [filter_row](#filter-row): filter ingredient data by column values
 - [filter_item](#filter-item): filter ingredient data by concepts
 - [run_op](#run-op): run math operations on ingredient columns
@@ -177,6 +177,8 @@ Currently supported procedures:
 - [trend_bridge](#trend-bridge)(WIP): connect 2 ingredients and make custom smoothing
 
 ### translate_header
+
+Change ingredient data header according to a mapping dictionary.
 
 **usage and options**
 
@@ -195,6 +197,8 @@ options:
 - currently chef only support one ingredient in the `ingredients` parameter
 
 ### translate_column
+
+Change column values of ingredient data according to a mapping dictionary, the dictionary can be generated from an other ingredient.
 
 **usage and options**
 
@@ -247,6 +251,8 @@ result: geo-aligned
 
 ### identity
 
+Return the ingredient as is.
+
 **usage and options**
 
 ```yaml
@@ -263,6 +269,8 @@ options:
 - currently chef only support one ingredient in the `ingredients` parameter
 
 ### merge
+
+Merge ingredients together on their keys.
 
 **usage and options**
 
@@ -284,6 +292,8 @@ options:
 - **deep merge** is when we check every datapoint for existence if false, overwrite is on the file level. If key-value (e.g. geo,year-population_total) exists, whole file gets overwritten if true, overwrite is on the row level. If values (e.g. afr,2015-population_total) exists, it gets overwritten, if it doesn’t it stays
 
 ### groupby
+
+Group ingredient by columns and do aggregate/filter/transform.
 
 **usage and options**
 
@@ -320,6 +330,8 @@ aggregate:  # or transform, filter
 
 ### window
 
+Run function on rolling windows.
+
 **usage and options**
 
 ```yaml
@@ -355,6 +367,8 @@ aggregate:
 
 ### filter_row
 
+Filter ingredient data by column values.
+
 **usage and options**
 
 ```yaml
@@ -387,6 +401,8 @@ An example can be found in this [github issue](https://github.com/semio/ddf_util
 
 ### filter_item
 
+Filter ingredient data by concepts.
+
 **usage and options**
 
 ```yaml
@@ -403,6 +419,8 @@ options:
 - currently chef only support one ingredient in the `ingredients` parameter
 
 ### run_op
+
+Run math operations on ingredient columns.
 
 **usage and options**
 
@@ -435,6 +453,8 @@ options:
 
 ### copy
 
+Make copy of columns of ingredient data.
+
 **usage and options**
 
 ```yaml
@@ -464,6 +484,8 @@ dictionary:
 
 ### extract_concepts
 
+Generate concepts ingredient from other ingredients.
+
 **usage and options**
 
 ```yaml
@@ -486,7 +508,9 @@ options:
 
 ### trend_bridge
 
-(WIP) see discussion [here](https://github.com/semio/ddf_utils/issues/42).
+(WIP) Connect 2 ingredients and make custom smoothing.
+
+see discussion [here](https://github.com/semio/ddf_utils/issues/42).
 
 
 ### General guideline for writing recipes
