@@ -498,6 +498,9 @@ options:
   join:  # optional
     base: str  # base concept ingredient id
     type: {'full_outer', 'ingredients_outer'}  # default is full_outer
+  include_keys: true  # if we should include the primaryKeys of the ingredients
+  overwrite:  # overwirte some of the concept types
+      year: time
 ```
 
 **notes**

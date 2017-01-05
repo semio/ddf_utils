@@ -733,7 +733,8 @@ def run_op(ingredient: BaseIngredient, result, op) -> ProcedureResult:
     return ProcedureResult(result, ingredient.key, data=data)
 
 
-def extract_concepts(*ingredients: List[BaseIngredient], result, **options) -> ProcedureResult:
+def extract_concepts(*ingredients: List[BaseIngredient], result,
+                     join=None, overwrite=None, include_keys=False) -> ProcedureResult:
     """extract concepts from other ingredients.
 
     .. highlight:: yaml
@@ -751,7 +752,10 @@ def extract_concepts(*ingredients: List[BaseIngredient], result, **options) -> P
          join:  # optional
            base: str  # base concept ingredient id
            type: {'full_outer', 'ingredients_outer'}  # default is full_outer
-
+         overwrite:  # overwrite some concept types
+           country: entity_set
+           year: time
+         include_keys: true  # if we should include the primaryKeys concepts
 
     Parameters
     ----------
@@ -762,7 +766,10 @@ def extract_concepts(*ingredients: List[BaseIngredient], result, **options) -> P
     ------------
     join : dict, optional
         the base ingredient to join
-
+    overwrite : dict, optional
+        overwrite concept types for some concepts
+    include_keys : bool, optional
+        if we shuld include the primaryKeys of the ingredients, default to false
 
     See Also
     --------
@@ -779,33 +786,42 @@ def extract_concepts(*ingredients: List[BaseIngredient], result, **options) -> P
       only keep concepts from ``ingredients``
 
     """
-    if 'join' in options.keys():
-        base = options['join']['base']
+    if join:
+        base = join['base']
         try:
-            join = options['join']['type']
+            join_type = join['type']
         except KeyError:
-            join = 'full_outer'
+            join_type = 'full_outer'
         concepts = base.get_data()['concepts'].set_index('concept')
     else:
         concepts = pd.DataFrame([], columns=['concept', 'concept_type']).set_index('concept')
-        join = 'full_outer'
+        join_type = 'full_outer'
 
     new_concepts = set()
 
     for i in ingredients:
         data = i.get_data()
+        pks = i.key_to_list()
         for k, df in data.items():
-            # TODO: add logic for concepts/entities ingredients
-            new_concepts.add(k)
-            if k in concepts.index:
-                continue
-            if np.issubdtype(df[k].dtype, np.number):
-                concepts.ix[k, 'concept_type'] = 'measure'
+            if include_keys:
+                cols = df.columns
             else:
-                concepts.ix[k, 'concept_type'] = 'string'
-    if join == 'ingredients_outer':
+                cols = [x for x in df.columns if x not in pks]
+            for col in cols:
+                new_concepts.add(col)
+                if col in concepts.index:
+                    continue
+                if np.issubdtype(df[col].dtype, np.number):
+                    concepts.ix[col, 'concept_type'] = 'measure'
+                else:
+                    concepts.ix[col, 'concept_type'] = 'string'
+    if join_type == 'ingredients_outer':
         # ingredients_outer join: only keep concepts appears in ingredients
         concepts = concepts.ix[new_concepts]
+    # overwrite some of the types
+    if overwrite:
+        for k, v in overwrite.items():
+            concepts.ix[k, 'concept_type'] = v
     if not result:
         result = 'concepts_extracted'
     return ProcedureResult(result, 'concept', data={'concepts': concepts.reset_index()})

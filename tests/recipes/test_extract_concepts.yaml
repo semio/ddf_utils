@@ -28,3 +28,6 @@ cooking:
               join:
                   base: geo-concepts
                   type: full_outer
+              include_keys: true
+              overwrite:
+                  year: time
