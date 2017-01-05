@@ -27,20 +27,18 @@ class BaseIngredient(object):
         It will be inferred from the key property of ingredient.
         TODO: what if key == '*'? Is it possible?
         """
-        if self.key == 'concept':
-            return 'concepts'
-        elif isinstance(self.key, list):
-            return 'entities'
+        keys = self.key_to_list()
+        if len(keys) == 1:
+            if keys[0] == 'concept':
+                return 'concepts'
+            else:
+                return 'entities'
         else:
             return 'datapoints'
 
     def key_to_list(self):
         """helper function: make a list that contains primaryKey of this ingredient"""
-        if self.dtype == "datapoints":
-            return self.key.split(',')
-        else:
-            assert isinstance(self.key, str)
-            return [self.key]
+        return [x.strip() for x in self.key.split(',')]
 
     def get_data(self):
         return self.data
@@ -86,7 +84,7 @@ class BaseIngredient(object):
             elif t == 'concepts':
                 path = os.path.join(outpath, 'ddf--{}.csv'.format(t))
             elif t == 'entities':
-                domain = self.key[0]
+                domain = self.key
                 if k == domain:
                     path = os.path.join(outpath, 'ddf--{}--{}.csv'.format(t, k))
                 else:
@@ -226,23 +224,18 @@ class Ingredient(BaseIngredient):
             ent = self.ddf.get_entities(dtype=str)
         else:
             ent = self.ddf.get_entities()
-        if self.key == '*':
-            return ent
+        conc = self.ddf.get_concepts()
+        values = []
+
+        if conc.ix[self.key, 'concept_type'] == 'entity_domain':
+            if 'domain' in conc.columns and len(conc[conc['domain'] == self.key]) > 0:
+                [values.append(i) for i in conc[conc['domain'] == self.key].index]
+            else:
+                values.append(self.key)
         else:
-            conc = self.ddf.get_concepts()
+            values.append(self.key)
 
-            values = []
-
-            for v in self.key:
-                if conc.ix[v, 'concept_type'] == 'entity_domain':
-                    if 'domain' in conc.columns and len(conc[conc['domain'] == v]) > 0:
-                        [values.append(i) for i in conc[conc['domain'] == v].index]
-                    else:
-                        values.append(v)
-                else:
-                    values.append(v)
-
-            return dict((k, ent[k]) for k in values)
+        return dict((k, ent[k]) for k in values)
 
     def _get_data_concepts(self, copy):
         if self.values == '*':

@@ -4,13 +4,11 @@ info:
 ingredients:
   - id: bp-geo
     dataset: ddf--bp--energy
-    key:
-      - geo
+    key: geo
     value: '*'
   - id: gw-countries
     dataset: ddf--gapminder--geo_entity_domain
-    key:
-      - country
+    key: country
     value: '*'
   - id: bp-datapoints
     dataset: ddf--bp--energy
