@@ -117,10 +117,10 @@ class ProcedureNode(BaseNode):
                     if 'base' in options[opt].keys():
                         ing = self.dag.get_task(options[opt]['base'])
                         options[opt]['base'] = ing.evaluate()
+            self.result_ingredient = func(*ingredients, result=self.procedure['result'], **options)
         else:
-            options = dict()
+            self.result_ingredient = func(*ingredients, result=self.procedure['result'])
 
-        self.result_ingredient = func(*ingredients, result=self.procedure['result'], **options)
         return self.result_ingredient
 
 

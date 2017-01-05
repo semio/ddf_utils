@@ -17,7 +17,7 @@ import logging
 logger = logging.getLogger('Chef')
 
 
-def translate_header(ingredient: BaseIngredient, *, result=None, **options) -> ProcedureResult:
+def translate_header(ingredient: BaseIngredient, result, dictionary) -> ProcedureResult:
     """Translate column headers
 
     Procedure format:
@@ -27,7 +27,7 @@ def translate_header(ingredient: BaseIngredient, *, result=None, **options) -> P
        procedure: translate_header
        ingredients:  # list of ingredient id
          - ingredient_id
-       result: str  # new ingledient id
+       result: str  # new ingredient id
        options:
          dictionary: str or dict  # file name or mappings dictionary
 
@@ -49,7 +49,7 @@ def translate_header(ingredient: BaseIngredient, *, result=None, **options) -> P
     """
     logger.info("translate_header: " + ingredient.ingred_id)
 
-    rm = options['dictionary']
+    rm = dictionary
     data = ingredient.copy_data()
 
     for k in list(data.keys()):
@@ -75,7 +75,8 @@ def translate_header(ingredient: BaseIngredient, *, result=None, **options) -> P
     return ProcedureResult(result, newkey, data=data)
 
 
-def translate_column(ingredient: BaseIngredient, *, result=None, **options) -> ProcedureResult:
+def translate_column(ingredient: BaseIngredient, result, dictionary, column, *,
+                     target_column=None, not_found='drop') -> ProcedureResult:
     """Translate column values.
 
     Procedure format:
@@ -126,12 +127,6 @@ def translate_column(ingredient: BaseIngredient, *, result=None, **options) -> P
 
     di = ingredient.copy_data()
 
-    # reading options
-    column = read_opt(options, 'column', required=True)
-    target_column = read_opt(options, 'target_column')
-    not_found = read_opt(options, 'not_found', default='drop')
-    dictionary = read_opt(options, 'dictionary', required=True)
-
     # find out the type of dictionary.
     if isinstance(dictionary, str):
         dict_type = 'file'
@@ -157,7 +152,7 @@ def translate_column(ingredient: BaseIngredient, *, result=None, **options) -> P
     return ProcedureResult(result, ingredient.key, data=di)
 
 
-def copy(ingredient: BaseIngredient, *, result=None, **options) -> ProcedureResult:
+def copy(ingredient: BaseIngredient, result, dictionary: Dict) -> ProcedureResult:
     """make copy of ingredient data columns, with new names.
 
     Procedure format:
@@ -191,7 +186,6 @@ def copy(ingredient: BaseIngredient, *, result=None, **options) -> ProcedureResu
     """
     logger.info("copy: " + ingredient.ingred_id)
 
-    dictionary = options['dictionary']
     data = ingredient.copy_data()
 
     for k, v in dictionary.items():
@@ -209,7 +203,7 @@ def copy(ingredient: BaseIngredient, *, result=None, **options) -> ProcedureResu
     return ProcedureResult(result, ingredient.key, data=data)
 
 
-def merge(*ingredients: List[BaseIngredient], result=None, **options) -> ProcedureResult:
+def merge(*ingredients: List[BaseIngredient], result, deep=False) -> ProcedureResult:
     """merge a list of ingredients
 
     The ingredients will be merged one by one in the order of how they are provided to this function.
@@ -271,10 +265,6 @@ def merge(*ingredients: List[BaseIngredient], result=None, **options) -> Procedu
         index_col = ingredients[0].key
         newkey = index_col
 
-    if 'deep' in options.keys():
-        deep = options.pop('deep')
-    else:
-        deep = False
     if deep:
         logger.info("merge: doing deep merge")
     # merge data from ingredients one by one.
@@ -338,7 +328,7 @@ def _merge_two(left: Dict[str, pd.DataFrame],
     return res_data
 
 
-def identity(ingredient: BaseIngredient, *, result=None, **options) -> BaseIngredient:
+def identity(ingredient: BaseIngredient, result, copy=False) -> BaseIngredient:
     """return the ingredient as is.
 
     Keyword Args
@@ -346,7 +336,7 @@ def identity(ingredient: BaseIngredient, *, result=None, **options) -> BaseIngre
     copy: bool, optional
         if copy is True, then treat all data as string. Default: False
     """
-    if 'copy' in options and options['copy'] is True:
+    if copy:
         ingredient.data = ingredient.get_data(copy=True)
     else:
         ingredient.data = ingredient.get_data()
@@ -356,7 +346,7 @@ def identity(ingredient: BaseIngredient, *, result=None, **options) -> BaseIngre
     return ingredient
 
 
-def filter_row(ingredient: BaseIngredient, *, result=None, **options) -> ProcedureResult:
+def filter_row(ingredient: BaseIngredient, result, dictionary) -> ProcedureResult:
     """filter an ingredient based on a set of options and return
     the result as new ingredient.
 
@@ -397,7 +387,6 @@ def filter_row(ingredient: BaseIngredient, *, result=None, **options) -> Procedu
     logger.info("filter_row: " + ingredient.ingred_id)
 
     data = ingredient.get_data()
-    dictionary = options.pop('dictionary')
 
     res = {}
 
@@ -446,7 +435,7 @@ def filter_row(ingredient: BaseIngredient, *, result=None, **options) -> Procedu
     return ProcedureResult(result, newkey, data=res)
 
 
-def filter_item(ingredient: BaseIngredient, *, result: Optional[str]=None, **options) -> ProcedureResult:
+def filter_item(ingredient: BaseIngredient, result, items: list) -> ProcedureResult:
     """filter items from the ingredient data
 
     Procedure format:
@@ -468,7 +457,6 @@ def filter_item(ingredient: BaseIngredient, *, result: Optional[str]=None, **opt
     logger.info("filter_item: " + ingredient.ingred_id)
 
     data = ingredient.get_data()
-    items = options.pop('items')
 
     try:
         data = dict([(k, data[k]) for k in items])
@@ -482,7 +470,7 @@ def filter_item(ingredient: BaseIngredient, *, result: Optional[str]=None, **opt
     return ProcedureResult(result, ingredient.key, data=data)
 
 
-def groupby(ingredient: BaseIngredient, *, result, **options) -> ProcedureResult:
+def groupby(ingredient: BaseIngredient, result, **options) -> ProcedureResult:
     """group ingredient data by column(s) and run aggregate function
 
     .. highlight:: yaml
@@ -524,7 +512,9 @@ def groupby(ingredient: BaseIngredient, *, result, **options) -> ProcedureResult
     ------------
     groubby : `str` or `list`
         the column(s) to group, can be a list or a string
-    aggregate/transform/filter : `dict`
+    aggregate
+    transform
+    filter : `dict`, optinoal
         the function to run. only one of `aggregate`, `transform` and `filter` should be supplied.
 
     Note
@@ -685,7 +675,7 @@ def window(ingredient: BaseIngredient, result, **options) -> ProcedureResult:
     return ProcedureResult(result, ingredient.key, newdata)
 
 
-def run_op(ingredient: BaseIngredient, *, result=None, **options) -> ProcedureResult:
+def run_op(ingredient: BaseIngredient, result, op) -> ProcedureResult:
     """run math operation on each row of ingredient data.
 
     Procedure format:
@@ -726,13 +716,12 @@ def run_op(ingredient: BaseIngredient, *, result=None, **options) -> ProcedureRe
 
     data = ingredient.get_data()
     keys = ingredient.key_to_list()
-    ops = options['op']
 
     # concat all the datapoint dataframe first, and eval the ops
     to_concat = [v.set_index(keys) for v in data.values()]
     df = pd.concat(to_concat, axis=1)
 
-    for k, v in ops.items():
+    for k, v in op.items():
         res = df.eval(v).dropna()  # type(res) is Series
         res.name = k
         if k not in df.columns:
@@ -744,8 +733,7 @@ def run_op(ingredient: BaseIngredient, *, result=None, **options) -> ProcedureRe
     return ProcedureResult(result, ingredient.key, data=data)
 
 
-def extract_concepts(*ingredients: List[BaseIngredient],
-                     result=None, **options) -> ProcedureResult:
+def extract_concepts(*ingredients: List[BaseIngredient], result, **options) -> ProcedureResult:
     """extract concepts from other ingredients.
 
     .. highlight:: yaml
