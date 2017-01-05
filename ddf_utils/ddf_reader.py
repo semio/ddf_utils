@@ -95,7 +95,8 @@ class DDF():
             key = res['schema']['primaryKey']
             if isinstance(key, str) and key != 'concept':
                 name = res['name'].split('--')[-1]  # TODO: don't judge by name
-                if res['schema']['primaryKey'] in list(entity_concepts.index):
+                if (res['schema']['primaryKey'] in list(entity_concepts.index) or
+                    (domain is not None and res['schema']['primaryKey'] == domain)):
                     entities[name] = pd.read_csv(
                         os.path.join(self.dataset_path, res['path']),
                         index_col=res['schema']['primaryKey'], **kwargs)
