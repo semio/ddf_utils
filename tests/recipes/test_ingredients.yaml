@@ -1,0 +1,35 @@
+info:
+  id: test_ingredients
+
+ingredients:
+  - id: bp-concept
+    dataset: ddf--bp--energy
+    key: concept
+    value: '*'
+  - id: gw-countries
+    dataset: ddf--gapminder--geo_entity_domain
+    key: country
+    value: '*'
+  - id: gw-geo
+    dataset: ddf--gapminder--geo_entity_domain
+    key: geo
+    value: '*'
+  - id: bp-datapoints
+    dataset: ddf--bp--energy
+    key: 'geo,year'
+    value: '*'
+
+cooking:
+    concepts:
+        - procedure: serve
+          ingredients:
+              - bp-concept
+    entities:
+        - procedure: serve
+          ingredients:
+              - gw-countries
+              - gw-geo
+    datapoints:
+        - procedure: serve
+          ingredients:
+              - bp-datapoints
