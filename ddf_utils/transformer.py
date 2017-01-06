@@ -10,9 +10,27 @@ import logging
 from ddf_utils.chef.helpers import prompt_select
 
 
-def _translate_column_inline(df, column, target_column, dictionary, not_found):
-
+def _translate_column_inline(df, column, target_column, dictionary,
+                             not_found, ambiguity):
     df_new = df.copy()
+
+    # check for ambiguities
+    dict_ = dictionary.copy()
+    for k, v in dict_.items():
+        if isinstance(v, list):  # there is ambiguity
+            if ambiguity == 'skip':
+                dictionary.pop(k)
+            elif ambiguity == 'error':
+                raise ValueError("ambiguities found in dictionary!")
+            elif ambiguity == 'prompt':
+                # prompt for value
+                text = 'Please choose the correct entity to align *{}* with ' \
+                       'for the rest of the execution of the recipe:'.format(k)
+                val = prompt_select(v, text_before=text)
+                if val != -1:
+                    dictionary[k] = val
+                else:
+                    dictionary.pop(k)
 
     if not_found == 'drop':
         df_new[target_column] = df_new[column].map(
@@ -67,12 +85,7 @@ def _generate_mapping_dict2(df, column, dictionary, base_df, not_found):
             mapping[f] = filtered[idx_col].iloc[0]
         elif len(filtered) > 1:
             logging.warning("multiple match found: "+f)
-            # prompt for value
-            text = 'Please choose the correct entity to align *{}* with ' \
-                   'for the rest of the execution of the recipe:'.format(f)
-            val = prompt_select(filtered[idx_col].values, text_before=text)
-            if val != -1:
-                mapping[f] = val
+            mapping[f] = filtered[idx_col].values.tolist()
         else:
             no_match.add(f)
 
@@ -85,7 +98,8 @@ def _generate_mapping_dict2(df, column, dictionary, base_df, not_found):
         return mapping
 
 
-def _translate_column_df(df, column, target_column, dictionary, base_df, not_found):
+def _translate_column_df(df, column, target_column, dictionary, base_df,
+                         not_found, ambiguity):
 
     search_cols = dictionary['key']
     if isinstance(search_cols, str):
@@ -96,14 +110,21 @@ def _translate_column_df(df, column, target_column, dictionary, base_df, not_fou
             mapping = _generate_mappng_dict1(df, column, dictionary, base_df, not_found)
         else:
             mapping = _generate_mapping_dict2(df, column, dictionary, base_df, not_found)
-    return _translate_column_inline(df, column, target_column, mapping, not_found)
+    return _translate_column_inline(df, column, target_column, mapping, not_found, ambiguity)
 
 
 def translate_column(df, column, dictionary_type, dictionary,
-                     target_column=None, base_df=None, not_found='drop'):
+                     target_column=None, base_df=None, not_found='drop', ambiguity='prompt'):
     """change values in a column base on a mapping dictionary.
 
     The dictionary can be provided as a python dictionary, pandas dataframe or read from file.
+
+    Note
+    ----
+    When translating with a base DataFrame, if ambiguity is found in the data, for example,
+    a dataset with entity-id `congo`, to align to a dataset with `cod` ( Democratic Republic
+    of the Congo ) and `cog` ( Republic of the Congo ), the function will ask for user input
+    to choose which one or to skip it.
 
     Parameters
     ----------
@@ -122,9 +143,11 @@ def translate_column(df, column, dictionary_type, dictionary,
         The column to store translated resluts. If this is None, then the one set with `column` will be replaced.
     `base_df` : `DataFrame`, optional
         When `dictionary_type` is `dataframe`, this option should be set
-    `not_found`: `str`
+    `not_found` : `str`
         What to do if key in the dictionary is not found in the dataframe to be translated.
         avaliable options are `drop`, `error`, `include`
+    `ambiguity` : `str`
+        What to do when there is ambiguities in the dictionary. avaliable options are `prompt`, `skip`, `error`
 
     Examples
     --------
@@ -157,6 +180,9 @@ def translate_column(df, column, dictionary_type, dictionary,
     if not_found not in ['drop', 'error', 'include']:
         raise ValueError("not_found should be one of 'drop', 'error', 'include'")
 
+    if ambiguity not in ['skip', 'error', 'prompt']:
+        raise ValueError("ambiguity should be one of 'skip', 'error', 'prompt'")
+
     if dictionary_type == 'dataframe' and base_df is None:
         raise ValueError("please specify base_df when dictionary type is 'dataframe'")
 
@@ -164,14 +190,17 @@ def translate_column(df, column, dictionary_type, dictionary,
         target_column = column
 
     if dictionary_type == 'inline':
-        df_new = _translate_column_inline(df, column, target_column, dictionary, not_found)
+        df_new = _translate_column_inline(df, column, target_column, dictionary,
+                                          not_found, ambiguity)
     if dictionary_type == 'file':
         with open(dictionary) as f:
             d = json.load(f)
-        df_new = _translate_column_inline(df, column, target_column, d, not_found)
+        df_new = _translate_column_inline(df, column, target_column, d,
+                                          not_found, ambiguity)
     if dictionary_type == 'dataframe':
         assert 'key' in dictionary.keys() and 'value' in dictionary.keys()
-        df_new = _translate_column_df(df, column, target_column, dictionary, base_df, not_found)
+        df_new = _translate_column_df(df, column, target_column, dictionary, base_df,
+                                      not_found, ambiguity)
 
     return df_new
 

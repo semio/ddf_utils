@@ -76,7 +76,7 @@ def translate_header(ingredient: BaseIngredient, result, dictionary) -> Procedur
 
 
 def translate_column(ingredient: BaseIngredient, result, dictionary, column, *,
-                     target_column=None, not_found='drop') -> ProcedureResult:
+                     target_column=None, not_found='drop', ambiguity='prompt') -> ProcedureResult:
     """Translate column values.
 
     Procedure format:
@@ -91,6 +91,7 @@ def translate_column(ingredient: BaseIngredient, result, dictionary, column, *,
          column: str  # the column to be translated
          target_column: str  # optinoal, the target column to store the translated data
          not_found: {'drop', 'include', 'error'}  # optional, the behavior when there is values not found in the mapping dictionary, default is 'drop'
+         ambiguity: {'prompt', 'skip', 'error'}  # optional, the behavior when there is ambiguity in the dictionary
          dictionary: str or dict  # file name or mappings dictionary
 
     If base is provided in dictionary, key and value should also in dictionary.
@@ -116,6 +117,8 @@ def translate_column(ingredient: BaseIngredient, result, dictionary, column, *,
         the target column to store the translated data. If this is not set then the `column` cloumn will be replaced
     not_found : {'drop', 'include', 'error'}, optional
         the behavior when there is values not found in the mapping dictionary, default is 'drop'
+    ambiguity : {'prompt', 'skip', 'error'}, optional
+        the behavior when there is ambiguity in the dictionary, default is 'prompt'
 
     See Also
     --------
@@ -145,7 +148,8 @@ def translate_column(ingredient: BaseIngredient, result, dictionary, column, *,
 
     for k, df in di.items():
         logger.debug("running on: " + k)
-        di[k] = tc(df, column, dict_type, dictionary, target_column, base_df, not_found)
+        di[k] = tc(df, column, dict_type, dictionary, target_column, base_df,
+                   not_found, ambiguity)
 
     if not result:
         result = ingredient.ingred_id + '-translated'

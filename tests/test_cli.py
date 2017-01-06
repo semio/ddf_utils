@@ -32,19 +32,20 @@ def test_prompt_select():
     assert result.exit_code == 130
 
 
-def test_generate_mapping_dict():
+def test_translate_column():
 
     @click.command()
     def test():
-        from ddf_utils.transformer import _generate_mapping_dict2 as f
+        from ddf_utils.transformer import _translate_column_df as tc
         df = pd.DataFrame([['congo', 'Congo']], columns=['country', 'name'])
-        base_df = pd.DataFrame([['cod', 'Congo'], ['cog', 'Congo']],
-                               columns=['geo', 'abbr'])
-        di = {'key': ['abbr'], 'value': 'geo'}
+        base_df = pd.DataFrame([['cod', 'Congo', 'Democratic Republic of the Congo'],
+                                ['cog', 'Congo', 'Republic of the Congo']],
+                               columns=['geo', 'abbr1', 'abbr2'])
+        di = {'key': ['abbr1', 'abbr2'], 'value': 'geo'}
 
-        res = f(df, 'name', di, base_df, 'drop')
+        res = tc(df, 'name', 'geo', di, base_df, 'drop', 'prompt')
         # click.echo(res)
-        click.echo(res['Congo'])
+        click.echo(res['geo'].values[0])
 
     runner = CliRunner()
     result = runner.invoke(test, input='1')

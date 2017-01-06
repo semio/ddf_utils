@@ -211,6 +211,7 @@ options:
   column: str  # the column to be translated
   target_column: str  # optinoal, the target column to store the translated data
   not_found: {'drop', 'include', 'error'}  # optional, the behavior when there is values not found in the mapping dictionary, default is 'drop'
+  ambiguity: {'prompt', 'skip', 'error'}  # optional, the behavior when there is ambiguity in the dictionary
   dictionary: str or dict  # file name or mappings dictionary
 ```
 
