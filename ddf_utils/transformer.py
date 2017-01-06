@@ -7,6 +7,8 @@ import numpy as np
 import json
 import logging
 
+from ddf_utils.chef.helpers import prompt_select
+
 
 def _translate_column_inline(df, column, target_column, dictionary, not_found):
 
@@ -65,7 +67,12 @@ def _generate_mapping_dict2(df, column, dictionary, base_df, not_found):
             mapping[f] = filtered[idx_col].iloc[0]
         elif len(filtered) > 1:
             logging.warning("multiple match found: "+f)
-            mapping[f] = filtered[idx_col].iloc[0]
+            # prompt for value
+            text = 'Please choose the correct entity to align *{}* with ' \
+                   'for the rest of the execution of the recipe:'.format(f)
+            val = prompt_select(filtered[idx_col].values, text_before=text)
+            if val != -1:
+                mapping[f] = val
         else:
             no_match.add(f)
 

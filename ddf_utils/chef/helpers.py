@@ -8,13 +8,13 @@ import click
 
 
 def prompt_select(selects, text_before=None):
-
+    """ask user to choose in a list of options"""
     def value_proc(v):
         if v == 'n':
             return -1
         if v == 'q':
             import sys
-            sys.exit()
+            sys.exit(130)  # code for user interrupted
         return int(v)
 
     if text_before:
@@ -29,7 +29,9 @@ def prompt_select(selects, text_before=None):
     prompt_text = 'Please select a value ({} ~ {}), or "n" to skip, "q" to quit'\
                   .format(1, len(selects))
     val = click.prompt(prompt_text, value_proc=value_proc)
-    return val
+    if val == -1:
+        return -1
+    return selects[val-1]
 
 
 def read_opt(options, key, required=False, default=None):
