@@ -16,6 +16,7 @@ A recipe is made of following parts:
 - basic info
 - configuration
 - includes
+- ingredients
 - cooking procedures
 - serving section
 
@@ -60,6 +61,44 @@ can set below path:
 A recipe can include other recipes inside itself. to include a recipe, simply
 append the filename to the `include` section. note that it should be a absolute
 path or a filename inside the `recipes_dir`.
+
+### ingredients section
+
+A recipe must have some ingredients for cooking. We can either define the ingredients in the
+`ingredients` section or include other recipes which have an `ingredients` section.
+
+The `ingredients` section is a list of ingredient objects. An ingredient should be defined with
+following parameters:
+
+- `id`: the name of the ingredient
+- `dataset`: the dataset where the ingredient is from
+- `key`: the primary keys to filter from datapackage
+- `value`: the concept names to filter from the result of filtering keys. Pass "*" to select all.
+- `row_filter`: optional, only select rows match the filter. The filter is a dictionary where keys 
+are colunm names and values are values to filter
+
+Here is an example of `ingredient` section:
+
+```yaml
+ingredients:
+  - id: example-concepts
+    dataset: ddf_example_dataset
+    key: concept
+    value: "*"
+    row_filter:
+      concept:
+        - geo
+        - time
+        - some_measure_concept
+  - id: example-datapoints
+    dataset: ddf_example_dataset
+    key: geo, time
+    value: some_measure_concept
+  - id: example-entities
+    dataset: ddf_example_dataset
+    key: geo
+    value: "*"
+```
 
 ### cooking section
 
@@ -122,7 +161,7 @@ serving:
 To run a recipe, you can use the `ddf run_recipe` command:
 
 ```shell
-$ ddf run_recipe -i path_to_recipe.yaml -o output_dir
+$ ddf run_recipe -i path_to_rsecipe.yaml -o output_dir
 ```
 
 You can specify the path where your datasets are stored:
