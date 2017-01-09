@@ -23,6 +23,7 @@ class DDF():
         self.dataset_path = dataset_path
         self.ddf_id = ddf_id
         self._datapackage = None
+        self._concepts = None
 
     @property
     def datapackage(self):
@@ -30,6 +31,28 @@ class DDF():
         if not self._datapackage:
             self._datapackage = get_datapackage(self.dataset_path)
         return self._datapackage
+
+    @property
+    def concepts(self):
+        """convenient function to get all concepts"""
+        if self._concepts is None:
+            self._concepts = self.get_concepts()
+        return self._concepts
+
+    @property
+    def dtypes(self):
+        """return a mapping for column -> python object type. internal use only."""
+        concept_types = self.concepts['concept_type']
+        res = dict()
+        for c, v in concept_types.iteritems():
+            if v in ['string', 'entity_domain', 'entity_set']:
+                res[c] = str
+            elif v in ['time']:
+                res[c] = int  # TODO: support more time format
+            else:  # for measures and other concept type, let pandas decide
+                continue
+
+        return res
 
     def get_all_files(self):
         """return a list of all files in this dataset"""
@@ -90,6 +113,11 @@ class DDF():
         if domain:
             entity_concepts = entity_concepts[entity_concepts.domain == domain]
 
+        if 'dtype' in kwargs.keys():
+            dtype = kwargs.pop('dtype')
+        else:
+            dtype = self.dtypes
+
         entities = dict()
         for res in resources:
             key = res['schema']['primaryKey']
@@ -99,7 +127,7 @@ class DDF():
                     (domain is not None and res['schema']['primaryKey'] == domain)):
                     entities[name] = pd.read_csv(
                         os.path.join(self.dataset_path, res['path']),
-                        index_col=res['schema']['primaryKey'], **kwargs)
+                        index_col=res['schema']['primaryKey'], dtype=dtype, **kwargs)
         return entities
 
     def get_datapoint_files(self):
@@ -126,7 +154,7 @@ class DDF():
 
     def __build_datapoint_df(self, files):
         return pd.concat(
-            [pd.read_csv(os.path.join(self.dataset_path, x)) for x in files],
+            [pd.read_csv(os.path.join(self.dataset_path, x), dtype=self.dtypes) for x in files],
             ignore_index=True
         )
 

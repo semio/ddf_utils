@@ -23,3 +23,10 @@ def test_read_entities():
     assert len(ent_1) == 8
     ent_2 = ddf.get_entities(domain='geo')
     assert len(ent_2) == 8
+
+
+def test_ddf_dtype(ddf):
+    dps = ddf.get_datapoint_df('agriculture_percentage')
+    print(dps.reset_index().dtypes)
+    assert dps.reset_index().dtypes['agriculture_percentage'] == 'float64'
+    assert dps.reset_index().dtypes['year'] == 'int64'
