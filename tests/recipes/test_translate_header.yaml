@@ -1,6 +1,9 @@
 info:
     id: test-translate_header
 
+config:
+    dictionary_dir: ../translation_dictionaries
+
 ingredients:
     - id: cme-datapoints
       dataset: ddf--cme
@@ -12,8 +15,14 @@ cooking:
         - procedure: translate_header
           ingredients:
               - cme-datapoints
-          result: res
+          result: dps_key_translated
           options:
               dictionary:
                   country: geo
                   year: time
+        - procedure: translate_header
+          ingredients:
+              - dps_key_translated
+          result: res
+          options:
+              dictionary: indicators_cme_to_sg.json

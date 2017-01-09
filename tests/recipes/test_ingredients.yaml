@@ -16,7 +16,7 @@ ingredients:
     value: '*'
   - id: bp-datapoints
     dataset: ddf--bp--energy
-    key: 'geo,year'
+    key: geo, year
     value: '*'
 
 cooking:
