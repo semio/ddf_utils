@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 
 from functools import wraps, partial
-import numpy as np
+from .. import config
 from .. import ops
+import os
 import logging
 import click
+import numpy as np
 
 
 def prompt_select(selects, text_before=None):
@@ -100,5 +102,27 @@ def log_procedure(func):
     def wrapper(*args, **kwargs):
         logging.info("running %s" % (func.__name__))
         result = func(*args, **kwargs)
+        return result
+    return wrapper
+
+
+def debuggable(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        if 'debug' in kwargs.keys():
+            debug = kwargs.pop('debug')
+            result = func(*args, **kwargs)
+            if debug:
+                if config.DEBUG_OUTPUT_PATH is None:
+                    logging.warning('debug output path not set!')
+                    config.DEBUG_OUTPUT_PATH = './_debug'  # TODO: handle the config better
+                outpath = os.path.join(config.DEBUG_OUTPUT_PATH, result.ingred_id)
+                if os.path.exists(outpath):
+                    import shutil
+                    shutil.rmtree(outpath)
+                    os.mkdir(outpath)
+                result.serve(outpath)
+        else:
+            result = func(*args, **kwargs)
         return result
     return wrapper

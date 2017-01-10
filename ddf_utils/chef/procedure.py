@@ -5,7 +5,7 @@
 import pandas as pd
 import numpy as np
 from . ingredient import BaseIngredient, Ingredient, ProcedureResult
-from .helpers import read_opt, mkfunc
+from .helpers import read_opt, mkfunc, debuggable
 from .. import config
 from .. import transformer
 import time
@@ -17,6 +17,7 @@ import logging
 logger = logging.getLogger('Chef')
 
 
+@debuggable
 def translate_header(ingredient: BaseIngredient, result, dictionary) -> ProcedureResult:
     """Translate column headers
 
@@ -75,6 +76,7 @@ def translate_header(ingredient: BaseIngredient, result, dictionary) -> Procedur
     return ProcedureResult(result, newkey, data=data)
 
 
+@debuggable
 def translate_column(ingredient: BaseIngredient, result, dictionary, column, *,
                      target_column=None, not_found='drop', ambiguity='prompt') -> ProcedureResult:
     """Translate column values.
@@ -156,6 +158,7 @@ def translate_column(ingredient: BaseIngredient, result, dictionary, column, *,
     return ProcedureResult(result, ingredient.key, data=di)
 
 
+@debuggable
 def copy(ingredient: BaseIngredient, result, dictionary: Dict) -> ProcedureResult:
     """make copy of ingredient data columns, with new names.
 
@@ -207,6 +210,7 @@ def copy(ingredient: BaseIngredient, result, dictionary: Dict) -> ProcedureResul
     return ProcedureResult(result, ingredient.key, data=data)
 
 
+@debuggable
 def merge(*ingredients: List[BaseIngredient], result, deep=False) -> ProcedureResult:
     """merge a list of ingredients
 
@@ -332,6 +336,7 @@ def _merge_two(left: Dict[str, pd.DataFrame],
     return res_data
 
 
+@debuggable
 def identity(ingredient: BaseIngredient, result, copy=False) -> BaseIngredient:
     """return the ingredient as is.
 
@@ -350,6 +355,7 @@ def identity(ingredient: BaseIngredient, result, copy=False) -> BaseIngredient:
     return ingredient
 
 
+@debuggable
 def filter_row(ingredient: BaseIngredient, result, dictionary) -> ProcedureResult:
     """filter an ingredient based on a set of options and return
     the result as new ingredient.
@@ -439,6 +445,7 @@ def filter_row(ingredient: BaseIngredient, result, dictionary) -> ProcedureResul
     return ProcedureResult(result, newkey, data=res)
 
 
+@debuggable
 def filter_item(ingredient: BaseIngredient, result, items: list) -> ProcedureResult:
     """filter items from the ingredient data
 
@@ -474,6 +481,7 @@ def filter_item(ingredient: BaseIngredient, result, items: list) -> ProcedureRes
     return ProcedureResult(result, ingredient.key, data=data)
 
 
+@debuggable
 def groupby(ingredient: BaseIngredient, result, **options) -> ProcedureResult:
     """group ingredient data by column(s) and run aggregate function
 
@@ -575,6 +583,7 @@ def groupby(ingredient: BaseIngredient, result, **options) -> ProcedureResult:
     return ProcedureResult(result, newkey, data=newdata)
 
 
+@debuggable
 def window(ingredient: BaseIngredient, result, **options) -> ProcedureResult:
     """apply functions on a rolling window
 
@@ -679,6 +688,7 @@ def window(ingredient: BaseIngredient, result, **options) -> ProcedureResult:
     return ProcedureResult(result, ingredient.key, newdata)
 
 
+@debuggable
 def run_op(ingredient: BaseIngredient, result, op) -> ProcedureResult:
     """run math operation on each row of ingredient data.
 
@@ -737,6 +747,7 @@ def run_op(ingredient: BaseIngredient, result, op) -> ProcedureResult:
     return ProcedureResult(result, ingredient.key, data=data)
 
 
+@debuggable
 def extract_concepts(*ingredients: List[BaseIngredient], result,
                      join=None, overwrite=None, include_keys=False) -> ProcedureResult:
     """extract concepts from other ingredients.
@@ -831,6 +842,7 @@ def extract_concepts(*ingredients: List[BaseIngredient], result,
     return ProcedureResult(result, 'concept', data={'concepts': concepts.reset_index()})
 
 
+@debuggable
 def trend_bridge(ingredient: BaseIngredient, result, **options) -> ProcedureResult:
     """run trend bridge on ingredients
 
