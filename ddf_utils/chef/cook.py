@@ -3,16 +3,20 @@
 
 import json
 import yaml
+import re
+import os
 from orderedattrdict import AttrDict
 from orderedattrdict.yamlutils import AttrDictYAMLLoader
 
-from . ingredient import *
+from . ingredient import BaseIngredient, Ingredient, ProcedureResult
 from . dag import DAG, IngredientNode, ProcedureNode
 from . helpers import read_opt
 from .. import config
-from . procedure import *
+from . exceptions import *
 
 import logging
+
+logger = logging.getLogger('Chef')
 
 
 def _loadfile(f):
@@ -77,7 +81,7 @@ def build_recipe(recipe_file, to_disk=False, **kwargs):
                 if isinstance(opt_dict, str):
                     # if the option dict is str, then it should be a filename
                     if dict_dir is None:
-                        raise KeyError("dictionary_dir not found in config!")
+                        raise ChefRuntimeError("dictionary_dir not found in config!")
                     if os.path.isabs(dict_dir):
                         path = os.path.join(dict_dir, opt_dict)
                     else:
@@ -121,7 +125,7 @@ def build_recipe(recipe_file, to_disk=False, **kwargs):
                     else:
                         # raise error when ingredients with same ID have different contents.
                         if v != rcp_dict_tmp[v['id']]:
-                            raise ValueError("Different content with same ingredient id detected: " + v['id'])
+                            raise ChefRuntimeError("Different content with same ingredient id detected: " + v['id'])
                 recipe['ingredients'] = list(rcp_dict_tmp.values())
             else:
                 recipe['ingredients'] = rcp['ingredients']
@@ -179,7 +183,7 @@ def check_dataset_availability(recipe):
     if len(not_exists) > 0:
         logging.critical("not enough datasets! please checkout following datasets:\n{}\n"\
                             .format('\n'.join(not_exists)))
-        raise ValueError('not enough datasets')
+        raise ChefRuntimeError('not enough datasets')
     return
 
 
@@ -233,13 +237,13 @@ def build_dag(recipe):
     # check if all serving ingredients are available
     for i in serving:
         if not dag.has_task(i):
-            raise ValueError('Ingredient not found: ' + i)
+            raise ChefRuntimeError('Ingredient not found: ' + i)
     if 'serving' in recipe.keys():
         if len(serving) > 0:
-            raise ValueError('can not have serve procedure and serving section at same time!')
+            raise ChefRuntimeError('can not have serve procedure and serving section at same time!')
         for i in recipe['serving']:
             if not dag.has_task(i['id']):
-                raise ValueError('Ingredient not found: ' + i['id'])
+                raise ChefRuntimeError('Ingredient not found: ' + i['id'])
     # display the tree
     # dag.tree_view()
     return dag
@@ -273,7 +277,7 @@ def run_recipe(recipe):
         config.DDF_SEARCH_PATH = recipe['config']['ddf_dir']
     except KeyError:
         if not config.DDF_SEARCH_PATH:
-            raise ValueError("no ddf_dir configured, please check your recipe")
+            raise ChefRuntimeError("no ddf_dir configured, please check your recipe")
     logging.info('path for searching DDF: ' + str(config.DDF_SEARCH_PATH))
 
     # check all datasets availability

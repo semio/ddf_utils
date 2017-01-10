@@ -11,6 +11,7 @@ import logging
 
 from .. import config
 from ..ddf_reader import DDF
+from .exceptions import *
 
 
 class BaseIngredient(object):
@@ -93,7 +94,7 @@ class BaseIngredient(object):
                 else:
                     path = os.path.join(outpath, 'ddf--{}--{}--{}.csv'.format(t, domain, k))
             else:
-                raise ValueError('Not a correct collection: ' + t)
+                raise IngredientError('Not a correct collection: ' + t)
             # formatting numbers for datapoints
             if t == 'datapoints':
                 digits = read_opt(options, 'digits', default=5)
@@ -215,7 +216,7 @@ class Ingredient(BaseIngredient):
             values = self.values
 
         if not values or len(values) == 0:
-            raise ValueError('no datapoint found for the ingredient: ' + self.ingred_id)
+            raise IngredientError('no datapoint found for the ingredient: ' + self.ingred_id)
 
         for v in values:
             data[v] = self.ddf.get_datapoint_df(v, keys)

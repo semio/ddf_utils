@@ -9,6 +9,7 @@ on eval.
 
 import pandas as pd
 from . import procedure as pc
+from .exceptions import *
 
 
 class BaseNode():
@@ -60,7 +61,7 @@ class BaseNode():
         for t in self.get_direct_relatives():
             if task is t:
                 msg = "Cycle detected in DAG. Faulty task: {0}".format(task)
-                raise ValueError(msg)
+                raise ChefRuntimeError(msg)
             else:
                 t.detect_downstream_cycle(task=task)
         return False
@@ -98,7 +99,7 @@ class ProcedureNode(BaseNode):
         try:
             func = getattr(pc, self.procedure['procedure'])
         except AttributeError:
-            raise NotImplementedError("Not supported: " + self.procedure['procedure'])
+            raise ProcedureError("Not supported: " + self.procedure['procedure'])
 
         # check the base ingredients and convert the string id to actual ingredient
         ingredients = []
@@ -164,13 +165,13 @@ class DAG():
                 not self.task_dict[task.node_id].procedure):
                 self.task_dict[task.node_id] = task
             else:
-                raise ValueError('can not overwirte node already exists: ' + task.node_id)
+                raise ChefRuntimeError('can not overwirte node already exists: ' + task.node_id)
         self.task_dict[task.node_id] = task
 
     def get_task(self, task_id):
         if task_id in self.task_dict.keys():
             return self.task_dict[task_id]
-        raise ValueError('task {} not found'.format(task_id))
+        raise ChefRuntimeError('task {} not found'.format(task_id))
 
     def has_task(self, task_id):
         return task_id in self.task_dict.keys()

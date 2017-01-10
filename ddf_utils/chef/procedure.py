@@ -6,6 +6,7 @@ import pandas as pd
 import numpy as np
 from . ingredient import BaseIngredient, Ingredient, ProcedureResult
 from .helpers import read_opt, mkfunc, debuggable
+from .exceptions import *
 from .. import config
 from .. import transformer
 import time
@@ -142,7 +143,7 @@ def translate_column(ingredient: BaseIngredient, result, dictionary, column, *,
             base = dictionary.pop('base')
             base_data = base.get_data()
             if len(base_data) > 1:
-                raise ValueError('only support ingredient with 1 item')
+                raise ProcedureError('only support ingredient with 1 item')
             base_df = list(base_data.values())[0]
         else:
             dict_type = 'inline'
@@ -259,7 +260,7 @@ def merge(*ingredients: List[BaseIngredient], result, deep=False) -> ProcedureRe
         log1 = "multiple dtype/key detected: \n"
         log2 = "\n".join(["{}: {}, {}".format(x.ingred_id, x.dtype, x.key) for x in ingredients])
         logger.warning(log1+log2)
-        raise ValueError("can't merge data with multiple dtype/key!")
+        raise ProcedureError("can't merge data with multiple dtype/key!")
 
     # get the dtype and index
     # we have assert dtype and key is unique, so we take it from
@@ -417,7 +418,7 @@ def filter_row(ingredient: BaseIngredient, result, dictionary) -> ProcedureResul
                 queries.append("{} == {}".format(col, val))
             # TODO: support more query methods.
             else:
-                raise ValueError("not supported in query: " + str(type(val)))
+                raise ProcedureError("not supported in query: " + str(type(val)))
 
         query_string = ' and '.join(queries)
 
@@ -471,9 +472,9 @@ def filter_item(ingredient: BaseIngredient, result, items: list) -> ProcedureRes
 
     try:
         data = dict([(k, data[k]) for k in items])
-    except KeyError:
+    except KeyError as e:
         logger.debug("keys in {}: {}".format(ingredient.ingred_id, str(list(data.keys()))))
-        raise
+        raise ProcedureError(e.message)
 
     if not result:
         result = ingredient.ingred_id
