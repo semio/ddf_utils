@@ -90,6 +90,7 @@ def build_recipe(recipe_file, to_disk=False, **kwargs):
         if 'config' not in recipe.keys():
             recipe['config'] = AttrDict()
         recipe.config.ddf_dir = kwargs['ddf_dir']
+        config.DDF_SEARCH_PATH = kwargs['ddf_dir']
 
     if 'include' not in recipe.keys():
         return recipe

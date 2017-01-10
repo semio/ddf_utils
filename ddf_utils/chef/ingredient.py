@@ -25,8 +25,8 @@ class BaseIngredient(object):
         returns the type of ddf data, i.e. concepts/entities/datapoints.
 
         It will be inferred from the key property of ingredient.
-        TODO: what if key == '*'? Is it possible?
         """
+        # TODO: what if key == '*'? Is it possible?
         keys = self.key_to_list()
         if len(keys) == 1:
             if keys[0] == 'concept':
@@ -70,6 +70,9 @@ class BaseIngredient(object):
             how many digits to keep at most.
 
         """
+        # create outpath if not exists
+        os.makedirs(outpath, exist_ok=True)
+
         data = self.copy_data()
         t = self.dtype
         assert isinstance(data, dict)
