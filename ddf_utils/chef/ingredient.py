@@ -205,7 +205,7 @@ class Ingredient(BaseIngredient):
 
     def _get_data_datapoint(self, copy):
         data = dict()
-        keys = self.key.split(',')
+        keys = self.key_to_list()
         if self.values == '*':  # get all datapoints for the key
             values = []
             for k, v in self.ddf.get_datapoint_files().items():

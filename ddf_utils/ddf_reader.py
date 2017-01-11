@@ -19,7 +19,7 @@ class DDF():
     def __init__(self, ddf_id, no_check_valid=False):
         dataset_path = os.path.join(config.DDF_SEARCH_PATH, ddf_id)
         if not no_check_valid:
-            assert is_dataset(dataset_path)
+            assert is_dataset(dataset_path), "path is not ddf dataset: {}".format(dataset_path) 
         self.dataset_path = dataset_path
         self.ddf_id = ddf_id
         self._datapackage = None
