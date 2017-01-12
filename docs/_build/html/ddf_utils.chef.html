@@ -255,8 +255,7 @@ for example:</p>
 <dt id="ddf_utils.chef.ingredient.BaseIngredient.dtype">
 <code class="descname">dtype</code><a class="headerlink" href="#ddf_utils.chef.ingredient.BaseIngredient.dtype" title="Permalink to this definition">¶</a></dt>
 <dd><p>returns the type of ddf data, i.e. concepts/entities/datapoints.</p>
-<p>It will be inferred from the key property of ingredient.
-TODO: what if key == &#8216;*&#8217;? Is it possible?</p>
+<p>It will be inferred from the key property of ingredient.</p>
 </dd></dl>
 
 <dl class="method">
@@ -402,7 +401,7 @@ the dataset will be in the ingredient</p>
 <p>all procedures for recipes</p>
 <dl class="function">
 <dt id="ddf_utils.chef.procedure.copy">
-<code class="descclassname">ddf_utils.chef.procedure.</code><code class="descname">copy</code><span class="sig-paren">(</span><em>ingredient: ddf_utils.chef.ingredient.BaseIngredient</em>, <em>*</em>, <em>result=None</em>, <em>**options</em><span class="sig-paren">)</span> &rarr; ddf_utils.chef.ingredient.ProcedureResult<a class="headerlink" href="#ddf_utils.chef.procedure.copy" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.chef.procedure.</code><code class="descname">copy</code><span class="sig-paren">(</span><em>ingredient: ddf_utils.chef.ingredient.BaseIngredient</em>, <em>result</em>, <em>dictionary: typing.Dict</em><span class="sig-paren">)</span> &rarr; ddf_utils.chef.ingredient.ProcedureResult<a class="headerlink" href="#ddf_utils.chef.procedure.copy" title="Permalink to this definition">¶</a></dt>
 <dd><p>make copy of ingredient data columns, with new names.</p>
 <p>Procedure format:</p>
 <div class="highlight-yaml"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">procedure</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">copy</span>
@@ -435,7 +434,7 @@ the dataset will be in the ingredient</p>
 
 <dl class="function">
 <dt id="ddf_utils.chef.procedure.extract_concepts">
-<code class="descclassname">ddf_utils.chef.procedure.</code><code class="descname">extract_concepts</code><span class="sig-paren">(</span><em>*ingredients: typing.List[ddf_utils.chef.ingredient.BaseIngredient], result=None, **options</em><span class="sig-paren">)</span> &rarr; ddf_utils.chef.ingredient.ProcedureResult<a class="headerlink" href="#ddf_utils.chef.procedure.extract_concepts" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.chef.procedure.</code><code class="descname">extract_concepts</code><span class="sig-paren">(</span><em>*ingredients: typing.List[ddf_utils.chef.ingredient.BaseIngredient], result, join=None, overwrite=None, include_keys=False</em><span class="sig-paren">)</span> &rarr; ddf_utils.chef.ingredient.ProcedureResult<a class="headerlink" href="#ddf_utils.chef.procedure.extract_concepts" title="Permalink to this definition">¶</a></dt>
 <dd><p>extract concepts from other ingredients.</p>
 <p>Procedure format:</p>
 <div class="highlight-yaml"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">procedure</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">extract_concepts</span>
@@ -447,16 +446,26 @@ the dataset will be in the ingredient</p>
   <span class="l l-Scalar l-Scalar-Plain">join</span><span class="p p-Indicator">:</span>  <span class="c1"># optional</span>
     <span class="l l-Scalar l-Scalar-Plain">base</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">str</span>  <span class="c1"># base concept ingredient id</span>
     <span class="l l-Scalar l-Scalar-Plain">type</span><span class="p p-Indicator">:</span> <span class="p p-Indicator">{</span><span class="s">&#39;full_outer&#39;</span><span class="p p-Indicator">,</span> <span class="s">&#39;ingredients_outer&#39;</span><span class="p p-Indicator">}</span>  <span class="c1"># default is full_outer</span>
+  <span class="l l-Scalar l-Scalar-Plain">overwrite</span><span class="p p-Indicator">:</span>  <span class="c1"># overwrite some concept types</span>
+    <span class="l l-Scalar l-Scalar-Plain">country</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">entity_set</span>
+    <span class="l l-Scalar l-Scalar-Plain">year</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">time</span>
+  <span class="l l-Scalar l-Scalar-Plain">include_keys</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span>  <span class="c1"># if we should include the primaryKeys concepts</span>
 </pre></div>
 </div>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>ingredients</strong> &#8211; any numbers of ingredient that needs to extract concepts from</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>ingredients</strong> &#8211; any numbers of ingredient that needs to extract concepts from</p>
+</td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Keyword Arguments:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><strong>join</strong> (<em>dict</em><em>, </em><em>optional</em>) &#8211; the base ingredient to join</td>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><ul class="first last simple">
+<li><strong>join</strong> (<em>dict</em><em>, </em><em>optional</em>) &#8211; the base ingredient to join</li>
+<li><strong>overwrite</strong> (<em>dict</em><em>, </em><em>optional</em>) &#8211; overwrite concept types for some concepts</li>
+<li><strong>include_keys</strong> (<em>bool</em><em>, </em><em>optional</em>) &#8211; if we shuld include the primaryKeys of the ingredients, default to false</li>
+</ul>
+</td>
 </tr>
 </tbody>
 </table>
@@ -480,7 +489,7 @@ only keep concepts from <code class="docutils literal"><span class="pre">ingredi
 
 <dl class="function">
 <dt id="ddf_utils.chef.procedure.filter_item">
-<code class="descclassname">ddf_utils.chef.procedure.</code><code class="descname">filter_item</code><span class="sig-paren">(</span><em>ingredient: ddf_utils.chef.ingredient.BaseIngredient</em>, <em>*</em>, <em>result: typing.Union[str</em>, <em>NoneType] = None</em>, <em>**options</em><span class="sig-paren">)</span> &rarr; ddf_utils.chef.ingredient.ProcedureResult<a class="headerlink" href="#ddf_utils.chef.procedure.filter_item" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.chef.procedure.</code><code class="descname">filter_item</code><span class="sig-paren">(</span><em>ingredient: ddf_utils.chef.ingredient.BaseIngredient</em>, <em>result</em>, <em>items: list</em><span class="sig-paren">)</span> &rarr; ddf_utils.chef.ingredient.ProcedureResult<a class="headerlink" href="#ddf_utils.chef.procedure.filter_item" title="Permalink to this definition">¶</a></dt>
 <dd><p>filter items from the ingredient data</p>
 <p>Procedure format:</p>
 <div class="highlight-yaml"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">procedure</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">filter_item</span>
@@ -504,7 +513,7 @@ only keep concepts from <code class="docutils literal"><span class="pre">ingredi
 
 <dl class="function">
 <dt id="ddf_utils.chef.procedure.filter_row">
-<code class="descclassname">ddf_utils.chef.procedure.</code><code class="descname">filter_row</code><span class="sig-paren">(</span><em>ingredient: ddf_utils.chef.ingredient.BaseIngredient</em>, <em>*</em>, <em>result=None</em>, <em>**options</em><span class="sig-paren">)</span> &rarr; ddf_utils.chef.ingredient.ProcedureResult<a class="headerlink" href="#ddf_utils.chef.procedure.filter_row" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.chef.procedure.</code><code class="descname">filter_row</code><span class="sig-paren">(</span><em>ingredient: ddf_utils.chef.ingredient.BaseIngredient</em>, <em>result</em>, <em>dictionary</em><span class="sig-paren">)</span> &rarr; ddf_utils.chef.ingredient.ProcedureResult<a class="headerlink" href="#ddf_utils.chef.procedure.filter_row" title="Permalink to this definition">¶</a></dt>
 <dd><p>filter an ingredient based on a set of options and return
 the result as new ingredient.</p>
 <p>Procedure format:</p>
@@ -545,7 +554,7 @@ the result as new ingredient.</p>
 
 <dl class="function">
 <dt id="ddf_utils.chef.procedure.groupby">
-<code class="descclassname">ddf_utils.chef.procedure.</code><code class="descname">groupby</code><span class="sig-paren">(</span><em>ingredient: ddf_utils.chef.ingredient.BaseIngredient</em>, <em>*</em>, <em>result</em>, <em>**options</em><span class="sig-paren">)</span> &rarr; ddf_utils.chef.ingredient.ProcedureResult<a class="headerlink" href="#ddf_utils.chef.procedure.groupby" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.chef.procedure.</code><code class="descname">groupby</code><span class="sig-paren">(</span><em>ingredient: ddf_utils.chef.ingredient.BaseIngredient</em>, <em>result</em>, <em>**options</em><span class="sig-paren">)</span> &rarr; ddf_utils.chef.ingredient.ProcedureResult<a class="headerlink" href="#ddf_utils.chef.procedure.groupby" title="Permalink to this definition">¶</a></dt>
 <dd><p>group ingredient data by column(s) and run aggregate function</p>
 <p>Procedure format:</p>
 <div class="highlight-yaml"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">procedure</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">groupby</span>
@@ -580,7 +589,9 @@ the result as new ingredient.</p>
 <tr class="field-odd field"><th class="field-name" colspan="2">Keyword Arguments:</th></tr>
 <tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><ul class="first last simple">
 <li><strong>groubby</strong> (<cite>str</cite> or <cite>list</cite>) &#8211; the column(s) to group, can be a list or a string</li>
-<li><strong>aggregate/transform/filter</strong> (<cite>dict</cite>) &#8211; the function to run. only one of <cite>aggregate</cite>, <cite>transform</cite> and <cite>filter</cite> should be supplied.</li>
+<li><strong>aggregate</strong> &#8211; </li>
+<li><strong>transform</strong> &#8211; </li>
+<li><strong>filter</strong> (<cite>dict</cite>, optinoal) &#8211; the function to run. only one of <cite>aggregate</cite>, <cite>transform</cite> and <cite>filter</cite> should be supplied.</li>
 </ul>
 </td>
 </tr>
@@ -597,7 +608,7 @@ the result as new ingredient.</p>
 
 <dl class="function">
 <dt id="ddf_utils.chef.procedure.identity">
-<code class="descclassname">ddf_utils.chef.procedure.</code><code class="descname">identity</code><span class="sig-paren">(</span><em>ingredient: ddf_utils.chef.ingredient.BaseIngredient</em>, <em>*</em>, <em>result=None</em>, <em>**options</em><span class="sig-paren">)</span> &rarr; ddf_utils.chef.ingredient.BaseIngredient<a class="headerlink" href="#ddf_utils.chef.procedure.identity" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.chef.procedure.</code><code class="descname">identity</code><span class="sig-paren">(</span><em>ingredient: ddf_utils.chef.ingredient.BaseIngredient</em>, <em>result</em>, <em>copy=False</em><span class="sig-paren">)</span> &rarr; ddf_utils.chef.ingredient.BaseIngredient<a class="headerlink" href="#ddf_utils.chef.procedure.identity" title="Permalink to this definition">¶</a></dt>
 <dd><p>return the ingredient as is.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -612,7 +623,7 @@ the result as new ingredient.</p>
 
 <dl class="function">
 <dt id="ddf_utils.chef.procedure.merge">
-<code class="descclassname">ddf_utils.chef.procedure.</code><code class="descname">merge</code><span class="sig-paren">(</span><em>*ingredients: typing.List[ddf_utils.chef.ingredient.BaseIngredient], result=None, **options</em><span class="sig-paren">)</span> &rarr; ddf_utils.chef.ingredient.ProcedureResult<a class="headerlink" href="#ddf_utils.chef.procedure.merge" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.chef.procedure.</code><code class="descname">merge</code><span class="sig-paren">(</span><em>*ingredients: typing.List[ddf_utils.chef.ingredient.BaseIngredient], result, deep=False</em><span class="sig-paren">)</span> &rarr; ddf_utils.chef.ingredient.ProcedureResult<a class="headerlink" href="#ddf_utils.chef.procedure.merge" title="Permalink to this definition">¶</a></dt>
 <dd><p>merge a list of ingredients</p>
 <p>The ingredients will be merged one by one in the order of how they are provided to this function.
 Later ones will overwrite the pervious merged results.</p>
@@ -649,7 +660,7 @@ if true, overwrite is on the row level. If values
 
 <dl class="function">
 <dt id="ddf_utils.chef.procedure.run_op">
-<code class="descclassname">ddf_utils.chef.procedure.</code><code class="descname">run_op</code><span class="sig-paren">(</span><em>ingredient: ddf_utils.chef.ingredient.BaseIngredient</em>, <em>*</em>, <em>result=None</em>, <em>**options</em><span class="sig-paren">)</span> &rarr; ddf_utils.chef.ingredient.ProcedureResult<a class="headerlink" href="#ddf_utils.chef.procedure.run_op" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.chef.procedure.</code><code class="descname">run_op</code><span class="sig-paren">(</span><em>ingredient: ddf_utils.chef.ingredient.BaseIngredient</em>, <em>result</em>, <em>op</em><span class="sig-paren">)</span> &rarr; ddf_utils.chef.ingredient.ProcedureResult<a class="headerlink" href="#ddf_utils.chef.procedure.run_op" title="Permalink to this definition">¶</a></dt>
 <dd><p>run math operation on each row of ingredient data.</p>
 <p>Procedure format:</p>
 <div class="highlight-yaml"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">procedure</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">filter_item</span>
@@ -684,7 +695,7 @@ if true, overwrite is on the row level. If values
 
 <dl class="function">
 <dt id="ddf_utils.chef.procedure.translate_column">
-<code class="descclassname">ddf_utils.chef.procedure.</code><code class="descname">translate_column</code><span class="sig-paren">(</span><em>ingredient: ddf_utils.chef.ingredient.BaseIngredient</em>, <em>*</em>, <em>result=None</em>, <em>**options</em><span class="sig-paren">)</span> &rarr; ddf_utils.chef.ingredient.ProcedureResult<a class="headerlink" href="#ddf_utils.chef.procedure.translate_column" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.chef.procedure.</code><code class="descname">translate_column</code><span class="sig-paren">(</span><em>ingredient: ddf_utils.chef.ingredient.BaseIngredient</em>, <em>result</em>, <em>dictionary</em>, <em>column</em>, <em>*</em>, <em>target_column=None</em>, <em>not_found='drop'</em>, <em>ambiguity='prompt'</em><span class="sig-paren">)</span> &rarr; ddf_utils.chef.ingredient.ProcedureResult<a class="headerlink" href="#ddf_utils.chef.procedure.translate_column" title="Permalink to this definition">¶</a></dt>
 <dd><p>Translate column values.</p>
 <p>Procedure format:</p>
 <div class="highlight-yaml"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">procedure</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">translate_column</span>
@@ -695,6 +706,7 @@ if true, overwrite is on the row level. If values
   <span class="l l-Scalar l-Scalar-Plain">column</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">str</span>  <span class="c1"># the column to be translated</span>
   <span class="l l-Scalar l-Scalar-Plain">target_column</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">str</span>  <span class="c1"># optinoal, the target column to store the translated data</span>
   <span class="l l-Scalar l-Scalar-Plain">not_found</span><span class="p p-Indicator">:</span> <span class="p p-Indicator">{</span><span class="s">&#39;drop&#39;</span><span class="p p-Indicator">,</span> <span class="s">&#39;include&#39;</span><span class="p p-Indicator">,</span> <span class="s">&#39;error&#39;</span><span class="p p-Indicator">}</span>  <span class="c1"># optional, the behavior when there is values not found in the mapping dictionary, default is &#39;drop&#39;</span>
+  <span class="l l-Scalar l-Scalar-Plain">ambiguity</span><span class="p p-Indicator">:</span> <span class="p p-Indicator">{</span><span class="s">&#39;prompt&#39;</span><span class="p p-Indicator">,</span> <span class="s">&#39;skip&#39;</span><span class="p p-Indicator">,</span> <span class="s">&#39;error&#39;</span><span class="p p-Indicator">}</span>  <span class="c1"># optional, the behavior when there is ambiguity in the dictionary</span>
   <span class="l l-Scalar l-Scalar-Plain">dictionary</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">str or dict</span>  <span class="c1"># file name or mappings dictionary</span>
 </pre></div>
 </div>
@@ -719,6 +731,7 @@ See <a class="reference internal" href="ddf_utils.html#ddf_utils.transformer.tra
 <li><strong>column</strong> (<cite>str</cite>) &#8211; the column to be translated</li>
 <li><strong>target_column</strong> (<cite>str</cite>, optional) &#8211; the target column to store the translated data. If this is not set then the <cite>column</cite> cloumn will be replaced</li>
 <li><strong>not_found</strong> (<em>{'drop'</em><em>, </em><em>'include'</em><em>, </em><em>'error'}</em><em>, </em><em>optional</em>) &#8211; the behavior when there is values not found in the mapping dictionary, default is &#8216;drop&#8217;</li>
+<li><strong>ambiguity</strong> (<em>{'prompt'</em><em>, </em><em>'skip'</em><em>, </em><em>'error'}</em><em>, </em><em>optional</em>) &#8211; the behavior when there is ambiguity in the dictionary, default is &#8216;prompt&#8217;</li>
 </ul>
 </td>
 </tr>
@@ -732,13 +745,13 @@ See <a class="reference internal" href="ddf_utils.html#ddf_utils.transformer.tra
 
 <dl class="function">
 <dt id="ddf_utils.chef.procedure.translate_header">
-<code class="descclassname">ddf_utils.chef.procedure.</code><code class="descname">translate_header</code><span class="sig-paren">(</span><em>ingredient: ddf_utils.chef.ingredient.BaseIngredient</em>, <em>*</em>, <em>result=None</em>, <em>**options</em><span class="sig-paren">)</span> &rarr; ddf_utils.chef.ingredient.ProcedureResult<a class="headerlink" href="#ddf_utils.chef.procedure.translate_header" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.chef.procedure.</code><code class="descname">translate_header</code><span class="sig-paren">(</span><em>ingredient: ddf_utils.chef.ingredient.BaseIngredient</em>, <em>result</em>, <em>dictionary</em><span class="sig-paren">)</span> &rarr; ddf_utils.chef.ingredient.ProcedureResult<a class="headerlink" href="#ddf_utils.chef.procedure.translate_header" title="Permalink to this definition">¶</a></dt>
 <dd><p>Translate column headers</p>
 <p>Procedure format:</p>
 <div class="highlight-yaml"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">procedure</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">translate_header</span>
 <span class="l l-Scalar l-Scalar-Plain">ingredients</span><span class="p p-Indicator">:</span>  <span class="c1"># list of ingredient id</span>
   <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">ingredient_id</span>
-<span class="l l-Scalar l-Scalar-Plain">result</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">str</span>  <span class="c1"># new ingledient id</span>
+<span class="l l-Scalar l-Scalar-Plain">result</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">str</span>  <span class="c1"># new ingredient id</span>
 <span class="l l-Scalar l-Scalar-Plain">options</span><span class="p p-Indicator">:</span>
   <span class="l l-Scalar l-Scalar-Plain">dictionary</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">str or dict</span>  <span class="c1"># file name or mappings dictionary</span>
 </pre></div>
@@ -767,9 +780,46 @@ See <a class="reference internal" href="ddf_utils.html#ddf_utils.transformer.tra
 
 <dl class="function">
 <dt id="ddf_utils.chef.procedure.trend_bridge">
-<code class="descclassname">ddf_utils.chef.procedure.</code><code class="descname">trend_bridge</code><span class="sig-paren">(</span><em>ingredient: ddf_utils.chef.ingredient.BaseIngredient</em>, <em>result</em>, <em>**options</em><span class="sig-paren">)</span> &rarr; ddf_utils.chef.ingredient.ProcedureResult<a class="headerlink" href="#ddf_utils.chef.procedure.trend_bridge" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.chef.procedure.</code><code class="descname">trend_bridge</code><span class="sig-paren">(</span><em>ingredient: ddf_utils.chef.ingredient.BaseIngredient</em>, <em>bridge_start</em>, <em>bridge_end</em>, <em>bridge_length</em>, <em>bridge_on</em>, <em>result</em>, <em>target_col=None</em><span class="sig-paren">)</span> &rarr; ddf_utils.chef.ingredient.ProcedureResult<a class="headerlink" href="#ddf_utils.chef.procedure.trend_bridge" title="Permalink to this definition">¶</a></dt>
 <dd><p>run trend bridge on ingredients</p>
-<p>(Not Implemented Yet)</p>
+<p>Procedure format:</p>
+<div class="highlight-yaml"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">procedure</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">trend_bridge</span>
+<span class="l l-Scalar l-Scalar-Plain">ingredients</span><span class="p p-Indicator">:</span>
+  <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">data_ingredient</span>                 <span class="c1"># optional, if not set defaults to empty ingredient</span>
+<span class="l l-Scalar l-Scalar-Plain">result</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">data_bridged</span>
+<span class="l l-Scalar l-Scalar-Plain">options</span><span class="p p-Indicator">:</span>
+  <span class="l l-Scalar l-Scalar-Plain">bridge_start</span><span class="p p-Indicator">:</span>
+      <span class="l l-Scalar l-Scalar-Plain">ingredient</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">old_data_ingredient</span> <span class="c1"># optional, if not set then assume it&#39;s the input ingredient</span>
+      <span class="l l-Scalar l-Scalar-Plain">column</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">concept_old_data</span>
+  <span class="l l-Scalar l-Scalar-Plain">bridge_end</span><span class="p p-Indicator">:</span>
+      <span class="l l-Scalar l-Scalar-Plain">ingredient</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">new_data_ingredient</span> <span class="c1"># optional, if not set then assume it&#39;s the input ingredient</span>
+      <span class="l l-Scalar l-Scalar-Plain">column</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">concept_new_data</span>
+  <span class="l l-Scalar l-Scalar-Plain">bridge_length</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">5</span>                  <span class="c1"># steps in time. If year, years, if days, days.</span>
+  <span class="l l-Scalar l-Scalar-Plain">bridge_on</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">time</span>                   <span class="c1"># the index column to build the bridge with</span>
+  <span class="l l-Scalar l-Scalar-Plain">target_column</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">concept_in_result</span>  <span class="c1"># overwrites if exists. creates if not exists. default to bridge_end.column</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>ingredient</strong> (<a class="reference internal" href="#ddf_utils.chef.ingredient.BaseIngredient" title="ddf_utils.chef.ingredient.BaseIngredient"><em>BaseIngredient</em></a>) &#8211; The input ingredient. The bridged result will be merged in to this ingredient. If this is None, then
+the only the bridged result will be returned</li>
+<li><strong>bridge_start</strong> (<em>dict</em>) &#8211; Describe the start of bridge</li>
+<li><strong>bridge_end</strong> (<em>dict</em>) &#8211; Describe the end of bridge</li>
+<li><strong>bridge_length</strong> (<em>int</em>) &#8211; The size of bridge</li>
+<li><strong>bridge_on</strong> (<cite>str</cite>) &#8211; The column to bridge</li>
+<li><strong>result</strong> (<cite>str</cite>) &#8211; The output ingredient id</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Keyword Arguments:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first last"><strong>target_column</strong> (<cite>str</cite>, optional) &#8211; The column name of the bridge result. default to <cite>bridge_end.column</cite></p>
+</td>
+</tr>
+</tbody>
+</table>
 <div class="admonition seealso">
 <p class="first admonition-title">See also</p>
 <p class="last"><a class="reference internal" href="ddf_utils.html#ddf_utils.transformer.trend_bridge" title="ddf_utils.transformer.trend_bridge"><code class="xref py py-func docutils literal"><span class="pre">ddf_utils.transformer.trend_bridge()</span></code></a> : related function in transformer module</p>
@@ -978,6 +1028,11 @@ other nodes&#8217; data. Other nodes will be evaluated if it&#8217;s needed.</p>
 <div class="section" id="module-ddf_utils.chef.helpers">
 <span id="ddf-utils-chef-helpers-module"></span><h2>ddf_utils.chef.helpers module<a class="headerlink" href="#module-ddf_utils.chef.helpers" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
+<dt id="ddf_utils.chef.helpers.debuggable">
+<code class="descclassname">ddf_utils.chef.helpers.</code><code class="descname">debuggable</code><span class="sig-paren">(</span><em>func</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.helpers.debuggable" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
 <dt id="ddf_utils.chef.helpers.log_dtypes">
 <code class="descclassname">ddf_utils.chef.helpers.</code><code class="descname">log_dtypes</code><span class="sig-paren">(</span><em>func</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.helpers.log_dtypes" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -1012,7 +1067,8 @@ from numpy or <a class="reference internal" href="ddf_utils.html#module-ddf_util
 <dl class="function">
 <dt id="ddf_utils.chef.helpers.prompt_select">
 <code class="descclassname">ddf_utils.chef.helpers.</code><code class="descname">prompt_select</code><span class="sig-paren">(</span><em>selects</em>, <em>text_before=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.helpers.prompt_select" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>ask user to choose in a list of options</p>
+</dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.chef.helpers.read_opt">

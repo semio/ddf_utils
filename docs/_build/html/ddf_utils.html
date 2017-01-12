@@ -195,9 +195,21 @@
 <p>The reader instance accepts an dataset id on init and search the dataset in path
 set by the <cite>DDF_SEARCH_PATH</cite> global variable.</p>
 <dl class="attribute">
+<dt id="ddf_utils.ddf_reader.DDF.concepts">
+<code class="descname">concepts</code><a class="headerlink" href="#ddf_utils.ddf_reader.DDF.concepts" title="Permalink to this definition">¶</a></dt>
+<dd><p>convenient function to get all concepts</p>
+</dd></dl>
+
+<dl class="attribute">
 <dt id="ddf_utils.ddf_reader.DDF.datapackage">
 <code class="descname">datapackage</code><a class="headerlink" href="#ddf_utils.ddf_reader.DDF.datapackage" title="Permalink to this definition">¶</a></dt>
 <dd><p>the datapackage object. create one if it doesn&#8217;t exist</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ddf_utils.ddf_reader.DDF.dtypes">
+<code class="descname">dtypes</code><a class="headerlink" href="#ddf_utils.ddf_reader.DDF.dtypes" title="Permalink to this definition">¶</a></dt>
+<dd><p>return a mapping for column -&gt; python object type. internal use only.</p>
 </dd></dl>
 
 <dl class="method">
@@ -404,7 +416,7 @@ the file path of csv will be out_dir/ddf&#8211;$ftype&#8211;$concept&#8211;$by.c
 <p>commonly used calculation methods</p>
 <dl class="function">
 <dt id="ddf_utils.ops.aagr">
-<code class="descclassname">ddf_utils.ops.</code><code class="descname">aagr</code><span class="sig-paren">(</span><em>df: &lt;Mock name='mock.DataFrame' id='4415168584'&gt;</em>, <em>window: int = 10</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.ops.aagr" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.ops.</code><code class="descname">aagr</code><span class="sig-paren">(</span><em>df: &lt;Mock name='mock.DataFrame' id='4353018456'&gt;</em>, <em>window: int = 10</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.ops.aagr" title="Permalink to this definition">¶</a></dt>
 <dd><p>average annual growth rate</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -491,9 +503,16 @@ e.g. fix_time_range(&#8216;1980-90&#8217;) = 1985</p>
 
 <dl class="function">
 <dt id="ddf_utils.transformer.translate_column">
-<code class="descclassname">ddf_utils.transformer.</code><code class="descname">translate_column</code><span class="sig-paren">(</span><em>df</em>, <em>column</em>, <em>dictionary_type</em>, <em>dictionary</em>, <em>target_column=None</em>, <em>base_df=None</em>, <em>not_found='drop'</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.transformer.translate_column" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.transformer.</code><code class="descname">translate_column</code><span class="sig-paren">(</span><em>df</em>, <em>column</em>, <em>dictionary_type</em>, <em>dictionary</em>, <em>target_column=None</em>, <em>base_df=None</em>, <em>not_found='drop'</em>, <em>ambiguity='prompt'</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.transformer.translate_column" title="Permalink to this definition">¶</a></dt>
 <dd><p>change values in a column base on a mapping dictionary.</p>
 <p>The dictionary can be provided as a python dictionary, pandas dataframe or read from file.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">When translating with a base DataFrame, if ambiguity is found in the data, for example,
+a dataset with entity-id <cite>congo</cite>, to align to a dataset with <cite>cod</cite> ( Democratic Republic
+of the Congo ) and <cite>cog</cite> ( Republic of the Congo ), the function will ask for user input
+to choose which one or to skip it.</p>
+</div>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -510,6 +529,7 @@ e.g. fix_time_range(&#8216;1980-90&#8217;) = 1985</p>
 <li><strong>base_df</strong> (<cite>DataFrame</cite>, optional) &#8211; When <cite>dictionary_type</cite> is <cite>dataframe</cite>, this option should be set</li>
 <li><strong>not_found</strong> (<cite>str</cite>) &#8211; What to do if key in the dictionary is not found in the dataframe to be translated.
 avaliable options are <cite>drop</cite>, <cite>error</cite>, <cite>include</cite></li>
+<li><strong>ambiguity</strong> (<cite>str</cite>) &#8211; What to do when there is ambiguities in the dictionary. avaliable options are <cite>prompt</cite>, <cite>skip</cite>, <cite>error</cite></li>
 </ul>
 </td>
 </tr>
@@ -563,7 +583,7 @@ avaliable options are <cite>drop</cite>, <cite>error</cite>, <cite>include</cite
 
 <dl class="function">
 <dt id="ddf_utils.transformer.trend_bridge">
-<code class="descclassname">ddf_utils.transformer.</code><code class="descname">trend_bridge</code><span class="sig-paren">(</span><em>old_data</em>, <em>new_data</em>, <em>bridge_length</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.transformer.trend_bridge" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.transformer.</code><code class="descname">trend_bridge</code><span class="sig-paren">(</span><em>old_data: &lt;Mock name='mock.Series' id='4357967320'&gt;</em>, <em>new_data: &lt;Mock name='mock.Series' id='4357967320'&gt;</em>, <em>bridge_length: int</em><span class="sig-paren">)</span> &rarr; &lt;Mock name='mock.Series' id='4357967320'&gt;<a class="headerlink" href="#ddf_utils.transformer.trend_bridge" title="Permalink to this definition">¶</a></dt>
 <dd><p>smoothing data between series.</p>
 <p>To avoid getting artificial stairs in the data, we smooth between to
 series. Sometime one source is systematically higher than another source,
