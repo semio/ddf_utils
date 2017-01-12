@@ -852,6 +852,8 @@ def trend_bridge(ingredient: BaseIngredient, bridge_start, bridge_end, bridge_le
 
     Procedure format:
 
+    ::
+
       procedure: trend_bridge
       ingredients:
         - data_ingredient                 # optional, if not set defaults to empty ingredient
