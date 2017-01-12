@@ -227,7 +227,7 @@ def translate_header(df, dictionary, dictionary_type='inline'):
         raise ValueError('dictionary not supported: '+dictionary_type)
 
 
-def trend_bridge(old_data, new_data, bridge_length):
+def trend_bridge(old_data: pd.Series, new_data: pd.Series, bridge_length: int) -> pd.Series:
     """smoothing data between series.
 
     To avoid getting artificial stairs in the data, we smooth between to
@@ -246,12 +246,10 @@ def trend_bridge(old_data, new_data, bridge_length):
     -------
     bridge_data : the bridged data
     """
-    assert new_data.index[0] < old_data.index[-1]  # assume old data and new data have overlaps
-
     bridge_end = new_data.index[0]
     bridge_start = bridge_end - bridge_length
 
-    assert bridge_start > old_data.index[0]
+    assert not pd.isnull(old_data.ix[bridge_start]), 'no data for bridge start'
 
     bridge_height = new_data.ix[bridge_end] - old_data.ix[bridge_end]
     fraction = bridge_height / bridge_length
@@ -263,7 +261,9 @@ def trend_bridge(old_data, new_data, bridge_length):
             break
         bridge_data.ix[i:bridge_end] = bridge_data.ix[i:bridge_end] + fraction
 
-    return bridge_data
+    # combine old/new/bridged data
+    result =  pd.concat([bridge_data.ix[:bridge_end], new_data.iloc[1:]])
+    return result
 
 
 def extract_concepts(dfs, base=None, join='full_outer'):

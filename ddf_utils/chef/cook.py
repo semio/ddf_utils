@@ -225,13 +225,16 @@ def build_dag(recipe):
             for ing in proc.ingredients:
                 add_dependency(dag, ing, task)
             # also add nodes from options
+            # for now, if a key in option named base or ingredient, it will be treat as ingredients
+            # TODO: see if there is better way to do
             if 'options' in proc.keys():
                 options = proc['options']
-                if 'base' in options.keys():
-                    add_dependency(dag, options['base'], task)
-                for opt in options.keys():
-                    if isinstance(opt, dict) and 'base' in opt.keys():
-                        add_dependency(dag, options[opt]['base'], task)
+                for ingredient_key in ['base', 'ingredient']:
+                    if ingredient_key in options.keys():
+                        add_dependency(dag, options[ingredient_key], task)
+                    for opt, val in options.items():
+                        if isinstance(val, AttrDict) and ingredient_key in val.keys():
+                            add_dependency(dag, options[opt][ingredient_key], task)
             # detect cycles in recipe after adding all related nodes
             task.detect_downstream_cycle()
     # check if all serving ingredients are available

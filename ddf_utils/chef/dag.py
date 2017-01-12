@@ -110,14 +110,15 @@ class ProcedureNode(BaseNode):
         # also evaluate the ingredients in the options
         if 'options' in self.procedure.keys():
             options = self.procedure['options']
-            if 'base' in options.keys():
-                ing = self.dag.get_task(self.procedure['options']['base'])
-                options['base'] = ing.evaluate()
-            for opt in options.keys():
-                if isinstance(options[opt], dict):
-                    if 'base' in options[opt].keys():
-                        ing = self.dag.get_task(options[opt]['base'])
-                        options[opt]['base'] = ing.evaluate()
+            for ingredient_key in ['base', 'ingredient']:
+                if ingredient_key in options.keys():
+                    ing = self.dag.get_task(self.procedure['options'][ingredient_key])
+                    options[ingredient_key] = ing.evaluate()
+                for opt in options.keys():
+                    if isinstance(options[opt], dict):
+                        if ingredient_key in options[opt].keys():
+                            ing = self.dag.get_task(options[opt][ingredient_key])
+                            options[opt][ingredient_key] = ing.evaluate()
             self.result_ingredient = func(*ingredients, result=self.procedure['result'], **options)
         else:
             self.result_ingredient = func(*ingredients, result=self.procedure['result'])
