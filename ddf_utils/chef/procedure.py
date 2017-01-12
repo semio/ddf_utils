@@ -852,20 +852,20 @@ def trend_bridge(ingredient: BaseIngredient, bridge_start, bridge_end, bridge_le
 
     Procedure format:
 
-    procedure: trend_bridge
-    ingredients:
-      - data_ingredient                 # optional, if not set defaults to empty ingredient
-    result: data_bridged
-    options:
-      bridge_start:
-          ingredient: old_data_ingredient # optional, if not set then assume it's the input ingredient
-          column: concept_old_data
-      bridge_end:
-          ingredient: new_data_ingredient # optional, if not set then assume it's the input ingredient
-          column: concept_new_data
-      bridge_length: 5                  # steps in time. If year, years, if days, days.
-      bridge_on: time                   # the index column to build the bridge with
-      target_column: concept_in_result  # overwrites if exists. creates if not exists. default to bridge_end.column
+      procedure: trend_bridge
+      ingredients:
+        - data_ingredient                 # optional, if not set defaults to empty ingredient
+      result: data_bridged
+      options:
+        bridge_start:
+            ingredient: old_data_ingredient # optional, if not set then assume it's the input ingredient
+            column: concept_old_data
+        bridge_end:
+            ingredient: new_data_ingredient # optional, if not set then assume it's the input ingredient
+            column: concept_new_data
+        bridge_length: 5                  # steps in time. If year, years, if days, days.
+        bridge_on: time                   # the index column to build the bridge with
+        target_column: concept_in_result  # overwrites if exists. creates if not exists. default to bridge_end.column
 
     Parameters
     ----------
