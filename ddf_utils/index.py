@@ -8,7 +8,7 @@ import csv
 from collections import OrderedDict
 
 
-def get_datapackage(path, update_existing=False, to_disk=False):
+def get_datapackage(path, use_existing=False, to_disk=False):
     """get the datapackage.json from a dataset path, create one if it's not exists
 
     Parameters
@@ -18,8 +18,8 @@ def get_datapackage(path, update_existing=False, to_disk=False):
 
     Keyword Args
     ------------
-    update_existing : bool
-        whether or not to update the existing datapackage
+    use_existing : bool
+        whether or not to use the existing datapackage
     to_disk : bool
         whether or not to save result to disk
     """
@@ -30,7 +30,7 @@ def get_datapackage(path, update_existing=False, to_disk=False):
         with open(datapackage_path, encoding='utf8') as f:
             datapackage_old = json.load(f, object_pairs_hook=OrderedDict)
 
-        if update_existing:
+        if use_existing:
             _ = datapackage_old.pop('resources')  # don't use the old resources
             datapackage_new = create_datapackage(path, **datapackage_old)
         else:
@@ -65,9 +65,19 @@ def get_ddf_files(path, root=None):
 def create_datapackage(path, **kwargs):
     """create datapackage.json base on the files in `path`.
 
+    If you want to set some attributes manually, you can pass them as
+    keyword arguments to this function
+
+    Note
+    ----
     A DDFcsv datapackage MUST contain the fields `name` and `resources`.
 
-    if name is None, then the base name of `path` will be used.
+    if name is not provided, then the base name of `path` will be used.
+
+    Parameters
+    ----------
+    path : `str`
+        the dataset path to create datapackage.json
     """
 
     datapackage = OrderedDict()

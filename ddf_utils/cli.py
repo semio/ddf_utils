@@ -5,6 +5,7 @@
 
 import click
 import os
+import shutil
 import logging
 
 @click.group()
@@ -66,7 +67,13 @@ def create_datapackage(path, update):
         with open(os.path.join(path, 'datapackage.json'), 'w', encoding='utf8') as f:
             json.dump(res, f, indent=4, ensure_ascii=False)
     else:
-        get_datapackage(path, update_existing=True)
+        if os.path.exists(os.path.join(path, 'datapackage.json')):
+            click.echo('overwritting existing datapackage.json...')
+            # make a backup
+            shutil.copy(os.path.join(path, 'datapackage.json'), os.path.join(path, 'datapackage.json.bak'))
+        res = get_datapackage(path, use_existing=True)
+        with open(os.path.join(path, 'datapackage.json'), 'w', encoding='utf8') as f:
+            json.dump(res, f, indent=4, ensure_ascii=False)
     click.echo('Done.')
 
 
