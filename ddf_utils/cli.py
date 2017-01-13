@@ -122,13 +122,13 @@ def split_translation(path, split_path, dtype, exclude_concepts, overwrite):
         split_translations_json(path, split_path, exclude_concepts, overwrite)
     click.echo('Done.')
 
-#TODO: docs
+
 @ddf.command()
 @click.argument('path', type=click.Path(exists=True))
-@click.option('--overwrite/--no-overwrite', default=False)
-@click.option('--type', '-t', 'dtype', type=click.Choice(['json', 'csv']))
-@click.option('--split_path', default='langsplit')
-@click.option('--lang_path', default='lang')
+@click.option('--overwrite/--no-overwrite', default=False, help='overwrite existing files or not')
+@click.option('--type', '-t', 'dtype', type=click.Choice(['json', 'csv']), help='split file type')
+@click.option('--split_path', default='langsplit', help='path to langsplit folder')
+@click.option('--lang_path', default='lang', help='path to lang folder')
 def merge_translation(path, split_path, lang_path, dtype, overwrite):
     """merge all translation files from crowdin"""
     from ddf_utils.i18n import merge_translations_csv, merge_translations_json
