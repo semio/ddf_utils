@@ -9,6 +9,20 @@ from collections import OrderedDict
 
 
 def get_datapackage(path, update_existing=False, to_disk=False):
+    """get the datapackage.json from a dataset path, create one if it's not exists
+
+    Parameters
+    ----------
+    path : `str`
+        the dataset path
+
+    Keyword Args
+    ------------
+    update_existing : bool
+        whether or not to update the existing datapackage
+    to_disk : bool
+        whether or not to save result to disk
+    """
     datapackage_path = os.path.join(path, 'datapackage.json')
 
     if os.path.exists(datapackage_path):

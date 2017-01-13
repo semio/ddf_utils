@@ -47,6 +47,9 @@ extensions = [
     'sphinxcontrib.napoleon',
 ]
 
+# add intersphinx docs
+intersphinx_mapping = {'pandas': ('http://pandas.pydata.org/pandas-docs/stable/', None)}
+
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 
@@ -118,7 +121,7 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 # show_authors = False
 
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = 'sphinx'
+pygments_style = 'colorful'
 
 # A list of ignored prefixes for module index sorting.
 # modindex_common_prefix = []

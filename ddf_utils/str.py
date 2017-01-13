@@ -62,8 +62,10 @@ def fix_time_range(s):
 
 
 def _float_to_decimal(f):
-    # http://docs.python.org/library/decimal.html#decimal-faq
-    """Convert a floating point number to a Decimal with no loss of information"""
+    """Convert a floating point number to a Decimal with no loss of information
+
+    see http://docs.python.org/library/decimal.html#decimal-faq
+    """
     n, d = f.as_integer_ratio()
     numerator, denominator = decimal.Decimal(n), decimal.Decimal(d)
     ctx = decimal.Context(prec=60)
@@ -76,7 +78,7 @@ def _float_to_decimal(f):
 
 
 def format_float_digits(number, digits=5, threshold=None, keep_decimal=False):
-    """format the number, limit the maximum amount of digits. Removing tailing zeros."""
+    """format the number to string, limit the maximum amount of digits. Removing tailing zeros."""
     # assert(digits > 0)
     if pd.isnull(number):
         return number
@@ -104,6 +106,7 @@ def format_float_digits(number, digits=5, threshold=None, keep_decimal=False):
 
 
 def format_float_sigfig(number, sigfig=5, threshold=None):
+    """format the number to string, keeping some significant digits."""
     # http://stackoverflow.com/questions/2663612/nicely-representing-a-floating-point-number-in-python/2663623#2663623
     # assert(sigfig > 0)
     if pd.isnull(number):

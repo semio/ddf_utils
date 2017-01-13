@@ -234,7 +234,7 @@ set by the <cite>DDF_SEARCH_PATH</cite> global variable.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>concept_type</strong> (<cite>str</cite> or <cite>list</cite>) &#8211; the concept type(s) to filter, if &#8216;all&#8217; is provided, all concepts will be returned</li>
-<li><strong>**kwargs</strong> (<em>dict</em>) &#8211; keyword arguments provided to <code class="xref py py-func docutils literal"><span class="pre">pandas.read_csv()</span></code></li>
+<li><strong>**kwargs</strong> (<em>dict</em>) &#8211; keyword arguments provided to <a class="reference external" href="http://pandas.pydata.org/pandas-docs/stable/generated/pandas.read_csv.html#pandas.read_csv" title="(in pandas v0.19.2)"><code class="xref py py-func docutils literal"><span class="pre">pandas.read_csv()</span></code></a></li>
 </ul>
 </td>
 </tr>
@@ -307,7 +307,7 @@ primaryKeys avaliable, the first primaryKey in datapackage will be returned</li>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>domain</strong> (<cite>str</cite>, optional) &#8211; the domain to filter, if not provided, all domain will be returned</li>
-<li><strong>**kwargs</strong> (<em>dict</em>) &#8211; keyword arguments provided to <code class="xref py py-func docutils literal"><span class="pre">pandas.read_csv()</span></code></li>
+<li><strong>**kwargs</strong> (<em>dict</em>) &#8211; keyword arguments provided to <a class="reference external" href="http://pandas.pydata.org/pandas-docs/stable/generated/pandas.read_csv.html#pandas.read_csv" title="(in pandas v0.19.2)"><code class="xref py py-func docutils literal"><span class="pre">pandas.read_csv()</span></code></a></li>
 </ul>
 </td>
 </tr>
@@ -381,7 +381,24 @@ to judge if the dir is a dataset.</p>
 <dl class="function">
 <dt id="ddf_utils.index.get_datapackage">
 <code class="descclassname">ddf_utils.index.</code><code class="descname">get_datapackage</code><span class="sig-paren">(</span><em>path</em>, <em>update_existing=False</em>, <em>to_disk=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.index.get_datapackage" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>get the datapackage.json from a dataset path, create one if it&#8217;s not exists</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>path</strong> (<cite>str</cite>) &#8211; the dataset path</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Keyword Arguments:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><ul class="first last simple">
+<li><strong>update_existing</strong> (<em>bool</em>) &#8211; whether or not to update the existing datapackage</li>
+<li><strong>to_disk</strong> (<em>bool</em>) &#8211; whether or not to save result to disk</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.index.get_ddf_files">
@@ -416,7 +433,7 @@ the file path of csv will be out_dir/ddf&#8211;$ftype&#8211;$concept&#8211;$by.c
 <p>commonly used calculation methods</p>
 <dl class="function">
 <dt id="ddf_utils.ops.aagr">
-<code class="descclassname">ddf_utils.ops.</code><code class="descname">aagr</code><span class="sig-paren">(</span><em>df: &lt;Mock name='mock.DataFrame' id='4462573776'&gt;</em>, <em>window: int = 10</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.ops.aagr" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.ops.</code><code class="descname">aagr</code><span class="sig-paren">(</span><em>df: &lt;Mock name='mock.DataFrame' id='4340872584'&gt;</em>, <em>window: int = 10</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.ops.aagr" title="Permalink to this definition">¶</a></dt>
 <dd><p>average annual growth rate</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -478,13 +495,14 @@ e.g. fix_time_range(&#8216;1980-90&#8217;) = 1985</p>
 <dl class="function">
 <dt id="ddf_utils.str.format_float_digits">
 <code class="descclassname">ddf_utils.str.</code><code class="descname">format_float_digits</code><span class="sig-paren">(</span><em>number</em>, <em>digits=5</em>, <em>threshold=None</em>, <em>keep_decimal=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.str.format_float_digits" title="Permalink to this definition">¶</a></dt>
-<dd><p>format the number, limit the maximum amount of digits. Removing tailing zeros.</p>
+<dd><p>format the number to string, limit the maximum amount of digits. Removing tailing zeros.</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.str.format_float_sigfig">
 <code class="descclassname">ddf_utils.str.</code><code class="descname">format_float_sigfig</code><span class="sig-paren">(</span><em>number</em>, <em>sigfig=5</em>, <em>threshold=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.str.format_float_sigfig" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>format the number to string, keeping some significant digits.</p>
+</dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.str.to_concept_id">
@@ -499,7 +517,31 @@ e.g. fix_time_range(&#8216;1980-90&#8217;) = 1985</p>
 <dl class="function">
 <dt id="ddf_utils.transformer.extract_concepts">
 <code class="descclassname">ddf_utils.transformer.</code><code class="descname">extract_concepts</code><span class="sig-paren">(</span><em>dfs</em>, <em>base=None</em>, <em>join='full_outer'</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.transformer.extract_concepts" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>extract concepts from a list of dataframes.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>dfs</strong> (<em>list</em><em>[</em><em>DataFrame</em><em>]</em><em></em>) &#8211; a list of dataframes to be extracted</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Keyword Arguments:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><ul class="first simple">
+<li><strong>base</strong> (<em>DataFrame</em>) &#8211; the base concept table to join</li>
+<li><strong>join</strong> (<em>{'full_outer'</em><em>, </em><em>'ingredients_outer'}</em>) &#8211; how to join the <cite>base</cite> dataframe. <code class="docutils literal"><span class="pre">full_outer</span></code> means union of the base and extracted,
+<code class="docutils literal"><span class="pre">ingredients_outer</span></code> means only keep concepts in extracted</li>
+</ul>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">the result concept table</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">DataFrame</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.transformer.translate_column">
@@ -541,7 +583,7 @@ avaliable options are <cite>drop</cite>, <cite>error</cite>, <cite>include</cite
 <span class="go">  concept                 name</span>
 <span class="go">0     geo  Geographical places</span>
 <span class="go">1    time                 Year</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">tf</span><span class="o">.</span><span class="n">translate_column</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="s1">&#39;concept&#39;</span><span class="p">,</span> <span class="s1">&#39;inline&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;geo&#39;</span><span class="p">:</span> <span class="s1">&#39;country&#39;</span><span class="p">,</span> <span class="s1">&#39;time&#39;</span><span class="p">:</span> <span class="s1">&#39;year&#39;</span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">translate_column</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="s1">&#39;concept&#39;</span><span class="p">,</span> <span class="s1">&#39;inline&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;geo&#39;</span><span class="p">:</span> <span class="s1">&#39;country&#39;</span><span class="p">,</span> <span class="s1">&#39;time&#39;</span><span class="p">:</span> <span class="s1">&#39;year&#39;</span><span class="p">})</span>
 <span class="go">   concept                 name</span>
 <span class="go">0  country  Geographical places</span>
 <span class="go">1     year                 Year</span>
@@ -552,7 +594,7 @@ avaliable options are <cite>drop</cite>, <cite>error</cite>, <cite>include</cite
 <span class="go">  concept alternative_name</span>
 <span class="go">0     geo          country</span>
 <span class="go">1    time             year</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">tf</span><span class="o">.</span><span class="n">translate_column</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="s1">&#39;concept&#39;</span><span class="p">,</span> <span class="s1">&#39;dataframe&#39;</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">translate_column</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="s1">&#39;concept&#39;</span><span class="p">,</span> <span class="s1">&#39;dataframe&#39;</span><span class="p">,</span>
 <span class="gp">... </span>                    <span class="p">{</span><span class="s1">&#39;key&#39;</span><span class="p">:</span> <span class="s1">&#39;concept&#39;</span><span class="p">,</span> <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="s1">&#39;alternative_name&#39;</span><span class="p">},</span>
 <span class="gp">... </span>                    <span class="n">target_column</span><span class="o">=</span><span class="s1">&#39;new_name&#39;</span><span class="p">,</span> <span class="n">base_df</span><span class="o">=</span><span class="n">base_df</span><span class="p">)</span>
 <span class="go">  concept                 name new_name</span>
@@ -583,7 +625,7 @@ avaliable options are <cite>drop</cite>, <cite>error</cite>, <cite>include</cite
 
 <dl class="function">
 <dt id="ddf_utils.transformer.trend_bridge">
-<code class="descclassname">ddf_utils.transformer.</code><code class="descname">trend_bridge</code><span class="sig-paren">(</span><em>old_data: &lt;Mock name='mock.Series' id='4458203960'&gt;</em>, <em>new_data: &lt;Mock name='mock.Series' id='4458203960'&gt;</em>, <em>bridge_length: int</em><span class="sig-paren">)</span> &rarr; &lt;Mock name='mock.Series' id='4458203960'&gt;<a class="headerlink" href="#ddf_utils.transformer.trend_bridge" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.transformer.</code><code class="descname">trend_bridge</code><span class="sig-paren">(</span><em>old_data: &lt;Mock name='mock.Series' id='4342928272'&gt;</em>, <em>new_data: &lt;Mock name='mock.Series' id='4342928272'&gt;</em>, <em>bridge_length: int</em><span class="sig-paren">)</span> &rarr; &lt;Mock name='mock.Series' id='4342928272'&gt;<a class="headerlink" href="#ddf_utils.transformer.trend_bridge" title="Permalink to this definition">¶</a></dt>
 <dd><p>smoothing data between series.</p>
 <p>To avoid getting artificial stairs in the data, we smooth between to
 series. Sometime one source is systematically higher than another source,

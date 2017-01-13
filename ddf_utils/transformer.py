@@ -156,7 +156,7 @@ def translate_column(df, column, dictionary_type, dictionary,
       concept                 name
     0     geo  Geographical places
     1    time                 Year
-    >>> tf.translate_column(df, 'concept', 'inline', {'geo': 'country', 'time': 'year'})
+    >>> translate_column(df, 'concept', 'inline', {'geo': 'country', 'time': 'year'})
        concept                 name
     0  country  Geographical places
     1     year                 Year
@@ -166,7 +166,7 @@ def translate_column(df, column, dictionary_type, dictionary,
       concept alternative_name
     0     geo          country
     1    time             year
-    >>> tf.translate_column(df, 'concept', 'dataframe',
+    >>> translate_column(df, 'concept', 'dataframe',
     ...                     {'key': 'concept', 'value': 'alternative_name'},
     ...                     target_column='new_name', base_df=base_df)
       concept                 name new_name
@@ -245,6 +245,7 @@ def trend_bridge(old_data: pd.Series, new_data: pd.Series, bridge_length: int) -
     Returns
     -------
     bridge_data : the bridged data
+
     """
     bridge_end = new_data.index[0]
     bridge_start = bridge_end - bridge_length
@@ -267,6 +268,26 @@ def trend_bridge(old_data: pd.Series, new_data: pd.Series, bridge_length: int) -
 
 
 def extract_concepts(dfs, base=None, join='full_outer'):
+    """extract concepts from a list of dataframes.
+
+    Parameters
+    ----------
+    dfs : list[DataFrame]
+        a list of dataframes to be extracted
+
+    Keyword Args
+    ------------
+    base : DataFrame
+        the base concept table to join
+    join : {'full_outer', 'ingredients_outer'}
+        how to join the `base` dataframe. ``full_outer`` means union of the base and extracted,
+        ``ingredients_outer`` means only keep concepts in extracted
+
+    Return
+    ------
+    DataFrame
+        the result concept table
+    """
     if base is not None:
         concepts = base.set_index('concept')
     else:
