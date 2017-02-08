@@ -7,9 +7,8 @@ each node will have a `evaluate()` function, which will return an ingredient
 on eval.
 """
 
-import pandas as pd
 from . import procedure as pc
-from .exceptions import *
+from .exceptions import ProcedureError, ChefRuntimeError
 
 
 class BaseNode():

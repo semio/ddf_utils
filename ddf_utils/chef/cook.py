@@ -8,11 +8,11 @@ import os
 from orderedattrdict import AttrDict
 from orderedattrdict.yamlutils import AttrDictYAMLLoader
 
-from . ingredient import BaseIngredient, Ingredient, ProcedureResult
+from . ingredient import Ingredient
 from . dag import DAG, IngredientNode, ProcedureNode
 from . helpers import read_opt
 from .. import config
-from . exceptions import *
+from . exceptions import ChefRuntimeError
 
 import logging
 
@@ -203,7 +203,7 @@ def build_dag(recipe):
 
     dag = DAG()
     ingredients = [Ingredient.from_dict(x) for x in recipe.ingredients]
-    ingredients_names = [x.ingred_id for x in ingredients]
+    # ingredients_names = [x.ingred_id for x in ingredients]
     serving = []
 
     # adding ingredient nodes

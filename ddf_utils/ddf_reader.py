@@ -4,7 +4,6 @@
 
 import pandas as pd
 import os
-import json
 from .index import get_datapackage
 from . import config
 
@@ -215,7 +214,6 @@ class DDF():
 
         """
         datapoint_files = self.get_datapoint_files()
-        datapoints = dict()
 
         if len(datapoint_files[measure].keys()) == 1:
             keys = list(datapoint_files[measure].keys())[0]

@@ -12,6 +12,7 @@ from . index import get_datapackage
 import json
 import os
 
+
 def split_translations_json(path, split_path='langsplit', exclude_concepts=None, overwrite=False):
     """split all string concepts and save them as json files"""
     datapackage = get_datapackage(path)

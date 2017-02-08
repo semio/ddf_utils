@@ -4,13 +4,11 @@
 
 import pandas as pd
 import numpy as np
-from . ingredient import BaseIngredient, Ingredient, ProcedureResult
+from . ingredient import BaseIngredient, ProcedureResult
 from .helpers import read_opt, mkfunc, debuggable
-from .exceptions import *
-from .. import config
+from .exceptions import ProcedureError
 import time
 from typing import List, Union, Dict, Optional
-import re
 
 import logging
 

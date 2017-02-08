@@ -2,6 +2,7 @@
 
 """exceptions for chef"""
 
+
 class ProcedureError(Exception):
     pass
 

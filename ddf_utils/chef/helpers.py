@@ -78,6 +78,7 @@ def mkfunc(options):
         func = getattr(ops, options.pop('function'))
         return partial(func, **options)
 
+
 # below functions are not used in ddf_utils yet, but may be useful.
 def log_shape(func):
     @wraps(func)

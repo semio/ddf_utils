@@ -120,10 +120,10 @@ def create_datapackage(path, **kwargs):
     # TODO: make separate functions. this function is too long.
     for n, r in enumerate(resources):
         name_res = r['name']
-        schema = {"fields":[], "primaryKey":None}
+        schema = {"fields": [], "primaryKey": None}
 
         if 'datapoints' in name_res:
-            conc,keys = re.match('ddf--datapoints--([\w_]+)--by--(.*)', name_res).groups()
+            conc, keys = re.match('ddf--datapoints--([\w_]+)--by--(.*)', name_res).groups()
             primary_keys = keys.split('--')
             # print(conc, primary_keys)
             for i, k in enumerate(primary_keys):
@@ -180,7 +180,7 @@ def create_datapackage(path, **kwargs):
                 schema['fields'].append({'name': h})
 
             resources[n].update({'schema': schema})
-        else: # not entity/concept/datapoint. it's not supported yet so we don't include them.
+        else:  # not entity/concept/datapoint. it's not supported yet so we don't include them.
             print("not supported file: " + name_res)
             resources[n] = None
 

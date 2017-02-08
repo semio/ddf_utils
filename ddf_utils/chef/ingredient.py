@@ -2,16 +2,14 @@
 
 """main ingredient class"""
 
-import pandas as pd
 import numpy as np
 from ..str import format_float_digits
 from .helpers import read_opt
 import os
 import logging
 
-from .. import config
 from ..ddf_reader import DDF
-from .exceptions import *
+from .exceptions import IngredientError
 
 
 class BaseIngredient(object):
@@ -247,7 +245,6 @@ class Ingredient(BaseIngredient):
         else:
             return {'concepts': self.ddf.get_concepts()[self.values]}
 
-
     def get_data(self, copy=False, key_as_index=False):
         """read in and return the ingredient data
         """
@@ -272,7 +269,7 @@ class Ingredient(BaseIngredient):
             data = funcs[self.dtype](copy)
             for k, v in data.items():
                 if self.row_filter:
-                    index_cols = data[k].index.names
+                    # index_cols = data[k].index.names
                     # data[k] = self.filter_row(data[k].reset_index()).set_index(index_cols)
                     data[k] = filter_row(data[k].reset_index())
                 else:
