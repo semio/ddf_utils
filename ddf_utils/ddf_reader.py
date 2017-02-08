@@ -190,8 +190,8 @@ class DDF():
             if primaryKey:
                 for m in datapoint_files.keys():
                     datapoints[m] = {
-                        k: (self.__build_datapoint_df(datapoint_files[m][primaryKey])
-                            .set_index(list(primaryKey)))
+                        primaryKey: (self.__build_datapoint_df(datapoint_files[m][primaryKey])
+                                     .set_index(list(primaryKey)))
                     }
             else:
                 for m in datapoint_files.keys():
