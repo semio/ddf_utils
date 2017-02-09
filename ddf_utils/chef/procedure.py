@@ -101,9 +101,9 @@ def translate_column(ingredient: BaseIngredient, result, dictionary, column, *,
     .. code-block:: yaml
 
        dictionary:
-	     base: str  # ingredient name
-	     key: str or list  # the columns to be the keys of the dictionary, can accept a list
-	     value: str  # the column to be the values of the the dictionary, must be one column
+         base: str  # ingredient name
+         key: str or list  # the columns to be the keys of the dictionary, can accept a list
+         value: str  # the column to be the values of the the dictionary, must be one column
 
     Keyword Args
     ------------
@@ -674,7 +674,7 @@ def window(ingredient: BaseIngredient, result, **options) -> ProcedureResult:
         if size == 'expanding':
             newdata[k] = (df.groupby(level=levels, group_keys=False)
                           .expanding(on=column, min_periods=min_periods, center=center)
-                          .agg(func).reset_index().dropna())
+                          .agg(f).reset_index().dropna())
         else:
             # There is a bug when running rolling on with groupby in pandas.
             # see https://github.com/pandas-dev/pandas/issues/13966
@@ -683,7 +683,7 @@ def window(ingredient: BaseIngredient, result, **options) -> ProcedureResult:
             # FIXME: add back the `on` parameter.
             newdata[k] = (df.groupby(level=levels, group_keys=False)
                           .rolling(window=size, min_periods=min_periods, center=center)
-                          .agg(func).reset_index().dropna())
+                          .agg(f).reset_index().dropna())
     return ProcedureResult(result, ingredient.key, newdata)
 
 

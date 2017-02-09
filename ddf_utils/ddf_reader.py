@@ -176,24 +176,24 @@ class DDF():
         datapoints = dict()
 
         if measure:
-            if primaryKey:
+            if primaryKey:  # both measure and primaryKey given
                 datapoints[measure] = {
                     primaryKey: (self.__build_datapoint_df(datapoint_files[measure][primaryKey])
                                  .set_index(list(primaryKey)))
                 }
-            else:
+            else:  # only measure given
                 datapoints[measure] = dict([
                         (k, self.__build_datapoint_df(
                                 datapoint_files[measure][k]).set_index(list(k)))
                         for k in datapoint_files[measure].keys()])
         else:
-            if primaryKey:
+            if primaryKey:  # only primaryKey given
                 for m in datapoint_files.keys():
                     datapoints[m] = {
                         primaryKey: (self.__build_datapoint_df(datapoint_files[m][primaryKey])
                                      .set_index(list(primaryKey)))
                     }
-            else:
+            else:  # no parameters, return all
                 for m in datapoint_files.keys():
                     datapoints[m] = dict([
                             (k, self.__build_datapoint_df(

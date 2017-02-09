@@ -8,6 +8,7 @@ import os
 import shutil
 import logging
 
+
 @click.group()
 @click.option('--debug/--no-debug', default=False)
 def ddf(debug):
@@ -18,6 +19,7 @@ def ddf(debug):
     logging.basicConfig(level=level, format='%(asctime)s -%(levelname)s- %(message)s',
                         datefmt="%H:%M:%S"
                         )
+
 
 # project management
 @ddf.command()

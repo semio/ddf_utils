@@ -181,8 +181,8 @@ def check_dataset_availability(recipe):
             not_exists.append(d)
 
     if len(not_exists) > 0:
-        logging.critical("not enough datasets! please checkout following datasets:\n{}\n"\
-                            .format('\n'.join(not_exists)))
+        logging.critical("not enough datasets! please checkout following datasets:\n{}\n"
+                         .format('\n'.join(not_exists)))
         raise ChefRuntimeError('not enough datasets')
     return
 
@@ -194,11 +194,11 @@ def build_dag(recipe):
     """
 
     def add_dependency(dag, upstream_id, downstream):
-        if not dag.has_task(upstream_id):
+        if not dag.has_node(upstream_id):
             upstream = ProcedureNode(upstream_id, None, dag)
-            dag.add_task(upstream)
+            dag.add_node(upstream)
         else:
-            upstream = dag.get_task(ing)
+            upstream = dag.get_node(ing)
         dag.add_dependency(upstream.node_id, downstream.node_id)
 
     dag = DAG()
@@ -208,7 +208,7 @@ def build_dag(recipe):
 
     # adding ingredient nodes
     for i in ingredients:
-        dag.add_task(IngredientNode(i.ingred_id, i, dag))
+        dag.add_node(IngredientNode(i.ingred_id, i, dag))
 
     for k, d in recipe.cooking.items():
         for proc in d:
@@ -216,14 +216,14 @@ def build_dag(recipe):
                 [serving.append(x) for x in proc.ingredients]
                 continue
             try:
-                task = ProcedureNode(proc.result, proc, dag)
+                node = ProcedureNode(proc.result, proc, dag)
             except KeyError:
                 logger.critical('Please set the result id for procedure: ' + proc['procedure'])
                 raise
-            dag.add_task(task)
+            dag.add_node(node)
             # add nodes from base ingredients
             for ing in proc.ingredients:
-                add_dependency(dag, ing, task)
+                add_dependency(dag, ing, node)
             # also add nodes from options
             # for now, if a key in option named base or ingredient, it will be treat as ingredients
             # TODO: see if there is better way to do
@@ -231,21 +231,21 @@ def build_dag(recipe):
                 options = proc['options']
                 for ingredient_key in ['base', 'ingredient']:
                     if ingredient_key in options.keys():
-                        add_dependency(dag, options[ingredient_key], task)
+                        add_dependency(dag, options[ingredient_key], node)
                     for opt, val in options.items():
                         if isinstance(val, AttrDict) and ingredient_key in val.keys():
-                            add_dependency(dag, options[opt][ingredient_key], task)
+                            add_dependency(dag, options[opt][ingredient_key], node)
             # detect cycles in recipe after adding all related nodes
-            task.detect_downstream_cycle()
+            node.detect_downstream_cycle()
     # check if all serving ingredients are available
     for i in serving:
-        if not dag.has_task(i):
+        if not dag.has_node(i):
             raise ChefRuntimeError('Ingredient not found: ' + i)
     if 'serving' in recipe.keys():
         if len(serving) > 0:
             raise ChefRuntimeError('can not have serve procedure and serving section at same time!')
         for i in recipe['serving']:
-            if not dag.has_task(i['id']):
+            if not dag.has_node(i['id']):
                 raise ChefRuntimeError('Ingredient not found: ' + i['id'])
     # display the tree
     # dag.tree_view()
@@ -300,11 +300,11 @@ def run_recipe(recipe):
         for p in pceds:
             func = p['procedure']
             if func == 'serve':
-                ingredients = [dag.get_task(x).evaluate() for x in p['ingredients']]
+                ingredients = [dag.get_node(x).evaluate() for x in p['ingredients']]
                 opts = read_opt(p, 'options', default=dict())
                 [dishes[k].append({'ingredient': i, 'options': opts}) for i in ingredients]
                 continue
-            out = dag.get_task(p['result']).evaluate()
+            out = dag.get_node(p['result']).evaluate()
         # if there is no seving procedures/section, use the last output Ingredient object as final result.
         if len(dishes[k]) == 0 and 'serving' not in recipe.keys():
             logger.warning('serving last procedure output for {}: {}'.format(k, out.ingred_id))
@@ -313,7 +313,7 @@ def run_recipe(recipe):
     if 'serving' in recipe.keys():
         for i in recipe['serving']:
             opts = read_opt(i, 'options', default=dict())
-            ing = dag.get_task(i['id']).evaluate()
+            ing = dag.get_node(i['id']).evaluate()
             if ing.dtype in dishes.keys():
                 dishes[ing.dtype].append({'ingredient': ing, 'options': opts})
             else:
