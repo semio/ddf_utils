@@ -2,10 +2,10 @@
 
 """new version of ddf_reader, base on datapackage.json"""
 
-import pandas as pd
 import os
-from .index import get_datapackage
+import pandas as pd
 from . import config
+from .index import get_datapackage
 
 
 # main class for ddf reading
@@ -18,7 +18,7 @@ class DDF():
     def __init__(self, ddf_id, no_check_valid=False):
         dataset_path = os.path.join(config.DDF_SEARCH_PATH, ddf_id)
         if not no_check_valid:
-            assert is_dataset(dataset_path), "path is not ddf dataset: {}".format(dataset_path) 
+            assert is_dataset(dataset_path), "path is not ddf dataset: {}".format(dataset_path)
         self.dataset_path = dataset_path
         self.ddf_id = ddf_id
         self._datapackage = None
@@ -224,7 +224,8 @@ class DDF():
             return df[measure][keys]
         else:
             if not primaryKey:
-                raise ValueError("please specify a primaryKey for measures with multiple primaryKey")
+                raise ValueError("please specify a primaryKey for measures with multiple"
+                                 "primaryKeys")
             for keys in datapoint_files[measure].keys():
                 if set(keys) == set(primaryKey):
                     df = self.get_datapoints(measure, keys)

@@ -12,11 +12,7 @@ def to_concept_id(s, sep='_'):
     if pd.isnull(s):
         return s
     # replace some symbol to meaningful strings
-    sub = {
-        '%': 'pct',
-        '>': 'gt',
-        '<': 'lt'
-    }
+    sub = {'%': 'pct', '>': 'gt', '<': 'lt'}
     for k, v in sub.items():
         if k in s:
             s = s.replace(k, v)
@@ -40,7 +36,6 @@ def fix_time_range(s):
 
     if '-' not in s:
         return int(s)
-
     else:
         t1, t2 = s.split('-')
         if len(t1) == 4 and len(t2) == 4:
@@ -48,7 +43,7 @@ def fix_time_range(s):
             return int(int(t1) + span / 2)
         else:  # t2 have only 1-2 digits.
             d = len(t2)
-            hund1 = int(t1[:4-d])
+            hund1 = int(t1[:4 - d])
             tens1 = int(t1[-d:])
             tens2 = int(t2)
             y1 = int(t1)
@@ -58,7 +53,7 @@ def fix_time_range(s):
             else:
                 y2 = hund1 * 10**d + tens2
 
-            return int(y1 + (y2 - y1) / 2 )
+            return int(y1 + (y2 - y1) / 2)
 
 
 def _float_to_decimal(f):
@@ -138,14 +133,14 @@ def format_float_sigfig(number, sigfig=5, threshold=None):
     result = result[:sigfig]
     if shift >= sigfig - 1:
         # Tack more zeros on the end
-        result += ['0']*(shift-sigfig+1)
+        result += ['0'] * (shift - sigfig + 1)
     elif 0 <= shift:
         # Place the decimal point in between digits
-        result.insert(shift+1, '.')
+        result.insert(shift + 1, '.')
     else:
         # Tack zeros on the front
-        assert(shift < 0)
-        result = ['0.']+['0']*(-shift-1)+result
+        assert (shift < 0)
+        result = ['0.'] + ['0'] * (-shift - 1) + result
     if sign:
         result.insert(0, '-')
     return ''.join(result)

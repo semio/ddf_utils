@@ -48,7 +48,8 @@ def cleanup(path, how, force):
         cl(path, how)
     else:
         if not is_dataset(path):
-            print('not a dataset path: {}. please set correct path or use --force to force run.'.format(path))
+            print('not a dataset path: {}. Please set correct path or '
+                  'use --force to force run.'.format(os.path.abspath(path)))
         else:
             cl(path, how)
     click.echo('Done.')
@@ -56,7 +57,8 @@ def cleanup(path, how, force):
 
 @ddf.command()
 @click.argument('path')
-@click.option('--update', '-u', 'update', flag_value=True, default=False, help='update existing datapackage.json')
+@click.option('--update', '-u', 'update', flag_value=True, default=False,
+              help='update existing datapackage.json')
 def create_datapackage(path, update):
     """create datapackage.json"""
     from ddf_utils.index import get_datapackage
@@ -72,7 +74,8 @@ def create_datapackage(path, update):
         if os.path.exists(os.path.join(path, 'datapackage.json')):
             click.echo('overwritting existing datapackage.json...')
             # make a backup
-            shutil.copy(os.path.join(path, 'datapackage.json'), os.path.join(path, 'datapackage.json.bak'))
+            shutil.copy(os.path.join(path, 'datapackage.json'),
+                        os.path.join(path, 'datapackage.json.bak'))
         res = get_datapackage(path, use_existing=True)
         with open(os.path.join(path, 'datapackage.json'), 'w', encoding='utf8') as f:
             json.dump(res, f, indent=4, ensure_ascii=False)
@@ -84,9 +87,11 @@ def create_datapackage(path, update):
 @click.option('--recipe', '-i', type=click.Path(exists=True), required=True)
 @click.option('--outdir', '-o', type=click.Path(exists=True))
 @click.option('--ddf_dir', type=click.Path(exists=True), default=None)
-@click.option('--update', 'update', flag_value=False, help='Not implemented yet')  # not impletmented
-@click.option('--dry_run', '-d', 'dry_run', flag_value=True, default=False, help="don't save output to disk")
-@click.option('--show-tree', 'show_tree', flag_value=True, default=False, help='show the dependency tree')
+@click.option('--update', 'update', flag_value=False, help="Don't use. Not implemented yet")
+@click.option('--dry_run', '-d', 'dry_run', flag_value=True, default=False,
+              help="don't save output to disk")
+@click.option('--show-tree', 'show_tree', flag_value=True, default=False,
+              help='show the dependency tree')
 def run_recipe(recipe, outdir, ddf_dir, update, dry_run, show_tree):
     """generate new ddf dataset with recipe"""
     import ddf_utils.chef as chef

@@ -140,14 +140,16 @@ def translate_column(df, column, dictionary_type, dictionary,
         `file`: the file path, `str`
         `dataframe`: `dict`, must have `key` and `value` keys. see examples in examples section.
     target_column : `str`, optional
-        The column to store translated resluts. If this is None, then the one set with `column` will be replaced.
+        The column to store translated resluts. If this is None, then the one set with `column`
+        will be replaced.
     `base_df` : `DataFrame`, optional
         When `dictionary_type` is `dataframe`, this option should be set
     `not_found` : `str`
         What to do if key in the dictionary is not found in the dataframe to be translated.
         avaliable options are `drop`, `error`, `include`
     `ambiguity` : `str`
-        What to do when there is ambiguities in the dictionary. avaliable options are `prompt`, `skip`, `error`
+        What to do when there is ambiguities in the dictionary. avaliable options are `prompt`,
+        `skip`, `error`
 
     Examples
     --------

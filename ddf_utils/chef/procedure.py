@@ -90,8 +90,10 @@ def translate_column(ingredient: BaseIngredient, result, dictionary, column, *,
        options:
          column: str  # the column to be translated
          target_column: str  # optinoal, the target column to store the translated data
-         not_found: {'drop', 'include', 'error'}  # optional, the behavior when there is values not found in the mapping dictionary, default is 'drop'
-         ambiguity: {'prompt', 'skip', 'error'}  # optional, the behavior when there is ambiguity in the dictionary
+         not_found: {'drop', 'include', 'error'}  # optional, the behavior when there is values not
+                                                  # found in the mapping dictionary, default is 'drop'
+         ambiguity: {'prompt', 'skip', 'error'}  # optional, the behavior when there is ambiguity
+                                                 # in the dictionary
          dictionary: str or dict  # file name or mappings dictionary
 
     If base is provided in dictionary, key and value should also in dictionary.
@@ -114,7 +116,8 @@ def translate_column(ingredient: BaseIngredient, result, dictionary, column, *,
     column: `str`
         the column to be translated
     target_column : `str`, optional
-        the target column to store the translated data. If this is not set then the `column` cloumn will be replaced
+        the target column to store the translated data. If this is not set then the `column`
+        cloumn will be replaced
     not_found : {'drop', 'include', 'error'}, optional
         the behavior when there is values not found in the mapping dictionary, default is 'drop'
     ambiguity : {'prompt', 'skip', 'error'}, optional
@@ -212,8 +215,8 @@ def copy(ingredient: BaseIngredient, result, dictionary: Dict) -> ProcedureResul
 def merge(*ingredients: List[BaseIngredient], result, deep=False) -> ProcedureResult:
     """merge a list of ingredients
 
-    The ingredients will be merged one by one in the order of how they are provided to this function.
-    Later ones will overwrite the pervious merged results.
+    The ingredients will be merged one by one in the order of how they are provided to this
+    function. Later ones will overwrite the pervious merged results.
 
     Procedure format:
 
@@ -711,7 +714,8 @@ def run_op(ingredient: BaseIngredient, result, op) -> ProcedureResult:
     --------
     .. highlight:: yaml
 
-    for exmaple, if we want to add 2 columns, col_a and col_b, to create an new column, we can write
+    for exmaple, if we want to add 2 columns, col_a and col_b, to create an new column, we can
+    write
 
     ::
 
@@ -842,8 +846,8 @@ def extract_concepts(*ingredients: List[BaseIngredient], result,
 
 
 @debuggable
-def trend_bridge(ingredient: BaseIngredient, bridge_start, bridge_end, bridge_length, bridge_on, result,
-                 target_col=None) -> ProcedureResult:
+def trend_bridge(ingredient: BaseIngredient, bridge_start, bridge_end, bridge_length, bridge_on,
+                 result, target_col=None) -> ProcedureResult:
     """run trend bridge on ingredients
 
     .. highlight:: yaml
@@ -870,8 +874,8 @@ def trend_bridge(ingredient: BaseIngredient, bridge_start, bridge_end, bridge_le
     Parameters
     ----------
     ingredient : BaseIngredient
-        The input ingredient. The bridged result will be merged in to this ingredient. If this is None, then
-        the only the bridged result will be returned
+        The input ingredient. The bridged result will be merged in to this ingredient. If this is
+        None, then the only the bridged result will be returned
     bridge_start : dict
         Describe the start of bridge
     bridge_end : dict
@@ -954,4 +958,5 @@ def trend_bridge(ingredient: BaseIngredient, bridge_start, bridge_end, bridge_le
         return ProcedureResult(result, start.key, merged)
     else:
         return ProcedureResult(result, start.key, {target_col: result_data})
+
 

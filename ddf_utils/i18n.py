@@ -1,4 +1,4 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 """i18n project management for Gapminder's datasets.
 
 The workflow is described in this `google doc`_
@@ -6,11 +6,11 @@ The workflow is described in this `google doc`_
 .. _google doc: https://docs.google.com/document/d/11d5D5CPlr6I2BqP8z0p2o_dYQC9AYUyxcLGUq1WYCfk/
 """
 
-import pandas as pd
-import numpy as np
-from . index import get_datapackage
-import json
 import os
+import json
+import numpy as np
+import pandas as pd
+from . index import get_datapackage
 
 
 def split_translations_json(path, split_path='langsplit', exclude_concepts=None, overwrite=False):

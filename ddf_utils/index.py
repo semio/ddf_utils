@@ -48,8 +48,13 @@ def get_ddf_files(path, root=None):
     info = next(os.walk(path))
 
     # don't include hidden and lang/etl dir.
-    sub_dirs = [x for x in info[1] if (not x.startswith('.') and not x in ['lang', 'etl', 'langsplit'])]
-    files = [x for x in info[2] if (x.startswith('ddf--') and x != 'ddf--index.csv' and x.endswith('.csv'))]
+    sub_dirs = [
+        x for x in info[1] if (not x.startswith('.') and x not in ['lang', 'etl', 'langsplit'])
+    ]
+    files = [
+        x for x in info[2]
+        if (x.startswith('ddf--') and x != 'ddf--index.csv' and x.endswith('.csv'))
+    ]
 
     for f in files:
         if root:

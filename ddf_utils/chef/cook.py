@@ -113,7 +113,8 @@ def build_recipe(recipe_file, to_disk=False, **kwargs):
         for rcp in sub_recipes:
             # appending ingredients
             if 'ingredients' in recipe.keys():
-                # ingredients = [*recipe['ingredients'], *rcp['ingredients']]  # not supportted by Python < 3.5
+                # ingredients = [*recipe['ingredients'], *rcp['ingredients']]
+                # ^ not supportted by Python < 3.5
                 ingredients = []
                 [ingredients.append(ing) for ing in recipe['ingredients']]
                 [ingredients.append(ing) for ing in rcp['ingredients']]
@@ -125,7 +126,8 @@ def build_recipe(recipe_file, to_disk=False, **kwargs):
                     else:
                         # raise error when ingredients with same ID have different contents.
                         if v != rcp_dict_tmp[v['id']]:
-                            raise ChefRuntimeError("Different content with same ingredient id detected: " + v['id'])
+                            raise ChefRuntimeError(
+                                "Different content with same ingredient id detected: " + v['id'])
                 recipe['ingredients'] = list(rcp_dict_tmp.values())
             else:
                 recipe['ingredients'] = rcp['ingredients']
@@ -140,10 +142,12 @@ def build_recipe(recipe_file, to_disk=False, **kwargs):
                     if p in recipe['cooking'].keys():
                         # NOTE: the included cooking procedures should be placed in front of
                         # the origin ones.
-                        # recipe['cooking'][p] = [*rcp['cooking'][p], *recipe['cooking'][p]]  # not supportted by Python < 3.5
+                        # recipe['cooking'][p] = [*rcp['cooking'][p], *recipe['cooking'][p]]
+                        # ^ not supportted by Python < 3.5
                         new_procs = []
                         [new_procs.append(proc) for proc in rcp['cooking'][p]]
-                        [new_procs.append(proc) for proc in recipe['cooking'][p] if proc not in new_procs]
+                        [new_procs.append(proc) for proc in recipe['cooking'][p]
+                         if proc not in new_procs]
                         recipe['cooking'][p] = new_procs
                     else:
                         recipe['cooking'][p] = rcp['cooking'][p]
@@ -305,7 +309,8 @@ def run_recipe(recipe):
                 [dishes[k].append({'ingredient': i, 'options': opts}) for i in ingredients]
                 continue
             out = dag.get_node(p['result']).evaluate()
-        # if there is no seving procedures/section, use the last output Ingredient object as final result.
+        # if there is no seving procedures/section, use the last output Ingredient
+        # object as final result.
         if len(dishes[k]) == 0 and 'serving' not in recipe.keys():
             logger.warning('serving last procedure output for {}: {}'.format(k, out.ingred_id))
             dishes[k].append({'ingredient': out, 'options': dict()})
