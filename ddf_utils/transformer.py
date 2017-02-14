@@ -7,10 +7,30 @@ import numpy as np
 import json
 import logging
 
+from ddf_utils.chef.helpers import prompt_select
 
-def _translate_column_inline(df, column, target_column, dictionary, not_found):
 
+def _translate_column_inline(df, column, target_column, dictionary,
+                             not_found, ambiguity):
     df_new = df.copy()
+
+    # check for ambiguities
+    dict_ = dictionary.copy()
+    for k, v in dict_.items():
+        if isinstance(v, list):  # there is ambiguity
+            if ambiguity == 'skip':
+                dictionary.pop(k)
+            elif ambiguity == 'error':
+                raise ValueError("ambiguities found in dictionary!")
+            elif ambiguity == 'prompt':
+                # prompt for value
+                text = 'Please choose the correct entity to align *{}* with ' \
+                       'for the rest of the execution of the recipe:'.format(k)
+                val = prompt_select(v, text_before=text)
+                if val != -1:
+                    dictionary[k] = val
+                else:
+                    dictionary.pop(k)
 
     if not_found == 'drop':
         df_new[target_column] = df_new[column].map(
@@ -65,7 +85,7 @@ def _generate_mapping_dict2(df, column, dictionary, base_df, not_found):
             mapping[f] = filtered[idx_col].iloc[0]
         elif len(filtered) > 1:
             logging.warning("multiple match found: "+f)
-            mapping[f] = filtered[idx_col].iloc[0]
+            mapping[f] = filtered[idx_col].values.tolist()
         else:
             no_match.add(f)
 
@@ -78,7 +98,8 @@ def _generate_mapping_dict2(df, column, dictionary, base_df, not_found):
         return mapping
 
 
-def _translate_column_df(df, column, target_column, dictionary, base_df, not_found):
+def _translate_column_df(df, column, target_column, dictionary, base_df,
+                         not_found, ambiguity):
 
     search_cols = dictionary['key']
     if isinstance(search_cols, str):
@@ -89,14 +110,21 @@ def _translate_column_df(df, column, target_column, dictionary, base_df, not_fou
             mapping = _generate_mappng_dict1(df, column, dictionary, base_df, not_found)
         else:
             mapping = _generate_mapping_dict2(df, column, dictionary, base_df, not_found)
-    return _translate_column_inline(df, column, target_column, mapping, not_found)
+    return _translate_column_inline(df, column, target_column, mapping, not_found, ambiguity)
 
 
 def translate_column(df, column, dictionary_type, dictionary,
-                     target_column=None, base_df=None, not_found='drop'):
+                     target_column=None, base_df=None, not_found='drop', ambiguity='prompt'):
     """change values in a column base on a mapping dictionary.
 
     The dictionary can be provided as a python dictionary, pandas dataframe or read from file.
+
+    Note
+    ----
+    When translating with a base DataFrame, if ambiguity is found in the data, for example,
+    a dataset with entity-id `congo`, to align to a dataset with `cod` ( Democratic Republic
+    of the Congo ) and `cog` ( Republic of the Congo ), the function will ask for user input
+    to choose which one or to skip it.
 
     Parameters
     ----------
@@ -112,12 +140,16 @@ def translate_column(df, column, dictionary_type, dictionary,
         `file`: the file path, `str`
         `dataframe`: `dict`, must have `key` and `value` keys. see examples in examples section.
     target_column : `str`, optional
-        The column to store translated resluts. If this is None, then the one set with `column` will be replaced.
+        The column to store translated resluts. If this is None, then the one set with `column`
+        will be replaced.
     `base_df` : `DataFrame`, optional
         When `dictionary_type` is `dataframe`, this option should be set
-    `not_found`: `str`
+    `not_found` : `str`
         What to do if key in the dictionary is not found in the dataframe to be translated.
         avaliable options are `drop`, `error`, `include`
+    `ambiguity` : `str`
+        What to do when there is ambiguities in the dictionary. avaliable options are `prompt`,
+        `skip`, `error`
 
     Examples
     --------
@@ -126,7 +158,7 @@ def translate_column(df, column, dictionary_type, dictionary,
       concept                 name
     0     geo  Geographical places
     1    time                 Year
-    >>> tf.translate_column(df, 'concept', 'inline', {'geo': 'country', 'time': 'year'})
+    >>> translate_column(df, 'concept', 'inline', {'geo': 'country', 'time': 'year'})
        concept                 name
     0  country  Geographical places
     1     year                 Year
@@ -136,7 +168,7 @@ def translate_column(df, column, dictionary_type, dictionary,
       concept alternative_name
     0     geo          country
     1    time             year
-    >>> tf.translate_column(df, 'concept', 'dataframe',
+    >>> translate_column(df, 'concept', 'dataframe',
     ...                     {'key': 'concept', 'value': 'alternative_name'},
     ...                     target_column='new_name', base_df=base_df)
       concept                 name new_name
@@ -150,6 +182,9 @@ def translate_column(df, column, dictionary_type, dictionary,
     if not_found not in ['drop', 'error', 'include']:
         raise ValueError("not_found should be one of 'drop', 'error', 'include'")
 
+    if ambiguity not in ['skip', 'error', 'prompt']:
+        raise ValueError("ambiguity should be one of 'skip', 'error', 'prompt'")
+
     if dictionary_type == 'dataframe' and base_df is None:
         raise ValueError("please specify base_df when dictionary type is 'dataframe'")
 
@@ -157,14 +192,17 @@ def translate_column(df, column, dictionary_type, dictionary,
         target_column = column
 
     if dictionary_type == 'inline':
-        df_new = _translate_column_inline(df, column, target_column, dictionary, not_found)
+        df_new = _translate_column_inline(df, column, target_column, dictionary,
+                                          not_found, ambiguity)
     if dictionary_type == 'file':
         with open(dictionary) as f:
             d = json.load(f)
-        df_new = _translate_column_inline(df, column, target_column, d, not_found)
+        df_new = _translate_column_inline(df, column, target_column, d,
+                                          not_found, ambiguity)
     if dictionary_type == 'dataframe':
         assert 'key' in dictionary.keys() and 'value' in dictionary.keys()
-        df_new = _translate_column_df(df, column, target_column, dictionary, base_df, not_found)
+        df_new = _translate_column_df(df, column, target_column, dictionary, base_df,
+                                      not_found, ambiguity)
 
     return df_new
 
@@ -191,7 +229,7 @@ def translate_header(df, dictionary, dictionary_type='inline'):
         raise ValueError('dictionary not supported: '+dictionary_type)
 
 
-def trend_bridge(old_data, new_data, bridge_length):
+def trend_bridge(old_data: pd.Series, new_data: pd.Series, bridge_length: int) -> pd.Series:
     """smoothing data between series.
 
     To avoid getting artificial stairs in the data, we smooth between to
@@ -209,13 +247,12 @@ def trend_bridge(old_data, new_data, bridge_length):
     Returns
     -------
     bridge_data : the bridged data
-    """
-    assert new_data.index[0] < old_data.index[-1]  # assume old data and new data have overlaps
 
+    """
     bridge_end = new_data.index[0]
     bridge_start = bridge_end - bridge_length
 
-    assert bridge_start > old_data.index[0]
+    assert not pd.isnull(old_data.ix[bridge_start]), 'no data for bridge start'
 
     bridge_height = new_data.ix[bridge_end] - old_data.ix[bridge_end]
     fraction = bridge_height / bridge_length
@@ -227,10 +264,32 @@ def trend_bridge(old_data, new_data, bridge_length):
             break
         bridge_data.ix[i:bridge_end] = bridge_data.ix[i:bridge_end] + fraction
 
-    return bridge_data
+    # combine old/new/bridged data
+    result =  pd.concat([bridge_data.ix[:bridge_end], new_data.iloc[1:]])
+    return result
 
 
 def extract_concepts(dfs, base=None, join='full_outer'):
+    """extract concepts from a list of dataframes.
+
+    Parameters
+    ----------
+    dfs : list[DataFrame]
+        a list of dataframes to be extracted
+
+    Keyword Args
+    ------------
+    base : DataFrame
+        the base concept table to join
+    join : {'full_outer', 'ingredients_outer'}
+        how to join the `base` dataframe. ``full_outer`` means union of the base and extracted,
+        ``ingredients_outer`` means only keep concepts in extracted
+
+    Return
+    ------
+    DataFrame
+        the result concept table
+    """
     if base is not None:
         concepts = base.set_index('concept')
     else:

@@ -1,20 +1,22 @@
 # -*- coding: utf-8 -*-
 
 from functools import wraps, partial
-import numpy as np
+from .. import config
 from .. import ops
+import os
 import logging
 import click
+import numpy as np
 
 
 def prompt_select(selects, text_before=None):
-
+    """ask user to choose in a list of options"""
     def value_proc(v):
         if v == 'n':
             return -1
         if v == 'q':
             import sys
-            sys.exit()
+            sys.exit(130)  # code for user interrupted
         return int(v)
 
     if text_before:
@@ -29,7 +31,9 @@ def prompt_select(selects, text_before=None):
     prompt_text = 'Please select a value ({} ~ {}), or "n" to skip, "q" to quit'\
                   .format(1, len(selects))
     val = click.prompt(prompt_text, value_proc=value_proc)
-    return val
+    if val == -1:
+        return -1
+    return selects[val-1]
 
 
 def read_opt(options, key, required=False, default=None):
@@ -74,6 +78,7 @@ def mkfunc(options):
         func = getattr(ops, options.pop('function'))
         return partial(func, **options)
 
+
 # below functions are not used in ddf_utils yet, but may be useful.
 def log_shape(func):
     @wraps(func)
@@ -98,5 +103,27 @@ def log_procedure(func):
     def wrapper(*args, **kwargs):
         logging.info("running %s" % (func.__name__))
         result = func(*args, **kwargs)
+        return result
+    return wrapper
+
+
+def debuggable(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        if 'debug' in kwargs.keys():
+            debug = kwargs.pop('debug')
+            result = func(*args, **kwargs)
+            if debug:
+                if config.DEBUG_OUTPUT_PATH is None:
+                    logging.warning('debug output path not set!')
+                    config.DEBUG_OUTPUT_PATH = './_debug'  # TODO: handle the config better
+                outpath = os.path.join(config.DEBUG_OUTPUT_PATH, result.ingred_id)
+                if os.path.exists(outpath):
+                    import shutil
+                    shutil.rmtree(outpath)
+                    os.mkdir(outpath)
+                result.serve(outpath)
+        else:
+            result = func(*args, **kwargs)
         return result
     return wrapper

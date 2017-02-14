@@ -1,3 +1,16 @@
+## version 0.2.10 2017-02-14
+
+- new options for `extract_concepts` procedure (#40)
+- the `key` parameter for ingredients now only accepts string (#39)
+    - Note: this will break recipes worked on pervious version with entities
+      ingredients which `key`s are lists.
+- `translate_column` can ask for user input when ambiguity found (#34)
+- the ingredient dataframe's dtype will set according to the concepts table (#43)
+- added debug options to all procedures (#46)
+- added `trend_bridge` procedure (#42)
+- code cleanup and formatting
+- added lots of documents
+
 ## version 0.2.9 2017-01-03
 
 - added tests for all procedures
@@ -7,7 +20,7 @@
 - add options for `serve` procedures and `serving` section. Now you should
 provide a list of dictionaries in `serving` section, instead of a list of
 ids as pervious version
-- improvements and bug fixes
+- minor improvements and bug fixes
 
 ## version 0.2.8 2016-12-13
 

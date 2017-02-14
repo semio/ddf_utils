@@ -16,6 +16,7 @@ A recipe is made of following parts:
 - basic info
 - configuration
 - includes
+- ingredients
 - cooking procedures
 - serving section
 
@@ -60,6 +61,44 @@ can set below path:
 A recipe can include other recipes inside itself. to include a recipe, simply
 append the filename to the `include` section. note that it should be a absolute
 path or a filename inside the `recipes_dir`.
+
+### ingredients section
+
+A recipe must have some ingredients for cooking. We can either define the ingredients in the
+`ingredients` section or include other recipes which have an `ingredients` section.
+
+The `ingredients` section is a list of ingredient objects. An ingredient should be defined with
+following parameters:
+
+- `id`: the name of the ingredient
+- `dataset`: the dataset where the ingredient is from
+- `key`: the primary keys to filter from datapackage
+- `value`: the concept names to filter from the result of filtering keys. Pass "*" to select all.
+- `row_filter`: optional, only select rows match the filter. The filter is a dictionary where keys 
+are colunm names and values are values to filter
+
+Here is an example of `ingredient` section:
+
+```yaml
+ingredients:
+  - id: example-concepts
+    dataset: ddf_example_dataset
+    key: concept
+    value: "*"
+    row_filter:
+      concept:
+        - geo
+        - time
+        - some_measure_concept
+  - id: example-datapoints
+    dataset: ddf_example_dataset
+    key: geo, time
+    value: some_measure_concept
+  - id: example-entities
+    dataset: ddf_example_dataset
+    key: geo
+    value: "*"
+```
 
 ### cooking section
 
@@ -122,7 +161,7 @@ serving:
 To run a recipe, you can use the `ddf run_recipe` command:
 
 ```shell
-$ ddf run_recipe -i path_to_recipe.yaml -o output_dir
+$ ddf run_recipe -i path_to_rsecipe.yaml -o output_dir
 ```
 
 You can specify the path where your datasets are stored:
@@ -163,12 +202,12 @@ run_recipe(path_to_recipe, outdir)
 
 Currently supported procedures:
 
-- [translate_header](#translate-header): translate the headers
-- [translate_column](#translate-column): translate the values in a column
-- [identity](#identity): identity function = nothing changes
-- [merge](#merge): merge ingredients together on the keys
+- [translate_header](#translate-header): change ingredient data header according to a mapping dictionary
+- [translate_column](#translate-column): change column values of ingredient data according to a mapping dictionary
+- [identity](#identity): return the ingredient as is
+- [merge](#merge): merge ingredients together on their keys
 - [groupby](#groubby): group ingredient by columns and do aggregate/filter/transform
-- [window](#window): run function on rolling window
+- [window](#window): run function on rolling windows
 - [filter_row](#filter-row): filter ingredient data by column values
 - [filter_item](#filter-item): filter ingredient data by concepts
 - [run_op](#run-op): run math operations on ingredient columns
@@ -177,6 +216,8 @@ Currently supported procedures:
 - [trend_bridge](#trend-bridge)(WIP): connect 2 ingredients and make custom smoothing
 
 ### translate_header
+
+Change ingredient data header according to a mapping dictionary.
 
 **usage and options**
 
@@ -196,6 +237,8 @@ options:
 
 ### translate_column
 
+Change column values of ingredient data according to a mapping dictionary, the dictionary can be generated from an other ingredient.
+
 **usage and options**
 
 ```yaml
@@ -207,6 +250,7 @@ options:
   column: str  # the column to be translated
   target_column: str  # optinoal, the target column to store the translated data
   not_found: {'drop', 'include', 'error'}  # optional, the behavior when there is values not found in the mapping dictionary, default is 'drop'
+  ambiguity: {'prompt', 'skip', 'error'}  # optional, the behavior when there is ambiguity in the dictionary
   dictionary: str or dict  # file name or mappings dictionary
 ```
 
@@ -247,6 +291,8 @@ result: geo-aligned
 
 ### identity
 
+Return the ingredient as is.
+
 **usage and options**
 
 ```yaml
@@ -263,6 +309,8 @@ options:
 - currently chef only support one ingredient in the `ingredients` parameter
 
 ### merge
+
+Merge ingredients together on their keys.
 
 **usage and options**
 
@@ -284,6 +332,8 @@ options:
 - **deep merge** is when we check every datapoint for existence if false, overwrite is on the file level. If key-value (e.g. geo,year-population_total) exists, whole file gets overwritten if true, overwrite is on the row level. If values (e.g. afr,2015-population_total) exists, it gets overwritten, if it doesn’t it stays
 
 ### groupby
+
+Group ingredient by columns and do aggregate/filter/transform.
 
 **usage and options**
 
@@ -320,6 +370,8 @@ aggregate:  # or transform, filter
 
 ### window
 
+Run function on rolling windows.
+
 **usage and options**
 
 ```yaml
@@ -355,6 +407,8 @@ aggregate:
 
 ### filter_row
 
+Filter ingredient data by column values.
+
 **usage and options**
 
 ```yaml
@@ -387,6 +441,8 @@ An example can be found in this [github issue](https://github.com/semio/ddf_util
 
 ### filter_item
 
+Filter ingredient data by concepts.
+
 **usage and options**
 
 ```yaml
@@ -403,6 +459,8 @@ options:
 - currently chef only support one ingredient in the `ingredients` parameter
 
 ### run_op
+
+Run math operations on ingredient columns.
 
 **usage and options**
 
@@ -435,6 +493,8 @@ options:
 
 ### copy
 
+Make copy of columns of ingredient data.
+
 **usage and options**
 
 ```yaml
@@ -464,6 +524,8 @@ dictionary:
 
 ### extract_concepts
 
+Generate concepts ingredient from other ingredients.
+
 **usage and options**
 
 ```yaml
@@ -476,6 +538,9 @@ options:
   join:  # optional
     base: str  # base concept ingredient id
     type: {'full_outer', 'ingredients_outer'}  # default is full_outer
+  include_keys: true  # if we should include the primaryKeys of the ingredients
+  overwrite:  # overwirte some of the concept types
+      year: time
 ```
 
 **notes**
@@ -486,7 +551,9 @@ options:
 
 ### trend_bridge
 
-(WIP) see discussion [here](https://github.com/semio/ddf_utils/issues/42).
+(WIP) Connect 2 ingredients and make custom smoothing.
+
+see discussion [here](https://github.com/semio/ddf_utils/issues/42).
 
 
 ### General guideline for writing recipes

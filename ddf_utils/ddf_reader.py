@@ -2,11 +2,10 @@
 
 """new version of ddf_reader, base on datapackage.json"""
 
-import pandas as pd
 import os
-import json
-from .index import get_datapackage
+import pandas as pd
 from . import config
+from .index import get_datapackage
 
 
 # main class for ddf reading
@@ -19,10 +18,11 @@ class DDF():
     def __init__(self, ddf_id, no_check_valid=False):
         dataset_path = os.path.join(config.DDF_SEARCH_PATH, ddf_id)
         if not no_check_valid:
-            assert is_dataset(dataset_path)
+            assert is_dataset(dataset_path), "path is not ddf dataset: {}".format(dataset_path)
         self.dataset_path = dataset_path
         self.ddf_id = ddf_id
         self._datapackage = None
+        self._concepts = None
 
     @property
     def datapackage(self):
@@ -30,6 +30,28 @@ class DDF():
         if not self._datapackage:
             self._datapackage = get_datapackage(self.dataset_path)
         return self._datapackage
+
+    @property
+    def concepts(self):
+        """convenient function to get all concepts"""
+        if self._concepts is None:
+            self._concepts = self.get_concepts()
+        return self._concepts
+
+    @property
+    def dtypes(self):
+        """return a mapping for column -> python object type. internal use only."""
+        concept_types = self.concepts['concept_type']
+        res = dict()
+        for c, v in concept_types.iteritems():
+            if v in ['string', 'entity_domain', 'entity_set']:
+                res[c] = str
+            elif v in ['time']:
+                res[c] = int  # TODO: support more time format
+            else:  # for measures and other concept type, let pandas decide
+                continue
+
+        return res
 
     def get_all_files(self):
         """return a list of all files in this dataset"""
@@ -90,15 +112,21 @@ class DDF():
         if domain:
             entity_concepts = entity_concepts[entity_concepts.domain == domain]
 
+        if 'dtype' in kwargs.keys():
+            dtype = kwargs.pop('dtype')
+        else:
+            dtype = self.dtypes
+
         entities = dict()
         for res in resources:
             key = res['schema']['primaryKey']
             if isinstance(key, str) and key != 'concept':
                 name = res['name'].split('--')[-1]  # TODO: don't judge by name
-                if res['schema']['primaryKey'] in list(entity_concepts.index):
+                if (res['schema']['primaryKey'] in list(entity_concepts.index) or
+                    (domain is not None and res['schema']['primaryKey'] == domain)):
                     entities[name] = pd.read_csv(
                         os.path.join(self.dataset_path, res['path']),
-                        index_col=res['schema']['primaryKey'], **kwargs)
+                        index_col=res['schema']['primaryKey'], dtype=dtype, **kwargs)
         return entities
 
     def get_datapoint_files(self):
@@ -125,7 +153,7 @@ class DDF():
 
     def __build_datapoint_df(self, files):
         return pd.concat(
-            [pd.read_csv(os.path.join(self.dataset_path, x)) for x in files],
+            [pd.read_csv(os.path.join(self.dataset_path, x), dtype=self.dtypes) for x in files],
             ignore_index=True
         )
 
@@ -148,24 +176,24 @@ class DDF():
         datapoints = dict()
 
         if measure:
-            if primaryKey:
+            if primaryKey:  # both measure and primaryKey given
                 datapoints[measure] = {
                     primaryKey: (self.__build_datapoint_df(datapoint_files[measure][primaryKey])
                                  .set_index(list(primaryKey)))
                 }
-            else:
+            else:  # only measure given
                 datapoints[measure] = dict([
                         (k, self.__build_datapoint_df(
                                 datapoint_files[measure][k]).set_index(list(k)))
                         for k in datapoint_files[measure].keys()])
         else:
-            if primaryKey:
+            if primaryKey:  # only primaryKey given
                 for m in datapoint_files.keys():
                     datapoints[m] = {
-                        k: (self.__build_datapoint_df(datapoint_files[m][primaryKey])
-                            .set_index(list(primaryKey)))
+                        primaryKey: (self.__build_datapoint_df(datapoint_files[m][primaryKey])
+                                     .set_index(list(primaryKey)))
                     }
-            else:
+            else:  # no parameters, return all
                 for m in datapoint_files.keys():
                     datapoints[m] = dict([
                             (k, self.__build_datapoint_df(
@@ -186,7 +214,6 @@ class DDF():
 
         """
         datapoint_files = self.get_datapoint_files()
-        datapoints = dict()
 
         if len(datapoint_files[measure].keys()) == 1:
             keys = list(datapoint_files[measure].keys())[0]
@@ -197,7 +224,8 @@ class DDF():
             return df[measure][keys]
         else:
             if not primaryKey:
-                raise ValueError("please specify a primaryKey for measures with multiple primaryKey")
+                raise ValueError("please specify a primaryKey for measures with multiple"
+                                 "primaryKeys")
             for keys in datapoint_files[measure].keys():
                 if set(keys) == set(primaryKey):
                     df = self.get_datapoints(measure, keys)

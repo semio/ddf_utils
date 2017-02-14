@@ -1,5 +1,5 @@
 info:
-    id: test-translate_header
+    id: test-debug
 
 config:
     dictionary_dir: ../translation_dictionaries
@@ -20,9 +20,11 @@ cooking:
               dictionary:
                   country: geo
                   year: time
+              debug: true
         - procedure: translate_header
           ingredients:
               - dps_key_translated
           result: res
           options:
               dictionary: indicators_cme_to_sg.json
+              debug: true

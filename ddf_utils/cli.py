@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
-#!usr/bin/env python
+#!/usr/bin/env python
 
 """script for ddf dataset management tasks"""
 
 import click
 import os
+import shutil
 import logging
+
 
 @click.group()
 @click.option('--debug/--no-debug', default=False)
@@ -17,6 +19,7 @@ def ddf(debug):
     logging.basicConfig(level=level, format='%(asctime)s -%(levelname)s- %(message)s',
                         datefmt="%H:%M:%S"
                         )
+
 
 # project management
 @ddf.command()
@@ -45,7 +48,8 @@ def cleanup(path, how, force):
         cl(path, how)
     else:
         if not is_dataset(path):
-            print('not a dataset path: {}. please set correct path or use --force to force run.'.format(path))
+            print('not a dataset path: {}. Please set correct path or '
+                  'use --force to force run.'.format(os.path.abspath(path)))
         else:
             cl(path, how)
     click.echo('Done.')
@@ -53,7 +57,8 @@ def cleanup(path, how, force):
 
 @ddf.command()
 @click.argument('path')
-@click.option('--update', '-u', 'update', flag_value=True, default=False, help='update existing datapackage.json')
+@click.option('--update', '-u', 'update', flag_value=True, default=False,
+              help='update existing datapackage.json')
 def create_datapackage(path, update):
     """create datapackage.json"""
     from ddf_utils.index import get_datapackage
@@ -66,7 +71,14 @@ def create_datapackage(path, update):
         with open(os.path.join(path, 'datapackage.json'), 'w', encoding='utf8') as f:
             json.dump(res, f, indent=4, ensure_ascii=False)
     else:
-        get_datapackage(path, update_existing=True)
+        if os.path.exists(os.path.join(path, 'datapackage.json')):
+            click.echo('overwritting existing datapackage.json...')
+            # make a backup
+            shutil.copy(os.path.join(path, 'datapackage.json'),
+                        os.path.join(path, 'datapackage.json.bak'))
+        res = get_datapackage(path, use_existing=True)
+        with open(os.path.join(path, 'datapackage.json'), 'w', encoding='utf8') as f:
+            json.dump(res, f, indent=4, ensure_ascii=False)
     click.echo('Done.')
 
 
@@ -75,9 +87,11 @@ def create_datapackage(path, update):
 @click.option('--recipe', '-i', type=click.Path(exists=True), required=True)
 @click.option('--outdir', '-o', type=click.Path(exists=True))
 @click.option('--ddf_dir', type=click.Path(exists=True), default=None)
-@click.option('--update', 'update', flag_value=False, help='Not implemented yet')  # not impletmented
-@click.option('--dry_run', '-d', 'dry_run', flag_value=True, default=False, help="don't save output to disk")
-@click.option('--show-tree', 'show_tree', flag_value=True, default=False, help='show the dependency tree')
+@click.option('--update', 'update', flag_value=False, help="Don't use. Not implemented yet")
+@click.option('--dry_run', '-d', 'dry_run', flag_value=True, default=False,
+              help="don't save output to disk")
+@click.option('--show-tree', 'show_tree', flag_value=True, default=False,
+              help='show the dependency tree')
 def run_recipe(recipe, outdir, ddf_dir, update, dry_run, show_tree):
     """generate new ddf dataset with recipe"""
     import ddf_utils.chef as chef
@@ -122,13 +136,13 @@ def split_translation(path, split_path, dtype, exclude_concepts, overwrite):
         split_translations_json(path, split_path, exclude_concepts, overwrite)
     click.echo('Done.')
 
-#TODO: docs
+
 @ddf.command()
 @click.argument('path', type=click.Path(exists=True))
-@click.option('--overwrite/--no-overwrite', default=False)
-@click.option('--type', '-t', 'dtype', type=click.Choice(['json', 'csv']))
-@click.option('--split_path', default='langsplit')
-@click.option('--lang_path', default='lang')
+@click.option('--overwrite/--no-overwrite', default=False, help='overwrite existing files or not')
+@click.option('--type', '-t', 'dtype', type=click.Choice(['json', 'csv']), help='split file type')
+@click.option('--split_path', default='langsplit', help='path to langsplit folder')
+@click.option('--lang_path', default='lang', help='path to lang folder')
 def merge_translation(path, split_path, lang_path, dtype, overwrite):
     """merge all translation files from crowdin"""
     from ddf_utils.i18n import merge_translations_csv, merge_translations_json

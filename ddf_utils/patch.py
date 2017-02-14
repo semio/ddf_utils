@@ -1,10 +1,9 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 
 """functions working with patches"""
 
 import pandas as pd
 import daff
-import os
 
 
 def apply_patch(base, patch):

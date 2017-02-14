@@ -145,6 +145,7 @@
  | <a href="#K"><strong>K</strong></a>
  | <a href="#L"><strong>L</strong></a>
  | <a href="#M"><strong>M</strong></a>
+ | <a href="#N"><strong>N</strong></a>
  | <a href="#P"><strong>P</strong></a>
  | <a href="#R"><strong>R</strong></a>
  | <a href="#S"><strong>S</strong></a>
@@ -166,7 +167,7 @@
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="ddf_utils.chef.html#ddf_utils.chef.dag.DAG.add_task">add_task() (ddf_utils.chef.dag.DAG method)</a>
+      <li><a href="ddf_utils.chef.html#ddf_utils.chef.dag.DAG.add_node">add_node() (ddf_utils.chef.dag.DAG method)</a>
 </li>
       <li><a href="ddf_utils.chef.html#ddf_utils.chef.dag.BaseNode.add_upstream">add_upstream() (ddf_utils.chef.dag.BaseNode method)</a>
 </li>
@@ -199,6 +200,8 @@
       <li><a href="ddf_utils.chef.html#ddf_utils.chef.cook.check_dataset_availability">check_dataset_availability() (in module ddf_utils.chef.cook)</a>
 </li>
       <li><a href="ddf_utils.html#ddf_utils.io.cleanup">cleanup() (in module ddf_utils.io)</a>
+</li>
+      <li><a href="ddf_utils.html#ddf_utils.ddf_reader.DDF.concepts">concepts (ddf_utils.ddf_reader.DDF attribute)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -238,10 +241,10 @@
 </li>
       <li><a href="ddf_utils.html#module-ddf_utils.cli">ddf_utils.cli (module)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="ddf_utils.html#module-ddf_utils.config">ddf_utils.config (module)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="ddf_utils.html#module-ddf_utils.ddf_reader">ddf_utils.ddf_reader (module)</a>
 </li>
       <li><a href="ddf_utils.html#module-ddf_utils.i18n">ddf_utils.i18n (module)</a>
@@ -258,6 +261,8 @@
 </li>
       <li><a href="ddf_utils.html#module-ddf_utils.transformer">ddf_utils.transformer (module)</a>
 </li>
+      <li><a href="ddf_utils.chef.html#ddf_utils.chef.helpers.debuggable">debuggable() (in module ddf_utils.chef.helpers)</a>
+</li>
       <li><a href="ddf_utils.chef.html#ddf_utils.chef.dag.BaseNode.detect_downstream_cycle">detect_downstream_cycle() (ddf_utils.chef.dag.BaseNode method)</a>
 </li>
       <li><a href="ddf_utils.chef.html#ddf_utils.chef.cook.dish_to_csv">dish_to_csv() (in module ddf_utils.chef.cook)</a>
@@ -265,6 +270,8 @@
       <li><a href="ddf_utils.chef.html#ddf_utils.chef.dag.BaseNode.downstream_list">downstream_list (ddf_utils.chef.dag.BaseNode attribute)</a>
 </li>
       <li><a href="ddf_utils.chef.html#ddf_utils.chef.ingredient.BaseIngredient.dtype">dtype (ddf_utils.chef.ingredient.BaseIngredient attribute)</a>
+</li>
+      <li><a href="ddf_utils.html#ddf_utils.ddf_reader.DDF.dtypes">dtypes (ddf_utils.ddf_reader.DDF attribute)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -342,7 +349,7 @@
 </li>
       <li><a href="ddf_utils.html#ddf_utils.ddf_reader.DDF.get_entities">get_entities() (ddf_utils.ddf_reader.DDF method)</a>
 </li>
-      <li><a href="ddf_utils.chef.html#ddf_utils.chef.dag.DAG.get_task">get_task() (ddf_utils.chef.dag.DAG method)</a>
+      <li><a href="ddf_utils.chef.html#ddf_utils.chef.dag.DAG.get_node">get_node() (ddf_utils.chef.dag.DAG method)</a>
 </li>
       <li><a href="ddf_utils.chef.html#ddf_utils.chef.procedure.groupby">groupby() (in module ddf_utils.chef.procedure)</a>
 </li>
@@ -354,7 +361,7 @@
 <h2 id="H">H</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="ddf_utils.chef.html#ddf_utils.chef.dag.DAG.has_task">has_task() (ddf_utils.chef.dag.DAG method)</a>
+      <li><a href="ddf_utils.chef.html#ddf_utils.chef.dag.DAG.has_node">has_node() (ddf_utils.chef.dag.DAG method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -425,6 +432,18 @@
   </ul></td>
 </tr></table>
 
+<h2 id="N">N</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="ddf_utils.chef.html#ddf_utils.chef.dag.DAG.node_dict">node_dict (ddf_utils.chef.dag.DAG attribute)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="ddf_utils.chef.html#ddf_utils.chef.dag.DAG.nodes">nodes (ddf_utils.chef.dag.DAG attribute)</a>
+</li>
+  </ul></td>
+</tr></table>
+
 <h2 id="P">P</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -480,10 +499,6 @@
 <h2 id="T">T</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="ddf_utils.chef.html#ddf_utils.chef.dag.DAG.task_dict">task_dict (ddf_utils.chef.dag.DAG attribute)</a>
-</li>
-      <li><a href="ddf_utils.chef.html#ddf_utils.chef.dag.DAG.tasks">tasks (ddf_utils.chef.dag.DAG attribute)</a>
-</li>
       <li><a href="ddf_utils.html#ddf_utils.str.to_concept_id">to_concept_id() (in module ddf_utils.str)</a>
 </li>
       <li><a href="ddf_utils.html#ddf_utils.io.to_csv">to_csv() (in module ddf_utils.io)</a>
