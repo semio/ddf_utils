@@ -87,7 +87,7 @@
             
                 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="recipe.html">Cooking with recipes (draft)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="recipe.html">Recipe Cookbook (draft)</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">API References</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">ddf_utils package</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#subpackages">Subpackages</a><ul>
@@ -446,7 +446,7 @@ the file path of csv will be out_dir/ddf&#8211;$ftype&#8211;$concept&#8211;$by.c
 <p>commonly used calculation methods</p>
 <dl class="function">
 <dt id="ddf_utils.ops.aagr">
-<code class="descclassname">ddf_utils.ops.</code><code class="descname">aagr</code><span class="sig-paren">(</span><em>df: &lt;Mock name='mock.DataFrame' id='4484151896'&gt;</em>, <em>window: int = 10</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.ops.aagr" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.ops.</code><code class="descname">aagr</code><span class="sig-paren">(</span><em>df: &lt;Mock name='mock.DataFrame' id='4402078048'&gt;</em>, <em>window: int = 10</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.ops.aagr" title="Permalink to this definition">¶</a></dt>
 <dd><p>average annual growth rate</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -580,11 +580,13 @@ to choose which one or to skip it.</p>
 <cite>inline</cite>: <cite>dict</cite>
 <cite>file</cite>: the file path, <cite>str</cite>
 <cite>dataframe</cite>: <cite>dict</cite>, must have <cite>key</cite> and <cite>value</cite> keys. see examples in examples section.</li>
-<li><strong>target_column</strong> (<cite>str</cite>, optional) &#8211; The column to store translated resluts. If this is None, then the one set with <cite>column</cite> will be replaced.</li>
+<li><strong>target_column</strong> (<cite>str</cite>, optional) &#8211; The column to store translated resluts. If this is None, then the one set with <cite>column</cite>
+will be replaced.</li>
 <li><strong>base_df</strong> (<cite>DataFrame</cite>, optional) &#8211; When <cite>dictionary_type</cite> is <cite>dataframe</cite>, this option should be set</li>
 <li><strong>not_found</strong> (<cite>str</cite>) &#8211; What to do if key in the dictionary is not found in the dataframe to be translated.
 avaliable options are <cite>drop</cite>, <cite>error</cite>, <cite>include</cite></li>
-<li><strong>ambiguity</strong> (<cite>str</cite>) &#8211; What to do when there is ambiguities in the dictionary. avaliable options are <cite>prompt</cite>, <cite>skip</cite>, <cite>error</cite></li>
+<li><strong>ambiguity</strong> (<cite>str</cite>) &#8211; What to do when there is ambiguities in the dictionary. avaliable options are <cite>prompt</cite>,
+<cite>skip</cite>, <cite>error</cite></li>
 </ul>
 </td>
 </tr>
@@ -638,7 +640,7 @@ avaliable options are <cite>drop</cite>, <cite>error</cite>, <cite>include</cite
 
 <dl class="function">
 <dt id="ddf_utils.transformer.trend_bridge">
-<code class="descclassname">ddf_utils.transformer.</code><code class="descname">trend_bridge</code><span class="sig-paren">(</span><em>old_data: &lt;Mock name='mock.Series' id='4486980328'&gt;</em>, <em>new_data: &lt;Mock name='mock.Series' id='4486980328'&gt;</em>, <em>bridge_length: int</em><span class="sig-paren">)</span> &rarr; &lt;Mock name='mock.Series' id='4486980328'&gt;<a class="headerlink" href="#ddf_utils.transformer.trend_bridge" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.transformer.</code><code class="descname">trend_bridge</code><span class="sig-paren">(</span><em>old_data: &lt;Mock name='mock.Series' id='4404652072'&gt;</em>, <em>new_data: &lt;Mock name='mock.Series' id='4404652072'&gt;</em>, <em>bridge_length: int</em><span class="sig-paren">)</span> &rarr; &lt;Mock name='mock.Series' id='4404652072'&gt;<a class="headerlink" href="#ddf_utils.transformer.trend_bridge" title="Permalink to this definition">¶</a></dt>
 <dd><p>smoothing data between series.</p>
 <p>To avoid getting artificial stairs in the data, we smooth between to
 series. Sometime one source is systematically higher than another source,

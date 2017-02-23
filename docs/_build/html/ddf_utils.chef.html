@@ -86,7 +86,7 @@
             
                 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="recipe.html">Cooking with recipes (draft)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="recipe.html">Recipe Cookbook (draft)</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">API References</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="ddf_utils.html">ddf_utils package</a><ul class="current">
 <li class="toctree-l3 current"><a class="reference internal" href="ddf_utils.html#subpackages">Subpackages</a><ul class="current">
@@ -625,8 +625,8 @@ the result as new ingredient.</p>
 <dt id="ddf_utils.chef.procedure.merge">
 <code class="descclassname">ddf_utils.chef.procedure.</code><code class="descname">merge</code><span class="sig-paren">(</span><em>*ingredients: typing.List[ddf_utils.chef.ingredient.BaseIngredient], result, deep=False</em><span class="sig-paren">)</span> &rarr; ddf_utils.chef.ingredient.ProcedureResult<a class="headerlink" href="#ddf_utils.chef.procedure.merge" title="Permalink to this definition">¶</a></dt>
 <dd><p>merge a list of ingredients</p>
-<p>The ingredients will be merged one by one in the order of how they are provided to this function.
-Later ones will overwrite the pervious merged results.</p>
+<p>The ingredients will be merged one by one in the order of how they are provided to this
+function. Later ones will overwrite the pervious merged results.</p>
 <p>Procedure format:</p>
 <div class="highlight-yaml"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">procedure</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">merge</span>
 <span class="l l-Scalar l-Scalar-Plain">ingredients</span><span class="p p-Indicator">:</span>  <span class="c1"># list of ingredient id</span>
@@ -681,7 +681,8 @@ if true, overwrite is on the row level. If values
 </tbody>
 </table>
 <p class="rubric">Examples</p>
-<p>for exmaple, if we want to add 2 columns, col_a and col_b, to create an new column, we can write</p>
+<p>for exmaple, if we want to add 2 columns, col_a and col_b, to create an new column, we can
+write</p>
 <div class="highlight-yaml"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">procedure</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">run_op</span>
 <span class="l l-Scalar l-Scalar-Plain">ingredients</span><span class="p p-Indicator">:</span>
   <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">ingredient_to_run</span>
@@ -705,8 +706,10 @@ if true, overwrite is on the row level. If values
 <span class="l l-Scalar l-Scalar-Plain">options</span><span class="p p-Indicator">:</span>
   <span class="l l-Scalar l-Scalar-Plain">column</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">str</span>  <span class="c1"># the column to be translated</span>
   <span class="l l-Scalar l-Scalar-Plain">target_column</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">str</span>  <span class="c1"># optinoal, the target column to store the translated data</span>
-  <span class="l l-Scalar l-Scalar-Plain">not_found</span><span class="p p-Indicator">:</span> <span class="p p-Indicator">{</span><span class="s">&#39;drop&#39;</span><span class="p p-Indicator">,</span> <span class="s">&#39;include&#39;</span><span class="p p-Indicator">,</span> <span class="s">&#39;error&#39;</span><span class="p p-Indicator">}</span>  <span class="c1"># optional, the behavior when there is values not found in the mapping dictionary, default is &#39;drop&#39;</span>
-  <span class="l l-Scalar l-Scalar-Plain">ambiguity</span><span class="p p-Indicator">:</span> <span class="p p-Indicator">{</span><span class="s">&#39;prompt&#39;</span><span class="p p-Indicator">,</span> <span class="s">&#39;skip&#39;</span><span class="p p-Indicator">,</span> <span class="s">&#39;error&#39;</span><span class="p p-Indicator">}</span>  <span class="c1"># optional, the behavior when there is ambiguity in the dictionary</span>
+  <span class="l l-Scalar l-Scalar-Plain">not_found</span><span class="p p-Indicator">:</span> <span class="p p-Indicator">{</span><span class="s">&#39;drop&#39;</span><span class="p p-Indicator">,</span> <span class="s">&#39;include&#39;</span><span class="p p-Indicator">,</span> <span class="s">&#39;error&#39;</span><span class="p p-Indicator">}</span>  <span class="c1"># optional, the behavior when there is values not</span>
+                                           <span class="c1"># found in the mapping dictionary, default is &#39;drop&#39;</span>
+  <span class="l l-Scalar l-Scalar-Plain">ambiguity</span><span class="p p-Indicator">:</span> <span class="p p-Indicator">{</span><span class="s">&#39;prompt&#39;</span><span class="p p-Indicator">,</span> <span class="s">&#39;skip&#39;</span><span class="p p-Indicator">,</span> <span class="s">&#39;error&#39;</span><span class="p p-Indicator">}</span>  <span class="c1"># optional, the behavior when there is ambiguity</span>
+                                          <span class="c1"># in the dictionary</span>
   <span class="l l-Scalar l-Scalar-Plain">dictionary</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">str or dict</span>  <span class="c1"># file name or mappings dictionary</span>
 </pre></div>
 </div>
@@ -729,7 +732,8 @@ The dictionary format will be:</p>
 If &#8216;base&#8217; is provided in the dictionary, &#8216;key&#8217; and &#8216;value&#8217; should also in the dictionary.
 See <a class="reference internal" href="ddf_utils.html#ddf_utils.transformer.translate_column" title="ddf_utils.transformer.translate_column"><code class="xref py py-func docutils literal"><span class="pre">ddf_utils.transformer.translate_column()</span></code></a> for more on how this is handled.</li>
 <li><strong>column</strong> (<cite>str</cite>) &#8211; the column to be translated</li>
-<li><strong>target_column</strong> (<cite>str</cite>, optional) &#8211; the target column to store the translated data. If this is not set then the <cite>column</cite> cloumn will be replaced</li>
+<li><strong>target_column</strong> (<cite>str</cite>, optional) &#8211; the target column to store the translated data. If this is not set then the <cite>column</cite>
+cloumn will be replaced</li>
 <li><strong>not_found</strong> (<em>{'drop'</em><em>, </em><em>'include'</em><em>, </em><em>'error'}</em><em>, </em><em>optional</em>) &#8211; the behavior when there is values not found in the mapping dictionary, default is &#8216;drop&#8217;</li>
 <li><strong>ambiguity</strong> (<em>{'prompt'</em><em>, </em><em>'skip'</em><em>, </em><em>'error'}</em><em>, </em><em>optional</em>) &#8211; the behavior when there is ambiguity in the dictionary, default is &#8216;prompt&#8217;</li>
 </ul>
@@ -804,8 +808,8 @@ See <a class="reference internal" href="ddf_utils.html#ddf_utils.transformer.tra
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>ingredient</strong> (<a class="reference internal" href="#ddf_utils.chef.ingredient.BaseIngredient" title="ddf_utils.chef.ingredient.BaseIngredient"><em>BaseIngredient</em></a>) &#8211; The input ingredient. The bridged result will be merged in to this ingredient. If this is None, then
-the only the bridged result will be returned</li>
+<li><strong>ingredient</strong> (<a class="reference internal" href="#ddf_utils.chef.ingredient.BaseIngredient" title="ddf_utils.chef.ingredient.BaseIngredient"><em>BaseIngredient</em></a>) &#8211; The input ingredient. The bridged result will be merged in to this ingredient. If this is
+None, then the only the bridged result will be returned</li>
 <li><strong>bridge_start</strong> (<em>dict</em>) &#8211; Describe the start of bridge</li>
 <li><strong>bridge_end</strong> (<em>dict</em>) &#8211; Describe the end of bridge</li>
 <li><strong>bridge_length</strong> (<em>int</em>) &#8211; The size of bridge</li>
