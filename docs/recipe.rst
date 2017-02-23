@@ -912,11 +912,22 @@ trend\_bridge
                                           # defaults to bridge_end.column
       result: data_bridged
 
+Checking Intermediate Results
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Most of the procedures supports ``debug`` option, which will save the result
+ingredient to ``_debug/<ingredient_id>/`` folder of your working directory. So
+if you want to check the intermediate results, just add ``debug: true`` to the
+``options`` dictionary.
+
 
 General guideline for writing recipes
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-------------------------------------
 
--  if you need to use
-   ``translate_header``/``translate_column``/``align``/``copy`` in your
-   recipe, place them at the beginning of recipe. This can improve the
-   performance of running the recipe.
+- if you need to use
+  ``translate_header``/``translate_column``/``align``/``copy`` in your recipe,
+  place them at the beginning of recipe. This can improve the performance of
+  running the recipe.
+- run recipe with ``ddf --debug run_recipe`` will enable debug output when
+  running recipes. use it with the ``debug`` option will help you in the
+  development of recipes.
