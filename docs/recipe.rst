@@ -27,7 +27,7 @@ consumption per person** data for each country. Let's do it with Recipe!
 ~~~~~~~~~~~
 
 Before you begin, you need to create a project. With the command line tool
-:doc:`ddf <ddf_cli>`, we can get a well designed dataset project directory.
+:ref:`ddf <ddf-cli>`, we can get a well designed dataset project directory.
 Just run ``ddf new`` and answer some questions. The script will generate the
 directory for you. When it's done we are ready to write the recipe.
 
@@ -46,7 +46,7 @@ kind of information can be written in the ``info`` section. The ``info`` section
 is optional and it's only for human reading for now. You can put anything you
 want in this section. In our example, we add the following information:
 
-.. code:: yaml
+.. code-block:: yaml
 
    info:
        id: ddf--your_company--oil_per_person
@@ -65,7 +65,7 @@ want in this section. In our example, we add the following information:
 The next thing to do is to tell Chef where to look for the source datasets. We
 can set this option in ``config`` section.
 
-.. code:: yaml
+.. code-block:: yaml
 
    config:
        ddf_dir: /path/to/datasets/
@@ -101,7 +101,7 @@ short names for its geo and gapminder is using 3 letter iso for its country
 entities, we shoule align them to use one system too. So we end up with below
 ingredients:
 
-.. code:: yaml
+.. code-block:: yaml
 
    ingredients:
        - id: oil-consumption-datapoints
@@ -133,7 +133,7 @@ section. Because in DDF model we have 3 kinds of collections: ``concepts``,
 corresponding sub-sections, and in each section will be a list of
 ``procedures``. So the basic format is:
 
-.. code:: yaml
+.. code-block:: yaml
 
    cooking:
        concepts:
@@ -162,7 +162,7 @@ Firstly we look at datapoints. What we need to do to get what we need are:
 We can use `translate_header`_, `translate_column`_, `merge`_, `run_op`_ to get
 these tasks done.
 
-.. code:: yaml
+.. code-block:: yaml
 
    datapoints:
        # change dimension for bp
@@ -232,7 +232,7 @@ these tasks done.
 For entities, we will just use the country entities from gapminder, so we can skip this part.
 For concepts, we need to extract concepts from the ingredients:
 
-.. code:: yaml
+.. code-block:: yaml
 
    concepts:
        - procedure: extract_concepts
@@ -254,7 +254,7 @@ recipe we can set which ingredients are we going to serve(save to disk) in the
 ``serve`` section. Note that this section is optional, and if you don't specify
 then the last procedure of each sub-section of ``cooking`` will be served.
 
-.. code:: yaml
+.. code-block:: yaml
 
    serve:
        - id: concepts-final
@@ -269,13 +269,23 @@ Now we have finished the recipe. For the complete recipe, please check this
 6. Running the Recipe
 ~~~~~~~~~~~~~~~~~~~~~
 
-TBD
+To run the recipe to generate the dataset, we use the ddf command line tool. Run
+the following command and it will cook for you and result will be saved into
+``out_dir``.
 
-.. code:: bash
+.. code-block:: bash
 
-   ddf --debug run_recipe -i example.yml -o out_dir
+   ddf run_recipe -i example.yml -o out_dir
 
+If you want to just do a dry run without saving the result, you can run with the
+``-d`` option.
 
+.. code-block:: bash
+
+   ddf run_recipe -i example.yml -d
+
+Now you have learned the basics of Recipe. We will go though more details in
+Recipe in the next sections.
 
 Structure of a Recipe
 ---------------------
@@ -349,7 +359,7 @@ ingredient should be defined with following parameters:
 
 Here is an example of ``ingredient`` section:
 
-.. code:: yaml
+.. code-block:: yaml
 
     ingredients:
       - id: example-concepts
@@ -379,7 +389,7 @@ procedures to build a dataset. valid keys for cooking section are
 
 The basic format of a procedure is:
 
-.. code:: yaml
+.. code-block:: yaml
 
     procedure: proc_name
     ingredients:
@@ -402,7 +412,7 @@ served, and you can choose one of them, but not both.
 ``serve`` procedure should be placed in ``cooking`` section, with the
 following format:
 
-.. code:: yaml
+.. code-block:: yaml
 
     procedure: serve
     ingredients:
@@ -417,7 +427,7 @@ multiple serve procedures are allowed in each cooking section.
 ``serving`` section should be a top level object in the recipe, with
 following format:
 
-.. code:: yaml
+.. code-block:: yaml
 
     serving:
       - id: ingredient_to_serve_1
@@ -437,13 +447,13 @@ Recipe execution
 
 To run a recipe, you can use the ``ddf run_recipe`` command:
 
-.. code:: shell
+.. code-block:: shell
 
     $ ddf run_recipe -i path_to_rsecipe.yaml -o output_dir
 
 You can specify the path where your datasets are stored:
 
-.. code:: shell
+.. code-block:: shell
 
     $ ddf run_recipe -i path_to_recipe.yaml -o output_dir --ddf_dir path_to_datasets
 
@@ -467,7 +477,7 @@ Internally, the process to generate a dataset have following steps:
 If you want to embed the function into your script, you can write script
 like this:
 
-.. code:: python
+.. code-block:: python
 
     import ddf_utils.chef as chef
 
@@ -509,7 +519,7 @@ Change ingredient data header according to a mapping dictionary.
 
 **usage and options**
 
-.. code:: yaml
+.. code-block:: yaml
 
     procedure: translate_header
     ingredients:  # list of ingredient id
@@ -534,7 +544,7 @@ dictionary, the dictionary can be generated from an other ingredient.
 
 **usage and options**
 
-.. code:: yaml
+.. code-block:: yaml
 
     procedure: translate_column
     ingredients:  # list of ingredient id
@@ -554,7 +564,7 @@ dictionary, the dictionary can be generated from an other ingredient.
    mapping dictionary using the ``base`` ingredient. The dictionary
    format will be:
 
-.. code:: yaml
+.. code-block:: yaml
 
     dictionary:
         base: str  # ingredient name
@@ -568,7 +578,7 @@ dictionary, the dictionary can be generated from an other ingredient.
 
 here is an example when we translate the BP geo names into Gapminder's
 
-.. code:: yaml
+.. code-block:: yaml
 
     procedure: translate_column
     ingredients:
@@ -593,7 +603,7 @@ Return the ingredient as is.
 
 **usage and options**
 
-.. code:: yaml
+.. code-block:: yaml
 
     procedure: identity
     ingredients:  # list of ingredient id
@@ -614,7 +624,7 @@ Merge ingredients together on their keys.
 
 **usage and options**
 
-.. code:: yaml
+.. code-block:: yaml
 
     procedure: merge
     ingredients:  # list of ingredient id
@@ -645,7 +655,7 @@ Group ingredient by columns and do aggregate/filter/transform.
 
 **usage and options**
 
-.. code:: yaml
+.. code-block:: yaml
 
     procedure: groupby
     ingredients:  # list of ingredient id
@@ -670,7 +680,7 @@ Group ingredient by columns and do aggregate/filter/transform.
 Two styles of function block are supported, and they can mix in one
 procedure:
 
-.. code:: yaml
+.. code-block:: yaml
 
     aggregate:  # or transform, filter
       col1: sum  # run sum to col1
@@ -686,7 +696,7 @@ Run function on rolling windows.
 
 **usage and options**
 
-.. code:: yaml
+.. code-block:: yaml
 
     procedure: window
     ingredients:  # list of ingredient id
@@ -705,7 +715,7 @@ Run function on rolling windows.
 Two styles of function block are supported, and they can mix in one
 procedure:
 
-.. code:: yaml
+.. code-block:: yaml
 
     aggregate:
       col1: sum  # run rolling sum to col1
@@ -726,7 +736,7 @@ Filter ingredient data by column values.
 
 **usage and options**
 
-.. code:: yaml
+.. code-block:: yaml
 
     procedure: filter_row
     ingredients:  # list of ingredient id
@@ -739,7 +749,7 @@ Filter ingredient data by column values.
 
 A filter definitioin block have following format:
 
-.. code:: yaml
+.. code-block:: yaml
 
     new_column_name:
       from: column_name_to_filter
@@ -763,7 +773,7 @@ Filter ingredient data by concepts.
 
 **usage and options**
 
-.. code:: yaml
+.. code-block:: yaml
 
     procedure: filter_item
     ingredients:  # list of ingredient id
@@ -784,7 +794,7 @@ Run math operations on ingredient columns.
 
 **usage and options**
 
-.. code:: yaml
+.. code-block:: yaml
 
     procedure: run_op
     ingredients:  # list of ingredient id
@@ -803,7 +813,7 @@ Run math operations on ingredient columns.
 for exmaple, if we want to add 2 columns, ``col_a`` and ``col_b``, to
 create an new column, we can write
 
-.. code:: yaml
+.. code-block:: yaml
 
     procedure: run_op
     ingredients:
@@ -820,7 +830,7 @@ Make copy of columns of ingredient data.
 
 **usage and options**
 
-.. code:: yaml
+.. code-block:: yaml
 
     procedure: copy
     ingredients:  # list of ingredient id
@@ -833,7 +843,7 @@ Make copy of columns of ingredient data.
 
 The ``dictionary`` option should be in following format:
 
-.. code:: yaml
+.. code-block:: yaml
 
     dictionary:
       col1: copy_1_1  # string
@@ -853,7 +863,7 @@ Generate concepts ingredient from other ingredients.
 
 **usage and options**
 
-.. code:: yaml
+.. code-block:: yaml
 
     procedure: extract_concepts
     ingredients:  # list of ingredient id
@@ -882,7 +892,26 @@ trend\_bridge
 
 (WIP) Connect 2 ingredients and make custom smoothing.
 
-see discussion `here <https://github.com/semio/ddf_utils/issues/42>`__.
+**usage and options**
+
+.. code-block:: yaml
+
+    - procedure: trend_bridge
+      ingredients:
+        - data_ingredient                 # optional, if not set defaults to empty ingredient
+      options:
+        bridge_start:
+          ingredient: old_data_ingredient # optional, if not set then assume it's the input ingredient
+          column: concept_old_data
+        bridge_end:
+          ingredient: new_data_ingredient # optional, if not set then assume it's the input ingredient
+          column: concept_new_data
+        bridge_length: 5                  # steps in time. If year, years, if days, days.
+        bridge_on: time                   # the index column to build the bridge with
+        target_column: concept_in_result  # overwrites if exists. creates if not exists.
+                                          # defaults to bridge_end.column
+      result: data_bridged
+
 
 General guideline for writing recipes
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

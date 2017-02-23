@@ -116,6 +116,8 @@ class ProcedureNode(BaseNode):
             func = getattr(pc, self.procedure['procedure'])
         except AttributeError:
             raise ProcedureError("Not supported: " + self.procedure['procedure'])
+        except TypeError:
+            raise ProcedureError("Procedure Error: " + str(self.node_id))
 
         # check the base ingredients and convert the string id to actual ingredient
         ingredients = []

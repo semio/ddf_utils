@@ -13,7 +13,6 @@ Contents:
 
    intro
    recipe
-   ddf_cli
    modules
 
 
