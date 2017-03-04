@@ -358,7 +358,7 @@ def identity(ingredient: BaseIngredient, result, copy=False) -> BaseIngredient:
 
 
 @debuggable
-def filter_row(ingredient: BaseIngredient, result, dictionary) -> ProcedureResult:
+def filter_row(ingredient: BaseIngredient, result, **options) -> ProcedureResult:
     """filter an ingredient based on a set of options and return
     the result as new ingredient.
 
@@ -399,6 +399,8 @@ def filter_row(ingredient: BaseIngredient, result, dictionary) -> ProcedureResul
     logger.info("filter_row: " + ingredient.ingred_id)
 
     data = ingredient.get_data()
+    dictionary = read_opt(options, 'dictionary', True)
+    keep_all_columns = read_opt(options, 'keep_all_columns', False, False)
 
     res = {}
 
@@ -428,17 +430,18 @@ def filter_row(ingredient: BaseIngredient, result, dictionary) -> ProcedureResul
         # drops all columns with unique contents. and update the key.
         newkey = ingredient.key
         keys = ingredient.key_to_list()
-        for c in df.columns:
-            if ingredient.dtype == 'datapoints':
-                if c in v.keys() and len(df[c].unique()) > 1:
-                    logger.debug("column {} have multiple values: {}".format(c, df[c].unique()))
-                elif len(df[c].unique()) <= 1:
-                    df = df.drop(c, axis=1)
-                    if c in keys:
-                        keys.remove(c)
-                    newkey = ','.join(keys)
-            else:
-                raise NotImplementedError("filtering concept/entity")
+        if not keep_all_columns:
+            for c in df.columns:
+                if ingredient.dtype == 'datapoints':
+                    if c in v.keys() and len(df[c].unique()) > 1:
+                        logger.debug("column {} have multiple values: {}".format(c, df[c].unique()))
+                    elif len(df[c].unique()) <= 1:
+                        df = df.drop(c, axis=1)
+                        if c in keys:
+                            keys.remove(c)
+                        newkey = ','.join(keys)
+                else:
+                    raise NotImplementedError("filtering concept/entity")
 
         res[k] = df
 
@@ -542,6 +545,10 @@ def groupby(ingredient: BaseIngredient, result, **options) -> ProcedureResult:
 
     data = ingredient.get_data()
     by = options.pop('groupby')
+    if 'insert_key' in options:
+        insert_key = options.pop('insert_key')
+    else:
+        insert_key = dict()
 
     # only one of aggregate/transform/filter should be in options.
     assert len(list(options.keys())) == 1
@@ -562,25 +569,24 @@ def groupby(ingredient: BaseIngredient, result, **options) -> ProcedureResult:
     newdata = dict()
 
     # TODO: support apply function to all items?
-    if comp_type == 'aggregate':
-        for k, func in options[comp_type].items():
-            func = mkfunc(func)
+    for k, func in options[comp_type].items():
+        func = mkfunc(func)
+        if comp_type == 'aggregate':
             newdata[k] = (data[k].groupby(by=by).agg({k: func})
                           .reset_index().dropna())
-    if comp_type == 'transform':
-        for k, func in options[comp_type].items():
-            func = mkfunc(func)
+        if comp_type == 'transform':
             df = data[k].set_index(ingredient.key_to_list())
             levels = [df.index.names.index(x) for x in by]
             newdata[k] = (df.groupby(level=levels)[k].transform(func)
                           .reset_index().dropna())
-    if comp_type == 'filter':
-        for k, func in options[comp_type].items():
-            func = mkfunc(func)
+        if comp_type == 'filter':
             df = data[k].set_index(ingredient.key_to_list())
             levels = [df.index.names.index(x) for x in by]
             newdata[k] = (df.groupby(level=levels)[k].filter(func)
                           .reset_index().dropna())
+        for col, val in insert_key.items():
+            newdata[k][col] = val
+            newkey = newkey+','+col
 
     return ProcedureResult(result, newkey, data=newdata)
 
@@ -921,7 +927,7 @@ def trend_bridge(ingredient: BaseIngredient, bridge_start, bridge_end, bridge_le
 
     # get the column to group. Because datapoints are multidimensional, but we only
     # bridge them in one column, so we should group other columns.
-    assert start.key_to_list() == end.key_to_list()
+    assert set(start.key_to_list()) == set(end.key_to_list())
 
     keys = start.key_to_list()
     keys.remove(bridge_on)
@@ -933,8 +939,14 @@ def trend_bridge(ingredient: BaseIngredient, bridge_start, bridge_end, bridge_le
     res_grouped = []
     for g, df in start_group:
         gstart = df
-        gend = end_group.get_group(g)
+        try:
+            gend = end_group.get_group(g)
+        except KeyError:  # no new data available for this group
+            logger.warning("no data for group: " + g)
+            bridged = gstart[bridge_start['column']]
+
         bridged = tb(gstart[bridge_start['column']], gend[bridge_end['column']], bridge_length)
+
         res_grouped.append((g, bridged))
 
     # combine groups to dataframe
