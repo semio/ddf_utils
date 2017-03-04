@@ -268,7 +268,7 @@ def trend_bridge(old_data: pd.Series, new_data: pd.Series, bridge_length: int) -
         bridge_data.ix[i:bridge_end] = bridge_data.ix[i:bridge_end] + fraction
 
     # combine old/new/bridged data
-    result =  pd.concat([bridge_data.ix[:bridge_end], new_data.iloc[1:]])
+    result = pd.concat([bridge_data.ix[:bridge_end], new_data.iloc[1:]])
     return result
 
 
