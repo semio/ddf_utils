@@ -1,3 +1,10 @@
+## version 0.2.11 2017-03-04
+
+- new `insert_keys` option to `groupby` procedure
+- new `keep_columns` option to `fliter_row` procedure
+- new `split_datapoints_by` and `sub_folder` option for serving
+- misc improvements and bug fixes
+
 ## version 0.2.10 2017-02-14
 
 - new options for `extract_concepts` procedure (#40)

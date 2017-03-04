@@ -4,7 +4,7 @@ import sys
 import os
 from setuptools import setup, find_packages
 
-version = "0.2.10"
+version = "0.2.11"
 
 if sys.argv[-1] == 'tag':
     os.system("git tag -a %s -m 'version %s'" % (version, version))
