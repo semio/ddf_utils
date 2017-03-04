@@ -59,10 +59,12 @@ see above links for documents for each module.
 
 .. _daff format: https://github.com/paulfitz/daff#reading-material
 
+.. _ddf-cli:
+
 Command line helper
 ~~~~~~~~~~~~~~~~~~~
 
-We provide a commandline utility ddf for common etl tasks. For now supported
+We provide a commandline utility ``ddf`` for common etl tasks. For now supported
 commands are:
 
 ::

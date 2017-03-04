@@ -52,7 +52,9 @@ def _generate_mappng_dict1(df, column, dictionary, base_df, not_found):
     idx_col = dictionary['value']
 
     if base_df.set_index(idx_col).index.has_duplicates:
-        logging.warning('there are duplicated keys in the base dataframe')
+        logging.warning('there are duplicated keys in the base dataframe:')
+        m = base_df.set_index(idx_col).index.duplicated()
+        logging.warning(base_df.set_index(idx_col).index[m].unique())
 
     if search_col == idx_col:
         mapping_all = dict([(x, x) for x in base_df[idx_col].values])
@@ -110,6 +112,7 @@ def _translate_column_df(df, column, target_column, dictionary, base_df,
             mapping = _generate_mappng_dict1(df, column, dictionary, base_df, not_found)
         else:
             mapping = _generate_mapping_dict2(df, column, dictionary, base_df, not_found)
+
     return _translate_column_inline(df, column, target_column, mapping, not_found, ambiguity)
 
 
@@ -265,7 +268,7 @@ def trend_bridge(old_data: pd.Series, new_data: pd.Series, bridge_length: int) -
         bridge_data.ix[i:bridge_end] = bridge_data.ix[i:bridge_end] + fraction
 
     # combine old/new/bridged data
-    result =  pd.concat([bridge_data.ix[:bridge_end], new_data.iloc[1:]])
+    result = pd.concat([bridge_data.ix[:bridge_end], new_data.iloc[1:]])
     return result
 
 

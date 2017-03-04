@@ -126,7 +126,8 @@ class DDF():
                     (domain is not None and res['schema']['primaryKey'] == domain)):
                     entities[name] = pd.read_csv(
                         os.path.join(self.dataset_path, res['path']),
-                        index_col=res['schema']['primaryKey'], dtype=dtype, **kwargs)
+                        dtype=dtype, **kwargs)
+                    entities[name] = entities[name].set_index(res['schema']['primaryKey'])
         return entities
 
     def get_datapoint_files(self):
