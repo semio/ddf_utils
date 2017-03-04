@@ -116,8 +116,10 @@ def build_recipe(recipe_file, to_disk=False, **kwargs):
                 # ingredients = [*recipe['ingredients'], *rcp['ingredients']]
                 # ^ not supportted by Python < 3.5
                 ingredients = []
-                [ingredients.append(ing) for ing in recipe['ingredients']]
-                [ingredients.append(ing) for ing in rcp['ingredients']]
+                if 'ingredients' in recipe.keys():
+                    [ingredients.append(ing) for ing in recipe['ingredients']]
+                if 'ingredients' in rcp.keys():
+                    [ingredients.append(ing) for ing in rcp['ingredients']]
                 # drop duplicated ingredients.
                 rcp_dict_tmp = {}
                 for v in ingredients:
@@ -260,22 +262,22 @@ def get_dishes(recipe):
     """get all dishes in the recipe"""
 
     if 'serving' in recipe:
-	return recipe['serving']
+        return recipe['serving']
 
     dishes = list()
     for _, procs in recipe['cooking'].items():
-	serve_proc_exists = False
-	for p in procs:
-	    if p['procedure'] == 'serve':
-		serve_proc_exists = True
-		for i in p['ingredients']:
-		    try:
-			dishes.append({'id': i, 'options': p['options']})
-		    except KeyError:
-			dishes.append({'id': i, 'options': dict()})
-	if not serve_proc_exists:
-	    logger.warning('no serve procedure found, serving the last result: ' + p['result'])
-	    dishes.append({'id': p['result'], 'options': dict()})
+        serve_proc_exists = False
+        for p in procs:
+            if p['procedure'] == 'serve':
+                serve_proc_exists = True
+                for i in p['ingredients']:
+                    try:
+                        dishes.append({'id': i, 'options': p['options']})
+                    except KeyError:
+                        dishes.append({'id': i, 'options': dict()})
+        if not serve_proc_exists:
+            logger.warning('no serve procedure found, serving the last result: ' + p['result'])
+            dishes.append({'id': p['result'], 'options': dict()})
 
     return dishes
 
@@ -326,12 +328,12 @@ def run_recipe(recipe, serve=False, outpath=None):
 
     results = list()
     for dish in dishes:
-	dish_result = dag.get_node(dish['id']).evaluate()
-	results.append(dish_result)
-	if serve:
-	    if 'options' in dish:
-		dish_result.serve(outpath, **dish['options'])
+        dish_result = dag.get_node(dish['id']).evaluate()
+        results.append(dish_result)
+        if serve:
+            if 'options' in dish:
+                dish_result.serve(outpath, **dish['options'])
             else:
-		dish_result.serve(outpath)
+                dish_result.serve(outpath)
 
     return results
