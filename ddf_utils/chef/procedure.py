@@ -394,6 +394,8 @@ def filter_row(ingredient: BaseIngredient, result, **options) -> ProcedureResult
     ------------
     dictionary: dict
         The filter description dictionary
+    keep_all_columns: bool
+        don't drop any column if true
     """
 
     logger.info("filter_row: " + ingredient.ingred_id)
@@ -529,6 +531,10 @@ def groupby(ingredient: BaseIngredient, result, **options) -> ProcedureResult:
     ------------
     groubby : `str` or `list`
         the column(s) to group, can be a list or a string
+    insert_key : `dict`
+        manually insert keys in to result. This is useful when we want to add back the
+        aggregated column and set them to one value. For example ``geo: global`` inserts
+        the ``geo`` column with all values are "global"
     aggregate
     transform
     filter : `dict`, optinoal
@@ -970,5 +976,4 @@ def trend_bridge(ingredient: BaseIngredient, bridge_start, bridge_end, bridge_le
         return ProcedureResult(result, start.key, merged)
     else:
         return ProcedureResult(result, start.key, {target_col: result_data})
-
 

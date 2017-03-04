@@ -203,14 +203,14 @@ If no includes found then return the parsed object as is.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="ddf_utils.chef.cook.dish_to_csv">
-<code class="descclassname">ddf_utils.chef.cook.</code><code class="descname">dish_to_csv</code><span class="sig-paren">(</span><em>dishes</em>, <em>outpath</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.cook.dish_to_csv" title="Permalink to this definition">¶</a></dt>
-<dd><p>save the recipe output to disk</p>
+<dt id="ddf_utils.chef.cook.get_dishes">
+<code class="descclassname">ddf_utils.chef.cook.</code><code class="descname">get_dishes</code><span class="sig-paren">(</span><em>recipe</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.cook.get_dishes" title="Permalink to this definition">¶</a></dt>
+<dd><p>get all dishes in the recipe</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.chef.cook.run_recipe">
-<code class="descclassname">ddf_utils.chef.cook.</code><code class="descname">run_recipe</code><span class="sig-paren">(</span><em>recipe</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.cook.run_recipe" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.chef.cook.</code><code class="descname">run_recipe</code><span class="sig-paren">(</span><em>recipe</em>, <em>serve=False</em>, <em>outpath=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.cook.run_recipe" title="Permalink to this definition">¶</a></dt>
 <dd><p>run the recipe.</p>
 <p>returns a dictionary. keys are <cite>concepts</cite>, <cite>entities</cite> and <cite>datapoints</cite>,
 and values are ingredients defined in the <cite>serve</cite> procedures or <cite>serving</cite> section.
@@ -513,7 +513,7 @@ only keep concepts from <code class="docutils literal"><span class="pre">ingredi
 
 <dl class="function">
 <dt id="ddf_utils.chef.procedure.filter_row">
-<code class="descclassname">ddf_utils.chef.procedure.</code><code class="descname">filter_row</code><span class="sig-paren">(</span><em>ingredient: ddf_utils.chef.ingredient.BaseIngredient</em>, <em>result</em>, <em>dictionary</em><span class="sig-paren">)</span> &rarr; ddf_utils.chef.ingredient.ProcedureResult<a class="headerlink" href="#ddf_utils.chef.procedure.filter_row" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.chef.procedure.</code><code class="descname">filter_row</code><span class="sig-paren">(</span><em>ingredient: ddf_utils.chef.ingredient.BaseIngredient</em>, <em>result</em>, <em>**options</em><span class="sig-paren">)</span> &rarr; ddf_utils.chef.ingredient.ProcedureResult<a class="headerlink" href="#ddf_utils.chef.procedure.filter_row" title="Permalink to this definition">¶</a></dt>
 <dd><p>filter an ingredient based on a set of options and return
 the result as new ingredient.</p>
 <p>Procedure format:</p>
@@ -545,7 +545,10 @@ the result as new ingredient.</p>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Keyword Arguments:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first last"><strong>dictionary</strong> (<em>dict</em>) &#8211; The filter description dictionary</p>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><ul class="first last simple">
+<li><strong>dictionary</strong> (<em>dict</em>) &#8211; The filter description dictionary</li>
+<li><strong>keep_all_columns</strong> (<em>bool</em>) &#8211; don&#8217;t drop any column if true</li>
+</ul>
 </td>
 </tr>
 </tbody>
@@ -589,6 +592,9 @@ the result as new ingredient.</p>
 <tr class="field-odd field"><th class="field-name" colspan="2">Keyword Arguments:</th></tr>
 <tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><ul class="first last simple">
 <li><strong>groubby</strong> (<cite>str</cite> or <cite>list</cite>) &#8211; the column(s) to group, can be a list or a string</li>
+<li><strong>insert_key</strong> (<cite>dict</cite>) &#8211; manually insert keys in to result. This is useful when we want to add back the
+aggregated column and set them to one value. For example <code class="docutils literal"><span class="pre">geo:</span> <span class="pre">global</span></code> inserts
+the <code class="docutils literal"><span class="pre">geo</span></code> column with all values are &#8220;global&#8221;</li>
 <li><strong>aggregate</strong> &#8211; </li>
 <li><strong>transform</strong> &#8211; </li>
 <li><strong>filter</strong> (<cite>dict</cite>, optinoal) &#8211; the function to run. only one of <cite>aggregate</cite>, <cite>transform</cite> and <cite>filter</cite> should be supplied.</li>

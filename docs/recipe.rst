@@ -666,14 +666,17 @@ Group ingredient by columns and do aggregate/filter/transform.
       aggregate: dict  # function block
       transform: dict  # function block
       filter: dict  # function block
+      insert_key: dict  # manually add columns
 
 **notes**
 
--  Only one of \ ``aggregate``, ``transform`` or ``filter`` can be used
-   in one procedure.
--  Any columns not mentioned in groupby or functions are dropped.
--  Currently chef only support one ingredient in the ``ingredients``
-   parameter
+- Only one of \ ``aggregate``, ``transform`` or ``filter`` can be used
+  in one procedure.
+- Any columns not mentioned in groupby or functions are dropped.
+- If you want to add back dropped columns with same values, use ``insert_key``
+  option.
+- Currently chef only support one ingredient in the ``ingredients``
+  parameter
 
 **function block**
 
@@ -732,7 +735,8 @@ procedure:
 filter\_row
 ~~~~~~~~~~~
 
-Filter ingredient data by column values.
+Filter ingredient data by column values. By default, it will remove columns if
+they contain only one value.
 
 **usage and options**
 
@@ -744,6 +748,7 @@ Filter ingredient data by column values.
     result: str  # new ingledient id
     options:
       dictionary: dict  # filter definition block
+      keep_all_columns: bool  # if true don't drop any columns
 
 **filter definition**
 
