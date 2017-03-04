@@ -256,7 +256,31 @@ def build_dag(recipe):
     return dag
 
 
-def run_recipe(recipe):
+def get_dishes(recipe):
+    """get all dishes in the recipe"""
+
+    if 'serving' in recipe:
+	return recipe['serving']
+
+    dishes = list()
+    for _, procs in recipe['cooking'].items():
+	serve_proc_exists = False
+	for p in procs:
+	    if p['procedure'] == 'serve':
+		serve_proc_exists = True
+		for i in p['ingredients']:
+		    try:
+			dishes.append({'id': i, 'options': p['options']})
+		    except KeyError:
+			dishes.append({'id': i, 'options': dict()})
+	if not serve_proc_exists:
+	    logger.warning('no serve procedure found, serving the last result: ' + p['result'])
+	    dishes.append({'id': p['result'], 'options': dict()})
+
+    return dishes
+
+
+def run_recipe(recipe, serve=False, outpath=None):
     """run the recipe.
 
     returns a dictionary. keys are `concepts`, `entities` and `datapoints`,
@@ -287,47 +311,27 @@ def run_recipe(recipe):
             raise ChefRuntimeError("no ddf_dir configured, please check your recipe")
     logging.info('path for searching DDF: ' + str(config.DDF_SEARCH_PATH))
 
+    # make a copy recipe, don't change the origin recipe
+    from copy import deepcopy
+    recipe_ = deepcopy(recipe)
+
     # check all datasets availability
-    check_dataset_availability(recipe)
+    check_dataset_availability(recipe_)
 
     # create DAG of recipe
-    dag = build_dag(recipe)
+    dag = build_dag(recipe_)
 
     # now run the recipe
-    dishes = {}
+    dishes = get_dishes(recipe_)
 
-    for k, pceds in recipe['cooking'].items():
-
-        print("running "+k)
-        dishes[k] = list()
-
-        for p in pceds:
-            func = p['procedure']
-            if func == 'serve':
-                ingredients = [dag.get_node(x).evaluate() for x in p['ingredients']]
-                opts = read_opt(p, 'options', default=dict())
-                [dishes[k].append({'ingredient': i, 'options': opts}) for i in ingredients]
-                continue
-            out = dag.get_node(p['result']).evaluate()
-        # if there is no seving procedures/section, use the last output Ingredient
-        # object as final result.
-        if len(dishes[k]) == 0 and 'serving' not in recipe.keys():
-            logger.warning('serving last procedure output for {}: {}'.format(k, out.ingred_id))
-            dishes[k].append({'ingredient': out, 'options': dict()})
-    # update dishes when there is serving section
-    if 'serving' in recipe.keys():
-        for i in recipe['serving']:
-            opts = read_opt(i, 'options', default=dict())
-            ing = dag.get_node(i['id']).evaluate()
-            if ing.dtype in dishes.keys():
-                dishes[ing.dtype].append({'ingredient': ing, 'options': opts})
+    results = list()
+    for dish in dishes:
+	dish_result = dag.get_node(dish['id']).evaluate()
+	results.append(dish_result)
+	if serve:
+	    if 'options' in dish:
+		dish_result.serve(outpath, **dish['options'])
             else:
-                dishes[ing.dtype] = [{'ingredient': ing, 'options': opts}]
-    return dishes
+		dish_result.serve(outpath)
 
-
-def dish_to_csv(dishes, outpath):
-    """save the recipe output to disk"""
-    for t, ds in dishes.items():
-        for dish in ds:
-            dish['ingredient'].serve(outpath, **dish['options'])
+    return results

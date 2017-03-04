@@ -55,6 +55,102 @@ class BaseIngredient(object):
         self.data = None
         return
 
+    def _serve_concepts(self, outpath, **options):
+        data = self.copy_data()
+        assert isinstance(data, dict)
+        for k, df in data.items():
+            # change boolean into string
+            for i, v in df.dtypes.iteritems():
+                if v == 'bool':
+                    df[i] = df[i].map(lambda x: str(x).upper())
+            path = os.path.join(outpath, 'ddf--concepts.csv')
+            df.to_csv(path, index=False, encoding='utf8')
+
+    def _serve_entities(self, outpath, **options):
+        data = self.copy_data()
+        assert isinstance(data, dict)
+        for k, df in data.items():
+            # change boolean into string
+            for i, v in df.dtypes.iteritems():
+                if v == 'bool':
+                    df[i] = df[i].map(lambda x: str(x).upper())
+            domain = self.key
+            if k == domain:
+                path = os.path.join(outpath, 'ddf--entities--{}.csv'.format(k))
+            else:
+                path = os.path.join(outpath, 'ddf--entities--{}--{}.csv'.format(domain, k))
+            df.to_csv(path, index=False, encoding='utf8')
+
+    def _serve_datapoints(self, outpath, **options):
+        data = self.copy_data()
+        assert isinstance(data, dict)
+        digits = read_opt(options, 'digits', default=5)
+
+        def to_disk(df_input, k, path):
+            df = df_input.copy()
+            if not np.issubdtype(df[k].dtype, np.number):
+                try:
+                    df[k] = df[k].astype(float)
+                    df[k] = df[k].map(lambda x: format_float_digits(x, digits))
+                except ValueError:
+                    logging.warning("data not numeric: " + k)
+            else:
+                df[k] = df[k].map(lambda x: format_float_digits(x, digits))
+            df.to_csv(path, encoding='utf8', index=False)
+
+        for k, df in data.items():
+            split_by = read_opt(options, 'split_datapoints_by', default=False)
+            by = self.key_to_list()
+            if not split_by:
+                path = os.path.join(
+                    outpath,
+                    'ddf--datapoints--{}--by--{}.csv'.format(k, '--'.join(by)))
+                to_disk(df, k, path)
+            else:
+                # split datapoints by entities. Firstly we calculate all possible
+                # combinations of entities, and then filter the dataframe, create
+                # file names and save them into disk.
+                from itertools import product
+                values = list()
+                [values.append(df[col].unique()) for col in split_by]
+                all_combinations = product(*values)
+
+                if len(by) > len(split_by):
+                    by = list(set(by) - set(split_by))
+                else:
+                    by = None
+
+                for comb in all_combinations:
+                    query = ''
+                    entity_strings = list()
+                    for entity, value in zip(split_by, comb):
+                        entity_strings.append(entity + '-' + value)
+                        if len(query) > 0:
+                            query = query + " and " + "{} == '{}'".format(entity, value)
+                        else:
+                            query = "{} == '{}'".format(entity, value)
+
+                    if by:
+                        path = os.path.join(
+                            outpath,
+                            'ddf--datapoints--{}--by--{}--{}.csv'.format(
+                                k,
+                                '--'.join(sorted(entity_strings)),
+                                '--'.join(sorted(by))
+                            )
+                        )
+                    else:
+                        path = os.path.join(
+                            outpath,
+                            'ddf--datapoints--{}--by--{}.csv'.format(
+                                k,
+                                '--'.join(sorted(entity_strings))
+                            )
+                        )
+                    # logging.debug('query is: ' + query)
+                    df_part = df.query(query)
+                    to_disk(df_part, k, path)
+
     def serve(self, outpath, **options):
         """save the ingledient to disk.
 
@@ -69,45 +165,23 @@ class BaseIngredient(object):
             how many digits to keep at most.
 
         """
+        logging.info('serving ingredient: ' + self.ingred_id)
         # create outpath if not exists
+        if 'sub_folder' in options:
+            sub_folder = options.pop('sub_folder')
+            assert not os.path.isabs(sub_folder)  # sub folder should not be abspath
+            outpath = os.path.join(outpath, sub_folder)
         os.makedirs(outpath, exist_ok=True)
 
-        data = self.copy_data()
         t = self.dtype
-        assert isinstance(data, dict)
-        for k, df in data.items():
-            # change boolean into string
-            for i, v in df.dtypes.iteritems():
-                if v == 'bool':
-                    df[i] = df[i].map(lambda x: str(x).upper())
-            if t == 'datapoints':
-                by = self.key_to_list()
-                path = os.path.join(outpath, 'ddf--{}--{}--by--{}.csv'.format(t, k, '--'.join(by)))
-            elif t == 'concepts':
-                path = os.path.join(outpath, 'ddf--{}.csv'.format(t))
-            elif t == 'entities':
-                domain = self.key
-                if k == domain:
-                    path = os.path.join(outpath, 'ddf--{}--{}.csv'.format(t, k))
-                else:
-                    path = os.path.join(outpath, 'ddf--{}--{}--{}.csv'.format(t, domain, k))
-            else:
-                raise IngredientError('Not a correct collection: ' + t)
-            # formatting numbers for datapoints
-            if t == 'datapoints':
-                digits = read_opt(options, 'digits', default=5)
-                df = df.set_index(by)
-                if not np.issubdtype(df[k].dtype, np.number):
-                    try:
-                        df[k] = df[k].astype(float)
-                        df[k] = df[k].map(lambda x: format_float_digits(x, digits))
-                    except ValueError:
-                        logging.warning("data not numeric: " + k)
-                else:
-                    df[k] = df[k].map(lambda x: format_float_digits(x, digits))
-                df[[k]].to_csv(path, encoding='utf8')
-            else:
-                df.to_csv(path, index=False, encoding='utf8')
+        if t == 'datapoints':
+            self._serve_datapoints(outpath, **options)
+        elif t == 'concepts':
+            self._serve_concepts(outpath, **options)
+        elif t == 'entities':
+            self._serve_entities(outpath, **options)
+        else:
+            raise IngredientError('Not a correct collection: ' + t)
 
 
 class Ingredient(BaseIngredient):
