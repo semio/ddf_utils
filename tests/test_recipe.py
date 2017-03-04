@@ -22,9 +22,10 @@ def recipe_file(request):
 def test_run_recipe(recipe_file, to_disk=False):
     print('running test: ' + recipe_file)
     recipe = chef.build_recipe(recipe_file)
-    res = chef.run_recipe(recipe)
     if to_disk:
         outdir = tempfile.mkdtemp()
         print('tmpdir: ' + outdir)
-        chef.dish_to_csv(res, outdir)
+        chef.run_recipe(recipe, True, outdir)
+    else:
+        _ = chef.run_recipe(recipe)
     assert 1
