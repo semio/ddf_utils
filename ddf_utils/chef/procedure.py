@@ -944,14 +944,14 @@ def trend_bridge(ingredient: BaseIngredient, bridge_start, bridge_end, bridge_le
     # calculate trend bridge on each group
     res_grouped = []
     for g, df in start_group:
-        gstart = df
+        gstart = df.copy()
         try:
             gend = end_group.get_group(g)
         except KeyError:  # no new data available for this group
-            logger.warning("no data for group: " + g)
+            logger.warning("no data for bridge end: " + g)
             bridged = gstart[bridge_start['column']]
-
-        bridged = tb(gstart[bridge_start['column']], gend[bridge_end['column']], bridge_length)
+        else:
+            bridged = tb(gstart[bridge_start['column']], gend[bridge_end['column']], bridge_length)
 
         res_grouped.append((g, bridged))
 
@@ -976,4 +976,3 @@ def trend_bridge(ingredient: BaseIngredient, bridge_start, bridge_end, bridge_le
         return ProcedureResult(result, start.key, merged)
     else:
         return ProcedureResult(result, start.key, {target_col: result_data})
-
