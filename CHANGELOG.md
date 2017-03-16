@@ -1,3 +1,8 @@
+## version 0.2.12 2017-03-16
+
+- bug fix in several procedures
+- minor improvments
+
 ## version 0.2.11 2017-03-04
 
 - new `insert_keys` option to `groupby` procedure
