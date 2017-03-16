@@ -73,6 +73,22 @@ class BaseNode():
                 t.detect_downstream_cycle(node=node)
         return False
 
+    def detect_missing_dependency(self):
+        """
+        check if every upstream is available in the DAG.
+        raise error if something is missing
+        """
+        not_found = set()
+        for n in self.upstream_list:
+            if not self.dag.has_node(n.node_id):
+                not_found.add(n.node_id)
+            if isinstance(n, ProcedureNode) and not n.procedure:
+                not_found.add(n.node_id)
+        if len(not_found) > 0:
+            raise ChefRuntimeError(
+                "dependency not found/not definded for {}: {}".format(self.node_id, not_found))
+        return False
+
 
 class IngredientNode(BaseNode):
     """Node for storing dataset ingredients.
@@ -116,8 +132,8 @@ class ProcedureNode(BaseNode):
             func = getattr(pc, self.procedure['procedure'])
         except AttributeError:
             raise ProcedureError("Not supported: " + self.procedure['procedure'])
-        except TypeError:
-            raise ProcedureError("Procedure Error: " + str(self.node_id))
+        # except TypeError:
+        #     raise ProcedureError("Procedure Error: " + str(self.node_id))
 
         # check the base ingredients and convert the string id to actual ingredient
         ingredients = []

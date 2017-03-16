@@ -11,21 +11,44 @@ import common
 import pytest
 import glob
 
-all_test_recipes = glob.glob('recipes/test_*')
+test_recipes_pass = glob.glob('recipes_pass/test_*')
+test_recipes_fail = glob.glob('recipes_fail/test_*')
+
 
 @pytest.fixture(scope='session',
-                params=all_test_recipes)
-def recipe_file(request):
+                params=test_recipes_pass)
+def recipe_file_pass(request):
     return request.param
 
 
-def test_run_recipe(recipe_file, to_disk=False):
-    print('running test: ' + recipe_file)
-    recipe = chef.build_recipe(recipe_file)
+@pytest.fixture(scope='session',
+                params=test_recipes_fail)
+def recipe_file_fail(request):
+    return request.param
+
+
+def test_run_recipe_pass(recipe_file_pass, to_disk=False):
+    print('running test: ' + recipe_file_pass)
+    recipe = chef.build_recipe(recipe_file_pass)
     if to_disk:
         outdir = tempfile.mkdtemp()
         print('tmpdir: ' + outdir)
-        chef.run_recipe(recipe, True, outdir)
     else:
-        _ = chef.run_recipe(recipe)
-    assert 1
+        outdir = None
+
+    chef.run_recipe(recipe, to_disk, outdir)
+
+
+def test_run_recipe_fail(recipe_file_fail, to_disk=False):
+    print('running test: ' + recipe_file_fail)
+    recipe = chef.build_recipe(recipe_file_fail)
+    if to_disk:
+        outdir = tempfile.mkdtemp()
+        print('tmpdir: ' + outdir)
+    else:
+        outdir = None
+    try:
+        chef.run_recipe(recipe, to_disk, outdir)
+    except:
+        return
+    assert 0

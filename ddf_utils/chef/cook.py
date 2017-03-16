@@ -323,6 +323,10 @@ def run_recipe(recipe, serve=False, outpath=None):
     # create DAG of recipe
     dag = build_dag(recipe_)
 
+    # check all ingredients availability
+    for root in dag.roots:
+        root.detect_missing_dependency()
+
     # now run the recipe
     dishes = get_dishes(recipe_)
 
