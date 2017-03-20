@@ -25,7 +25,20 @@
                     "id": {"type": "string"},
                     "dataset": {"type": "string"},
                     "key": {"type": "string"},
-                    "value": {"type": "string"},
+                    "value": {
+                        "oneOf":[
+                            {
+                                "type": "string", 
+                                "enum": ["*"]
+                            },
+                            {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                }
+                            }
+                        ]
+                    },
                     "row_fliter": {"type": "string"}
                 },
                 "required": ["id", "dataset", "key", "value"]
