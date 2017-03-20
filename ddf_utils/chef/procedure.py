@@ -859,7 +859,7 @@ def extract_concepts(*ingredients: List[BaseIngredient], result,
 
 @debuggable
 def trend_bridge(ingredient: BaseIngredient, bridge_start, bridge_end, bridge_length, bridge_on,
-                 result, target_col=None) -> ProcedureResult:
+                 result, target_column=None) -> ProcedureResult:
     """run trend bridge on ingredients
 
     .. highlight:: yaml
@@ -928,8 +928,8 @@ def trend_bridge(ingredient: BaseIngredient, bridge_start, bridge_end, bridge_le
     assert start.dtype == 'datapoints'
     assert end.dtype == 'datapoints'
 
-    if target_col is None:
-        target_col = bridge_start['column']
+    if target_column is None:
+        target_column = bridge_start['column']
 
     # get the column to group. Because datapoints are multidimensional, but we only
     # bridge them in one column, so we should group other columns.
@@ -958,7 +958,7 @@ def trend_bridge(ingredient: BaseIngredient, bridge_start, bridge_end, bridge_le
     # combine groups to dataframe
     res = []
     for g, v in res_grouped:
-        v.name = target_col
+        v.name = target_column
         v = v.reset_index()
         if len(keys) == 1:
             assert isinstance(g, str)
@@ -971,8 +971,8 @@ def trend_bridge(ingredient: BaseIngredient, bridge_start, bridge_end, bridge_le
     result_data = pd.concat(res, ignore_index=True)
 
     if ingredient is not None:
-        merged = _merge_two(ingredient.get_data(), {target_col: result_data},
+        merged = _merge_two(ingredient.get_data(), {target_column: result_data},
                             start.key_to_list(), 'datapoints')
         return ProcedureResult(result, start.key, merged)
     else:
-        return ProcedureResult(result, start.key, {target_col: result_data})
+        return ProcedureResult(result, start.key, {target_column: result_data})
