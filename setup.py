@@ -18,6 +18,7 @@ requirements = [
     'orderedattrdict',
     'typing',
     'cookiecutter',
+    'jsonschema',
     'Click',
     'daff'
 ]
