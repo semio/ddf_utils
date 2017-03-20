@@ -34,6 +34,6 @@ cooking:
                   column: new_col
               bridge_length: 10
               bridge_on: year
-              target_col: bridged
+              target_column: bridged
           result: res
 
