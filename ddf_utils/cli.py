@@ -115,6 +115,23 @@ def run_recipe(recipe, outdir, ddf_dir, update, dry_run, show_tree):
     click.echo("Done.")
 
 
+@ddf.command()
+@click.argument('recipe', type=click.Path(exists=True))
+@click.option('--format', '-f', type=click.Choice(['json', 'yaml']), default='json',
+              help='set output format')
+def build_recipe(recipe, format):
+    """create a complete recipe by expanding all includes in the input recipe."""
+    from ddf_utils.chef.cook import build_recipe
+    recipe = build_recipe(recipe)
+    fp = click.open_file('-', 'w')
+    if format == 'json':
+        import json
+        json.dump(recipe, fp, indent=4, ensure_ascii=False)
+    elif format == 'yaml':
+        import yaml
+        yaml.dump(recipe, fp)
+
+
 # Translation related tasks
 @ddf.command()
 @click.argument('path', type=click.Path(exists=True))

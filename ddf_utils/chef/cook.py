@@ -157,9 +157,6 @@ def build_recipe(recipe_file, to_disk=False, **kwargs):
                     recipe['cooking'] = {}
                     recipe['cooking'][p] = rcp['cooking'][p]
 
-        if to_disk:
-            yaml.dump(recipe, open('recipe_dump.yaml', 'w'))
-
         return recipe
 
 
