@@ -30,7 +30,7 @@ setup(
     author='Semio Zheng',
     author_email='prairy.long@gmail.com',
     license='MIT',
-    packages=find_packages(exclude=['contrib', 'docs', 'tests']),
+    packages=find_packages(exclude=['contrib', 'docs', 'tests', 'res']),
     install_requires=requirements,
     entry_points={
         'console_scripts': [
