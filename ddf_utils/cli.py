@@ -144,6 +144,8 @@ def validate_recipe(recipe, build):
     if build:
         from ddf_utils.chef.cook import build_recipe as buildrcp
         recipe = buildrcp(recipe)
+        # reload the recipe to get rid of AttrDict in the object
+        recipe = json.loads(json.dumps(recipe))
     else:
         if recipe.endswith('.json'):
             recipe = json.load(open(recipe))
@@ -154,11 +156,17 @@ def validate_recipe(recipe, build):
     v = Draft4Validator(schema)
     errors = list(v.iter_errors(recipe))
     if len(errors) == 0:
-        print("The recipe is valid.")
+        click.echo("The recipe is valid.")
     else:
         for e in errors:
-            print("On .{}[{}]:".format('.'.join(list(e.path)[:-1]), e.path[-1]))
-            print(e.message)
+            path = ''
+            for p in e.path:
+                if isinstance(p, int):
+                    path = path + '[{}]'.format(p)
+                else:
+                    path = path + '.{}'.format(p)
+            click.echo('On {}'.format(path))
+            click.echo(e.message)
 
 
 # Translation related tasks
