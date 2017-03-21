@@ -305,6 +305,9 @@
                                     "type": "array"
                                 }
                             ]
+                        },
+                        "insert_key": {
+                            "type": "object"
                         }
                     },
                     "patternProperties": {
