@@ -1,35 +1,58 @@
 {
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
+    "additionalProperties": false,
     "properties": {
         "info": {
             "type": "object",
             "properties": {
-                "id": {"type": "string"}
+                "id": {
+                    "type": "string"
+                }
             }
         },
         "config": {
             "type": "object",
             "properties": {
-                "ddf_dir": {"type": "string"},
-                "recipes_dir": {"type": "string"},
-                "dictionary_dir": {"type": "string"}
+                "ddf_dir": {
+                    "type": "string"
+                },
+                "recipes_dir": {
+                    "type": "string"
+                },
+                "dictionary_dir": {
+                    "type": "string"
+                }
             }
         },
+        "include": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        }, 
         "ingredients": {
             "type": "array",
             "uniqueItems": true,
             "items": {
                 "type": "object",
                 "properties": {
-                    "id": {"type": "string"},
-                    "dataset": {"type": "string"},
-                    "key": {"type": "string"},
+                    "id": {
+                        "type": "string"
+                    },
+                    "dataset": {
+                        "type": "string"
+                    },
+                    "key": {
+                        "type": "string"
+                    },
                     "value": {
-                        "oneOf":[
+                        "oneOf": [
                             {
-                                "type": "string", 
-                                "enum": ["*"]
+                                "type": "string",
+                                "enum": [
+                                    "*"
+                                ]
                             },
                             {
                                 "type": "array",
@@ -39,519 +62,43 @@
                             }
                         ]
                     },
-                    "row_fliter": {"type": "string"}
+                    "row_fliter": {
+                        "type": "string"
+                    }
                 },
-                "required": ["id", "dataset", "key", "value"]
+                "required": [
+                    "id",
+                    "dataset",
+                    "key",
+                    "value"
+                ]
             }
         },
         "cooking": {
             "type": "object",
+            "additionalProperties": false,
             "properties": {
                 "datapoints": {
                     "type": "array",
                     "items": {
                         "type": "object",
-                        "anyOf": [
+                        "allOf":[
                             {
                                 "properties": {
                                     "procedure": {
-                                        "type": "string",
                                         "enum": [
-                                            "translate_header"
-                                        ]
-                                    },
-                                    "ingredients": {
-                                        "type": "array",
-                                        "items": {
-                                            "type": "string"
-                                        },
-                                        "uniqueItems": true,
-                                        "maxItems": 1
-                                    },
-                                    "result": {
-                                        "type": "string"
-                                    },
-                                    "options": {
-                                        "type": "object",
-                                        "properties": {
-                                            "dictionary":{
-                                                "oneOf":[
-                                                    {"type": "string"},
-                                                    {"type": "object"}
-                                                ]
-                                            }
-                                        }
-                                    }
-                                },
-                                "required": [
-                                    "procedure",
-                                    "ingredients",
-                                    "result",
-                                    "options"
-                                ]
-                            },
-                            {
-                                "properties": {
-                                    "procedure": {
-                                        "type": "string",
-                                        "enum": [
-                                            "translate_column"
-                                        ]
-                                    },
-                                    "ingredients": {
-                                        "type": "array",
-                                        "items": {
-                                            "type": "string"
-                                        },
-                                        "uniqueItems": true,
-                                        "maxItems": 1
-                                    },
-                                    "result": {
-                                        "type": "string"
-                                    },
-                                    "options": {
-                                        "type": "object",
-                                        "properties": {
-                                            "dictionary":{
-                                                "oneOf":[
-                                                    {"type": "string"},
-                                                    {"type": "object"}
-                                                ]
-                                            },
-                                            "column": {"type": "string"},
-                                            "target_column": {"type": "string"},
-                                            "not_found":{
-                                                "type": "string",
-                                                "enum": [
-                                                    "drop",
-                                                    "include",
-                                                    "error"
-                                                ]
-                                            },
-                                            "ambiguity": {
-                                                "type": "string",
-                                                "enum": [
-                                                    "prompt",
-                                                    "skip",
-                                                    "error"
-                                                ]
-                                            }
-
-                                        }
-                                    }
-                                },
-                                "required": [
-                                    "procedure",
-                                    "ingredients",
-                                    "result",
-                                    "options"
-                                ]
-                            },
-                            {
-                                "properties": {
-                                    "procedure": {
-                                        "type": "string",
-                                        "enum": [
-                                            "groupby"
-                                        ]
-                                    },
-                                    "ingredients": {
-                                        "type": "array",
-                                        "items": {
-                                            "type": "string"
-                                        },
-                                        "uniqueItems": true,
-                                        "maxItems": 1
-                                    },
-                                    "result": {
-                                        "type": "string"
-                                    },
-                                    "options": {
-                                        "type": "object",
-                                        "properties": {
-                                            "groupby":{
-                                                "oneOf":[
-                                                    {"type": "string"},
-                                                    {"type": "array"}
-                                                ]
-                                            },
-                                            "aggregate": {
-                                                "type": "object",
-                                                "patternProperties": {
-                                                    ".*": {
-                                                        "oneOf":[
-                                                            {"type": "string"},
-                                                            {
-                                                                "type": "object",
-                                                                "properties": {
-                                                                    "function": {"type": "string"}
-                                                                },
-                                                                "required": ["function"]
-                                                            }
-                                                        ]
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                },
-                                "required": [
-                                    "procedure",
-                                    "ingredients",
-                                    "result",
-                                    "options"
-                                ]
-                            },
-                            {
-                                "properties": {
-                                    "procedure": {
-                                        "type": "string",
-                                        "enum": [
-                                            "window"
-                                        ]
-                                    },
-                                    "ingredients": {
-                                        "type": "array",
-                                        "items": {
-                                            "type": "string"
-                                        },
-                                        "uniqueItems": true,
-                                        "maxItems": 1
-                                    },
-                                    "result": {
-                                        "type": "string"
-                                    },
-                                    "options": {
-                                        "type": "object",
-                                        "properties": {
-                                            "window":{
-                                                "type": "object",
-                                                "properties": {
-                                                    "column": {"type": "string"},
-                                                    "size": {
-                                                        "oneOf":[
-                                                            {"type": "number"},
-                                                            {
-                                                                "type": "string",
-                                                                "enum": [
-                                                                    "expanding"
-                                                                ]
-                                                            }
-                                                        ]
-                                                    },
-                                                    "min_periods": {"type": "number"},
-                                                    "center": {"type": "boolean"},
-                                                    "aggregate": {
-                                                    "type": "object",
-                                                    "patternProperties": {
-                                                        ".*": {
-                                                            "oneOf":[
-                                                                {"type": "string"},
-                                                                {
-                                                                    "type": "object",
-                                                                    "properties": {
-                                                                        "function": {"type": "string"}
-                                                                    },
-                                                                    "required": ["function"]
-                                                                    }
-                                                                ]
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                },
-                                "required": [
-                                    "procedure",
-                                    "ingredients",
-                                    "result",
-                                    "options"
-                                ]
-                            },
-                            {
-                                "properties": {
-                                    "procedure": {
-                                        "type": "string",
-                                        "enum": [
-                                            "filter_row"
-                                        ]
-                                    },
-                                    "ingredients": {
-                                        "type": "array",
-                                        "items": {
-                                            "type": "string"
-                                        },
-                                        "uniqueItems": true,
-                                        "maxItems": 1
-                                    },
-                                    "result": {
-                                        "type": "string"
-                                    },
-                                    "options": {
-                                        "type": "object",
-                                        "properties": {
-                                            "dictionary":{
-                                                "type": "object",
-                                                "patternProperties": {
-                                                    ".*": {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "from": {"type": "string"}
-                                                        },
-                                                        "required": ["from"]
-                                                    }
-                                                }
-                                            },
-                                            "keep_all_columns": {"type": "boolean"}
-                                        },
-                                        "required": ["dictionary"]
-                                    }
-                                },
-                                "required": [
-                                    "procedure",
-                                    "ingredients",
-                                    "result",
-                                    "options"
-                                ]
-                            },
-                            {
-                                "properties": {
-                                    "procedure": {
-                                        "type": "string",
-                                        "enum": [
-                                            "filter_item"
-                                        ]
-                                    },
-                                    "ingredients": {
-                                        "type": "array",
-                                        "items": {
-                                            "type": "string"
-                                        },
-                                        "uniqueItems": true,
-                                        "maxItems": 1
-                                    },
-                                    "result": {
-                                        "type": "string"
-                                    },
-                                    "options": {
-                                        "type": "object",
-                                        "properties": {
-                                            "items": {
-                                                "type": "array",
-                                                "items": {
-                                                    "type": "string"
-                                                }
-                                            }
-                                        },
-                                        "required": ["items"]
-                                    }
-                                },
-                                "required": [
-                                    "procedure",
-                                    "ingredients",
-                                    "result",
-                                    "options"
-                                ]
-                            },
-                            {
-                                "properties": {
-                                    "procedure": {
-                                        "type": "string",
-                                        "enum": [
-                                            "run_op"
-                                        ]
-                                    },
-                                    "ingredients": {
-                                        "type": "array",
-                                        "items": {
-                                            "type": "string"
-                                        },
-                                        "uniqueItems": true,
-                                        "maxItems": 1
-                                    },
-                                    "result": {
-                                        "type": "string"
-                                    },
-                                    "options": {
-                                        "type": "object",
-                                        "properties": {
-                                            "op": {
-                                                "type": "object"
-                                            }
-                                        },
-                                        "required": ["op"]
-                                    }
-                                },
-                                "required": [
-                                    "procedure",
-                                    "ingredients",
-                                    "result",
-                                    "options"
-                                ]
-                            },
-                            {
-                                "properties": {
-                                    "procedure": {
-                                        "type": "string",
-                                        "enum": [
-                                            "copy"
-                                        ]
-                                    },
-                                    "ingredients": {
-                                        "type": "array",
-                                        "items": {
-                                            "type": "string"
-                                        },
-                                        "uniqueItems": true,
-                                        "maxItems": 1
-                                    },
-                                    "result": {
-                                        "type": "string"
-                                    },
-                                    "options": {
-                                        "type": "object",
-                                        "properties": {
-                                            "dictionary": {
-                                                "type": "object",
-                                                "patternProperties": {
-                                                    ".*": {
-                                                        "oneOf":[
-                                                            {"type": "string"},
-                                                            {
-                                                                "type": "array",
-                                                                "items": {
-                                                                    "type": "string"
-                                                                }
-                                                            }
-                                                        ]
-                                                    }
-                                                }
-                                            }
-                                        },
-                                        "required": ["dictionary"]
-                                    }
-                                },
-                                "required": [
-                                    "procedure",
-                                    "ingredients",
-                                    "result",
-                                    "options"
-                                ]
-                            },
-                            {
-                                "properties": {
-                                    "procedure": {
-                                        "type": "string",
-                                        "enum": [
-                                            "extract_concepts"
-                                        ]
-                                    },
-                                    "ingredients": {
-                                        "type": "array",
-                                        "items": {
-                                            "type": "string"
-                                        },
-                                        "uniqueItems": true
-                                    },
-                                    "result": {
-                                        "type": "string"
-                                    },
-                                    "options": {
-                                        "type": "object",
-                                        "properties": {
-                                            "join": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "base": {
-                                                        "type": "string"
-                                                    },
-                                                    "type": {
-                                                        "type": "string",
-                                                        "enum": [
-                                                            "full_outer",
-                                                            "ingredients_outer"
-                                                        ]
-                                                    }
-                                                }
-                                            },
-                                            "include_keys": {
-                                                "type": "boolean"
-                                            },
-                                            "overwrite": {
-                                                "type": "object",
-                                                "patternProperties": {
-                                                    ".*":{
-                                                        "type": "string"
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                },
-                                "required": [
-                                    "procedure",
-                                    "ingredients",
-                                    "result",
-                                    "options"
-                                ]
-                            },
-                            {
-                                "properties": {
-                                    "procedure": {
-                                        "type": "string",
-                                        "enum": [
-                                            "trend_bridge"
-                                        ]
-                                    },
-                                    "ingredients": {
-                                        "type": "array",
-                                        "items": {
-                                            "type": "string"
-                                        },
-                                        "uniqueItems": true,
-                                        "maxItems": 1
-                                    },
-                                    "result": {
-                                        "type": "string"
-                                    },
-                                    "options": {
-                                        "type": "object",
-                                        "patternProperties": {
-                                            "^bridge_(start|end)$": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "ingredient": {"type": "string"},
-                                                    "column": {"type": "string"}
-                                                },
-                                                "required": ["column"]
-                                            },
-                                            "bridge_on": {"type": "string"},
-                                            "bridge_length": {"type": "number"},
-                                            "target_column": {"type": "string"}
-                                        },
-                                        "required": [
-                                            "bridge_start", 
-                                            "bridge_end",
-                                            "bridge_length", 
-                                            "bridge_on", 
-                                            "target_column"
-                                        ]
-                                    }
-                                },
-                                "required": [
-                                    "procedure",
-                                    "ingredients",
-                                    "result",
-                                    "options"
-                                ]
-                            },
-                            {
-                                "properties": {
-                                    "procedure": {
-                                        "type": "string",
-                                        "enum": [
+                                            "translate_header",
+                                            "translate_column",
+                                            "identity",
+                                            "merge",
+                                            "groupby",
+                                            "window",
+                                            "filter_row",
+                                            "filter_item",
+                                            "run_op",
+                                            "copy",
+                                            "extract_concepts",
+                                            "trend_bridge",
                                             "serve"
                                         ]
                                     },
@@ -562,44 +109,55 @@
                                         },
                                         "uniqueItems": true
                                     },
-                                    "result": {
-                                        "type": "string"
-                                    },
                                     "options": {
                                         "type": "object"
+                                    },
+                                    "result": {
+                                        "type": "string"
                                     }
                                 },
-                                "required": [
-                                    "procedure",
-                                    "ingredients"
-                                ]
+                                "required": ["procedure", "ingredients"],
+                                "additionalProperties": false
+                                    
                             },
                             {
-                                "properties": {
-                                    "procedure": {
-                                        "type": "string",
-                                        "enum": [
-                                            "merge"
-                                        ]
+                                "anyOf": [
+                                    {
+                                        "$ref": "#/definitions/translate_header"
                                     },
-                                    "ingredients": {
-                                        "type": "array",
-                                        "items": {
-                                            "type": "string"
-                                        },
-                                        "uniqueItems": true
+                                    {
+                                        "$ref": "#/definitions/translate_column"
                                     },
-                                    "result": {
-                                        "type": "string"
+                                    {
+                                        "$ref": "#/definitions/merge"
                                     },
-                                    "options": {
-                                        "type": "object"
+                                    {
+                                        "$ref": "#/definitions/groupby"
+                                    },
+                                    {
+                                        "$ref": "#/definitions/window"
+                                    },
+                                    {
+                                        "$ref": "#/definitions/filter_row"
+                                    },
+                                    {
+                                        "$ref": "#/definitions/filter_item"
+                                    },
+                                    {
+                                        "$ref": "#/definitions/run_op"
+                                    },
+                                    {
+                                        "$ref": "#/definitions/copy"
+                                    },
+                                    {
+                                        "$ref": "#/definitions/extract_concepts"
+                                    },
+                                    {
+                                        "$ref": "#/definitions/trend_bridge"
+                                    },
+                                    {
+                                        "$ref": "#/definitions/serve"
                                     }
-                                },
-                                "required": [
-                                    "procedure",
-                                    "ingredients",
-                                    "result"
                                 ]
                             }
                         ]
@@ -626,6 +184,550 @@
                     }
                 }
             }
+        }
+    },
+    "definitions": {
+        "translate_header": {
+            "properties": {
+                "procedure": {
+                    "type": "string",
+                    "enum": [
+                        "translate_header"
+                    ]
+                },
+                "ingredients": {
+                    "maxItems": 1
+                },
+                "options": {
+                    "type": "object",
+                    "properties": {
+                        "dictionary": {
+                            "oneOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "object"
+                                }
+                            ]
+                        },
+                        "debug": {"type": "boolean"}
+                    },
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "procedure",
+                "ingredients",
+                "result",
+                "options"
+            ]
+        },
+        "translate_column": {
+            "properties": {
+                "procedure": {
+                    "type": "string",
+                    "enum": [
+                        "translate_column"
+                    ]
+                },
+                "ingredients": {
+                    "maxItems": 1
+                },
+                "options": {
+                    "type": "object",
+                    "properties": {
+                        "dictionary": {
+                            "oneOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "object"
+                                }
+                            ]
+                        },
+                        "column": {
+                            "type": "string"
+                        },
+                        "target_column": {
+                            "type": "string"
+                        },
+                        "not_found": {
+                            "type": "string",
+                            "enum": [
+                                "drop",
+                                "include",
+                                "error"
+                            ]
+                        },
+                        "ambiguity": {
+                            "type": "string",
+                            "enum": [
+                                "prompt",
+                                "skip",
+                                "error"
+                            ]
+                        },
+                        "debug": {"type": "boolean"}
+                    },
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "procedure",
+                "ingredients",
+                "result",
+                "options"
+            ]
+        },
+        "groupby": {
+            "properties": {
+                "procedure": {
+                    "type": "string",
+                    "enum": [
+                        "groupby"
+                    ]
+                },
+                "ingredients": {
+                    "maxItems": 1
+                },
+                "options": {
+                    "type": "object",
+                    "properties": {
+                        "debug": {"type": "boolean"},
+                        "groupby": {
+                            "oneOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "array"
+                                }
+                            ]
+                        }
+                    },
+                    "patternProperties": {
+                        "aggregate|filter|transform": {
+                            "type": "object",
+                            "patternProperties": {
+                                ".*": {
+                                    "oneOf": [
+                                        {
+                                            "type": "string"
+                                        },
+                                        {
+                                            "type": "object",
+                                            "properties": {
+                                                "function": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "function"
+                                            ]
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "procedure",
+                "ingredients",
+                "result",
+                "options"
+            ]
+        },
+        "window": {
+            "properties": {
+                "procedure": {
+                    "type": "string",
+                    "enum": [
+                        "window"
+                    ]
+                },
+                "ingredients": {
+                    "maxItems": 1
+                },
+                "options": {
+                    "type": "object",
+                    "properties": {
+                        "debug": {"type": "boolean"},
+                        "window": {
+                            "type": "object",
+                            "properties": {
+                                "column": {
+                                    "type": "string"
+                                },
+                                "size": {
+                                    "oneOf": [
+                                        {
+                                            "type": "number"
+                                        },
+                                        {
+                                            "type": "string",
+                                            "enum": [
+                                                "expanding"
+                                            ]
+                                        }
+                                    ]
+                                },
+                                "min_periods": {
+                                    "type": "number"
+                                },
+                                "center": {
+                                    "type": "boolean"
+                                }
+                                
+                            }
+                        },
+                        "aggregate": {
+                            "type": "object",
+                            "patternProperties": {
+                                ".*": {
+                                    "oneOf": [
+                                        {
+                                            "type": "string"
+                                        },
+                                        {
+                                            "type": "object",
+                                            "properties": {
+                                                "function": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "function"
+                                            ]
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "procedure",
+                "ingredients",
+                "result",
+                "options"
+            ]
+        },
+        "filter_row": {
+            "properties": {
+                "procedure": {
+                    "type": "string",
+                    "enum": [
+                        "filter_row"
+                    ]
+                },
+                "ingredients": {
+                    "maxItems": 1
+                },
+                "options": {
+                    "type": "object",
+                    "properties": {
+                        "debug": {"type": "boolean"},
+                        "dictionary": {
+                            "type": "object",
+                            "patternProperties": {
+                                ".*": {
+                                    "type": "object",
+                                    "properties": {
+                                        "from": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "from"
+                                    ]
+                                }
+                            }
+                        },
+                        "keep_all_columns": {
+                            "type": "boolean"
+                        }
+                    },
+                    "required": [
+                        "dictionary"
+                    ],
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "procedure",
+                "ingredients",
+                "result",
+                "options"
+            ]
+        },
+        "filter_item": {
+            "properties": {
+                "procedure": {
+                    "type": "string",
+                    "enum": [
+                        "filter_item"
+                    ]
+                },
+                "ingredients": {
+                    "maxItems": 1
+                },
+                "options": {
+                    "type": "object",
+                    "properties": {
+                        "debug": {"type": "boolean"},
+                        "items": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "required": [
+                        "items"
+                    ],
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "procedure",
+                "ingredients",
+                "result",
+                "options"
+            ]
+        },
+        "run_op": {
+            "properties": {
+                "procedure": {
+                    "type": "string",
+                    "enum": [
+                        "run_op"
+                    ]
+                },
+                "ingredients": {
+                    "maxItems": 1
+                },
+                "options": {
+                    "type": "object",
+                    "properties": {
+                        "debug": {"type": "boolean"},
+                        "op": {
+                            "type": "object"
+                        }
+                    },
+                    "required": [
+                        "op"
+                    ],
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "procedure",
+                "ingredients",
+                "result",
+                "options"
+            ]
+        },
+        "copy": {
+            "properties": {
+                "procedure": {
+                    "type": "string",
+                    "enum": [
+                        "copy"
+                    ]
+                },
+                "ingredients": {
+                    "maxItems": 1
+                },
+                "options": {
+                    "type": "object",
+                    "properties": {
+                        "debug": {"type": "boolean"},
+                        "dictionary": {
+                            "type": "object",
+                            "patternProperties": {
+                                ".*": {
+                                    "oneOf": [
+                                        {
+                                            "type": "string"
+                                        },
+                                        {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string"
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "required": [
+                        "dictionary"
+                    ],
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "procedure",
+                "ingredients",
+                "result",
+                "options"
+            ]
+        },
+        "extract_concepts": {
+            "properties": {
+                "procedure": {
+                    "type": "string",
+                    "enum": [
+                        "extract_concepts"
+                    ]
+                },
+                "options": {
+                    "type": "object",
+                    "properties": {
+                        "debug": {"type": "boolean"},
+                        "join": {
+                            "type": "object",
+                            "properties": {
+                                "base": {
+                                    "type": "string"
+                                },
+                                "type": {
+                                    "type": "string",
+                                    "enum": [
+                                        "full_outer",
+                                        "ingredients_outer"
+                                    ]
+                                }
+                            }
+                        },
+                        "include_keys": {
+                            "type": "boolean"
+                        },
+                        "overwrite": {
+                            "type": "object",
+                            "patternProperties": {
+                                ".*": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "procedure",
+                "ingredients",
+                "result",
+                "options"
+            ]
+        },
+        "trend_bridge": {
+            "properties": {
+                "procedure": {
+                    "type": "string",
+                    "enum": [
+                        "trend_bridge"
+                    ]
+                },
+                "ingredients": {
+                    "maxItems": 1
+                },
+                "options": {
+                    "type": "object",
+                    "patternProperties": {
+                        "^bridge_(start|end)$": {
+                            "type": "object",
+                            "properties": {
+                                "ingredient": {
+                                    "type": "string"
+                                },
+                                "column": {
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "column"
+                            ]
+                        }
+                    },
+                    "properties": {
+                        "debug": {"type": "boolean"},
+                        "bridge_on": {
+                            "type": "string"
+                        },
+                        "bridge_length": {
+                            "type": "number"
+                        },
+                        "target_column": {
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "bridge_start",
+                        "bridge_end",
+                        "bridge_length",
+                        "bridge_on"
+                    ],
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "procedure",
+                "ingredients",
+                "result",
+                "options"
+            ]
+        },
+        "serve": {
+            "properties": {
+                "procedure": {
+                    "type": "string",
+                    "enum": [
+                        "serve"
+                    ]
+                },
+                "options": {
+                    "type": "object"
+                }
+            },
+            "required": [
+                "procedure",
+                "ingredients"
+            ]
+        },
+        "merge": {
+            "properties": {
+                "procedure": {
+                    "type": "string",
+                    "enum": [
+                        "merge"
+                    ]
+                },
+                "options": {
+                    "type": "object",
+                    "properties": {
+                        "debug": {"type": "boolean"},
+                        "deep": {
+                            "type": "boolean"
+                        }
+                    },
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "procedure",
+                "ingredients",
+                "result"
+            ]
         }
     }
 }
