@@ -790,7 +790,7 @@ cloumn will be replaced</li>
 
 <dl class="function">
 <dt id="ddf_utils.chef.procedure.trend_bridge">
-<code class="descclassname">ddf_utils.chef.procedure.</code><code class="descname">trend_bridge</code><span class="sig-paren">(</span><em>ingredient: ddf_utils.chef.ingredient.BaseIngredient</em>, <em>bridge_start</em>, <em>bridge_end</em>, <em>bridge_length</em>, <em>bridge_on</em>, <em>result</em>, <em>target_col=None</em><span class="sig-paren">)</span> &rarr; ddf_utils.chef.ingredient.ProcedureResult<a class="headerlink" href="#ddf_utils.chef.procedure.trend_bridge" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.chef.procedure.</code><code class="descname">trend_bridge</code><span class="sig-paren">(</span><em>ingredient: ddf_utils.chef.ingredient.BaseIngredient</em>, <em>bridge_start</em>, <em>bridge_end</em>, <em>bridge_length</em>, <em>bridge_on</em>, <em>result</em>, <em>target_column=None</em><span class="sig-paren">)</span> &rarr; ddf_utils.chef.ingredient.ProcedureResult<a class="headerlink" href="#ddf_utils.chef.procedure.trend_bridge" title="Permalink to this definition">¶</a></dt>
 <dd><p>run trend bridge on ingredients</p>
 <p>Procedure format:</p>
 <div class="highlight-yaml"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">procedure</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">trend_bridge</span>
@@ -905,7 +905,7 @@ each node will have a <cite>evaluate()</cite> function, which will return an ing
 on eval.</p>
 <dl class="class">
 <dt id="ddf_utils.chef.dag.BaseNode">
-<em class="property">class </em><code class="descclassname">ddf_utils.chef.dag.</code><code class="descname">BaseNode</code><span class="sig-paren">(</span><em>node_id</em>, <em>dag</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.dag.BaseNode" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">ddf_utils.chef.dag.</code><code class="descname">BaseNode</code><span class="sig-paren">(</span><em>node_id</em>, <em>dag</em>, <em>config=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.dag.BaseNode" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <p>The base node which IngredientNode and ProcedureNode inherit from</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -938,6 +938,13 @@ detected downstream from self. It is invoked when nodes are added to
 the DAG to detect cycles.</p>
 </dd></dl>
 
+<dl class="method">
+<dt id="ddf_utils.chef.dag.BaseNode.detect_missing_dependency">
+<code class="descname">detect_missing_dependency</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.dag.BaseNode.detect_missing_dependency" title="Permalink to this definition">¶</a></dt>
+<dd><p>check if every upstream is available in the DAG.
+raise error if something is missing</p>
+</dd></dl>
+
 <dl class="attribute">
 <dt id="ddf_utils.chef.dag.BaseNode.downstream_list">
 <code class="descname">downstream_list</code><a class="headerlink" href="#ddf_utils.chef.dag.BaseNode.downstream_list" title="Permalink to this definition">¶</a></dt>
@@ -964,7 +971,7 @@ downstream.</p>
 
 <dl class="class">
 <dt id="ddf_utils.chef.dag.DAG">
-<em class="property">class </em><code class="descclassname">ddf_utils.chef.dag.</code><code class="descname">DAG</code><span class="sig-paren">(</span><em>node_dict=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.dag.DAG" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">ddf_utils.chef.dag.</code><code class="descname">DAG</code><span class="sig-paren">(</span><em>node_dict=None</em>, <em>info=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.dag.DAG" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <p>The DAG model.</p>
 <p>A dag (directed acyclic graph) is a collection of tasks with directional
