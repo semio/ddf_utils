@@ -925,6 +925,60 @@ ingredient to ``_debug/<ingredient_id>/`` folder of your working directory. So
 if you want to check the intermediate results, just add ``debug: true`` to the
 ``options`` dictionary.
 
+Validate Recipe with Schema
+---------------------------
+
+In ddf_utils we provided a command for recipe writers to check if the recipe is
+valid using a `JSON schema`_ for recipe. The following command check and report
+any errors in recipe:
+
+.. _`JSON schema`: http://json-schema.org/
+
+::
+
+   $ ddf validate_recipe input.yaml
+
+Note that if you have includes in your recipe, you may want to build a complete
+recipe before validating it. You can firstly build your recipe and validate it:
+
+::
+
+   $ ddf build_recipe input.yaml > output.json
+
+   $ ddf validate_recipe output.json
+
+or just run ``ddf validate_recipe --build input.yaml`` without creating a new
+file.
+
+The validate command will output the json paths that are invalid, so that you can
+easily check which part of your recipe is wrong. For example,
+
+::
+
+   $ ddf validate_recipe --build etl.yml
+   On .cooking.datapoints[7]
+   {'procedure': 'translate_header', 'ingredients': ['unpop-datapoints-pop-by-age-aligned'], 'options': {'dictionary_f': {'country_code': 'country'}}, 'result': 'unpop-datapoints-pop-by-age-country'} is not valid under any of the given schemas
+
+For a pretty printed output of the invalid path, try using json processors like
+`jq`_:
+
+.. _`jq`: https://stedolan.github.io/jq/
+
+.. code-block:: javascript
+
+  // $ ddf build_recipe etl.yml | jq ".cooking.datapoints[7]"
+  {
+    "procedure": "translate_header",
+    "ingredients": [
+      "unpop-datapoints-pop-by-age-aligned"
+    ],
+    "options": {
+      "dictionary_f": {
+        "country_code": "country"
+      }
+    },
+    "result": "unpop-datapoints-pop-by-age-country"
+  }
 
 General guideline for writing recipes
 -------------------------------------
