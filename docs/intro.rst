@@ -77,11 +77,13 @@ commands are:
     --help                Show this message and exit.
 
   Commands:
+    build_recipe        create a complete recipe by expanding all...
     cleanup             clean up ddf files or translation files.
     create_datapackage  create datapackage.json
     merge_translation   merge all translation files from crowdin
     new                 create a new ddf project
     run_recipe          generate new ddf dataset with recipe
     split_translation   split ddf files for crowdin translation
+    validate_recipe     validate the recipe
 
 run ``ddf <command> --help`` for detail usage on each command.

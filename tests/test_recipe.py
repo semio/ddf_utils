@@ -1,8 +1,5 @@
 # -*- coding: utf-8 -*-
 
-# from ddf_utils.chef import *
-import ddf_utils.chef as chef
-
 import os
 import tempfile
 import shutil
@@ -10,6 +7,11 @@ import logging
 import common
 import pytest
 import glob
+
+# from ddf_utils.chef import *
+import ddf_utils.chef as chef
+from ddf_utils.chef.exceptions import ChefRuntimeError
+
 
 test_recipes_pass = glob.glob('recipes_pass/test_*')
 test_recipes_fail = glob.glob('recipes_fail/test_*')
@@ -49,6 +51,7 @@ def test_run_recipe_fail(recipe_file_fail, to_disk=False):
         outdir = None
     try:
         chef.run_recipe(recipe, to_disk, outdir)
-    except:
+    except ChefRuntimeError:
         return
-    assert 0
+    else:
+        raise Exception('test should fail')

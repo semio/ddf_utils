@@ -115,6 +115,62 @@ def run_recipe(recipe, outdir, ddf_dir, update, dry_run, show_tree):
     click.echo("Done.")
 
 
+@ddf.command()
+@click.argument('recipe', type=click.Path(exists=True))
+@click.option('--format', '-f', type=click.Choice(['json', 'yaml']), default='json',
+              help='set output format')
+def build_recipe(recipe, format):
+    """create a complete recipe by expanding all includes in the input recipe."""
+    from ddf_utils.chef.cook import build_recipe as buildrcp
+    recipe = buildrcp(recipe)
+    fp = click.open_file('-', 'w')
+    if format == 'json':
+        import json
+        json.dump(recipe, fp, indent=4, ensure_ascii=False)
+    elif format == 'yaml':
+        import yaml
+        yaml.dump(recipe, fp)
+
+
+@ddf.command()
+@click.argument('recipe', type=click.Path(exists=True))
+@click.option('--build/--no--build', default=False)
+def validate_recipe(recipe, build):
+    """validate the recipe"""
+    import json
+    from jsonschema import Draft4Validator
+    schema_file = os.path.join(os.path.dirname(__file__), '../res/specs/recipe.json')
+    schema = json.load(open(schema_file))
+    if build:
+        from ddf_utils.chef.cook import build_recipe as buildrcp
+        recipe = buildrcp(recipe)
+        # reload the recipe to get rid of AttrDict in the object
+        recipe = json.loads(json.dumps(recipe))
+    else:
+        if recipe.endswith('.json'):
+            recipe = json.load(open(recipe))
+        else:
+            import yaml
+            recipe = yaml.load(open(recipe))
+
+    v = Draft4Validator(schema)
+    errors = list(v.iter_errors(recipe))
+    if len(errors) == 0:
+        click.echo("The recipe is valid.")
+    else:
+        for e in errors:
+            path = ''
+            for p in e.path:
+                if isinstance(p, int):
+                    path = path + '[{}]'.format(p)
+                else:
+                    path = path + '.{}'.format(p)
+            if path == '':
+                path = '.'
+            click.echo('On {}'.format(path))
+            click.echo(e.message)
+
+
 # Translation related tasks
 @ddf.command()
 @click.argument('path', type=click.Path(exists=True))
