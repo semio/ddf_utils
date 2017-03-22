@@ -165,6 +165,8 @@ def validate_recipe(recipe, build):
                     path = path + '[{}]'.format(p)
                 else:
                     path = path + '.{}'.format(p)
+            if path == '':
+                path = '.'
             click.echo('On {}'.format(path))
             click.echo(e.message)
 
