@@ -1,3 +1,10 @@
+## version 0.2.13 2017-03-22
+
+- new subcommands for `ddf`: `validate_recipe` and `build_recipe`
+- include a recipe schema for validating recipes
+- documents for new commands
+- minor improvments
+
 ## version 0.2.12 2017-03-16
 
 - bug fix in several procedures
