@@ -10,4 +10,6 @@ install:
   - pip install -r requirements.txt
   - pip install .
 # command to run tests
-script: "cd tests && pytest"
+script: 
+  - cd tests
+  - if [[ $TRAVIS_PYTHON_VERSION <= 3.5 ]]; then py.test;else pytest; fi
