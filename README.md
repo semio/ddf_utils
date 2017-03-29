@@ -1,6 +1,8 @@
 # ddf_utils
 
-![status](https://travis-ci.org/semio/ddf_utils.svg?branch=master)
+![status](https://img.shields.io/travis/semio/ddf_utils.svg)
+![version](https://img.shields.io/pypi/v/ddf_utils.svg)
+![pyversion](https://img.shields.io/pypi/pyversions/ddf_utils.svg)
 
 ddf_utils is a Python library and command line tool for people working with
 [Tabular Data Package][1] in [DDF model][2]. It provides various functions for [ETL tasks][3],
