@@ -12,3 +12,6 @@ install:
 script: 
   - cd tests
   - if [[ $TRAVIS_PYTHON_VERSION == '3.3' || $TRAVIS_PYTHON_VERSION == '3.4' || $TRAVIS_PYTHON_VERSION == '3.5' ]]; then py.test;else pytest; fi
+after_success:
+  - pip install codecov
+  - codecov
