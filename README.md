@@ -17,8 +17,7 @@ functions we find useful in daily works in [Gapminder][5].
 
 ## Installation
 
-We are using python3 only features such as type signature in this repo.
-So python 3 is required in order to run this module.
+Python 3.3+ is required in order to run this module.
 
 ```$ pip3 install git+https://github.com/semio/ddf_utils.git```
 
