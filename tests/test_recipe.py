@@ -13,8 +13,9 @@ import ddf_utils.chef as chef
 from ddf_utils.chef.exceptions import ChefRuntimeError
 
 
-test_recipes_pass = glob.glob('recipes_pass/test_*')
-test_recipes_fail = glob.glob('recipes_fail/test_*')
+wd = os.path.dirname(__file__)
+test_recipes_pass = glob.glob(os.path.join(wd, 'recipes_pass/test_*'))
+test_recipes_fail = glob.glob(os.path.join(wd, 'recipes_fail/test_*'))
 
 
 @pytest.fixture(scope='session',
