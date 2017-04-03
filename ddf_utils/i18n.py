@@ -69,10 +69,10 @@ def split_translations_json(path, split_path='langsplit', exclude_concepts=None,
                 continue
             os.makedirs(dir_path, exist_ok=True)
             # print(json_path)
-            with open(json_path, 'w', encoding='utf8') as f:
-                df = df.fillna('')
-                content = df.to_json(orient='index')
-                json.dump(json.loads(content), f, indent=4, ensure_ascii=False)
+            df = df.fillna('')
+            # FIXME: handle multiIndex issue
+            # see https://github.com/pandas-dev/pandas/issues/4889
+            df.to_json(json_path, orient='index', force_ascii=False)
     return
 
 

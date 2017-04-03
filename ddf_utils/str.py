@@ -17,8 +17,12 @@ def to_concept_id(s, sep='_'):
         if k in s:
             s = s.replace(k, v)
 
-    pattern = re.compile('[\W_]+')
-    snew = unidecode(pattern.sub(sep, s.strip()).lower())
+    pattern = re.compile('[\W_]+')  # match all Non-alphanumeric
+    snew = unidecode(s.strip())
+    snew = pattern.sub(sep, snew).lower()
+
+    if len(snew.replace(sep, '')) == 0:
+        return None
 
     # remove first/last underscore
     if snew[-1] == sep:
