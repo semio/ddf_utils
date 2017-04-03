@@ -174,7 +174,8 @@ def validate_recipe(recipe, build):
 # Translation related tasks
 @ddf.command()
 @click.argument('path', type=click.Path(exists=True))
-@click.option('--type', '-t', 'dtype', type=click.Choice(['csv', 'json']), help='split file type')
+@click.option('--type', '-t', 'dtype', type=click.Choice(['csv', 'json']), help='split file type',
+              default='csv')
 @click.option('--overwrite/--no-overwrite', default=False, help='overwrite existing files or not')
 @click.option('--split_path', default='langsplit', help='path to langsplit folder')
 @click.option('--exclude_concept', '-x', 'exclude_concepts', multiple=True,
@@ -186,6 +187,9 @@ def split_translation(path, split_path, dtype, exclude_concepts, overwrite):
         split_translations_csv(path, split_path, exclude_concepts, overwrite)
     elif dtype == 'json':
         split_translations_json(path, split_path, exclude_concepts, overwrite)
+    else:
+        click.echo('Please specify correct input type (csv or json) with -t option.')
+        return
     click.echo('Done.')
 
 
@@ -200,8 +204,11 @@ def merge_translation(path, split_path, lang_path, dtype, overwrite):
     from ddf_utils.i18n import merge_translations_csv, merge_translations_json
     if dtype == 'csv':
         merge_translations_csv(path, split_path, lang_path, overwrite)
-    else:
+    elif dtype == 'json':
         merge_translations_json(path, split_path, lang_path, overwrite)
+    else:
+        click.echo('Please specify correct input type (csv or json) with -t option.')
+        return
     click.echo('Done.')
 
 
