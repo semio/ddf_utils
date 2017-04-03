@@ -8,7 +8,7 @@ import csv
 from collections import OrderedDict
 
 
-def get_datapackage(path, use_existing=False, to_disk=False):
+def get_datapackage(path, use_existing=True, to_disk=False):
     """get the datapackage.json from a dataset path, create one if it's not exists
 
     Parameters
@@ -31,11 +31,14 @@ def get_datapackage(path, use_existing=False, to_disk=False):
             datapackage_old = json.load(f, object_pairs_hook=OrderedDict)
 
         if use_existing:
+            # TODO: maybe add an option to just return the old datapackage
             _ = datapackage_old.pop('resources')  # don't use the old resources
             datapackage_new = create_datapackage(path, **datapackage_old)
         else:
-            return datapackage_old
+            datapackage_new = create_datapackage(path)
     else:
+        if use_existing:
+            print("wARNING: no existing datapackage.json")
         datapackage_new = create_datapackage(path)
 
     if to_disk:
