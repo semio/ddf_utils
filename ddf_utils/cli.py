@@ -217,7 +217,7 @@ def merge_translation(path, split_path, lang_path, dtype, overwrite):
 @click.argument('dataset1')
 @click.argument('dataset2')
 @click.option('--git', '-g', is_flag=True)
-@click.option('--checkout-path', type=click.Path(), default=os.path.join('.', 'etl', 'diff'))
+@click.option('--checkout-path', type=click.Path(), default='./etl/diff')
 @click.option('--diff-only', is_flag=True)
 def diff(dataset1, dataset2, git, checkout_path, diff_only):
     """give a report on the statistical differences for datapoints between 2 datasets."""
