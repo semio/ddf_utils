@@ -17,15 +17,15 @@ class DDF():
     the `DDF_SEARCH_PATH` global variable.
     """
     def __init__(self, ddf_id, no_check_valid=False):
-	if os.path.isabs(ddf_id):
-	    self.dataset_path = ddf_id
-	    self.ddf_id = os.path.dirname(ddf_id)
-	else:
-	    self.dataset_path = os.path.join(config.DDF_SEARCH_PATH, ddf_id)
-	    self.ddf_id = ddf_id
+        if os.path.isabs(ddf_id):
+            self.dataset_path = ddf_id
+            self.ddf_id = os.path.dirname(ddf_id)
+        else:
+            self.dataset_path = os.path.join(config.DDF_SEARCH_PATH, ddf_id)
+            self.ddf_id = ddf_id
         if not no_check_valid:
-	    assert is_dataset(self.dataset_path), \
-		"path is not ddf dataset: {}".format(self.dataset_path)
+            assert is_dataset(self.dataset_path), \
+                "path is not ddf dataset: {}".format(self.dataset_path)
         self._datapackage = None
         self._concepts = None
 
@@ -57,6 +57,12 @@ class DDF():
                 continue
 
         return res
+
+    @property
+    def indicator_dict(self):
+        """return all indicators"""
+        return dict([name, list(item.keys())]
+                    for name, item in self.get_datapoint_files().items())
 
     def get_all_files(self):
         """return a list of all files in this dataset"""
@@ -225,12 +231,12 @@ class DDF():
             keys = list(datapoint_files[measure].keys())[0]
             if primaryKey:
                 if not set(keys) == set(primaryKey):
-                    raise ValueError('key not found for the measure!')
+                    raise KeyError('no such key for the measure: ', primaryKey)
             df = self.get_datapoints(measure, keys)
             return df[measure][keys]
         else:
             if not primaryKey:
-                raise ValueError("please specify a primaryKey for measures with multiple"
+                raise ValueError("please specify a primaryKey for measures with multiple "
                                  "primaryKeys")
             for keys in datapoint_files[measure].keys():
                 if set(keys) == set(primaryKey):

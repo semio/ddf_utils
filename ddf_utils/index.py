@@ -38,7 +38,7 @@ def get_datapackage(path, use_existing=True, to_disk=False):
             datapackage_new = create_datapackage(path)
     else:
         if use_existing:
-            print("wARNING: no existing datapackage.json")
+            print("WARNING: no existing datapackage.json")
         datapackage_new = create_datapackage(path)
 
     if to_disk:

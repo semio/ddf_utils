@@ -50,6 +50,8 @@ def compare_with_func(dataset1, dataset2, fns=['rval', 'avg_pct_chg'],
 
     def get_comp_df(indicator, k):
         '''get dataframes from old and new datasets, and combine them into one dataframe'''
+        # FIXME: support multiple indicator in one file
+        # like the indicators in ddf--sodertorn--stockholm_lan_basomrade
         try:
             i1 = dataset1.get_datapoint_df(indicator, k)
         except KeyError:
