@@ -20,7 +20,8 @@ requirements = [
     'cookiecutter',
     'jsonschema',
     'Click',
-    'daff'
+    'daff',
+    'tabulate'
 ]
 
 setup(
