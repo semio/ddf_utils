@@ -1,3 +1,8 @@
+## version 0.2.14 2017-04-07
+
+- new subcommands for `ddf`: `diff` for comparing 2 datasets
+- DDF() now accepts absolute path to datasets
+
 ## version 0.2.13 2017-03-22
 
 - new subcommands for `ddf`: `validate_recipe` and `build_recipe`
