@@ -76,6 +76,15 @@ ddf_utils.patch module
     :undoc-members:
     :show-inheritance:
 
+
+ddf_utils.qa module
+-------------------
+
+.. automodule:: ddf_utils.qa
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 ddf_utils.str module
 --------------------
 
