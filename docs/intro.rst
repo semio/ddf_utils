@@ -51,6 +51,7 @@ domain, namely:
 - :py:mod:`index <ddf_utils.index>`: Generating/updating datapackage.json
 - :py:mod:`ops <ddf_utils.ops>`: Computations on data
 - :py:mod:`patch <ddf_utils.patch>`: Applying patch in `daff format`_
+- :py:mod:`qa <ddf_utils.qa>`: Functions for QA tasks
 - :py:mod:`str <ddf_utils.str>`: Functions for string/number formatting
 - :py:mod:`transformer <ddf_utils.transformer>`: Data transforming functions,
   such as column/row translation, trend bridge, etc.
@@ -80,6 +81,7 @@ commands are:
     build_recipe        create a complete recipe by expanding all...
     cleanup             clean up ddf files or translation files.
     create_datapackage  create datapackage.json
+    diff                give a report on the statistical differences...
     merge_translation   merge all translation files from crowdin
     new                 create a new ddf project
     run_recipe          generate new ddf dataset with recipe

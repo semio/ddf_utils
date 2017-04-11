@@ -94,9 +94,11 @@ def compare_with_func(dataset1, dataset2, fns=['rval', 'avg_pct_chg'],
 
 
 def rval(comp_df):
+    """return r-value between old and new data"""
     return comp_df.corr().ix['old', 'new']
 
 
 def avg_pct_chg(comp_df):
+    """return average precentage changes between old and new data"""
     res = (comp_df['new'] - comp_df['old']) / comp_df['old'] * 100
     return res.replace([np.inf, -np.inf], np.nan).mean()
