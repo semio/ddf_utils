@@ -3,7 +3,7 @@
 
 import os
 import shutil
-# import pandas as pd
+import pandas as pd
 
 
 def to_csv(df, out_dir, ftype, concept, by=None, **kwargs):
@@ -44,3 +44,71 @@ def cleanup(path, how='ddf'):
     if how == 'langsplit':
         if os.path.exists(os.path.join(path, 'langsplit')):
             shutil.rmtree(os.path.join(path, 'langsplit'))
+
+
+def csvs_to_ddf(files, out_path):
+    """convert raw files to ddfcsv"""
+    import re
+    from os.path import join
+    from ddf_utils.str import to_concept_id
+    from ddf_utils.index import get_datapackage
+
+    concepts_df = pd.DataFrame([['name', 'Name', 'string']],
+                               columns=['concept', 'name', 'concept_type'])
+    concepts_df = concepts_df.set_index('concept')
+
+    all_entities = dict()
+
+    pattern = 'indicators--by--([ 0-9a-zA-Z_-]*).csv'
+
+    for f in files:
+        data = pd.read_csv(f)
+        basename = os.path.basename(f)
+        keys = re.match(pattern, basename).groups()[0].split('--')
+        keys_alphanum = list(map(to_concept_id, keys))
+
+        for col in data.columns:
+            concept = to_concept_id(col)
+            if col in keys and col != keys[-1]:
+                t = 'entity_domain'
+            elif col in keys and col == keys[-1]:
+                t = 'time'
+            else:
+                t = 'measure'
+            concepts_df.ix[concept] = [col, t]
+
+        for ent in keys[:-1]:  # assumes the last column is time
+            ent_df = data[[ent]].drop_duplicates().copy()
+            ent_concept = to_concept_id(ent)
+            ent_df.columns = ['name']
+            ent_df[ent_concept] = ent_df.name.map(to_concept_id)
+
+            if ent_concept not in all_entities.keys():
+                all_entities[ent_concept] = ent_df
+            else:
+                all_entities[ent_concept] = pd.concat([all_entities[ent_concept], ent_df],
+                                                      ignore_index=True)
+
+        data = data.set_index(keys)
+        for c in data:
+            # output datapoints
+            df = data[c].copy()
+            df = df.reset_index()
+            for k in keys[:-1]:
+                df[k] = df[k].map(to_concept_id)
+            df.columns = df.columns.map(to_concept_id)
+            df.to_csv(join(out_path,
+                           'ddf--datapoints--{}--by--{}.csv'.format(
+                               to_concept_id(c), '--'.join(keys_alphanum))),
+                      index=False)
+
+    # output concepts
+    concepts_df.to_csv(join(out_path, 'ddf--concepts.csv'))
+
+    # output entities
+    for c, df in all_entities.items():
+        df.to_csv(join(out_path, 'ddf--entities--{}.csv'.format(c)), index=False)
+
+    _ = get_datapackage(out_path, to_disk=True, use_existing=False)
+
+    return

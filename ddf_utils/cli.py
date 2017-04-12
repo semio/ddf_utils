@@ -272,5 +272,24 @@ def diff(dataset1, dataset2, git, checkout_path, diff_only):
                                  headers=cols, tablefmt='psql'))
 
 
+# csv to ddfcsv
+@ddf.command()
+@click.option('-i', 'input', type=click.Path(exists=True))
+@click.option('-o', 'out_path', type=click.Path(exists=True))
+def from_csv(input, out_path):
+    """create ddfcsv dataset from a set of csv files"""
+    from .io import csvs_to_ddf
+
+    if os.path.isfile(input):
+        files = [input]
+    else:
+        files = [os.path.join(input, x)
+                 for x in os.listdir(input) if x.endswith('.csv')]
+
+    csvs_to_ddf(files, out_path)
+
+    click.echo('Done.')
+
+
 if __name__ == '__main__':
     ddf()
