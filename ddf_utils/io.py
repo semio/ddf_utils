@@ -47,7 +47,16 @@ def cleanup(path, how='ddf'):
 
 
 def csvs_to_ddf(files, out_path):
-    """convert raw files to ddfcsv"""
+    """convert raw files to ddfcsv
+
+    Args
+    ----
+    files: list
+        a list of file paths to build ddf csv
+    out_path: `str`
+        the directory to put the ddf dataset
+
+    """
     import re
     from os.path import join
     from ddf_utils.str import to_concept_id
@@ -67,17 +76,34 @@ def csvs_to_ddf(files, out_path):
         keys = re.match(pattern, basename).groups()[0].split('--')
         keys_alphanum = list(map(to_concept_id, keys))
 
+        # check if there is a time column. Assume last column is time.
+        try:
+            pd.to_datetime(data[keys[-1]], format='%Y')
+        except (ValueError, pd.tslib.OutOfBoundsDatetime):
+            has_time = False
+        else:
+            has_time = True
+
+        if has_time:
+            ent_keys = keys[:-1]
+        else:
+            ent_keys = keys
+
+        # set concept type
         for col in data.columns:
             concept = to_concept_id(col)
-            if col in keys and col != keys[-1]:
-                t = 'entity_domain'
-            elif col in keys and col == keys[-1]:
-                t = 'time'
+
+            if col in keys:
+                if col in ent_keys:
+                    t = 'entity_domain'
+                else:
+                    t = 'time'
             else:
                 t = 'measure'
+
             concepts_df.ix[concept] = [col, t]
 
-        for ent in keys[:-1]:  # assumes the last column is time
+        for ent in ent_keys:
             ent_df = data[[ent]].drop_duplicates().copy()
             ent_concept = to_concept_id(ent)
             ent_df.columns = ['name']
