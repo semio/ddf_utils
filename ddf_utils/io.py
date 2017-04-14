@@ -123,10 +123,11 @@ def csvs_to_ddf(files, out_path):
             for k in keys[:-1]:
                 df[k] = df[k].map(to_concept_id)
             df.columns = df.columns.map(to_concept_id)
-            df.to_csv(join(out_path,
-                           'ddf--datapoints--{}--by--{}.csv'.format(
-                               to_concept_id(c), '--'.join(keys_alphanum))),
-                      index=False)
+            (df.dropna()
+               .to_csv(join(out_path,
+                            'ddf--datapoints--{}--by--{}.csv'.format(
+                                to_concept_id(c), '--'.join(keys_alphanum))),
+                       index=False))
 
     # output concepts
     concepts_df.to_csv(join(out_path, 'ddf--concepts.csv'))
