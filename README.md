@@ -22,14 +22,20 @@ functions we find useful in daily works in [Gapminder][5].
 
 Python 3.3+ is required in order to run this module.
 
-```$ pip3 install git+https://github.com/semio/ddf_utils.git```
+To install this package from pypi, run:
+
+```$ pip install ddf_utils```
+
+To install from the latest source, run:
+
+```$ pip install git+https://github.com/semio/ddf_utils.git```
 
 ### For Windows users
 
-If you encounter `failed to create process.` when you run the `ddf` command, please
+If you encounter `failed to create process` when you run the `ddf` command, please
 try updating setuptools to latest version:
 
-`> pip3 install -U setuptools`
+`$ pip3 install -U setuptools`
 
 and then reinstall ddf_utils should fix the problem.
 

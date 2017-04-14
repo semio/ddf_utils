@@ -16,8 +16,15 @@ datasets, and other functions we find useful in daily works in Gapminder_.
 Installation
 ------------
 
-We are using python3 only features such as type signature in this repo. So
-python 3 is required in order to run this module.
+Python 3.3+ is required in order to run this module.
+
+To install this package from pypi, run:
+
+.. code-block:: bash
+
+   $ pip install ddf_utils
+
+To install from the latest source, run:
 
 .. code-block:: bash
 
@@ -26,12 +33,12 @@ python 3 is required in order to run this module.
 For Windows users
 ~~~~~~~~~~~~~~~~~
 
-If you encounter ``failed to create process.`` when you run the ddf command, please
+If you encounter ``failed to create process`` when you run the ddf command, please
 try updating setuptools to latest version:
 
 .. code-block:: bash
 
-   > pip3 install -U setuptools
+   $ pip3 install -U setuptools
 
 Usage
 -----
