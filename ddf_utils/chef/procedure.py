@@ -76,8 +76,8 @@ def translate_header(ingredient: BaseIngredient, result, dictionary) -> Procedur
 
 @debuggable
 def translate_column(ingredient: BaseIngredient, result, dictionary, column, *,
-		     target_column=None, not_found='drop', ambiguity='prompt',
-		     ignore_case=False) -> ProcedureResult:
+                     target_column=None, not_found='drop', ambiguity='prompt',
+                     ignore_case=False) -> ProcedureResult:
     """Translate column values.
 
     Procedure format:
@@ -153,7 +153,7 @@ def translate_column(ingredient: BaseIngredient, result, dictionary, column, *,
     for k, df in di.items():
         logger.debug("running on: " + k)
         di[k] = tc(df, column, dict_type, dictionary, target_column, base_df,
-		   not_found, ambiguity, ignore_case)
+                   not_found, ambiguity, ignore_case)
 
     if not result:
         result = ingredient.ingred_id + '-translated'
@@ -673,7 +673,7 @@ def window(ingredient: BaseIngredient, result, **options) -> ProcedureResult:
 
     column = read_opt(window, 'column', required=True)
     size = read_opt(window, 'size', required=True)
-    min_periods = read_opt(window, 'min_periods', default=None)
+    min_periods = read_opt(window, 'min_periods', default=0)
     center = read_opt(window, 'center', default=False)
 
     data = ingredient.get_data()
@@ -983,6 +983,8 @@ def trend_bridge(ingredient: BaseIngredient, bridge_start, bridge_end, bridge_le
 def merge_entity(ingredient: BaseIngredient, dictionary: dict, result, merged='drop'):
     """merge entities"""
     from ..transformer import merge_keys
+
+    # TODO: handle file for dictionary
 
     data = ingredient.get_data()
 
