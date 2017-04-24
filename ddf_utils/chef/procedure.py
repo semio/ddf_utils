@@ -76,7 +76,8 @@ def translate_header(ingredient: BaseIngredient, result, dictionary) -> Procedur
 
 @debuggable
 def translate_column(ingredient: BaseIngredient, result, dictionary, column, *,
-                     target_column=None, not_found='drop', ambiguity='prompt') -> ProcedureResult:
+		     target_column=None, not_found='drop', ambiguity='prompt',
+		     ignore_case=False) -> ProcedureResult:
     """Translate column values.
 
     Procedure format:
@@ -152,7 +153,7 @@ def translate_column(ingredient: BaseIngredient, result, dictionary, column, *,
     for k, df in di.items():
         logger.debug("running on: " + k)
         di[k] = tc(df, column, dict_type, dictionary, target_column, base_df,
-                   not_found, ambiguity)
+		   not_found, ambiguity, ignore_case)
 
     if not result:
         result = ingredient.ingred_id + '-translated'

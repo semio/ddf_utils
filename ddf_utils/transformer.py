@@ -69,7 +69,7 @@ def _generate_mappng_dict1(df, column, dictionary, base_df, not_found):
     return mapping_all
 
 
-def _generate_mapping_dict2(df, column, dictionary, base_df, not_found):
+def _generate_mapping_dict2(df, column, dictionary, base_df, not_found, ignore_case):
 
     mapping = dict()
     no_match = set()
@@ -82,7 +82,10 @@ def _generate_mapping_dict2(df, column, dictionary, base_df, not_found):
     for f in df[column].values:
         bools = []
         for sc in search_cols:
-            bools.append(base_df[sc] == f)
+            if ignore_case:
+                bools.append(base_df[sc].str.lower() == f.lower())
+            else:
+                bools.append(base_df[sc] == f)
 
         mask = bools[0]
         for m in bools[1:]:
@@ -107,7 +110,7 @@ def _generate_mapping_dict2(df, column, dictionary, base_df, not_found):
 
 
 def _translate_column_df(df, column, target_column, dictionary, base_df,
-                         not_found, ambiguity):
+                         not_found, ambiguity, ignore_case):
 
     search_cols = dictionary['key']
     if isinstance(search_cols, str):
@@ -115,15 +118,18 @@ def _translate_column_df(df, column, target_column, dictionary, base_df,
     else:
         if len(search_cols) == 1:
             dictionary['key'] = search_cols[0]
-            mapping = _generate_mappng_dict1(df, column, dictionary, base_df, not_found)
+            mapping = _generate_mappng_dict1(df, column, dictionary, base_df, not_found,
+                                             ignore_case)
         else:
-            mapping = _generate_mapping_dict2(df, column, dictionary, base_df, not_found)
+            mapping = _generate_mapping_dict2(df, column, dictionary, base_df, not_found,
+                                              ignore_case)
 
     return _translate_column_inline(df, column, target_column, mapping, not_found, ambiguity)
 
 
 def translate_column(df, column, dictionary_type, dictionary,
-                     target_column=None, base_df=None, not_found='drop', ambiguity='prompt'):
+                     target_column=None, base_df=None, not_found='drop', ambiguity='prompt',
+                     ignore_case=False):
     """change values in a column base on a mapping dictionary.
 
     The dictionary can be provided as a python dictionary, pandas dataframe or read from file.
@@ -211,7 +217,7 @@ def translate_column(df, column, dictionary_type, dictionary,
     if dictionary_type == 'dataframe':
         assert 'key' in dictionary.keys() and 'value' in dictionary.keys()
         df_new = _translate_column_df(df, column, target_column, dictionary, base_df,
-                                      not_found, ambiguity)
+                                      not_found, ambiguity, ignore_case)
 
     return df_new
 
