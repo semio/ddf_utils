@@ -976,3 +976,32 @@ def trend_bridge(ingredient: BaseIngredient, bridge_start, bridge_end, bridge_le
         return ProcedureResult(result, start.key, merged)
     else:
         return ProcedureResult(result, start.key, {target_column: result_data})
+
+
+@debuggable
+def merge_entity(ingredient: BaseIngredient, dictionary: dict, result, merged='drop'):
+    """merge entities"""
+    from ..transformer import merge_keys
+
+    data = ingredient.get_data()
+
+    res_data = dict()
+    for k, df in data:
+        res_data[k] = merge_keys(df, dictionary, merged)
+
+    return ProcedureResult(result, ingredient.key, res_data)
+
+
+@debuggable
+def split_entity(ingredient: BaseIngredient, dictionary: dict,
+                 target_column, result, splited='drop'):
+    """split entities"""
+    from ..transformer import split_keys
+
+    data = ingredient.get_data()
+
+    res_data = dict()
+    for k, df in data:
+        res_data[k] = split_keys(df, target_column, dictionary, splited)
+
+    return ProcedureResult(result, ingredient.key, res_data)
