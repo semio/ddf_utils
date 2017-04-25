@@ -255,8 +255,8 @@ def merge(*ingredients: List[BaseIngredient], result, deep=False) -> ProcedureRe
 
     # assert that dtype and key are same in all dataframe
     try:
-        # TODO: using `key` is not good, because it's string and there may be spaces in it
-        assert len(set([x.key for x in ingredients])) == 1
+	for x in ingredients[1:]:
+	    assert set(x.key_to_list()) == set(ingredients[0].key_to_list())
         assert len(set([x.dtype for x in ingredients])) == 1
     except (AssertionError, TypeError):
         log1 = "multiple dtype/key detected: \n"
