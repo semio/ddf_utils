@@ -352,7 +352,10 @@ def split_keys(df, target_column, dictionary, splited='drop'):
     ratio = dict()
 
     for k, v in dictionary.items():
-        masks = [df_[target_column].isin(dictionary[k]['split'])]
+        for spl in v['split']:
+            if spl not in df_[target_column].values:
+                raise ValueError('entity not in data: ' + spl)
+        masks = [df_[target_column].isin(v['split'])]
         [masks.append(df_[c] == x) for c, x in v['at'].items()]
         before_spl = df_[np.all(masks, axis=0)].set_index(target_column)
         for key in keys:
@@ -391,8 +394,8 @@ def split_keys(df, target_column, dictionary, splited='drop'):
     final = pd.concat([df, *to_concat])
     if splited == 'drop':
         final = final[~final.index.get_level_values(target_column).isin(dictionary.keys())]
-        return final
+        return final.sort_index()
     elif splited == 'keep':
-        return final
+        return final.sort_index()
     else:
         raise ValueError('only support drop == "drop" and "keep".')

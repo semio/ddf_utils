@@ -255,8 +255,8 @@ def merge(*ingredients: List[BaseIngredient], result, deep=False) -> ProcedureRe
 
     # assert that dtype and key are same in all dataframe
     try:
-	for x in ingredients[1:]:
-	    assert set(x.key_to_list()) == set(ingredients[0].key_to_list())
+        for x in ingredients[1:]:
+            assert set(x.key_to_list()) == set(ingredients[0].key_to_list())
         assert len(set([x.dtype for x in ingredients])) == 1
     except (AssertionError, TypeError):
         log1 = "multiple dtype/key detected: \n"
@@ -980,31 +980,32 @@ def trend_bridge(ingredient: BaseIngredient, bridge_start, bridge_end, bridge_le
 
 
 @debuggable
-def merge_entity(ingredient: BaseIngredient, dictionary: dict, result, merged='drop'):
+def merge_entity(ingredient: BaseIngredient, dictionary,
+                 target_column, result, merged='drop'):
     """merge entities"""
     from ..transformer import merge_keys
-
-    # TODO: handle file for dictionary
 
     data = ingredient.get_data()
 
     res_data = dict()
-    for k, df in data:
-        res_data[k] = merge_keys(df, dictionary, merged)
+    for k, df in data.items():
+        res_data[k] = merge_keys(df.set_index(ingredient.key_to_list()),
+                                 dictionary, merged).reset_index()
 
     return ProcedureResult(result, ingredient.key, res_data)
 
 
 @debuggable
-def split_entity(ingredient: BaseIngredient, dictionary: dict,
-                 target_column, result, splited='drop'):
+def split_entity(ingredient: BaseIngredient, dictionary,
+                 target_column, result, splitted='drop'):
     """split entities"""
     from ..transformer import split_keys
 
     data = ingredient.get_data()
 
     res_data = dict()
-    for k, df in data:
-        res_data[k] = split_keys(df, target_column, dictionary, splited)
+    for k, df in data.items():
+        res_data[k] = split_keys(df.set_index(ingredient.key_to_list()),
+                                 target_column, dictionary, splitted).reset_index()
 
     return ProcedureResult(result, ingredient.key, res_data)
