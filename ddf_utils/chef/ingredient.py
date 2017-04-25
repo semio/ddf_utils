@@ -249,8 +249,8 @@ class Ingredient(BaseIngredient):
         ddf_id = data['dataset']
         key = data['key']
         values = data['value']
-        if 'filter' in data.keys():
-            row_filter = data['filter']
+        if 'row_filter' in data.keys():
+            row_filter = data['row_filter']
         else:
             row_filter = None
 
@@ -335,8 +335,9 @@ class Ingredient(BaseIngredient):
             # 2. The query() Method is Experimental
             if self.row_filter:
                 query_str = "and".join(["{} in {}".format(k, v) for k, v in self.row_filter.items()])
-                # print(query_str)
+                # logging.debug(query_str)
                 df = df.query(query_str)
+                # logging.debug(df.head())
             return df
 
         if self.data is None:
