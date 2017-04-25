@@ -397,7 +397,7 @@ def split_keys(df, target_column, dictionary, splited='drop'):
                 t_[target_column] = g
                 to_concat.append(t_.set_index(keys))
 
-    final = pd.concat([df, *to_concat])
+    final = pd.concat(to_concat.append(df))
     if splited == 'drop':
         final = final[~final.index.get_level_values(target_column).isin(dictionary.keys())]
         return final.sort_index()
