@@ -352,34 +352,40 @@ def split_keys(df, target_column, dictionary, splited='drop'):
     ratio = dict()
 
     for k, v in dictionary.items():
-        for spl in v['split']:
+        before_spl = list()
+        for spl in v:
             if spl not in df_[target_column].values:
                 raise ValueError('entity not in data: ' + spl)
-        masks = [df_[target_column].isin(v['split'])]
-        [masks.append(df_[c] == x) for c, x in v['at'].items()]
-        before_spl = df_[np.all(masks, axis=0)].set_index(target_column)
-        for key in keys:
-            if key != target_column:
-                before_spl = before_spl.drop(key, axis=1)
+            tdf = df_[df_[target_column] == spl].set_index(keys).sort_index()
+            last = pd.DataFrame(tdf.ix[tdf.index[0], tdf.columns]).T
+            last.index.names = keys
+            logging.debug("using {} for first valid index".format(tdf.index[0]))
+            last = last.reset_index()
+            for key in keys:
+                if key != target_column:
+                    last = last.drop(key, axis=1)
+            before_spl.append(last.set_index(target_column))
+        before_spl = pd.concat(before_spl)
         total = before_spl.sum()
         ptc = before_spl / total
         ratio[k] = ptc.to_dict()
 
-        # the ratio format will be:
-        # ratio = {
-        #     'entity_to_split': {
-        #         'concept_1': {
-        #             'sub_entity_1': r11,
-        #             'sub_entity_2': r12,
-        #             ...
-        #         },
-        #         'concept_2': {
-        #             'sub_entity_1': r21,
-        #             'sub_entity_2': r22,
-        #             ...
-        #         }
-        #     }
-        # }
+    logging.debug(ratio)
+    # the ratio format will be:
+    # ratio = {
+    #     'entity_to_split': {
+    #         'concept_1': {
+    #             'sub_entity_1': r11,
+    #             'sub_entity_2': r12,
+    #             ...
+    #         },
+    #         'concept_2': {
+    #             'sub_entity_1': r21,
+    #             'sub_entity_2': r22,
+    #             ...
+    #         }
+    #     }
+    # }
 
     to_concat = []
     for k, v in ratio.items():
