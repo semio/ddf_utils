@@ -327,11 +327,14 @@ def extract_concepts(dfs, base=None, join='full_outer'):
     return concepts.reset_index()
 
 
-def merge_keys(df, dictionary, merged='drop'):
+def merge_keys(df, dictionary, target_column=None, merged='drop'):
+    """merge keys"""
     rename_dict = dict()
     for new_key, val in dictionary.items():
         for old_key in val:
             rename_dict[old_key] = new_key
+    # TODO: limit the rename inside target_column
+    # after pandas 0.20.0 there will be a level option for df.rename
     df_new = df.rename(index=rename_dict).groupby(level=list(range(len(df.index.levels)))).sum()
 
     if merged == 'drop':
