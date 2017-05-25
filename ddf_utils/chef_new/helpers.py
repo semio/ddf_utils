@@ -66,9 +66,11 @@ def accept_file_input(params):
     def real_wrapper(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
-            for k, v in kwargs:
+            for k, v in kwargs.items():
                 if k in params:
-                    kwargs[k] = json.load(open(v))
+                    if isinstance(v, str):
+                        assert os.path.exists(v), 'file not exists!'
+                        kwargs[k] = json.load(open(v))
             return func(*args, **kwargs)
         return wrapper
     return real_wrapper

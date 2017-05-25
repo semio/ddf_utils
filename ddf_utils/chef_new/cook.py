@@ -13,6 +13,7 @@ from functools import reduce
 from .. import config
 from . exceptions import ChefRuntimeError
 from ..model.ddf import Dataset
+from . import procedure
 
 import logging
 
@@ -42,15 +43,22 @@ class Pipeline:
             return self._result
 
     def cook(self):
-        def run_procedure(dataset, proc):
-            func = mkfunc(proc['procedure'])
-            return func(dataset, proc['options'])
+        def get_proc_func(proc):
+            func = getattr(procedure, proc['procedure'])
+            return func
 
-        raise NotImplementedError
+        def run_procedure(proc):
+            func = get_proc_func(proc)
+            return func(self.chef, **proc['options'])
+
+        for proc in self.procedures:
+            self._result = run_procedure(proc)
+
+        return self._result
 
 
 class Chef:
-    def __init__(self, info, cfg, ingredients, cooking, serving):
+    def __init__(self, info=None, cfg=None, ingredients=None, cooking=None, serving=None):
         assert 'main' in cooking.keys(), 'the cooking pipeline "main" must exists'
 
         self.info = info
@@ -62,7 +70,13 @@ class Chef:
 
     @classmethod
     def from_recipe(cls, recipe):
-        raise NotImplementedError
+        info = recipe['info']
+        cfg = recipe['config']
+        ingredients = recipe['ingredients']
+        cooking = recipe['cooking']
+        serving = recipe['serving']
+
+        return cls(info, cfg, ingredients, cooking, serving)
 
     @property
     def ingredients_bag(self):
@@ -98,5 +112,3 @@ def _loadfile(f):
     return res
 
 
-def cook_recipe(recipe):
-    pass

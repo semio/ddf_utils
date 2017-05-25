@@ -10,7 +10,7 @@ logging.getLogger('Chef')
 
 
 @accept_file_input(['dictionary'])
-def translate_concept(chef, dataset, dictionary) -> Dataset:
+def translate_concept(chef, dataset=None, dictionary=None) -> Dataset:
     """translate concepts, base on dictionary"""
     ds = chef.get_ingredient(dataset)
     return ds.rename(concepts=dictionary)
