@@ -9,25 +9,15 @@ from copy import deepcopy
 import numpy as np
 import pandas as pd
 import dask.dataframe as dd
+from .utils import load_datapackage_json
 from ..chef_new.helpers import read_opt
 import xarray
 import hashlib
 
 
-def load_datapackage_json(path):
-    if osp.isdir(path):
-        dp = json.load(open(osp.join(path, 'datapackage.json')))
-        basedir = path
-    else:
-        dp = json.load(open(path))
-        basedir = osp.dirname(path)
-
-    return basedir, dp
-
-
 class Dataset:
     """DDF dataset"""
-    def __init__(self, concepts=None, entities=None, datapoints=None, datapackage=None):
+    def __init__(self, concepts=None, entities=None, datapoints=None, attrs=None):
         """create a Dataset object
 
         concepts: dataframe with all concepts definition
@@ -41,11 +31,11 @@ class Dataset:
         self._concepts = concepts
         self._entities = entities
         self._datapoints = datapoints
-        self._datapackage = datapackage
+        self.attrs = attrs
 
     def __repr__(self):
 
-        def maybe_truncate(obj, maxlen=30):
+        def maybe_truncate(obj, maxlen=20, fillspaces=False):
             if isinstance(obj, np.ndarray):
                 s = ', '.join(map(str, obj))
                 if len(s) > maxlen:
@@ -55,37 +45,40 @@ class Dataset:
                 s = str(obj)
                 if len(s) > maxlen:
                     s = s[:(maxlen - 3)] + '...'
+            if len(s) < maxlen and fillspaces:
+                diff = maxlen - len(s)
+                s = s + ' ' * diff
             return s
 
         indent = 4
 
         concs = self.concepts.set_index('concept')
-        docs = ["<Dataset {}>".format(self.datapackage['name'])]
+        docs = ["<Dataset {}>".format(self.attrs['name'])]
         docs.append("entities:")
         if 'entity_set' in concs['concept_type'].values:
             for domain, entities in self.entities.items():
                 if len(concs[concs.domain == domain]) == 0:
                     vals = self.get_entity(domain)[domain].head(20).values
-                    docs.append('{}{}:{}{}'.format(' ' * indent,
-                                                   maybe_truncate(domain),
-                                                   ' ' * indent * 2,
-                                                   maybe_truncate(vals, 50)))
+                    docs.append('{}- {}{}{}'.format(' ' * indent,
+                                                    maybe_truncate(domain, 10, True),
+                                                    ' ' * indent * 2,
+                                                    maybe_truncate(vals, 50)))
                 else:
                     docs.append('{}{}:'.format(' ' * indent, domain))
                     sets = concs[concs.domain == domain]
                     for i in sets.index:
                         vals = self.get_entity(i)[domain].head(20).values
-                        docs.append('{}{}:{}{}'.format(' ' * indent * 2,
-                                                       maybe_truncate(i),
-                                                       ' ' * indent * 2,
-                                                       maybe_truncate(vals, 50)))
+                        docs.append('{}- {}{}{}'.format(' ' * indent * 2,
+                                                        maybe_truncate(i, 10, True),
+                                                        ' ' * indent * 2,
+                                                        maybe_truncate(vals, 50)))
         else:
             for domain, entities in self.entities.items():
                 vals = self.get_entity(domain)[domain].head(20).values
-                docs.append('{}{}:{}{}'.format(' ' * indent,
-                                               maybe_truncate(domain),
-                                               ' ' * indent * 2,
-                                               maybe_truncate(vals, 50)))
+                docs.append('{}- {}{}{}'.format(' ' * indent,
+                                                maybe_truncate(domain, 10, True),
+                                                ' ' * indent * 2,
+                                                maybe_truncate(vals, 50)))
 
         docs.append('indicators:')
         for i, data in self.datapoints.items():
@@ -96,7 +89,7 @@ class Dataset:
         return '\n'.join(docs)
 
     @classmethod
-    def from_ddfcsv(cls, datapackage):
+    def from_ddfcsv(cls, datapackage, no_datapoints=False):
         """read from local DDF csv dataset.
 
         datapackage: path to the datapackage folder or datapackage.json
@@ -119,22 +112,29 @@ class Dataset:
                         "key": pkey
                     })
             else:
-                df = dd.read_csv(os.path.join(base_dir, r['path']))
-                indicator_name = list(set(df.columns) - set(pkey))[0]
-                keys = tuple(sorted(pkey))
-                if indicator_name in datapoints.keys():
-                    if keys in datapoints[indicator_name]:
-                        datapoints[indicator_name][keys].append(df)
+                if not no_datapoints:
+                    df = dd.read_csv(os.path.join(base_dir, r['path']))
+                    try:
+                        indicator_name = list(set(df.columns) - set(pkey))[0]
+                    except:
+                        print(df.columns)
+                        print(pkey)
+                        raise
+                    keys = tuple(sorted(pkey))
+                    if indicator_name in datapoints.keys():
+                        if keys in datapoints[indicator_name]:
+                            datapoints[indicator_name][keys].append(df)
+                        else:
+                            datapoints[indicator_name][keys] = [df]
                     else:
+                        datapoints[indicator_name] = dict()
                         datapoints[indicator_name][keys] = [df]
-                else:
-                    datapoints[indicator_name] = dict()
-                    datapoints[indicator_name][keys] = [df]
 
         # datapoints
-        for i, v in datapoints.items():
-            for k, l in v.items():
-                v[k] = dd.multi.concat(l)
+        if not no_datapoints:
+            for i, v in datapoints.items():
+                for k, l in v.items():
+                    v[k] = dd.multi.concat(l)
 
         # concepts
         concepts = pd.concat(concepts)
@@ -151,12 +151,29 @@ class Dataset:
                         entities[domain].append(e['data'])
                     elif e['key'] in concepts[concepts.domain == domain]['concept'].values:
                         e['data'] = e['data'].rename(columns={e['key']: domain})
-                        entities[domain].append(e['data'])  # FIXME: append is not right for one entity in multiset
+                        entities[domain].append(e['data'])
         for e, l in entities.items():
-            entities[e] = pd.concat(l, ignore_index=True)
+            df = l[0]
+            for df_ in l[1:]:
+                df = pd.merge(df, df_, on=e, how='outer')
+                for c in list(df.columns):
+                    if c.endswith('_x'):
+                        c_orig = c[:-2]
+                        df[c_orig] = None
+                        for i in df.index:
+                            if not pd.isnull(df.loc[i, c]):
+                                if not pd.isnull(df.loc[i, c_orig+'_y']):
+                                    assert df.loc[i, c] == df.loc[i, c_orig+'_y'], "different values for same cell"
+                                    df.loc[i, c_orig] = df.loc[i, c]
+                                else:
+                                    df.loc[i, c_orig] = df.loc[i, c]
+                            else:
+                                df.loc[i, c_orig] = df.loc[i, c_orig+'_y']
+                        df = df.drop([c, c_orig+'_y'], axis=1)
+            entities[e] = df
 
         return cls(concepts=concepts, entities=entities,
-                   datapoints=datapoints, datapackage=dp)
+                   datapoints=datapoints, attrs=dp)
 
     @property
     def concepts(self):
@@ -169,10 +186,6 @@ class Dataset:
     @property
     def datapoints(self):
         return self._datapoints
-
-    @property
-    def datapackage(self):
-        return self._datapackage
 
     @property
     def entities(self):
@@ -220,11 +233,7 @@ class Dataset:
         self._concepts = ds.concepts
         self._entities = ds.entities
         self._datapoints = ds.datapoints
-        self._datapackage = ds.datapackage
-
-    def update_datapackage(self, keep_meta=True):
-        """update datapackage with new resources"""
-        raise NotImplementedError
+        self.attrs = ds.attrs
 
     def _rename_concepts(self, dictionary, inplace=False):
         concepts, entities, datapoints = self.get_data_copy()
@@ -266,7 +275,7 @@ class Dataset:
                     di = datapoints.pop(i)
                     datapoints[dictionary[i]] = di
 
-        res = Dataset(concepts=concepts, entities=entities, datapoints=datapoints, datapackage=self.datapackage)
+        res = Dataset(concepts=concepts, entities=entities, datapoints=datapoints, attrs=self.attrs)
         if inplace:
             self._update_inplace(res)
         else:
