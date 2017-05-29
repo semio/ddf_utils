@@ -86,9 +86,10 @@ def compare_with_func(dataset1, dataset2, fns=['rval', 'avg_pct_chg'],
         result[f] = np.nan
 
     result = result.set_index(['indicator', 'primary_key'])
-
+    result = result.sort_index()
+    idx = pd.IndexSlice
     for i in result.index:
-        result.ix[i, fns] = do_compare(fns, i[0], i[1])
+        result.loc[idx[i[0], [i[1]]], fns] = np.array(do_compare(fns, i[0], i[1]))
 
     return result.reset_index()
 
