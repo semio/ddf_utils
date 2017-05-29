@@ -21,8 +21,8 @@ requirements = [
     'jsonschema',
     'Click',
     'daff',
-    'tabulate'
-    'dask[dataframe]'
+    'tabulate',
+    'dask[dataframe]',
     'xarray'
 ]
 
