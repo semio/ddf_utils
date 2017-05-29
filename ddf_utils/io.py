@@ -60,7 +60,7 @@ def csvs_to_ddf(files, out_path):
     import re
     from os.path import join
     from ddf_utils.str import to_concept_id
-    from ddf_utils.index import get_datapackage
+    from ddf_utils.datapackage import get_datapackage
 
     concepts_df = pd.DataFrame([['name', 'Name', 'string']],
                                columns=['concept', 'name', 'concept_type'])

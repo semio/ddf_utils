@@ -61,7 +61,7 @@ def cleanup(path, how, force):
               help='update existing datapackage.json')
 def create_datapackage(path, update):
     """create datapackage.json"""
-    from ddf_utils.index import get_datapackage
+    from ddf_utils.datapackage import get_datapackage
     import json
     if not update:
         if os.path.exists(os.path.join(path, 'datapackage.json')):
@@ -95,7 +95,7 @@ def create_datapackage(path, update):
 def run_recipe(recipe, outdir, ddf_dir, update, dry_run, show_tree):
     """generate new ddf dataset with recipe"""
     import ddf_utils.chef as chef
-    from ddf_utils.index import get_datapackage
+    from ddf_utils.datapackage import get_datapackage
     click.echo('building recipe...')
     if ddf_dir:
         recipe = chef.build_recipe(recipe, ddf_dir=ddf_dir)

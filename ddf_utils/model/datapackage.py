@@ -3,15 +3,22 @@
 """datapackage model"""
 
 import os
+import os.path as osp
 import pandas as pd
 from .ddf import Dataset
 from itertools import product
 from .utils import load_datapackage_json
 
+import logging
+
 
 class Datapackage:
     def __init__(self, datapackage_path):
-        self.base_dir, self.datapackage = load_datapackage_json(datapackage_path)
+        try:
+            self.base_dir, self.datapackage = load_datapackage_json(datapackage_path)
+        except FileNotFoundError:
+            logging.warning("no datapackage.json found")
+            raise
 
     @property
     def resources(self):

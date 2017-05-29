@@ -5,7 +5,7 @@
 import os
 import pandas as pd
 from . import config
-from .index import get_datapackage
+from .datapackage import get_datapackage
 
 
 # main class for ddf reading
