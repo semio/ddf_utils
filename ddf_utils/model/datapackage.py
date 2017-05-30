@@ -4,6 +4,7 @@
 
 import os
 import os.path as osp
+import json
 import numpy as np
 import pandas as pd
 from .ddf import Dataset
@@ -14,12 +15,20 @@ import logging
 
 
 class Datapackage:
-    def __init__(self, datapackage_path):
-        try:
-            self.base_dir, self.datapackage = load_datapackage_json(datapackage_path)
-        except FileNotFoundError:
-            logging.warning("no datapackage.json found")
-            raise
+    def __init__(self, datapackage, base_dir='./'):
+        """create datapackage object from datapackage descriptor.
+
+        datapackage: can be a path to datapackage file or dictioinary in datapackage format
+        """
+        if isinstance(datapackage, dict):
+            self.base_dir = base_dir
+            self.datapackage = datapackage
+        elif isinstance(datapackage, str):
+            try:
+                self.base_dir, self.datapackage = load_datapackage_json(datapackage)
+            except FileNotFoundError:
+                logging.warning("datapackage.json not found.")
+                raise
 
     @property
     def resources(self):
@@ -121,5 +130,12 @@ class Datapackage:
             else:
                 ddf_schema['datapoints'].append(sch)
 
-        return ddf_schema
+        self.datapackage['ddfSchema'] = ddf_schema
 
+    def dump(self, path):
+        """dump the datapackage to path."""
+        # TODO: dump all files
+        # for now we only dump the datapackage.json
+        with open(osp.join(path, 'datapackage.json')) as f:
+            json.dump(self.datapackage, f)
+            f.close()
