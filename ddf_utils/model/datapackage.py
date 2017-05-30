@@ -107,7 +107,10 @@ class Datapackage:
 
         def _add_to_schema(resource_schema):
             key = '-'.join(sorted(resource_schema['primaryKey']))
-            hash_val = key + '--' + resource_schema['value']
+            if not pd.isnull(resource_schema['value']):
+                hash_val = key + '--' + resource_schema['value']
+            else:
+                hash_val = key + '--' + 'nan'
             if hash_val not in hash_table.keys():
                 hash_table[hash_val] = {
                     'primaryKey': sorted(resource_schema['primaryKey']),
