@@ -71,15 +71,17 @@ def create_datapackage(path, update):
         res = get_datapackage(path, use_existing=False)
     else:
         if os.path.exists(os.path.join(path, 'datapackage.json')):
-            click.echo('overwritting existing datapackage.json...')
+            click.echo('backing up previous datapackage.json...')
             # make a backup
             shutil.copy(os.path.join(path, 'datapackage.json'),
                         os.path.join(path, 'datapackage.json.bak'))
         res = get_datapackage(path, use_existing=True)
 
     # generate ddfSchema
+    click.echo('generating ddfSchema...')
     dp = Datapackage(res)
     dp.generate_ddfschema()
+    click.echo('writing to datapackage.json...')
     with open(os.path.join(path, 'datapackage.json'), 'w', encoding='utf8') as f:
         json.dump(dp.datapackage, f, indent=4, ensure_ascii=False)
     click.echo('Done.')
