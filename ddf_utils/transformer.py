@@ -8,6 +8,7 @@ import json
 import logging
 
 from ddf_utils.chef.helpers import prompt_select
+from dask import delayed
 
 
 def _translate_column_inline(df, column, target_column, dictionary,
@@ -52,7 +53,7 @@ def _translate_column_inline(df, column, target_column, dictionary,
     return df_new
 
 
-def _generate_mappng_dict1(df, column, dictionary, base_df, not_found):
+def _generate_mapping_dict1(df, column, dictionary, base_df, not_found):
 
     search_col = dictionary['key']
     idx_col = dictionary['value']
@@ -79,7 +80,7 @@ def _generate_mapping_dict2(df, column, dictionary, base_df, not_found, ignore_c
 
     assert isinstance(idx_col, str)
 
-    for f in df[column].values:
+    for f in df[column].unique():
         bools = []
         for sc in search_cols:
             if ignore_case:
@@ -114,11 +115,11 @@ def _translate_column_df(df, column, target_column, dictionary, base_df,
 
     search_cols = dictionary['key']
     if isinstance(search_cols, str):
-        mapping = _generate_mappng_dict1(df, column, dictionary, base_df, not_found)
+        mapping = _generate_mapping_dict1(df, column, dictionary, base_df, not_found)
     else:
         if len(search_cols) == 1:
             dictionary['key'] = search_cols[0]
-            mapping = _generate_mappng_dict1(df, column, dictionary, base_df, not_found,
+            mapping = _generate_mapping_dict1(df, column, dictionary, base_df, not_found,
                                              ignore_case)
         else:
             mapping = _generate_mapping_dict2(df, column, dictionary, base_df, not_found,

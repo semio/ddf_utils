@@ -6,6 +6,7 @@ import os
 import pandas as pd
 from . import config
 from .datapackage import get_datapackage
+from pprint import pformat
 
 
 # main class for ddf reading
@@ -28,6 +29,13 @@ class DDF():
                 "path is not ddf dataset: {}".format(self.dataset_path)
         self._datapackage = None
         self._concepts = None
+
+    def __repr__(self):
+        return "dataset {}".format(self.ddf_id)
+
+    def describe(self):
+        return ("concepts in this dataset: \n\n{}"
+                .format(pformat(self.concepts['concept_type'].to_dict())))
 
     @property
     def datapackage(self):
@@ -121,7 +129,14 @@ class DDF():
         entity_concepts = self.get_concepts(['entity_domain', 'entity_set'])
 
         if domain:
-            entity_concepts = entity_concepts[entity_concepts.domain == domain]
+            entity_concepts = entity_concepts.reset_index()
+            if 'domain' in entity_concepts.columns:
+                mask = ((entity_concepts.domain == domain) |
+                        ((entity_concepts.concept == domain) &
+                         (entity_concepts.concept_type == 'entity_domain')))
+            else:
+                mask = entity_concepts.concept == domain
+            entity_concepts = entity_concepts[mask].set_index('concept')
 
         if 'dtype' in kwargs.keys():
             dtype = kwargs.pop('dtype')
