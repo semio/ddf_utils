@@ -22,8 +22,7 @@ requirements = [
     'Click',
     'daff',
     'tabulate',
-    'dask[dataframe]',
-    'xarray'
+    'dask[dataframe]'
 ]
 
 setup(

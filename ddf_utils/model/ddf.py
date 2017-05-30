@@ -4,15 +4,12 @@
 
 import os
 import os.path as osp
-import json
 from copy import deepcopy
 import numpy as np
 import pandas as pd
 import dask.dataframe as dd
 from .utils import load_datapackage_json
 from ..chef_new.helpers import read_opt
-import xarray
-import hashlib
 
 
 class Dataset:
