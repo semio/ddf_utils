@@ -4,6 +4,7 @@
 
 import os
 import os.path as osp
+import numpy as np
 import pandas as pd
 from .ddf import Dataset
 from itertools import product
@@ -89,8 +90,11 @@ class Datapackage:
                     pkeys_dict[k] = [k]
 
             for perm in product(*(list(pkeys_dict.values()))):
-                for c in value_cols:
-                    yield {'primaryKey': list(perm), 'value': c, 'resource': resource['name']}
+                if len(value_cols) > 0:
+                    for c in value_cols:
+                        yield {'primaryKey': list(perm), 'value': c, 'resource': resource['name']}
+                else:
+                    yield {'primaryKey': list(perm), 'value': np.nan, 'resource': resource['name']}
 
         def _add_to_schema(resource_schema):
             key = '-'.join(sorted(resource_schema['primaryKey']))
