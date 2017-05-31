@@ -1,3 +1,7 @@
+## version 0.2.16 2017-05-31
+
+- bug fix in ddfSchema generation
+
 ## version 0.2.15 2017-05-31
 
 - the chef_new module, which is to replace the chef module. But it's still WIP, not working yet.
