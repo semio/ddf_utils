@@ -20,6 +20,17 @@ def test_create_datapackage():
     dp_.generate_ddfschema()
     assert 'ddfSchema' in dp_.datapackage.keys()
 
+    d = {
+        "primaryKey": [
+            "project"
+        ],
+        "value": None,
+        "resources": [
+            "ddf--entities--project"
+        ]
+    }
+    assert d in dp_.datapackage['ddfSchema']['entities']
+
 
 def test_dataset():
     from ddf_utils.model.ddf import Dataset
