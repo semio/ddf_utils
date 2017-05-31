@@ -8,7 +8,6 @@ import json
 import logging
 
 from ddf_utils.chef.helpers import prompt_select
-from dask import delayed
 
 
 def _translate_column_inline(df, column, target_column, dictionary,
@@ -120,7 +119,7 @@ def _translate_column_df(df, column, target_column, dictionary, base_df,
         if len(search_cols) == 1:
             dictionary['key'] = search_cols[0]
             mapping = _generate_mapping_dict1(df, column, dictionary, base_df, not_found,
-                                             ignore_case)
+                                              ignore_case)
         else:
             mapping = _generate_mapping_dict2(df, column, dictionary, base_df, not_found,
                                               ignore_case)
