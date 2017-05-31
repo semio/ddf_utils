@@ -16,8 +16,15 @@ datasets, and other functions we find useful in daily works in Gapminder_.
 Installation
 ------------
 
-We are using python3 only features such as type signature in this repo. So
-python 3 is required in order to run this module.
+Python 3.3+ is required in order to run this module.
+
+To install this package from pypi, run:
+
+.. code-block:: bash
+
+   $ pip install ddf_utils
+
+To install from the latest source, run:
 
 .. code-block:: bash
 
@@ -26,12 +33,12 @@ python 3 is required in order to run this module.
 For Windows users
 ~~~~~~~~~~~~~~~~~
 
-If you encounter ``failed to create process.`` when you run the ddf command, please
+If you encounter ``failed to create process`` when you run the ddf command, please
 try updating setuptools to latest version:
 
 .. code-block:: bash
 
-   > pip3 install -U setuptools
+   $ pip3 install -U setuptools
 
 Usage
 -----
@@ -51,6 +58,7 @@ domain, namely:
 - :py:mod:`index <ddf_utils.index>`: Generating/updating datapackage.json
 - :py:mod:`ops <ddf_utils.ops>`: Computations on data
 - :py:mod:`patch <ddf_utils.patch>`: Applying patch in `daff format`_
+- :py:mod:`qa <ddf_utils.qa>`: Functions for QA tasks
 - :py:mod:`str <ddf_utils.str>`: Functions for string/number formatting
 - :py:mod:`transformer <ddf_utils.transformer>`: Data transforming functions,
   such as column/row translation, trend bridge, etc.
@@ -80,6 +88,7 @@ commands are:
     build_recipe        create a complete recipe by expanding all...
     cleanup             clean up ddf files or translation files.
     create_datapackage  create datapackage.json
+    diff                give a report on the statistical differences...
     merge_translation   merge all translation files from crowdin
     new                 create a new ddf project
     run_recipe          generate new ddf dataset with recipe

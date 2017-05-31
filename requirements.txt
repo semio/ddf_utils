@@ -9,5 +9,8 @@ daff
 sphinx_rtd_theme
 sphinxcontrib-napoleon
 recommonmark
-hypothesis
 tabulate
+dask[dataframe]
+hypothesis
+pytest
+pytest-cov

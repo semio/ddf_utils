@@ -15,7 +15,7 @@ def ddf(debug):
     if debug:
         level = logging.DEBUG
     else:
-        level = logging.WARNING
+        level = logging.INFO
     logging.basicConfig(level=level, format='%(asctime)s -%(levelname)s- %(message)s',
                         datefmt="%H:%M:%S"
                         )
@@ -59,26 +59,31 @@ def cleanup(path, how, force):
 @click.argument('path')
 @click.option('--update', '-u', 'update', flag_value=True, default=False,
               help='update existing datapackage.json')
-def create_datapackage(path, update):
+@click.option('--overwrite', '-n', 'overwrite', flag_value=True, default=False,
+              help='overwrite existing datapackage.json')
+def create_datapackage(path, update, overwrite):
     """create datapackage.json"""
-    from ddf_utils.index import get_datapackage
+    from ddf_utils.datapackage import get_datapackage
+    from ddf_utils.model.datapackage import Datapackage
     import json
-    if not update:
+    if not update and not overwrite:
         if os.path.exists(os.path.join(path, 'datapackage.json')):
-            click.echo('datapackage.json already exists. skipping')
+            click.echo('datapackage.json already exists. use --update to update or --overwrite to create new')
             return
-        res = get_datapackage(path)
-        with open(os.path.join(path, 'datapackage.json'), 'w', encoding='utf8') as f:
-            json.dump(res, f, indent=4, ensure_ascii=False)
+        res = get_datapackage(path, use_existing=False)
     else:
         if os.path.exists(os.path.join(path, 'datapackage.json')):
-            click.echo('overwritting existing datapackage.json...')
+            click.echo('backing up previous datapackage.json...')
             # make a backup
             shutil.copy(os.path.join(path, 'datapackage.json'),
                         os.path.join(path, 'datapackage.json.bak'))
-        res = get_datapackage(path, use_existing=True)
-        with open(os.path.join(path, 'datapackage.json'), 'w', encoding='utf8') as f:
-            json.dump(res, f, indent=4, ensure_ascii=False)
+        if overwrite:
+            res = get_datapackage(path, use_existing=False)
+        else:
+            res = get_datapackage(path, use_existing=True, update=True)
+
+    with open(os.path.join(path, 'datapackage.json'), 'w', encoding='utf8') as f:
+        json.dump(res, f, indent=4, ensure_ascii=False)
     click.echo('Done.')
 
 
@@ -95,7 +100,7 @@ def create_datapackage(path, update):
 def run_recipe(recipe, outdir, ddf_dir, update, dry_run, show_tree):
     """generate new ddf dataset with recipe"""
     import ddf_utils.chef as chef
-    from ddf_utils.index import get_datapackage
+    from ddf_utils.datapackage import get_datapackage
     click.echo('building recipe...')
     if ddf_dir:
         recipe = chef.build_recipe(recipe, ddf_dir=ddf_dir)
@@ -270,6 +275,25 @@ def diff(dataset1, dataset2, git, checkout_path, diff_only):
 
     click.echo(tabulate.tabulate(result,
                                  headers=cols, tablefmt='psql'))
+
+
+# csv to ddfcsv
+@ddf.command()
+@click.option('-i', 'input', type=click.Path(exists=True))
+@click.option('-o', 'out_path', type=click.Path(exists=True))
+def from_csv(input, out_path):
+    """create ddfcsv dataset from a set of csv files"""
+    from .io import csvs_to_ddf
+
+    if os.path.isfile(input):
+        files = [input]
+    else:
+        files = [os.path.join(input, x)
+                 for x in os.listdir(input) if x.endswith('.csv')]
+
+    csvs_to_ddf(files, out_path)
+
+    click.echo('Done.')
 
 
 if __name__ == '__main__':

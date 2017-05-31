@@ -76,7 +76,8 @@ def translate_header(ingredient: BaseIngredient, result, dictionary) -> Procedur
 
 @debuggable
 def translate_column(ingredient: BaseIngredient, result, dictionary, column, *,
-                     target_column=None, not_found='drop', ambiguity='prompt') -> ProcedureResult:
+                     target_column=None, not_found='drop', ambiguity='prompt',
+                     ignore_case=False) -> ProcedureResult:
     """Translate column values.
 
     Procedure format:
@@ -152,7 +153,7 @@ def translate_column(ingredient: BaseIngredient, result, dictionary, column, *,
     for k, df in di.items():
         logger.debug("running on: " + k)
         di[k] = tc(df, column, dict_type, dictionary, target_column, base_df,
-                   not_found, ambiguity)
+                   not_found, ambiguity, ignore_case)
 
     if not result:
         result = ingredient.ingred_id + '-translated'
@@ -254,8 +255,8 @@ def merge(*ingredients: List[BaseIngredient], result, deep=False) -> ProcedureRe
 
     # assert that dtype and key are same in all dataframe
     try:
-        # TODO: using `key` is not good, because it's string and there may be spaces in it
-        assert len(set([x.key for x in ingredients])) == 1
+        for x in ingredients[1:]:
+            assert set(x.key_to_list()) == set(ingredients[0].key_to_list())
         assert len(set([x.dtype for x in ingredients])) == 1
     except (AssertionError, TypeError):
         log1 = "multiple dtype/key detected: \n"
@@ -672,7 +673,7 @@ def window(ingredient: BaseIngredient, result, **options) -> ProcedureResult:
 
     column = read_opt(window, 'column', required=True)
     size = read_opt(window, 'size', required=True)
-    min_periods = read_opt(window, 'min_periods', default=None)
+    min_periods = read_opt(window, 'min_periods', default=0)
     center = read_opt(window, 'center', default=False)
 
     data = ingredient.get_data()
@@ -976,3 +977,35 @@ def trend_bridge(ingredient: BaseIngredient, bridge_start, bridge_end, bridge_le
         return ProcedureResult(result, start.key, merged)
     else:
         return ProcedureResult(result, start.key, {target_column: result_data})
+
+
+@debuggable
+def merge_entity(ingredient: BaseIngredient, dictionary,
+                 target_column, result, merged='drop'):
+    """merge entities"""
+    from ..transformer import merge_keys
+
+    data = ingredient.get_data()
+
+    res_data = dict()
+    for k, df in data.items():
+        res_data[k] = merge_keys(df.set_index(ingredient.key_to_list()),
+                                 dictionary, merged).reset_index()
+
+    return ProcedureResult(result, ingredient.key, res_data)
+
+
+@debuggable
+def split_entity(ingredient: BaseIngredient, dictionary,
+                 target_column, result, splitted='drop'):
+    """split entities"""
+    from ..transformer import split_keys
+
+    data = ingredient.get_data()
+
+    res_data = dict()
+    for k, df in data.items():
+        res_data[k] = split_keys(df.set_index(ingredient.key_to_list()),
+                                 target_column, dictionary, splitted).reset_index()
+
+    return ProcedureResult(result, ingredient.key, res_data)

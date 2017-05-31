@@ -52,7 +52,7 @@ def _translate_column_inline(df, column, target_column, dictionary,
     return df_new
 
 
-def _generate_mappng_dict1(df, column, dictionary, base_df, not_found):
+def _generate_mapping_dict1(df, column, dictionary, base_df, not_found):
 
     search_col = dictionary['key']
     idx_col = dictionary['value']
@@ -69,7 +69,7 @@ def _generate_mappng_dict1(df, column, dictionary, base_df, not_found):
     return mapping_all
 
 
-def _generate_mapping_dict2(df, column, dictionary, base_df, not_found):
+def _generate_mapping_dict2(df, column, dictionary, base_df, not_found, ignore_case):
 
     mapping = dict()
     no_match = set()
@@ -79,10 +79,13 @@ def _generate_mapping_dict2(df, column, dictionary, base_df, not_found):
 
     assert isinstance(idx_col, str)
 
-    for f in df[column].values:
+    for f in df[column].unique():
         bools = []
         for sc in search_cols:
-            bools.append(base_df[sc] == f)
+            if ignore_case:
+                bools.append(base_df[sc].str.lower() == f.lower())
+            else:
+                bools.append(base_df[sc] == f)
 
         mask = bools[0]
         for m in bools[1:]:
@@ -107,23 +110,26 @@ def _generate_mapping_dict2(df, column, dictionary, base_df, not_found):
 
 
 def _translate_column_df(df, column, target_column, dictionary, base_df,
-                         not_found, ambiguity):
+                         not_found, ambiguity, ignore_case):
 
     search_cols = dictionary['key']
     if isinstance(search_cols, str):
-        mapping = _generate_mappng_dict1(df, column, dictionary, base_df, not_found)
+        mapping = _generate_mapping_dict1(df, column, dictionary, base_df, not_found)
     else:
         if len(search_cols) == 1:
             dictionary['key'] = search_cols[0]
-            mapping = _generate_mappng_dict1(df, column, dictionary, base_df, not_found)
+            mapping = _generate_mapping_dict1(df, column, dictionary, base_df, not_found,
+                                              ignore_case)
         else:
-            mapping = _generate_mapping_dict2(df, column, dictionary, base_df, not_found)
+            mapping = _generate_mapping_dict2(df, column, dictionary, base_df, not_found,
+                                              ignore_case)
 
     return _translate_column_inline(df, column, target_column, mapping, not_found, ambiguity)
 
 
 def translate_column(df, column, dictionary_type, dictionary,
-                     target_column=None, base_df=None, not_found='drop', ambiguity='prompt'):
+                     target_column=None, base_df=None, not_found='drop', ambiguity='prompt',
+                     ignore_case=False):
     """change values in a column base on a mapping dictionary.
 
     The dictionary can be provided as a python dictionary, pandas dataframe or read from file.
@@ -211,7 +217,7 @@ def translate_column(df, column, dictionary_type, dictionary,
     if dictionary_type == 'dataframe':
         assert 'key' in dictionary.keys() and 'value' in dictionary.keys()
         df_new = _translate_column_df(df, column, target_column, dictionary, base_df,
-                                      not_found, ambiguity)
+                                      not_found, ambiguity, ignore_case)
 
     return df_new
 
@@ -319,3 +325,87 @@ def extract_concepts(dfs, base=None, join='full_outer'):
         # ingredients_outer join: only keep concepts appears in ingredients
         concepts = concepts.ix[new_concepts]
     return concepts.reset_index()
+
+
+def merge_keys(df, dictionary, target_column=None, merged='drop'):
+    """merge keys"""
+    rename_dict = dict()
+    for new_key, val in dictionary.items():
+        for old_key in val:
+            rename_dict[old_key] = new_key
+    # TODO: limit the rename inside target_column
+    # after pandas 0.20.0 there will be a level option for df.rename
+    df_new = df.rename(index=rename_dict).groupby(level=list(range(len(df.index.levels)))).sum()
+
+    if merged == 'drop':
+        return df_new
+    elif merged == 'keep':
+        df_ = df.copy()
+        df_ = pd.concat([df_, df_new])
+        return df_[~df_.index.duplicated()]  # remove all duplicated indies
+    else:
+        raise ValueError('only "drop", "keep" is allowed')
+
+
+def split_keys(df, target_column, dictionary, splited='drop'):
+    """split entities"""
+    keys = df.index.names
+    df_ = df.reset_index()
+
+    ratio = dict()
+
+    for k, v in dictionary.items():
+        before_spl = list()
+        for spl in v:
+            if spl not in df_[target_column].values:
+                raise ValueError('entity not in data: ' + spl)
+            tdf = df_[df_[target_column] == spl].set_index(keys).sort_index()
+            last = pd.DataFrame(tdf.ix[tdf.index[0], tdf.columns]).T
+            last.index.names = keys
+            logging.debug("using {} for first valid index".format(tdf.index[0]))
+            last = last.reset_index()
+            for key in keys:
+                if key != target_column:
+                    last = last.drop(key, axis=1)
+            before_spl.append(last.set_index(target_column))
+        before_spl = pd.concat(before_spl)
+        total = before_spl.sum()
+        ptc = before_spl / total
+        ratio[k] = ptc.to_dict()
+
+    logging.debug(ratio)
+    # the ratio format will be:
+    # ratio = {
+    #     'entity_to_split': {
+    #         'concept_1': {
+    #             'sub_entity_1': r11,
+    #             'sub_entity_2': r12,
+    #             ...
+    #         },
+    #         'concept_2': {
+    #             'sub_entity_1': r21,
+    #             'sub_entity_2': r22,
+    #             ...
+    #         }
+    #     }
+    # }
+
+    to_concat = []
+    for k, v in ratio.items():
+        t = df_[df_[target_column] == k].copy()
+        for x, y in v.items():
+            for g, r in y.items():
+                t_ = t.copy()
+                t_[x] = t_[x] * r
+                t_[target_column] = g
+                to_concat.append(t_.set_index(keys))
+
+    to_concat.append(df)
+    final = pd.concat(to_concat)
+    if splited == 'drop':
+        final = final[~final.index.get_level_values(target_column).isin(dictionary.keys())]
+        return final.sort_index()
+    elif splited == 'keep':
+        return final.sort_index()
+    else:
+        raise ValueError('only support drop == "drop" and "keep".')

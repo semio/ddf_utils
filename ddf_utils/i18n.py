@@ -10,7 +10,7 @@ import os
 import json
 import numpy as np
 import pandas as pd
-from . index import get_datapackage
+from . datapackage import get_datapackage
 
 
 def split_translations_json(path, split_path='langsplit', exclude_concepts=None, overwrite=False):

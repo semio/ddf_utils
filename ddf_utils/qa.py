@@ -86,17 +86,20 @@ def compare_with_func(dataset1, dataset2, fns=['rval', 'avg_pct_chg'],
         result[f] = np.nan
 
     result = result.set_index(['indicator', 'primary_key'])
-
+    result = result.sort_index()
+    idx = pd.IndexSlice
     for i in result.index:
-        result.ix[i, fns] = do_compare(fns, i[0], i[1])
+        result.loc[idx[i[0], [i[1]]], fns] = np.array(do_compare(fns, i[0], i[1]))
 
     return result.reset_index()
 
 
 def rval(comp_df):
+    """return r-value between old and new data"""
     return comp_df.corr().ix['old', 'new']
 
 
 def avg_pct_chg(comp_df):
+    """return average precentage changes between old and new data"""
     res = (comp_df['new'] - comp_df['old']) / comp_df['old'] * 100
     return res.replace([np.inf, -np.inf], np.nan).mean()

@@ -68,7 +68,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'ddf_utils'
-copyright = '2016, Semio Zheng'
+copyright = '2017, Gapminder Fundation'
 author = 'Semio Zheng'
 
 # The version info for the project you're documenting, acts as replacement for

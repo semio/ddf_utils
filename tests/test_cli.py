@@ -43,7 +43,7 @@ def test_translate_column():
                                columns=['geo', 'abbr1', 'abbr2'])
         di = {'key': ['abbr1', 'abbr2'], 'value': 'geo'}
 
-        res = tc(df, 'name', 'geo', di, base_df, 'drop', 'prompt')
+        res = tc(df, 'name', 'geo', di, base_df, 'drop', 'prompt', False)
         # click.echo(res)
         click.echo(res['geo'].values[0])
 

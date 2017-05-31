@@ -21,13 +21,15 @@ requirements = [
     'jsonschema',
     'Click',
     'daff',
-    'tabulate'
+    'tabulate',
+    'dask[dataframe]'
 ]
 
 setup(
     name='ddf_utils',
     version=version,
     description='Commonly used functions/utilities for DDF file model.',
+    long_description='README.md',
     url='https://github.com/semio/ddf_utils',
     author='Semio Zheng',
     author_email='prairy.long@gmail.com',
