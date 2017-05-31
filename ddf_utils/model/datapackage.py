@@ -5,7 +5,6 @@
 import os
 import os.path as osp
 import json
-import numpy as np
 import pandas as pd
 from .ddf import Dataset
 from itertools import product
@@ -103,7 +102,7 @@ class Datapackage:
                     for c in value_cols:
                         yield {'primaryKey': list(perm), 'value': c, 'resource': resource['name']}
                 else:
-                    yield {'primaryKey': list(perm), 'value': np.nan, 'resource': resource['name']}
+                    yield {'primaryKey': list(perm), 'value': None, 'resource': resource['name']}
 
         def _add_to_schema(resource_schema):
             key = '-'.join(sorted(resource_schema['primaryKey']))
