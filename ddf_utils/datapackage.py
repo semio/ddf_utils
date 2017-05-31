@@ -5,10 +5,12 @@ import os
 import re
 import json
 import csv
+import logging
+from .model.datapackage import Datapackage
 from collections import OrderedDict
 
 
-def get_datapackage(path, use_existing=True, to_disk=False):
+def get_datapackage(path, use_existing=True, update=True):
     """get the datapackage.json from a dataset path, create one if it's not exists
 
     Parameters
@@ -20,19 +22,21 @@ def get_datapackage(path, use_existing=True, to_disk=False):
     ------------
     use_existing : bool
         whether or not to use the existing datapackage
-    to_disk : bool
-        whether or not to save result to disk
     """
     datapackage_path = os.path.join(path, 'datapackage.json')
 
     if os.path.exists(datapackage_path):
-        # TODO: move the json reading/writting functions to io.py
         with open(datapackage_path, encoding='utf8') as f:
             datapackage_old = json.load(f, object_pairs_hook=OrderedDict)
 
         if use_existing:
-            # TODO: maybe add an option to just return the old datapackage
-            _ = datapackage_old.pop('resources')  # don't use the old resources
+            if not update:
+                return datapackage_old
+            try:
+                datapackage_old.pop('resources')  # don't use the old resources
+                datapackage_old.pop('ddfSchema')  # and ddf schema
+            except KeyError:
+                logging.warning('no resources or ddfSchema in datapackage.json')
             datapackage_new = create_datapackage(path, **datapackage_old)
         else:
             datapackage_new = create_datapackage(path)
@@ -41,9 +45,6 @@ def get_datapackage(path, use_existing=True, to_disk=False):
             print("WARNING: no existing datapackage.json")
         datapackage_new = create_datapackage(path)
 
-    if to_disk:
-        with open(datapackage_path, 'w', encoding='utf8') as f:
-            json.dump(datapackage_new, f, indent=4, ensure_ascii=False)
     return datapackage_new
 
 
@@ -189,6 +190,11 @@ def create_datapackage(path, **kwargs):
             print("not supported file: " + name_res)
             resources[n] = None
 
-    # return
     datapackage['resources'] = [x for x in resources if x is not None]
+
+    # generate ddf schema
+    dp = Datapackage(datapackage, base_dir=path)
+    logging.info('generating ddf schema, may take some time...')
+    dp.generate_ddfschema()
+
     return datapackage

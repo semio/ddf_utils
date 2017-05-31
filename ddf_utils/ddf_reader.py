@@ -41,7 +41,7 @@ class DDF():
     def datapackage(self):
         """the datapackage object. create one if it doesn't exist"""
         if not self._datapackage:
-            self._datapackage = get_datapackage(self.dataset_path)
+            self._datapackage = get_datapackage(self.dataset_path, update=False)
         return self._datapackage
 
     @property
