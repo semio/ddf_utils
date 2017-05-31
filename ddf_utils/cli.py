@@ -15,7 +15,7 @@ def ddf(debug):
     if debug:
         level = logging.DEBUG
     else:
-        level = logging.WARNING
+        level = logging.INFO
     logging.basicConfig(level=level, format='%(asctime)s -%(levelname)s- %(message)s',
                         datefmt="%H:%M:%S"
                         )
@@ -59,14 +59,16 @@ def cleanup(path, how, force):
 @click.argument('path')
 @click.option('--update', '-u', 'update', flag_value=True, default=False,
               help='update existing datapackage.json')
-def create_datapackage(path, update):
+@click.option('--overwrite', '-n', 'overwrite', flag_value=True, default=False,
+              help='overwrite existing datapackage.json')
+def create_datapackage(path, update, overwrite):
     """create datapackage.json"""
     from ddf_utils.datapackage import get_datapackage
     from ddf_utils.model.datapackage import Datapackage
     import json
-    if not update:
+    if not update and not overwrite:
         if os.path.exists(os.path.join(path, 'datapackage.json')):
-            click.echo('datapackage.json already exists. use --update to update')
+            click.echo('datapackage.json already exists. use --update to update or --overwrite to create new')
             return
         res = get_datapackage(path, use_existing=False)
     else:
@@ -75,15 +77,13 @@ def create_datapackage(path, update):
             # make a backup
             shutil.copy(os.path.join(path, 'datapackage.json'),
                         os.path.join(path, 'datapackage.json.bak'))
-        res = get_datapackage(path, use_existing=True)
+        if overwrite:
+            res = get_datapackage(path, use_existing=False)
+        else:
+            res = get_datapackage(path, use_existing=True, update=True)
 
-    # generate ddfSchema
-    click.echo('generating ddfSchema...')
-    dp = Datapackage(res)
-    dp.generate_ddfschema()
-    click.echo('writing to datapackage.json...')
     with open(os.path.join(path, 'datapackage.json'), 'w', encoding='utf8') as f:
-        json.dump(dp.datapackage, f, indent=4, ensure_ascii=False)
+        json.dump(res, f, indent=4, ensure_ascii=False)
     click.echo('Done.')
 
 
