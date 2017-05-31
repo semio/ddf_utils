@@ -1,3 +1,13 @@
+## version 0.2.15 2017-05-31
+
+- the chef_new module, which is to replace the chef module. But it's still WIP, not working yet.
+- ddf_utils.index renamed to ddf_utils.datapackage
+- new interface for DDF Dataset and Datapackage
+- removed python 3.3 support, because it's not supported by latest pandas now
+- add support for ddfSchema creation
+- bug fix for procedures/functions
+- minor improvments
+
 ## version 0.2.14 2017-04-07
 
 - new subcommands for `ddf`: `diff` for comparing 2 datasets
