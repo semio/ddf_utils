@@ -149,12 +149,10 @@ def create_datapackage(path, **kwargs):
             resources[n].update({'schema': schema})
 
         elif 'entities' in name_res:
-            match = re.match('ddf--entities--([\w_]+)-*([\w_]*)', name_res).groups()
-            if len(match) == 1:
-                domain = match[0]
-                concept = None
-            else:
-                domain, concept = match
+            match = re.match('ddf--entities--([\w_]+)(--[\w_]*)?-?.*', name_res).groups()
+            domain, concept = match
+            if concept is not None:
+                concept = concept[2:]
 
             with open(os.path.join(path, r['path'])) as f:
                 reader = csv.reader(f, delimiter=',', quotechar='"')
@@ -163,11 +161,10 @@ def create_datapackage(path, **kwargs):
 
             if domain in header:
                 key = domain
-            elif concept in header:
+            elif concept is not None and concept in header:
                 key = concept
             else:
-                # FIXME: error when the recource name have a tail (ddf--entities--country-2)
-                raise ValueError('no matching header found for {}!'.format(name_res))
+                raise ValueError('no header in {} matches its implied domain/entity_set!'.format(name_res))
                 # print(
                 #     """There is no matching header found for {}. Using the first column header
                 #     """.format(name_res)
