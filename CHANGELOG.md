@@ -1,3 +1,8 @@
+## version 0.2.17 2017-06-01
+
+- performance improvement on datapackage generation
+- add progress bar to datapackage generation
+
 ## version 0.2.16 2017-05-31
 
 - bug fix in ddfSchema generation
