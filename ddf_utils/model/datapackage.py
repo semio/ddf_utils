@@ -55,16 +55,21 @@ class Datapackage:
         cdf = ds.concepts.set_index('concept')
         hash_table = {}
         ddf_schema = {'concepts': [], 'entities': [], 'datapoints': []}
+        entity_value_cache = dict()
+        entity_df_cache = dict()
 
         def _which_sets(entity, domain):
-            ent_df = ds.get_entity(domain)
+            if domain not in entity_df_cache.keys():
+                entity_df_cache[domain] = ds.get_entity(domain)
+            ent_df = entity_df_cache[domain]
             sets = [domain]
             for c in ent_df.columns:
                 if c.startswith('is--'):
-                    if entity in ent_df[domain]:
-                        idx = ent_df[ent_df[domain] == entity].index[0]
-                        if ent_df.loc[idx, c] is True:
-                            sets.append(c[4:])
+                    if domain not in entity_value_cache.keys():
+                        entity_value_cache[domain] = list(ent_df[domain].values)
+                    idx = entity_value_cache[domain].index(entity)
+                    if ent_df.loc[idx, c] is True:
+                        sets.append(c[4:])
             return sets
 
         def _gen_key_value_object(resource):
