@@ -1,3 +1,7 @@
+## version 0.2.18 2017-06-01
+
+- bug fix in datapackage generation
+
 ## version 0.2.17 2017-06-01
 
 - performance improvement on datapackage generation
