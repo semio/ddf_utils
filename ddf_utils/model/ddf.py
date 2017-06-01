@@ -204,10 +204,8 @@ class Dataset:
         if ent in self._entities_cache.keys():
             return self._entities_cache[ent]
 
-        # conc = self.concepts.set_index('concept')
-        conc = self.concepts
-        idx = conc[conc.concept == ent].index[0]
-        if conc.loc[idx, 'concept_type'] == 'entity_domain':
+        conc = self.concepts.set_index('concept')
+        if conc.loc[ent, 'concept_type'] == 'entity_domain':
             self._entities_cache[ent] = self.entities[ent]
         else:
             domain = conc.loc[ent, 'domain']
