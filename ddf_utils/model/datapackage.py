@@ -122,10 +122,12 @@ class Datapackage:
             else:
                 hash_table[hash_val]['resources'].append(resource_schema['resource'])
 
-        for g in tqdm(map(_gen_key_value_object, self.resources)):
+        pbar = tqdm(total=len(self.resources))
+        for g in map(_gen_key_value_object, self.resources):
             for kvo in g:
                 logging.debug("adding kvo {}".format(str(kvo)))
                 _add_to_schema(kvo)
+            pbar.update(1)
 
         for sch in hash_table.values():
             if len(sch['primaryKey']) == 1:

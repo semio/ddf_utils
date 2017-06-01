@@ -14,3 +14,4 @@ dask[dataframe]
 hypothesis
 pytest
 pytest-cov
+tqdm
