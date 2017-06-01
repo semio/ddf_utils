@@ -27,7 +27,6 @@ class Dataset:
         # TODO: add type check.
         self._concepts = concepts
         self._entities = entities
-        self._entities_cache = dict()
         self._datapoints = datapoints
         self.attrs = attrs
 
@@ -201,20 +200,13 @@ class Dataset:
             return False
 
     def get_entity(self, ent):
-        if ent in self._entities_cache.keys():
-            return self._entities_cache[ent]
-
-        # conc = self.concepts.set_index('concept')
-        conc = self.concepts
-        idx = conc[conc.concept == ent].index[0]
-        if conc.loc[idx, 'concept_type'] == 'entity_domain':
-            self._entities_cache[ent] = self.entities[ent]
+        conc = self.concepts.set_index('concept')
+        if conc.loc[ent, 'concept_type'] == 'entity_domain':
+            return self.entities[ent]
         else:
             domain = conc.loc[ent, 'domain']
             ent_domain = self.entities[domain]
-            self._entities_cache[ent] = ent_domain[ent_domain['is--'+ent] == True].dropna(axis=1, how='all')
-
-        return self._entities_cache[ent]
+            return ent_domain[ent_domain['is--'+ent] == True].dropna(axis=1, how='all')
 
     def get_datapoint_df(self, indicator, primary_key=None):
         if primary_key:
