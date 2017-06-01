@@ -9,6 +9,7 @@ import pandas as pd
 from .ddf import Dataset
 from itertools import product
 from .utils import load_datapackage_json
+from tqdm import tqdm
 
 import logging
 
@@ -56,12 +57,14 @@ class Datapackage:
         ddf_schema = {'concepts': [], 'entities': [], 'datapoints': []}
 
         def _which_sets(entity, domain):
-            ent_df = ds.get_entity(domain).set_index(domain)
+            ent_df = ds.get_entity(domain)
             sets = [domain]
             for c in ent_df.columns:
                 if c.startswith('is--'):
-                    if ent_df.loc[entity, c] is True:
-                        sets.append(c[4:])
+                    if entity in ent_df[domain]:
+                        idx = ent_df[ent_df[domain] == entity].index[0]
+                        if ent_df.loc[idx, c] is True:
+                            sets.append(c[4:])
             return sets
 
         def _gen_key_value_object(resource):
@@ -119,9 +122,12 @@ class Datapackage:
             else:
                 hash_table[hash_val]['resources'].append(resource_schema['resource'])
 
+        pbar = tqdm(total=len(self.resources))
         for g in map(_gen_key_value_object, self.resources):
             for kvo in g:
+                logging.debug("adding kvo {}".format(str(kvo)))
                 _add_to_schema(kvo)
+            pbar.update(1)
 
         for sch in hash_table.values():
             if len(sch['primaryKey']) == 1:

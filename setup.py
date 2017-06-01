@@ -22,7 +22,8 @@ requirements = [
     'Click',
     'daff',
     'tabulate',
-    'dask[dataframe]'
+    'dask[dataframe]',
+    'tqdm'
 ]
 
 setup(
