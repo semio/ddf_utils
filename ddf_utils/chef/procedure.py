@@ -434,9 +434,9 @@ def filter_row(ingredient: BaseIngredient, result, **options) -> ProcedureResult
         newkey = ingredient.key
         keys = ingredient.key_to_list()
         if not keep_all_columns:
-            for c in df.columns:
+            for c in v.keys():
                 if ingredient.dtype == 'datapoints':
-                    if c in v.keys() and len(df[c].unique()) > 1:
+                    if len(df[c].unique()) > 1:
                         logger.debug("column {} have multiple values: {}".format(c, df[c].unique()))
                     elif len(df[c].unique()) <= 1:
                         df = df.drop(c, axis=1)
