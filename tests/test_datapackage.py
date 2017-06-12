@@ -5,7 +5,7 @@ import os
 
 def test_create_datapackage():
     from ddf_utils.datapackage import get_datapackage
-    from ddf_utils.model.datapackage import Datapackage
+    from ddf_utils.model.package import Datapackage
 
     dataset_path = os.path.join(os.path.dirname(__file__),
                                 'datasets/ddf--gapminder--dummy_companies')

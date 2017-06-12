@@ -64,7 +64,7 @@ def cleanup(path, how, force):
 def create_datapackage(path, update, overwrite):
     """create datapackage.json"""
     from ddf_utils.datapackage import get_datapackage
-    from ddf_utils.model.datapackage import Datapackage
+    from ddf_utils.model.package import Datapackage
     import json
     if not update and not overwrite:
         if os.path.exists(os.path.join(path, 'datapackage.json')):

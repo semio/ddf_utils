@@ -24,11 +24,7 @@ class Datapackage:
             self.base_dir = base_dir
             self.datapackage = datapackage
         elif isinstance(datapackage, str):
-            try:
-                self.base_dir, self.datapackage = load_datapackage_json(datapackage)
-            except FileNotFoundError:
-                logging.warning("datapackage.json not found.")
-                raise
+            self.base_dir, self.datapackage = load_datapackage_json(datapackage)
 
     @property
     def resources(self):
@@ -130,7 +126,7 @@ class Datapackage:
         pbar = tqdm(total=len(self.resources))
         for g in map(_gen_key_value_object, self.resources):
             for kvo in g:
-                logging.debug("adding kvo {}".format(str(kvo)))
+                # logging.debug("adding kvo {}".format(str(kvo)))
                 _add_to_schema(kvo)
             pbar.update(1)
 

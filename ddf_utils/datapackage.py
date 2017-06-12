@@ -6,7 +6,7 @@ import re
 import json
 import csv
 import logging
-from .model.datapackage import Datapackage
+from .model.package import Datapackage
 from collections import OrderedDict
 
 
