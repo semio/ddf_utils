@@ -54,6 +54,9 @@ class Datapackage:
         entity_value_cache = dict()
         entity_df_cache = dict()
 
+        all_entity_concepts = cdf[cdf.concept_type.isin(['entity_set', 'entity_domain'])].index
+        dtypes = dict([(c, 'str') for c in all_entity_concepts])  # set all entity column to string type
+
         def _which_sets(entity, domain):
             if domain not in entity_df_cache.keys():
                 entity_df_cache[domain] = ds.get_entity(domain)
@@ -69,8 +72,9 @@ class Datapackage:
             return sets
 
         def _gen_key_value_object(resource):
+            logging.debug('working on: {}'.format(resource['path']))
             base_dir = self.base_dir
-            data = pd.read_csv(os.path.join(base_dir, resource['path']))
+            data = pd.read_csv(os.path.join(base_dir, resource['path']), dtype=dtypes)
             if isinstance(resource['schema']['primaryKey'], str):
                 pkeys = [resource['schema']['primaryKey']]
             else:
