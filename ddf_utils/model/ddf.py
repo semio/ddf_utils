@@ -105,12 +105,13 @@ class Dataset:
             elif isinstance(pkey, str):
                 entities_.append(
                     {
-                        "data": pd.read_csv(osp.join(base_dir, r['path'])),
+                        "data": pd.read_csv(osp.join(base_dir, r['path']), dtype={pkey: str}),
                         "key": pkey
                     })
             else:
                 if not no_datapoints:
-                    df = dd.read_csv(os.path.join(base_dir, r['path']))
+                    dtypes = dict([(x, 'str') for x in pkey])  # FIXME: time should not be string
+                    df = dd.read_csv(os.path.join(base_dir, r['path']), dtype=dtypes)
                     try:
                         indicator_name = list(set(df.columns) - set(pkey))[0]
                     except:
