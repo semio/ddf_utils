@@ -52,24 +52,29 @@ class Datapackage:
         hash_table = {}
         ddf_schema = {'concepts': [], 'entities': [], 'datapoints': []}
         entity_value_cache = dict()
-        entity_df_cache = dict()
+
+        # generate set-membership details for every single entity in dataset
+        for domain, df in ds.entities.items():
+            entity_value_cache[domain] = dict()
+            for _, row in df.iterrows():
+                sets = set()
+                sets.add(domain)
+                for c in df.columns:
+                    if c.startswith('is--'):
+                        if row[c] == True:
+                            sets.add(c[4:])
+                entity_value_cache[domain][row[domain]] = tuple(sets)
 
         all_entity_concepts = cdf[cdf.concept_type.isin(['entity_set', 'entity_domain'])].index
         dtypes = dict([(c, 'str') for c in all_entity_concepts])  # set all entity column to string type
 
-        def _which_sets(entity, domain):
-            if domain not in entity_df_cache.keys():
-                entity_df_cache[domain] = ds.get_entity(domain)
-            ent_df = entity_df_cache[domain]
-            sets = [domain]
-            for c in ent_df.columns:
-                if c.startswith('is--'):
-                    if domain not in entity_value_cache.keys():
-                        entity_value_cache[domain] = list(ent_df[domain].values)
-                    idx = entity_value_cache[domain].index(entity)
-                    if ent_df.loc[idx, c] is True:
-                        sets.append(c[4:])
-            return sets
+        def _which_sets(entity_, domain_):
+            try:
+                return entity_value_cache[domain_][entity_]
+            except KeyError:
+                logging.debug('entity {} is not in {} domain!'.format(entity_, domain_))
+                entity_ = entity_.lower().replace(' ', '').replace('-', '')
+                return entity_value_cache[domain_][entity_]
 
         def _gen_key_value_object(resource):
             logging.debug('working on: {}'.format(resource['path']))
@@ -80,37 +85,37 @@ class Datapackage:
             else:
                 pkeys = resource['schema']['primaryKey']
 
+            entity_cols = [x for x in pkeys if
+                           (x in cdf.index) and
+                           (cdf.loc[x, 'concept_type'] in ['entity_set', 'entity_domain'])]
             value_cols = list(set([x['name'] for x in resource['schema']['fields']]) - set(pkeys))
+            # only consider all permutations on entity columns
+            if len(entity_cols) > 0:
+                data = data[pkeys].drop_duplicates(subset=entity_cols)
 
-            pkeys_dict = dict()
-
-            for k in pkeys:
-                if k in cdf.index:
-                    if cdf.loc[k, 'concept_type'] == 'entity_set':
-                        domain = cdf.loc[k, 'domain']
-                        for val in data[k].unique():
-                            if k in pkeys_dict.keys():
-                                pkeys_dict[k] = list(set(_which_sets(val, domain)).union(set(pkeys_dict[k])))
-                            else:
-                                pkeys_dict[k] = _which_sets(val, domain)
-                    elif cdf.loc[k, 'concept_type'] == 'entity_domain':
-                        domain = k
-                        for val in data[k].unique():
-                            if k in pkeys_dict.keys():
-                                pkeys_dict[k] = list(set(_which_sets(val, domain)).union(set(pkeys_dict[k])))
-                            else:
-                                pkeys_dict[k] = _which_sets(val, domain)
+            all_permutations = set()
+            for i, r in data.iterrows():
+                perm = list()
+                for c in pkeys:
+                    if c not in cdf.index:
+                        perm.append(tuple([c]))
+                        continue
+                    if cdf.loc[c, 'concept_type'] == 'entity_set':
+                        domain = cdf.loc[c, 'domain']
+                        perm.append(_which_sets(r[c], domain))
+                    elif cdf.loc[c, 'concept_type'] == 'entity_domain':
+                        perm.append(_which_sets(r[c], c))
                     else:
-                        pkeys_dict[k] = [k]
-                else:
-                    pkeys_dict[k] = [k]
+                        perm.append(tuple([c]))
+                all_permutations.add(tuple(perm))
 
-            for perm in product(*(list(pkeys_dict.values()))):
-                if len(value_cols) > 0:
-                    for c in value_cols:
-                        yield {'primaryKey': list(perm), 'value': c, 'resource': resource['name']}
-                else:
-                    yield {'primaryKey': list(perm), 'value': None, 'resource': resource['name']}
+            for row in all_permutations:
+                for perm in product(*row):
+                    if len(value_cols) > 0:
+                        for c in value_cols:
+                            yield {'primaryKey': list(perm), 'value': c, 'resource': resource['name']}
+                    else:
+                        yield {'primaryKey': list(perm), 'value': None, 'resource': resource['name']}
 
         def _add_to_schema(resource_schema):
             key = '-'.join(sorted(resource_schema['primaryKey']))
@@ -122,10 +127,10 @@ class Datapackage:
                 hash_table[hash_val] = {
                     'primaryKey': sorted(resource_schema['primaryKey']),
                     'value': resource_schema['value'],
-                    'resources': [resource_schema['resource']]
+                    'resources': set([resource_schema['resource']])
                 }
             else:
-                hash_table[hash_val]['resources'].append(resource_schema['resource'])
+                hash_table[hash_val]['resources'].add(resource_schema['resource'])
 
         pbar = tqdm(total=len(self.resources))
         for g in map(_gen_key_value_object, self.resources):
@@ -135,6 +140,7 @@ class Datapackage:
             pbar.update(1)
 
         for sch in hash_table.values():
+            sch['resources'] = list(sch['resources'])
             if len(sch['primaryKey']) == 1:
                 if sch['primaryKey'][0] == 'concept':
                     ddf_schema['concepts'].append(sch)

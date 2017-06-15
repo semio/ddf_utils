@@ -3,7 +3,7 @@
 import os
 
 
-def test_create_datapackage():
+def test_create_datapackage_1():
     from ddf_utils.datapackage import get_datapackage
     from ddf_utils.model.package import Datapackage
 
@@ -30,6 +30,19 @@ def test_create_datapackage():
         ]
     }
     assert d in dp_.datapackage['ddfSchema']['entities']
+
+
+def test_create_datapackage_2():
+    from ddf_utils.model.package import Datapackage
+
+    dataset_path = os.path.join(os.path.dirname(__file__),
+                                'datasets/ddf--datapackage--testing')
+
+    dp = Datapackage(dataset_path)
+    dp.generate_ddfschema()
+    assert 'ddfSchema' in dp.datapackage.keys()
+
+    assert len(dp.datapackage['ddfSchema']['datapoints']) == 3
 
 
 def test_dataset():
