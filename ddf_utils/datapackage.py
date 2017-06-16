@@ -6,7 +6,7 @@ import re
 import json
 import csv
 import logging
-from .model.datapackage import Datapackage
+from .model.package import Datapackage
 from collections import OrderedDict
 
 
@@ -73,7 +73,7 @@ def get_ddf_files(path, root=None):
             yield p
 
 
-def create_datapackage(path, **kwargs):
+def create_datapackage(path, gen_schema=True, **kwargs):
     """create datapackage.json base on the files in `path`.
 
     If you want to set some attributes manually, you can pass them as
@@ -195,8 +195,18 @@ def create_datapackage(path, **kwargs):
     datapackage['resources'] = [x for x in resources if x is not None]
 
     # generate ddf schema
-    dp = Datapackage(datapackage, base_dir=path)
-    logging.info('generating ddf schema, may take some time...')
-    dp.generate_ddfschema()
+    if gen_schema:
+        dp = Datapackage(datapackage, base_dir=path)
+        logging.info('generating ddf schema, may take some time...')
+        dp.generate_ddfschema()
 
-    return datapackage
+        return dp.datapackage
+    else:
+        return datapackage
+
+
+# helper for dumping datapackage json
+def dump_json(path, obj):
+    with open(path, 'w+') as f:
+        json.dump(obj, f, ensure_ascii=False, indent=4)
+        f.close()

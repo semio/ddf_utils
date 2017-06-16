@@ -64,7 +64,7 @@ def cleanup(path, how, force):
 def create_datapackage(path, update, overwrite):
     """create datapackage.json"""
     from ddf_utils.datapackage import get_datapackage
-    from ddf_utils.model.datapackage import Datapackage
+    from ddf_utils.model.package import Datapackage
     import json
     if not update and not overwrite:
         if os.path.exists(os.path.join(path, 'datapackage.json')):
@@ -100,7 +100,7 @@ def create_datapackage(path, update, overwrite):
 def run_recipe(recipe, outdir, ddf_dir, update, dry_run, show_tree):
     """generate new ddf dataset with recipe"""
     import ddf_utils.chef as chef
-    from ddf_utils.datapackage import get_datapackage
+    from ddf_utils.datapackage import get_datapackage, dump_json
     click.echo('building recipe...')
     if ddf_dir:
         recipe = chef.build_recipe(recipe, ddf_dir=ddf_dir)
@@ -116,7 +116,7 @@ def run_recipe(recipe, outdir, ddf_dir, update, dry_run, show_tree):
     chef.run_recipe(recipe, serve=serve, outpath=outdir)
     if serve:
         click.echo('creating datapackage file...')
-        get_datapackage(outdir, use_existing=True, to_disk=True)
+        dump_json(os.path.join(outdir, 'datapackage.json'), get_datapackage(outdir))
     click.echo("Done.")
 
 

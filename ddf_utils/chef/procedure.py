@@ -52,22 +52,33 @@ def translate_header(ingredient: BaseIngredient, result, dictionary) -> Procedur
     data = ingredient.copy_data()
 
     for k in list(data.keys()):
+        df_new = data[k].rename(columns=rm).copy()
+        if ingredient.dtype == 'entities':  # also rename the `is--` headers
+            rm_ = {}
+            for c in df_new.columns:
+                if k == c[4:]:
+                    rm_[c] = 'is--' + rm[k]
+            if len(rm_) > 0:
+                df_new = df_new.rename(columns=rm_)
         if k in rm.keys():  # if we need to rename the concept name
-            data[rm[k]] = data[k].rename(columns=rm).copy()
+            data[rm[k]] = df_new
             del(data[k])
         else:  # we only rename index/properties columns
-            data[k] = data[k].rename(columns=rm)
+            data[k] = df_new
 
     # also rename the key
     newkey = ingredient.key
-    if ingredient.dtype in ['datapoints', 'concepts']:
+    if ingredient.dtype == 'datapoints':
         for key in rm.keys():
             if key in ingredient.key:
                 newkey = newkey.replace(key, rm[key])
-    else:
+    elif ingredient.dtype == 'entities':
         for key in rm.keys():
-            if key in ingredient.key:
-                newkey[ingredient.key.index(key)] = rm[key]
+            if key == ingredient.key:
+                newkey = rm[key]
+    else:
+        if 'concept' in rm.keys():
+            raise ValueError('can translate the primaryKey for concept!')
 
     if not result:
         result = ingredient.ingred_id + '-translated'
@@ -333,8 +344,19 @@ def _merge_two(left: Dict[str, pd.DataFrame],
         else:
             res_data = {'concept': right_df.drop_duplicates(subset='concept', keep='last')}
     else:
-        # TODO
-        raise NotImplementedError('entity data do not support merging yet.')
+        # TODO: improve this
+        if deep:
+            for k, df in right.items():
+                if k in left.keys():
+                    left[k] = left[k].append(df, ignore_index=True)
+                    left[k] = left[k].groupby(index_col).agg(__get_last_item).reset_index()
+                else:
+                    left[k] = df
+        else:
+            for k, df in right.items():
+                left[k] = df
+        res_data = left
+        # raise NotImplementedError('entity data do not support merging yet.')
 
     return res_data
 
@@ -434,9 +456,9 @@ def filter_row(ingredient: BaseIngredient, result, **options) -> ProcedureResult
         newkey = ingredient.key
         keys = ingredient.key_to_list()
         if not keep_all_columns:
-            for c in df.columns:
+            for c in v.keys():
                 if ingredient.dtype == 'datapoints':
-                    if c in v.keys() and len(df[c].unique()) > 1:
+                    if len(df[c].unique()) > 1:
                         logger.debug("column {} have multiple values: {}".format(c, df[c].unique()))
                     elif len(df[c].unique()) <= 1:
                         df = df.drop(c, axis=1)

@@ -102,10 +102,11 @@ class BaseIngredient(object):
             split_by = read_opt(options, 'split_datapoints_by', default=False)
             by = self.key_to_list()
             if not split_by:
+                columns = [*by, k]
                 path = os.path.join(
                     outpath,
                     'ddf--datapoints--{}--by--{}.csv'.format(k, '--'.join(by)))
-                to_disk(df, k, path)
+                to_disk(df[columns], k, path)
             else:
                 # split datapoints by entities. Firstly we calculate all possible
                 # combinations of entities, and then filter the dataframe, create
@@ -117,8 +118,10 @@ class BaseIngredient(object):
 
                 if len(by) > len(split_by):
                     by = list(set(by) - set(split_by))
+                    columns = [*sorted(split_by), *sorted(by), k]
                 else:
                     by = None
+                    columns = [*sorted(split_by), k]
 
                 for comb in all_combinations:
                     query = ''
@@ -149,7 +152,7 @@ class BaseIngredient(object):
                         )
                     # logging.debug('query is: ' + query)
                     df_part = df.query(query)
-                    to_disk(df_part, k, path)
+                    to_disk(df_part[columns], k, path)
 
     def serve(self, outpath, **options):
         """save the ingledient to disk.
