@@ -1,3 +1,8 @@
+## version 0.2.19 2017-06-16
+
+- add ddfSchema creation to datapackage
+- bug fix and improvements
+
 ## version 0.2.18 2017-06-01
 
 - bug fix in datapackage generation
@@ -79,11 +84,10 @@ ids as pervious version
 ## version 0.2.7 2016-12-06
 
 - use DAG to model the recipe. changes are:
-    - procedure result can not have same id with other ingredients 
+    - procedure result can not have same id with other ingredients
     (can't overwrite existing ingredients)
     - the `result` of procedure is mandantory field now
     - recipe cooking procedures can be written in any order. Chef will check dependencies
     - new show-tree option to display a tree view of procedures/ingredients in recipe
 - added support for serve section
 - renamed procedure `add_concepts` to `extract_concepts` #40
-
