@@ -73,8 +73,7 @@ class Datapackage:
                 return entity_value_cache[domain_][entity_]
             except KeyError:
                 logging.debug('entity {} is not in {} domain!'.format(entity_, domain_))
-                entity_ = entity_.lower().replace(' ', '').replace('-', '')
-                return entity_value_cache[domain_][entity_]
+                raise
 
         def _gen_key_value_object(resource):
             logging.debug('working on: {}'.format(resource['path']))
