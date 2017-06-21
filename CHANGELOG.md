@@ -1,3 +1,7 @@
+## version 0.2.20 2017-06-17
+
+- bug fix: #67
+
 ## version 0.2.19 2017-06-16
 
 - add ddfSchema creation to datapackage
