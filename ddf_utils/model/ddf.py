@@ -9,7 +9,6 @@ import numpy as np
 import pandas as pd
 import dask.dataframe as dd
 from .utils import load_datapackage_json
-from ..chef_new.helpers import read_opt
 
 
 class Dataset:
