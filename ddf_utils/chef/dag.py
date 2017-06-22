@@ -7,7 +7,6 @@ each node will have a `evaluate()` function, which will return an ingredient
 on eval.
 """
 
-from . import procedure as pc
 from .exceptions import ProcedureError, ChefRuntimeError
 
 
@@ -124,6 +123,7 @@ class ProcedureNode(BaseNode):
         self.result_ingredient = None
 
     def evaluate(self):
+        from . import procedure as pc
         if self.result_ingredient:
             return self.result_ingredient
 
@@ -135,32 +135,17 @@ class ProcedureNode(BaseNode):
         except TypeError:
             raise ProcedureError("Procedure Error: " + str(self.node_id))
 
-        # check the base ingredients and convert the string id to actual ingredient
-        ingredients = []
-        for i in self.procedure['ingredients']:
-            ing = self.dag.get_node(i)
-            ingredients.append(ing.evaluate())
-
-        # also evaluate the ingredients in the options
+        ingredients = self.procedure['ingredients']
         if 'options' in self.procedure.keys():
             options = self.procedure['options']
-            for ingredient_key in ['base', 'ingredient']:
-                if ingredient_key in options.keys():
-                    ing = self.dag.get_node(self.procedure['options'][ingredient_key])
-                    options[ingredient_key] = ing.evaluate()
-                for opt in options.keys():
-                    if isinstance(options[opt], dict):
-                        if ingredient_key in options[opt].keys():
-                            ing = self.dag.get_node(options[opt][ingredient_key])
-                            options[opt][ingredient_key] = ing.evaluate()
-            self.result_ingredient = func(*ingredients, result=self.procedure['result'], **options)
+            self.result_ingredient = func(self.dag, ingredients, result=self.procedure['result'], **options)
         else:
-            self.result_ingredient = func(*ingredients, result=self.procedure['result'])
+            self.result_ingredient = func(self.dag, ingredients, result=self.procedure['result'])
 
         return self.result_ingredient
 
 
-class DAG():
+class DAG:
     """The DAG model.
 
     A dag (directed acyclic graph) is a collection of tasks with directional

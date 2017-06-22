@@ -4,7 +4,8 @@
 
 import pandas as pd
 import numpy as np
-from . ingredient import BaseIngredient, ProcedureResult
+from . dag import DAG
+from .ingredient import BaseIngredient, ProcedureResult
 from .helpers import read_opt, mkfunc, debuggable
 from .exceptions import ProcedureError
 import time
@@ -16,7 +17,7 @@ logger = logging.getLogger('Chef')
 
 
 @debuggable
-def translate_header(ingredient: BaseIngredient, result, dictionary) -> ProcedureResult:
+def translate_header(dag: DAG, ingredients: List[str], result, dictionary) -> ProcedureResult:
     """Translate column headers
 
     Procedure format:
@@ -32,8 +33,10 @@ def translate_header(ingredient: BaseIngredient, result, dictionary) -> Procedur
 
     Parameters
     ----------
-    ingredient : BaseIngredient
-        The ingredient to translate
+    dag : DAG
+        The procedure will run on
+    ingredients : list
+        A list of ingredient id to translate
     result : `str`
         The result ingredient id
 
@@ -46,9 +49,11 @@ def translate_header(ingredient: BaseIngredient, result, dictionary) -> Procedur
     --------
     :py:func:`ddf_utils.transformer.translate_header` : Related function in transformer module
     """
-    logger.info("translate_header: " + ingredient.ingred_id)
+    assert len(ingredients) == 1, "procedure only support 1 ingredient for now."
+    logger.info("translate_header: " + ingredients[0])
 
     rm = dictionary
+    ingredient = dag.get_node(ingredients[0]).evaluate()
     data = ingredient.copy_data()
 
     for k in list(data.keys()):
@@ -86,9 +91,9 @@ def translate_header(ingredient: BaseIngredient, result, dictionary) -> Procedur
 
 
 @debuggable
-def translate_column(ingredient: BaseIngredient, result, dictionary, column, *,
-                     target_column=None, not_found='drop', ambiguity='prompt',
-                     ignore_case=False) -> ProcedureResult:
+def translate_column(dag: DAG, ingredients: List[str], result, dictionary,
+                     column, *, target_column=None, not_found='drop',
+                     ambiguity='prompt', ignore_case=False) -> ProcedureResult:
     """Translate column values.
 
     Procedure format:
@@ -139,10 +144,12 @@ def translate_column(ingredient: BaseIngredient, result, dictionary, column, *,
     --------
     :py:func:`ddf_utils.transformer.translate_column` : related function in transformer module
     """
-    logger.info("translate_column: " + ingredient.ingred_id)
+    assert len(ingredients) == 1, "procedure only support 1 ingredient for now."
+    logger.info("translate_column: " + ingredients[0])
 
     from ..transformer import translate_column as tc
 
+    ingredient = dag.get_node(ingredients[0]).evaluate()
     di = ingredient.copy_data()
 
     # find out the type of dictionary.
@@ -152,7 +159,7 @@ def translate_column(ingredient: BaseIngredient, result, dictionary, column, *,
     else:
         if 'base' in dictionary.keys():
             dict_type = 'dataframe'
-            base = dictionary.pop('base')
+            base = dag.get_node(dictionary.pop('base')).evaluate()
             base_data = base.get_data()
             if len(base_data) > 1:
                 raise ProcedureError('only support ingredient with 1 item')
@@ -210,6 +217,7 @@ def merge(dag: DAG, ingredients: List[str], result, deep=False) -> ProcedureResu
     if true, overwrite is on the row level. If values
     (e.g. afr,2015-population_total) exists, it gets overwritten, if it doesn't it stays
     """
+    ingredients = [dag.get_node(x).evaluate() for x in ingredients]
     logger.info("merge: " + str([i.ingred_id for i in ingredients]))
 
     # assert that dtype and key are same in all dataframe
@@ -349,9 +357,10 @@ def filter_row(dag: DAG, ingredients: List[str], result, **options) -> Procedure
     keep_all_columns: bool
         don't drop any column if true
     """
+    assert len(ingredients) == 1, "procedure only support 1 ingredient for now."
+    logger.info("filter_row: " + ingredients[0])
 
-    logger.info("filter_row: " + ingredient.ingred_id)
-
+    ingredient = dag.get_node(ingredients[0]).evaluate()
     data = ingredient.get_data()
     dictionary = read_opt(options, 'dictionary', True)
     keep_all_columns = read_opt(options, 'keep_all_columns', False, False)
@@ -405,7 +414,7 @@ def filter_row(dag: DAG, ingredients: List[str], result, **options) -> Procedure
 
 
 @debuggable
-def filter_item(ingredient: BaseIngredient, result, items: list) -> ProcedureResult:
+def filter_item(dag: DAG, ingredients: List[str], result, items: list) -> ProcedureResult:
     """filter items from the ingredient data
 
     Procedure format:
@@ -424,8 +433,10 @@ def filter_item(ingredient: BaseIngredient, result, items: list) -> ProcedureRes
     items: list
         a list of items to filter from base ingredient
     """
-    logger.info("filter_item: " + ingredient.ingred_id)
+    assert len(ingredients) == 1, "procedure only support 1 ingredient for now."
+    logger.info("filter_item: " + ingredients[0])
 
+    ingredient = dag.get_node(ingredients[0]).evaluate()
     data = ingredient.get_data()
 
     try:
@@ -441,7 +452,7 @@ def filter_item(ingredient: BaseIngredient, result, items: list) -> ProcedureRes
 
 
 @debuggable
-def groupby(ingredient: BaseIngredient, result, **options) -> ProcedureResult:
+def groupby(dag: DAG, ingredients: List[str], result, **options) -> ProcedureResult:
     """group ingredient data by column(s) and run aggregate function
 
     .. highlight:: yaml
@@ -498,9 +509,10 @@ def groupby(ingredient: BaseIngredient, result, **options) -> ProcedureResult:
     - Any columns not mentioned in groupby or functions are dropped.
 
     """
+    assert len(ingredients) == 1, "procedure only support 1 ingredient for now."
+    logger.info("groupby: " + ingredients[0])
 
-    logger.info("groupby: " + ingredient.ingred_id)
-
+    ingredient = dag.get_node(ingredients[0]).evaluate()
     data = ingredient.get_data()
     by = options.pop('groupby')
     if 'insert_key' in options:
@@ -550,7 +562,7 @@ def groupby(ingredient: BaseIngredient, result, **options) -> ProcedureResult:
 
 
 @debuggable
-def window(ingredient: BaseIngredient, result, **options) -> ProcedureResult:
+def window(dag: DAG, ingredients: List[str], result, **options) -> ProcedureResult:
     """apply functions on a rolling window
 
     .. highlight:: yaml
@@ -615,8 +627,8 @@ def window(ingredient: BaseIngredient, result, **options) -> ProcedureResult:
     -----
     Any column not mentioned in the `aggregate` block will be dropped in the returned ingredient.
     """
-
-    logger.info('window: ' + ingredient.ingred_id)
+    assert len(ingredients) == 1, "procedure only support 1 ingredient for now."
+    logger.info('window: ' + ingredients[0])
 
     # reading options
     window = options.pop('window')
@@ -627,6 +639,7 @@ def window(ingredient: BaseIngredient, result, **options) -> ProcedureResult:
     min_periods = read_opt(window, 'min_periods', default=0)
     center = read_opt(window, 'center', default=False)
 
+    ingredient = dag.get_node(ingredients[0]).evaluate()
     data = ingredient.get_data()
     newdata = dict()
 
@@ -655,7 +668,7 @@ def window(ingredient: BaseIngredient, result, **options) -> ProcedureResult:
 
 
 @debuggable
-def run_op(ingredient: BaseIngredient, result, op) -> ProcedureResult:
+def run_op(dag: DAG, ingredients: List[str], result, op) -> ProcedureResult:
     """run math operation on each row of ingredient data.
 
     Procedure format:
@@ -692,6 +705,8 @@ def run_op(ingredient: BaseIngredient, result, op) -> ProcedureResult:
             new_col_name: "col_a + col_b"
     """
 
+    assert len(ingredients) == 1, "procedure only support 1 ingredient for now."
+    ingredient = dag.get_node(ingredients[0]).evaluate()
     assert ingredient.dtype == 'datapoints'
     logger.info("run_op: " + ingredient.ingred_id)
 
@@ -715,7 +730,7 @@ def run_op(ingredient: BaseIngredient, result, op) -> ProcedureResult:
 
 
 @debuggable
-def extract_concepts(*ingredients: List[BaseIngredient], result,
+def extract_concepts(dag: DAG, ingredients: List[str], result,
                      join=None, overwrite=None, include_keys=False) -> ProcedureResult:
     """extract concepts from other ingredients.
 
@@ -768,8 +783,11 @@ def extract_concepts(*ingredients: List[BaseIngredient], result,
       only keep concepts from ``ingredients``
 
     """
+
+    ingredients = [dag.get_node(x).evaluate() for x in ingredients]
+
     if join:
-        base = join['base']
+        base = dag.get_node(join['base']).evaluate()
         try:
             join_type = join['type']
         except KeyError:
@@ -810,7 +828,7 @@ def extract_concepts(*ingredients: List[BaseIngredient], result,
 
 
 @debuggable
-def trend_bridge(ingredient: BaseIngredient, bridge_start, bridge_end, bridge_length, bridge_on,
+def trend_bridge(dag: DAG, ingredients: List[str], bridge_start, bridge_end, bridge_length, bridge_on,
                  result, target_column=None) -> ProcedureResult:
     """run trend bridge on ingredients
 
@@ -862,6 +880,9 @@ def trend_bridge(ingredient: BaseIngredient, bridge_start, bridge_end, bridge_le
     """
     from ..transformer import trend_bridge as tb
 
+    assert len(ingredients) == 1, "procedure only support 1 ingredient for now."
+    ingredient = dag.get_node(ingredients[0]).evaluate()
+
     # check paramaters
     if ingredient is None:
         assert 'ingredient' in bridge_start.keys()
@@ -869,11 +890,11 @@ def trend_bridge(ingredient: BaseIngredient, bridge_start, bridge_end, bridge_le
 
     # get data for start and end
     if 'ingredient' in bridge_start.keys():
-        start = bridge_start['ingredient']
+        start = dag.get_node(bridge_start['ingredient']).evaluate()
     else:
         start = ingredient
     if 'ingredient' in bridge_end.keys():
-        end = bridge_end['ingredient']
+        end = dag.get_node(bridge_end['ingredient']).evaluate()
     else:
         end = ingredient
 
@@ -931,10 +952,13 @@ def trend_bridge(ingredient: BaseIngredient, bridge_start, bridge_end, bridge_le
 
 
 @debuggable
-def merge_entity(ingredient: BaseIngredient, dictionary,
+def merge_entity(dag: DAG, ingredients: List[str], dictionary,
                  target_column, result, merged='drop'):
     """merge entities"""
     from ..transformer import merge_keys
+
+    assert len(ingredients) == 1, "procedure only support 1 ingredient for now."
+    ingredient = dag.get_node(ingredients[0]).evaluate()
 
     data = ingredient.get_data()
 
@@ -947,10 +971,13 @@ def merge_entity(ingredient: BaseIngredient, dictionary,
 
 
 @debuggable
-def split_entity(ingredient: BaseIngredient, dictionary,
+def split_entity(dag: DAG, ingredients: List[str], dictionary,
                  target_column, result, splitted='drop'):
     """split entities"""
     from ..transformer import split_keys
+
+    assert len(ingredients) == 1, "procedure only support 1 ingredient for now."
+    ingredient = dag.get_node(ingredients[0]).evaluate()
 
     data = ingredient.get_data()
 
