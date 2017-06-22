@@ -172,59 +172,7 @@ def translate_column(ingredient: BaseIngredient, result, dictionary, column, *,
 
 
 @debuggable
-def copy(ingredient: BaseIngredient, result, dictionary: Dict) -> ProcedureResult:
-    """make copy of ingredient data columns, with new names.
-
-    Procedure format:
-
-    .. code-block:: yaml
-
-       procedure: copy
-       ingredients:  # list of ingredient id
-         - ingredient_id
-       result: str  # new ingledient id
-       options:
-       dictionary: dict  # old name -> new name mappings
-
-    An example of dictionary:
-
-    .. code-block:: yaml
-
-       dictionary:
-         col1: copy_1_1  # string
-         col2:  # list of string
-           - copy_2_1
-           - copy_2_2
-
-    where 'col1' and 'col2' should be existing columns in the input ingredient
-
-    Keyword Args
-    ------------
-    dictionary: dict
-        a dictionary of oldname -> newname mappings
-
-    """
-    logger.info("copy: " + ingredient.ingred_id)
-
-    data = ingredient.copy_data()
-
-    for k, v in dictionary.items():
-        if isinstance(v, str):  # value is str, means only make one copy
-            data[v] = data[k].rename(columns={k: v}).copy()
-        else:  # then it's a list, should make multiple copy
-            for n in v:
-                data[n] = data[k].rename(columns={k: n}).copy()
-
-    # usually the old ingredient won't be used after creating copy.
-    # just reset the data to save memory
-    ingredient.reset_data()
-    if not result:
-        result = ingredient.ingred_id + '_'
-    return ProcedureResult(result, ingredient.key, data=data)
-
-
-@debuggable
-def merge(*ingredients: List[BaseIngredient], result, deep=False) -> ProcedureResult:
+def merge(dag: DAG, ingredients: List[str], result, deep=False) -> ProcedureResult:
     """merge a list of ingredients
 
     The ingredients will be merged one by one in the order of how they are provided to this
@@ -362,26 +310,7 @@ def _merge_two(left: Dict[str, pd.DataFrame],
 
 
 @debuggable
-def identity(ingredient: BaseIngredient, result, copy=False) -> BaseIngredient:
-    """return the ingredient as is.
-
-    Keyword Args
-    ------------
-    copy: bool, optional
-        if copy is True, then treat all data as string. Default: False
-    """
-    if copy:
-        ingredient.data = ingredient.get_data(copy=True)
-    else:
-        ingredient.data = ingredient.get_data()
-
-    if result:
-        ingredient.ingred_id = result + '-identity'
-    return ingredient
-
-
-@debuggable
-def filter_row(ingredient: BaseIngredient, result, **options) -> ProcedureResult:
+def filter_row(dag: DAG, ingredients: List[str], result, **options) -> ProcedureResult:
     """filter an ingredient based on a set of options and return
     the result as new ingredient.
 
