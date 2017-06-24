@@ -10,6 +10,7 @@ from .helpers import read_opt, mkfunc, debuggable
 from .exceptions import ProcedureError
 import time
 from typing import List, Union, Dict, Optional
+import fnmatch
 
 import logging
 
@@ -368,13 +369,14 @@ def filter_row(dag: DAG, ingredients: List[str], result, **options) -> Procedure
     res = {}
 
     for k, v in dictionary.items():
-        from_name = v.pop('from')
-        df = data[from_name]
+        from_name_wildcard = v.pop('from')
         if len(v) == 0:
-            res[k] = df.rename(columns={from_name: k})
-            continue
-        queries = []
+            raise ProcedureError("no filter provided!")
 
+        # load all dataframes that match the wildcard indicator name
+        dfs = dict([(x, data[x]) for x in fnmatch.filter(data.keys(), from_name_wildcard)])
+        # build the query string
+        queries = []
         for col, val in v.items():
             if isinstance(val, list):
                 queries.append("{} in {}".format(col, val))
@@ -385,32 +387,17 @@ def filter_row(dag: DAG, ingredients: List[str], result, **options) -> Procedure
             # TODO: support more query methods.
             else:
                 raise ProcedureError("not supported in query: " + str(type(val)))
-
         query_string = ' and '.join(queries)
+        logger.debug("querying: {}".format(query_string))
 
-        df = df.query(query_string).copy()
-        df = df.rename(columns={from_name: k})
-        # drops all columns with unique contents. and update the key.
-        newkey = ingredient.key
-        keys = ingredient.key_to_list()
-        if not keep_all_columns:
-            for c in v.keys():
-                if ingredient.dtype == 'datapoints':
-                    if len(df[c].unique()) > 1:
-                        logger.debug("column {} have multiple values: {}".format(c, df[c].unique()))
-                    elif len(df[c].unique()) <= 1:
-                        df = df.drop(c, axis=1)
-                        if c in keys:
-                            keys.remove(c)
-                        newkey = ','.join(keys)
-                else:
-                    raise NotImplementedError("filtering concept/entity")
-
-        res[k] = df
+        for from_name, df in dfs.items():
+            df = df.query(query_string).copy()
+            new_name = k.format(concept=from_name)
+            res[new_name] = df.rename(columns={from_name: new_name})
 
     if not result:
         result = ingredient.ingred_id + '-filtered'
-    return ProcedureResult(result, newkey, data=res)
+    return ProcedureResult(result, ingredient.key, data=res)
 
 
 @debuggable

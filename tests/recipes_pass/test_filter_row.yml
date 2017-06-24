@@ -18,9 +18,11 @@ cooking:
                 imr_lower_afg:
                     from: imr_lower
                     country: afg
-                imr_upper_usa_1990s:
+                imr_upper_usa_swe_someyears:
                     from: imr_upper
-                    country: usa
+                    country:
+                        - usa
+                        - swe
                     year:
                         - 1990
                         - 1991
@@ -33,3 +35,19 @@ cooking:
                         - 1998
                         - 1999
                         - 2000
+        - procedure: filter_row
+          ingredients:
+              - res
+          options:
+              dictionary:
+                  "{concept}_1990only":
+                      from: imr*
+                      year:
+                          - 1990
+          result: res_2
+
+        - procedure: serve
+          ingredients:
+              - res
+              - res_2
+
