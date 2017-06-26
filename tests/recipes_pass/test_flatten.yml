@@ -1,0 +1,46 @@
+info:
+    id: test-flatten
+
+
+ingredients:
+    - id: cme-datapoints
+      dataset: ddf--cme
+      key: "country,year"
+      value: "*"
+
+
+
+cooking:
+    datapoints:
+        - procedure: filter_row
+          ingredients:
+              - cme-datapoints
+          result: filtered
+          options:
+              filters:
+                imr_lower:
+                    country: afg
+                    year:
+                        - 1990
+                        - 1991
+                imr_upper:
+                    country:
+                        - usa
+                        - swe
+                    year:
+                        - 1990
+                        - 1991
+                        - 1992
+                        - 1993
+                        - 1994
+                        - 1995
+                        - 1996
+        - procedure: flatten
+          ingredients:
+              - filtered
+          options:
+              dictionary:
+                  "imr*": "{concept}_{country}"
+              flatten_dimensions:
+                  - country
+          result: res

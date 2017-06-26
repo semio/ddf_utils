@@ -394,6 +394,43 @@ def filter_row(dag: DAG, ingredients: List[str], result, **options) -> Procedure
 
 
 @debuggable
+def flatten(dag: DAG, ingredients: List[str], result, **options) -> ProcedureResult:
+    """flattening some dimensions, create new indicators."""
+    assert len(ingredients) == 1, "procedure only support 1 ingredient for now."
+
+    ingredient = dag.get_node(ingredients[0]).evaluate()
+    data = ingredient.get_data()
+
+    logger.info("flatten: " + ingredients[0])
+
+    flatten_dimensions = options['flatten_dimensions']
+    if not isinstance(flatten_dimensions, list):
+	flatten_dimensions = [flatten_dimensions]
+    dictionary = options['dictionary']
+
+    newkey = [x for x in ingredient.key_to_list() if x not in flatten_dimensions]
+    newkey = ','.join(newkey)
+
+    res = {}
+    for from_name_tmpl, new_name_tmpl in dictionary.items():
+	dfs = dict([(x, data[x]) for x in fnmatch.filter(data.keys(), from_name_tmpl)])
+	for from_name, df in dfs.items():
+	    groups = df.groupby(flatten_dimensions).groups
+	    for g, idx in groups.items():
+		if not isinstance(g, tuple):
+		    g = [g]
+		df_ = df.loc[idx].copy()
+		tmpl_dict = dict(zip(flatten_dimensions, g))
+		tmpl_dict['concept'] = from_name
+		new_name = new_name_tmpl.format(**tmpl_dict)
+		if new_name in res.keys():
+		    raise ProcedureError("{} already created! check your name template pleasd.".format(new_name))
+		res[new_name] = df_.rename(columns={from_name: new_name}).drop(flatten_dimensions, axis=1)
+
+    return ProcedureResult(result, newkey, data=res)
+
+
+@debuggable
 def filter_item(dag: DAG, ingredients: List[str], result, items: list) -> ProcedureResult:
     """filter items from the ingredient data
 
