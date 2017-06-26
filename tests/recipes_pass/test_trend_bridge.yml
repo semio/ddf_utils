@@ -17,12 +17,18 @@ cooking:
           ingredients:
               - cme1
           options:
-              dictionary:
-                  new_col:
-                      from: imr_median
+              filters:
+                  imr_median:
                       year: [2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008,
                              2009, 2010, 2011, 2012, 2013]
           result: cme3
+        - procedure: translate_header
+          ingredients:
+              - cme3
+          options:
+              dictionary:
+                  imr_median: new_col
+          result: cme3_translated
         - procedure: trend_bridge
           ingredients:
               - cme1
@@ -30,7 +36,7 @@ cooking:
               bridge_start:
                   column: imr_lower
               bridge_end:
-                  ingredient: cme3
+                  ingredient: cme3_translated
                   column: new_col
               bridge_length: 10
               bridge_on: year

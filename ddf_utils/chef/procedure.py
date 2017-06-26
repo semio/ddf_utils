@@ -363,19 +363,14 @@ def filter_row(dag: DAG, ingredients: List[str], result, **options) -> Procedure
 
     ingredient = dag.get_node(ingredients[0]).evaluate()
     data = ingredient.get_data()
-    dictionary = read_opt(options, 'dictionary', True)
-    keep_all_columns = read_opt(options, 'keep_all_columns', False, False)
+    filters = read_opt(options, 'filters', True)
 
     res = {}
 
-    for k, v in dictionary.items():
-        from_name_wildcard = v.pop('from')
-        if len(v) == 0:
-            raise ProcedureError("no filter provided!")
+    for k, v in filters.items():
 
-        # load all dataframes that match the wildcard indicator name
-        dfs = dict([(x, data[x]) for x in fnmatch.filter(data.keys(), from_name_wildcard)])
-        # build the query string
+	df = data[k].copy()
+
         queries = []
         for col, val in v.items():
             if isinstance(val, list):
@@ -390,10 +385,8 @@ def filter_row(dag: DAG, ingredients: List[str], result, **options) -> Procedure
         query_string = ' and '.join(queries)
         logger.debug("querying: {}".format(query_string))
 
-        for from_name, df in dfs.items():
-            df = df.query(query_string).copy()
-            new_name = k.format(concept=from_name)
-            res[new_name] = df.rename(columns={from_name: new_name})
+	df = df.query(query_string).copy()
+	res[k] = df.query(query_string).copy()
 
     if not result:
         result = ingredient.ingred_id + '-filtered'
