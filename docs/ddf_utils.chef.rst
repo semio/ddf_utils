@@ -4,6 +4,14 @@ ddf_utils.chef package
 Submodules
 ----------
 
+ddf_utils.chef.api module
+-------------------------
+
+.. automodule:: ddf_utils.chef.api
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 ddf_utils.chef.cook module
 --------------------------
 
@@ -29,7 +37,7 @@ ddf_utils.chef.procedure module
     :show-inheritance:
 
 ddf_utils.chef.dag module
--------------------------------
+-------------------------
 
 .. automodule:: ddf_utils.chef.dag
     :members:
@@ -37,7 +45,7 @@ ddf_utils.chef.dag module
     :show-inheritance:
 
 ddf_utils.chef.helpers module
--------------------------------
+-----------------------------
 
 .. automodule:: ddf_utils.chef.helpers
     :members:

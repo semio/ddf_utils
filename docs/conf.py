@@ -28,7 +28,7 @@ try:
 except ImportError:
     import mock
 
-MOCK_MODULES = ['numpy', 'pandas']
+MOCK_MODULES = ['numpy', 'pandas', 'dask', 'dask.dataframe']
 for mod_name in MOCK_MODULES:
     sys.modules[mod_name] = mock.Mock()
 
