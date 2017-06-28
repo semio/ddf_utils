@@ -23,7 +23,9 @@ requirements = [
     'daff',
     'tabulate',
     'dask[dataframe]',
-    'tqdm'
+    'tqdm',
+    'ruamel.yaml',
+    'graphviz'
 ]
 
 setup(
