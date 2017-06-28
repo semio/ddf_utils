@@ -37,14 +37,11 @@ def translate_header(dag: DAG, ingredients: List[str], result, dictionary) -> Pr
     dag : DAG
         The procedure will run on
     ingredients : list
-        A list of ingredient id to translate
+        A list of ingredient id in the dag to translate
+    dictionary : dict
+        A dictionary for name mapping
     result : `str`
         The result ingredient id
-
-    Keyword Args
-    ------------
-    dictionary: dict
-        a dictionary of oldname -> newname mappings
 
     See Also
     --------
@@ -104,10 +101,10 @@ def translate_column(dag: DAG, ingredients: List[str], result, dictionary,
        procedure: translate_column
        ingredients:  # list of ingredient id
          - ingredient_id
-       result: str  # new ingledient id
+       result: str  # new ingredient id
        options:
          column: str  # the column to be translated
-         target_column: str  # optinoal, the target column to store the translated data
+         target_column: str  # optional, the target column to store the translated data
          not_found: {'drop', 'include', 'error'}  # optional, the behavior when there is values not
                                                   # found in the mapping dictionary, default is 'drop'
          ambiguity: {'prompt', 'skip', 'error'}  # optional, the behavior when there is ambiguity
@@ -124,6 +121,13 @@ def translate_column(dag: DAG, ingredients: List[str], result, dictionary,
          base: str  # ingredient name
          key: str or list  # the columns to be the keys of the dictionary, can accept a list
          value: str  # the column to be the values of the the dictionary, must be one column
+
+    Parameters
+    ----------
+    dag : DAG
+        The procedure will run on
+    ingredients : list
+        A list of ingredient id in the dag to translate
 
     Keyword Args
     ------------
@@ -202,7 +206,9 @@ def merge(dag: DAG, ingredients: List[str], result, deep=False) -> ProcedureResu
 
     Parameters
     ----------
-    BaseIngredient
+    dag: DAG
+        a DAG instance
+    ingredients:
         Any numbers of ingredients to be merged
 
     Keyword Args
@@ -330,33 +336,34 @@ def filter_row(dag: DAG, ingredients: List[str], result, **options) -> Procedure
        procedure: filter_row
        ingredients:  # list of ingredient id
          - ingredient_id
-       result: str  # new ingledient id
+       result: str  # new ingredient id
        options:
-         dictionary: dict  # filter definition block
+         filters: dict  # filter definition block
 
     A dictionary should be provided in options with the following format:
 
     .. code-block:: yaml
 
-        dictionary:
-          new_key_in_new_ingredient:
-            from: old_key_in_old_ingredient
-            filter_col_1: filter_val_1
-            filter_col_2: filter_val_2
+        filters:
+            concept_1:
+                filter_col_1: filter_val_1
+                filter_col_2: filter_val_2
 
-    See a detail example in this `github issue <https://github.com/semio/ddf_utils/issues/2#issuecomment-254132615>`_
+    See a detail example in this `recipe
+    <https://github.com/semio/ddf_utils/blob/dev/tests/recipes_pass/test_filter_row.yml>`_
 
     Parameters
     ----------
-    ingredient: BaseIngredient
+    dag: DAG
+        the DAG instance
+    ingredients:
+        list of ingredient id in the DAG
     result: `str`
 
     Keyword Args
     ------------
-    dictionary: dict
+    filters: dict
         The filter description dictionary
-    keep_all_columns: bool
-        don't drop any column if true
     """
     assert len(ingredients) == 1, "procedure only support 1 ingredient for now."
     logger.info("filter_row: " + ingredients[0])
@@ -395,7 +402,26 @@ def filter_row(dag: DAG, ingredients: List[str], result, **options) -> Procedure
 
 @debuggable
 def flatten(dag: DAG, ingredients: List[str], result, **options) -> ProcedureResult:
-    """flattening some dimensions, create new indicators."""
+    """flattening some dimensions, create new indicators.
+
+    procedure format:
+
+    .. code-block:: yaml
+
+       procedure: flatten
+       ingredients:
+           - ingredient_to_run
+       options:
+           flatten_dimensions:
+               - entity_1
+               - entity_2
+           dictionary:
+               "concept_name_wildcard": "new_concept_name_template"
+
+    The `dictionary` can have multiple entries, for each entry the concepts that matches the key in wildcard
+    matching will be flatten to the value, which should be a template string. The variables for the templates
+    will be provided with a dictionary contains `concept`, and all columns from `flatten_dimensions` as keys.
+    """
     assert len(ingredients) == 1, "procedure only support 1 ingredient for now."
 
     ingredient = dag.get_node(ingredients[0]).evaluate()
@@ -424,7 +450,7 @@ def flatten(dag: DAG, ingredients: List[str], result, **options) -> ProcedureRes
                 tmpl_dict['concept'] = from_name
                 new_name = new_name_tmpl.format(**tmpl_dict)
                 if new_name in res.keys():
-                    raise ProcedureError("{} already created! check your name template pleasd.".format(new_name))
+                    raise ProcedureError("{} already created! check your name template please.".format(new_name))
                 res[new_name] = df_.rename(columns={from_name: new_name}).drop(flatten_dimensions, axis=1)
 
     return ProcedureResult(result, newkey, data=res)
@@ -441,7 +467,7 @@ def filter_item(dag: DAG, ingredients: List[str], result, items: list) -> Proced
        procedure: filter_item
        ingredients:  # list of ingredient id
          - ingredient_id
-       result: str  # new ingledient id
+       result: str  # new ingredient id
        options:
          items: list  # a list of items should be in the result ingredient
 
@@ -506,6 +532,8 @@ def groupby(dag: DAG, ingredients: List[str], result, **options) -> ProcedureRes
             param1: foo
             param2: baz
 
+    wildcard is supported in the column names. So `aggreagte: {"*": "sum"} will run on every indicator in
+    the ingredient
 
     Keyword Args
     ------------
@@ -873,7 +901,9 @@ def trend_bridge(dag: DAG, ingredients: List[str], bridge_start, bridge_end, bri
 
     Parameters
     ----------
-    ingredient : BaseIngredient
+    dag: DAG
+        A DAG instance
+    ingredients : list
         The input ingredient. The bridged result will be merged in to this ingredient. If this is
         None, then the only the bridged result will be returned
     bridge_start : dict
@@ -898,13 +928,14 @@ def trend_bridge(dag: DAG, ingredients: List[str], bridge_start, bridge_end, bri
     """
     from ..transformer import trend_bridge as tb
 
-    assert len(ingredients) == 1, "procedure only support 1 ingredient for now."
-    ingredient = dag.get_node(ingredients[0]).evaluate()
-
-    # check paramaters
-    if ingredient is None:
+    # check parameters
+    if ingredients is None:
         assert 'ingredient' in bridge_start.keys()
         assert 'ingredient' in bridge_end.keys()
+        ingredient = None
+    else:
+        assert len(ingredients) == 1, "procedure only support 1 ingredient for now."
+        ingredient = dag.get_node(ingredients[0]).evaluate()
 
     # get data for start and end
     if 'ingredient' in bridge_start.keys():
@@ -983,7 +1014,7 @@ def merge_entity(dag: DAG, ingredients: List[str], dictionary,
     res_data = dict()
     for k, df in data.items():
         res_data[k] = merge_keys(df.set_index(ingredient.key_to_list()),
-                                 dictionary, merged).reset_index()
+                                 dictionary, target_column=target_column, merged=merged).reset_index()
 
     return ProcedureResult(result, ingredient.key, res_data)
 
