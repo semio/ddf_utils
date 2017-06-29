@@ -204,7 +204,7 @@ class Ingredient(BaseIngredient):
         value:  # only include concepts listed here
           - concept_1
           - concept_2
-        filter:  # select rows by column values
+        row_filter:  # select rows by column values
           geo:  # only keep datapoint where `geo` is in [swe, usa, chn]
             - swe
             - usa
@@ -248,7 +248,7 @@ class Ingredient(BaseIngredient):
         - dataset
         - key
         - value
-        - filter (optional)
+        - row_filter (optional)
         """
         ingred_id = read_opt(data, 'id', required=True)
         ddf_id = read_opt(data, 'dataset', required=True)
