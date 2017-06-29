@@ -250,14 +250,11 @@ class Ingredient(BaseIngredient):
         - value
         - filter (optional)
         """
-        ingred_id = data['id']
-        ddf_id = data['dataset']
-        key = data['key']
-        values = data['value']
-        if 'row_filter' in data.keys():
-            row_filter = data['row_filter']
-        else:
-            row_filter = None
+        ingred_id = read_opt(data, 'id', required=True)
+        ddf_id = read_opt(data, 'dataset', required=True)
+        key = read_opt(data, 'key', required=True)
+        values = read_opt(data, 'value', required=True)
+        row_filter = read_opt(data, 'row_filter', required=False, default=None)
 
         return cls(ingred_id, ddf_id, key, values, row_filter)
 
