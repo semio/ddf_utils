@@ -48,11 +48,11 @@ def translate_header(dag: DAG, ingredients: List[str], result, dictionary) -> Pr
     :py:func:`ddf_utils.transformer.translate_header` : Related function in transformer module
     """
     assert len(ingredients) == 1, "procedure only support 1 ingredient for now."
+    ingredient = dag.get_node(ingredients[0]).evaluate()
     logger.info("translate_header: " + ingredients[0])
 
-    rm = dictionary
-    ingredient = dag.get_node(ingredients[0]).evaluate()
     data = ingredient.copy_data()
+    rm = dictionary
 
     for k in list(data.keys()):
         df_new = data[k].rename(columns=rm).copy()
@@ -149,12 +149,12 @@ def translate_column(dag: DAG, ingredients: List[str], result, dictionary,
     --------
     :py:func:`ddf_utils.transformer.translate_column` : related function in transformer module
     """
-    assert len(ingredients) == 1, "procedure only support 1 ingredient for now."
-    logger.info("translate_column: " + ingredients[0])
-
     from ..transformer import translate_column as tc
+    assert len(ingredients) == 1, "procedure only support 1 ingredient for now."
 
     ingredient = dag.get_node(ingredients[0]).evaluate()
+    logger.info("translate_column: " + ingredients[0])
+
     di = ingredient.copy_data()
 
     # find out the type of dictionary.
@@ -188,7 +188,7 @@ def merge(dag: DAG, ingredients: List[str], result, deep=False) -> ProcedureResu
     """merge a list of ingredients
 
     The ingredients will be merged one by one in the order of how they are provided to this
-    function. Later ones will overwrite the pervious merged results.
+    function. Later ones will overwrite the previous merged results.
 
     Procedure format:
 
@@ -366,9 +366,9 @@ def filter_row(dag: DAG, ingredients: List[str], result, **options) -> Procedure
         The filter description dictionary
     """
     assert len(ingredients) == 1, "procedure only support 1 ingredient for now."
+    ingredient = dag.get_node(ingredients[0]).evaluate()
     logger.info("filter_row: " + ingredients[0])
 
-    ingredient = dag.get_node(ingredients[0]).evaluate()
     data = ingredient.get_data()
     filters = read_opt(options, 'filters', True)
 
@@ -418,9 +418,9 @@ def flatten(dag: DAG, ingredients: List[str], result, **options) -> ProcedureRes
            dictionary:
                "concept_name_wildcard": "new_concept_name_template"
 
-    The `dictionary` can have multiple entries, for each entry the concepts that matches the key in wildcard
+    The ``dictionary`` can have multiple entries, for each entry the concepts that matches the key in wildcard
     matching will be flatten to the value, which should be a template string. The variables for the templates
-    will be provided with a dictionary contains `concept`, and all columns from `flatten_dimensions` as keys.
+    will be provided with a dictionary contains ``concept``, and all columns from ``flatten_dimensions`` as keys.
     """
     assert len(ingredients) == 1, "procedure only support 1 ingredient for now."
 
@@ -477,9 +477,9 @@ def filter_item(dag: DAG, ingredients: List[str], result, items: list) -> Proced
         a list of items to filter from base ingredient
     """
     assert len(ingredients) == 1, "procedure only support 1 ingredient for now."
+    ingredient = dag.get_node(ingredients[0]).evaluate()
     logger.info("filter_item: " + ingredients[0])
 
-    ingredient = dag.get_node(ingredients[0]).evaluate()
     data = ingredient.get_data()
 
     try:
@@ -507,9 +507,9 @@ def groupby(dag: DAG, ingredients: List[str], result, **options) -> ProcedureRes
        procedure: groupby
        ingredients:  # list of ingredient id
          - ingredient_id
-       result: str  # new ingledient id
+       result: str  # new ingredient id
        options:
-         groupby: str or list  # colunm(s) to group
+         groupby: str or list  # column(s) to group
          aggregate: dict  # function block
          transform: dict  # function block
          filter: dict  # function block
@@ -532,7 +532,7 @@ def groupby(dag: DAG, ingredients: List[str], result, **options) -> ProcedureRes
             param1: foo
             param2: baz
 
-    wildcard is supported in the column names. So `aggreagte: {"*": "sum"} will run on every indicator in
+    wildcard is supported in the column names. So ``aggreagte: {"*": "sum"}`` will run on every indicator in
     the ingredient
 
     Keyword Args
@@ -674,6 +674,7 @@ def window(dag: DAG, ingredients: List[str], result, **options) -> ProcedureResu
     Any column not mentioned in the `aggregate` block will be dropped in the returned ingredient.
     """
     assert len(ingredients) == 1, "procedure only support 1 ingredient for now."
+    ingredient = dag.get_node(ingredients[0]).evaluate()
     logger.info('window: ' + ingredients[0])
 
     # reading options
@@ -685,7 +686,6 @@ def window(dag: DAG, ingredients: List[str], result, **options) -> ProcedureResu
     min_periods = read_opt(window, 'min_periods', default=0)
     center = read_opt(window, 'center', default=False)
 
-    ingredient = dag.get_node(ingredients[0]).evaluate()
     data = ingredient.get_data()
     newdata = dict()
 
@@ -831,6 +831,7 @@ def extract_concepts(dag: DAG, ingredients: List[str], result,
     """
 
     ingredients = [dag.get_node(x).evaluate() for x in ingredients]
+    logger.info("extract concepts: {}".format([x.ingred_id for x in ingredients]))
 
     if join:
         base = dag.get_node(join['base']).evaluate()
@@ -949,6 +950,8 @@ def trend_bridge(dag: DAG, ingredients: List[str], bridge_start, bridge_end, bri
 
     assert start.dtype == 'datapoints'
     assert end.dtype == 'datapoints'
+
+    logger.info("trend_bridge: {} and {}".format(start.ingred_id, end.ingred_id))
 
     if target_column is None:
         target_column = bridge_start['column']
