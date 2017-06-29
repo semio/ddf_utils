@@ -166,12 +166,14 @@ class BaseIngredient(object):
         ----------------
         digits : int
             how many digits to keep at most.
+        path : `str`
+            which sub-folder under the outpath to save the output files
 
         """
         logging.info('serving ingredient: ' + self.ingred_id)
         # create outpath if not exists
-        if 'sub_folder' in options:
-            sub_folder = options.pop('sub_folder')
+        if 'path' in options:
+            sub_folder = options.pop('path')
             assert not os.path.isabs(sub_folder)  # sub folder should not be abspath
             outpath = os.path.join(outpath, sub_folder)
         os.makedirs(outpath, exist_ok=True)

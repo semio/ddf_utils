@@ -46,3 +46,4 @@ serving:
     - id: grouped-datapoints-2
       options:
           digits: 2
+          path: test_serving
