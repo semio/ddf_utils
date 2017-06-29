@@ -56,7 +56,7 @@ def read_opt(options, key, required=False, default=None):
     if key in options.keys():
         return options.pop(key)
     if required:
-        raise KeyError('field {} is mandantory'.format(key))
+        raise KeyError('Field "{}" is mandatory. Please provide this field in the options.'.format(key))
     return default
 
 

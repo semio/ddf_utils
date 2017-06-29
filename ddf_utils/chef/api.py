@@ -4,10 +4,12 @@
 
 import os
 import sys
+import logging
 from ddf_utils.chef.dag import DAG, ProcedureNode, IngredientNode
 from ddf_utils.chef.ingredient import Ingredient
 from ddf_utils import config as cfg
 from ddf_utils.chef.cook import build_recipe, build_dag, get_dishes
+from ddf_utils.chef import procedure as pc
 import ruamel.yaml as yaml
 from collections import Mapping
 from graphviz import Digraph
@@ -62,6 +64,13 @@ class Chef:
                                   'options': procedure.get('options', None)}) for x in ingredients]
             return self
 
+        # check if procedure is supported
+        try:
+            getattr(pc, procedure)
+        except AttributeError:
+            logging.warning("{} is not a valid procedure, please double check "
+                            "or register new procedure".format(procedure))
+
         def add_dependency(dag, upstream_id, downstream):
             if not dag.has_node(upstream_id):
                 upstream = ProcedureNode(upstream_id, None, dag)
@@ -70,7 +79,6 @@ class Chef:
                 upstream = dag.get_node(ing)
             dag.add_dependency(upstream.node_id, downstream.node_id)
 
-        assert result is not None
         if options is None:
             pdict = {'procedure': procedure, 'ingredients': ingredients, 'result': result}
         else:
@@ -95,7 +103,6 @@ class Chef:
     @staticmethod
     def register_procedure(func):
         assert callable(func)
-        from ddf_utils.chef import procedure as pc
         setattr(pc, func.__name__, func)
 
     @property

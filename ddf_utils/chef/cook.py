@@ -273,7 +273,7 @@ def get_dishes(recipe):
                     except KeyError:
                         dishes.append({'id': i, 'options': dict()})
         if not serve_proc_exists:
-            logger.warning('no serve procedure found, serving the last result: ' + p['result'])
+            logger.warning('no serve procedure found, will serve the last result: ' + p['result'])
             dishes.append({'id': p['result'], 'options': dict()})
 
     return dishes

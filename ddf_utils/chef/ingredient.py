@@ -256,6 +256,9 @@ class Ingredient(BaseIngredient):
         values = read_opt(data, 'value', required=True)
         row_filter = read_opt(data, 'row_filter', required=False, default=None)
 
+        if len(data.keys()) > 0:
+            logging.warning("Ignoring following keys: {}".format(list(data.keys())))
+
         return cls(ingred_id, ddf_id, key, values, row_filter)
 
     @property
