@@ -134,7 +134,7 @@ class ProcedureNode(BaseNode):
         # procedure: module.function
         try:
             func = get_procedure(self.procedure['procedure'], self.chef.config.get('procedure_dir', None))
-        except (AttributeError, ModuleNotFoundError):
+        except (AttributeError, ImportError, ModuleNotFoundError):
             raise ProcedureError("No such procedure: " + self.procedure['procedure'])
         except TypeError:
             raise ProcedureError("Procedure Error: " + str(self.node_id))
