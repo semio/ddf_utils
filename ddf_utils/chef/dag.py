@@ -8,9 +8,10 @@ on eval.
 """
 
 from .exceptions import ProcedureError, ChefRuntimeError
+from .helpers import get_procedure
 
 
-class BaseNode():
+class BaseNode:
     """The base node which IngredientNode and ProcedureNode inherit from
 
     Parameters
@@ -20,9 +21,10 @@ class BaseNode():
     dag : DAG
         the `DAG` object the node is in
     """
-    def __init__(self, node_id, dag):
+    def __init__(self, node_id, chef):
         self.node_id = node_id
-        self.dag = dag
+        self.chef = chef
+        self.dag = chef.dag
         self._upstream_list = list()
         self._downstream_list = list()
 
@@ -97,8 +99,8 @@ class IngredientNode(BaseNode):
     ingredient : Ingredient
         the ingredient in this node
     """
-    def __init__(self, node_id, ingredient, dag):
-        super(IngredientNode, self).__init__(node_id, dag)
+    def __init__(self, node_id, ingredient, chef):
+        super(IngredientNode, self).__init__(node_id, chef)
         self.ingredient = ingredient
 
     def evaluate(self):
@@ -117,30 +119,32 @@ class ProcedureNode(BaseNode):
     procedure : dict
         the procedure dictionary
     """
-    def __init__(self, node_id, procedure, dag):
-        super(ProcedureNode, self).__init__(node_id, dag)
+    def __init__(self, node_id, procedure, chef):
+        super(ProcedureNode, self).__init__(node_id, chef)
         self.procedure = procedure
         self.result_ingredient = None
 
     def evaluate(self):
-        from . import procedure as pc
         if self.result_ingredient:
             return self.result_ingredient
 
         # get the procedure function, raise error if procedure not supported
+        # supported format:
+        # procedure: sub/dir/module.function
+        # procedure: module.function
         try:
-            func = getattr(pc, self.procedure['procedure'])
-        except AttributeError:
-            raise ProcedureError("Not supported: " + self.procedure['procedure'])
+            func = get_procedure(self.procedure['procedure'], self.chef.config.get('procedure_dir', None))
+        except (AttributeError, ModuleNotFoundError):
+            raise ProcedureError("No such procedure: " + self.procedure['procedure'])
         except TypeError:
             raise ProcedureError("Procedure Error: " + str(self.node_id))
 
         ingredients = self.procedure['ingredients']
         if 'options' in self.procedure.keys():
             options = self.procedure['options']
-            self.result_ingredient = func(self.dag, ingredients, result=self.procedure['result'], **options)
+            self.result_ingredient = func(self.chef, ingredients, result=self.procedure['result'], **options)
         else:
-            self.result_ingredient = func(self.dag, ingredients, result=self.procedure['result'])
+            self.result_ingredient = func(self.chef, ingredients, result=self.procedure['result'])
 
         return self.result_ingredient
 

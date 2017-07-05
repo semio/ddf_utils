@@ -5,6 +5,7 @@
 import pandas as pd
 import numpy as np
 from . dag import DAG
+from ddf_utils.chef.cook import Chef
 from .ingredient import BaseIngredient, ProcedureResult
 from .helpers import read_opt, mkfunc, debuggable
 from .exceptions import ProcedureError
@@ -18,7 +19,7 @@ logger = logging.getLogger('Chef')
 
 
 @debuggable
-def translate_header(dag: DAG, ingredients: List[str], result, dictionary) -> ProcedureResult:
+def translate_header(chef: Chef, ingredients: List[str], result, dictionary) -> ProcedureResult:
     """Translate column headers
 
     Procedure format:
@@ -48,7 +49,7 @@ def translate_header(dag: DAG, ingredients: List[str], result, dictionary) -> Pr
     :py:func:`ddf_utils.transformer.translate_header` : Related function in transformer module
     """
     assert len(ingredients) == 1, "procedure only support 1 ingredient for now."
-    ingredient = dag.get_node(ingredients[0]).evaluate()
+    ingredient = chef.dag.get_node(ingredients[0]).evaluate()
     logger.info("translate_header: " + ingredients[0])
 
     data = ingredient.copy_data()
@@ -85,11 +86,11 @@ def translate_header(dag: DAG, ingredients: List[str], result, dictionary) -> Pr
 
     if not result:
         result = ingredient.ingred_id + '-translated'
-    return ProcedureResult(result, newkey, data=data)
+    return ProcedureResult(chef, result, newkey, data=data)
 
 
 @debuggable
-def translate_column(dag: DAG, ingredients: List[str], result, dictionary,
+def translate_column(chef: Chef, ingredients: List[str], result, dictionary,
                      column, *, target_column=None, not_found='drop',
                      ambiguity='prompt', ignore_case=False) -> ProcedureResult:
     """Translate column values.
@@ -152,7 +153,7 @@ def translate_column(dag: DAG, ingredients: List[str], result, dictionary,
     from ..transformer import translate_column as tc
     assert len(ingredients) == 1, "procedure only support 1 ingredient for now."
 
-    ingredient = dag.get_node(ingredients[0]).evaluate()
+    ingredient = chef.dag.get_node(ingredients[0]).evaluate()
     logger.info("translate_column: " + ingredients[0])
 
     di = ingredient.copy_data()
@@ -164,7 +165,7 @@ def translate_column(dag: DAG, ingredients: List[str], result, dictionary,
     else:
         if 'base' in dictionary.keys():
             dict_type = 'dataframe'
-            base = dag.get_node(dictionary.pop('base')).evaluate()
+            base = chef.dag.get_node(dictionary.pop('base')).evaluate()
             base_data = base.get_data()
             if len(base_data) > 1:
                 raise ProcedureError('only support ingredient with 1 item')
@@ -180,11 +181,11 @@ def translate_column(dag: DAG, ingredients: List[str], result, dictionary,
 
     if not result:
         result = ingredient.ingred_id + '-translated'
-    return ProcedureResult(result, ingredient.key, data=di)
+    return ProcedureResult(chef, result, ingredient.key, data=di)
 
 
 @debuggable
-def merge(dag: DAG, ingredients: List[str], result, deep=False) -> ProcedureResult:
+def merge(chef: Chef, ingredients: List[str], result, deep=False) -> ProcedureResult:
     """merge a list of ingredients
 
     The ingredients will be merged one by one in the order of how they are provided to this
@@ -224,7 +225,7 @@ def merge(dag: DAG, ingredients: List[str], result, deep=False) -> ProcedureResu
     if true, overwrite is on the row level. If values
     (e.g. afr,2015-population_total) exists, it gets overwritten, if it doesn't it stays
     """
-    ingredients = [dag.get_node(x).evaluate() for x in ingredients]
+    ingredients = [chef.dag.get_node(x).evaluate() for x in ingredients]
     logger.info("merge: " + str([i.ingred_id for i in ingredients]))
 
     # assert that dtype and key are same in all dataframe
@@ -261,7 +262,7 @@ def merge(dag: DAG, ingredients: List[str], result, deep=False) -> ProcedureResu
     if not result:
         result = 'all_data_merged_'+str(int(time.time() * 1000))
 
-    return ProcedureResult(result, newkey, data=res_all)
+    return ProcedureResult(chef, result, newkey, data=res_all)
 
 
 def __get_last_item(ser):
@@ -325,7 +326,7 @@ def _merge_two(left: Dict[str, pd.DataFrame],
 
 
 @debuggable
-def filter_row(dag: DAG, ingredients: List[str], result, **options) -> ProcedureResult:
+def filter_row(chef: Chef, ingredients: List[str], result, **options) -> ProcedureResult:
     """filter an ingredient based on a set of options and return
     the result as new ingredient.
 
@@ -366,7 +367,7 @@ def filter_row(dag: DAG, ingredients: List[str], result, **options) -> Procedure
         The filter description dictionary
     """
     assert len(ingredients) == 1, "procedure only support 1 ingredient for now."
-    ingredient = dag.get_node(ingredients[0]).evaluate()
+    ingredient = chef.dag.get_node(ingredients[0]).evaluate()
     logger.info("filter_row: " + ingredients[0])
 
     data = ingredient.get_data()
@@ -397,11 +398,11 @@ def filter_row(dag: DAG, ingredients: List[str], result, **options) -> Procedure
 
     if not result:
         result = ingredient.ingred_id + '-filtered'
-    return ProcedureResult(result, ingredient.key, data=res)
+    return ProcedureResult(chef, result, ingredient.key, data=res)
 
 
 @debuggable
-def flatten(dag: DAG, ingredients: List[str], result, **options) -> ProcedureResult:
+def flatten(chef: Chef, ingredients: List[str], result, **options) -> ProcedureResult:
     """flattening some dimensions, create new indicators.
 
     procedure format:
@@ -424,7 +425,7 @@ def flatten(dag: DAG, ingredients: List[str], result, **options) -> ProcedureRes
     """
     assert len(ingredients) == 1, "procedure only support 1 ingredient for now."
 
-    ingredient = dag.get_node(ingredients[0]).evaluate()
+    ingredient = chef.dag.get_node(ingredients[0]).evaluate()
     data = ingredient.get_data()
 
     logger.info("flatten: " + ingredients[0])
@@ -453,11 +454,11 @@ def flatten(dag: DAG, ingredients: List[str], result, **options) -> ProcedureRes
                     raise ProcedureError("{} already created! check your name template please.".format(new_name))
                 res[new_name] = df_.rename(columns={from_name: new_name}).drop(flatten_dimensions, axis=1)
 
-    return ProcedureResult(result, newkey, data=res)
+    return ProcedureResult(chef, result, newkey, data=res)
 
 
 @debuggable
-def filter_item(dag: DAG, ingredients: List[str], result, items: list) -> ProcedureResult:
+def filter_item(chef: Chef, ingredients: List[str], result, items: list) -> ProcedureResult:
     """filter items from the ingredient data
 
     Procedure format:
@@ -477,7 +478,7 @@ def filter_item(dag: DAG, ingredients: List[str], result, items: list) -> Proced
         a list of items to filter from base ingredient
     """
     assert len(ingredients) == 1, "procedure only support 1 ingredient for now."
-    ingredient = dag.get_node(ingredients[0]).evaluate()
+    ingredient = chef.dag.get_node(ingredients[0]).evaluate()
     logger.info("filter_item: " + ingredients[0])
 
     data = ingredient.get_data()
@@ -491,11 +492,11 @@ def filter_item(dag: DAG, ingredients: List[str], result, items: list) -> Proced
     if not result:
         result = ingredient.ingred_id
 
-    return ProcedureResult(result, ingredient.key, data=data)
+    return ProcedureResult(chef, result, ingredient.key, data=data)
 
 
 @debuggable
-def groupby(dag: DAG, ingredients: List[str], result, **options) -> ProcedureResult:
+def groupby(chef: Chef, ingredients: List[str], result, **options) -> ProcedureResult:
     """group ingredient data by column(s) and run aggregate function
 
     .. highlight:: yaml
@@ -557,7 +558,7 @@ def groupby(dag: DAG, ingredients: List[str], result, **options) -> ProcedureRes
     assert len(ingredients) == 1, "procedure only support 1 ingredient for now."
     logger.info("groupby: " + ingredients[0])
 
-    ingredient = dag.get_node(ingredients[0]).evaluate()
+    ingredient = chef.dag.get_node(ingredients[0]).evaluate()
     data = ingredient.get_data()
     by = options.pop('groupby')
     if 'insert_key' in options:
@@ -604,11 +605,11 @@ def groupby(dag: DAG, ingredients: List[str], result, **options) -> ProcedureRes
                 newdata[k][col] = val
                 newkey = newkey+','+col
 
-    return ProcedureResult(result, newkey, data=newdata)
+    return ProcedureResult(chef, result, newkey, data=newdata)
 
 
 @debuggable
-def window(dag: DAG, ingredients: List[str], result, **options) -> ProcedureResult:
+def window(chef: Chef, ingredients: List[str], result, **options) -> ProcedureResult:
     """apply functions on a rolling window
 
     .. highlight:: yaml
@@ -674,7 +675,7 @@ def window(dag: DAG, ingredients: List[str], result, **options) -> ProcedureResu
     Any column not mentioned in the `aggregate` block will be dropped in the returned ingredient.
     """
     assert len(ingredients) == 1, "procedure only support 1 ingredient for now."
-    ingredient = dag.get_node(ingredients[0]).evaluate()
+    ingredient = chef.dag.get_node(ingredients[0]).evaluate()
     logger.info('window: ' + ingredients[0])
 
     # reading options
@@ -710,11 +711,11 @@ def window(dag: DAG, ingredients: List[str], result, **options) -> ProcedureResu
             newdata[k] = (df.groupby(level=levels, group_keys=False)
                           .rolling(window=size, min_periods=min_periods, center=center)
                           .agg(f).reset_index().dropna())
-    return ProcedureResult(result, ingredient.key, newdata)
+    return ProcedureResult(chef, result, ingredient.key, newdata)
 
 
 @debuggable
-def run_op(dag: DAG, ingredients: List[str], result, op) -> ProcedureResult:
+def run_op(chef: Chef, ingredients: List[str], result, op) -> ProcedureResult:
     """run math operation on each row of ingredient data.
 
     Procedure format:
@@ -752,7 +753,7 @@ def run_op(dag: DAG, ingredients: List[str], result, op) -> ProcedureResult:
     """
 
     assert len(ingredients) == 1, "procedure only support 1 ingredient for now."
-    ingredient = dag.get_node(ingredients[0]).evaluate()
+    ingredient = chef.dag.get_node(ingredients[0]).evaluate()
     assert ingredient.dtype == 'datapoints'
     logger.info("run_op: " + ingredient.ingred_id)
 
@@ -772,11 +773,11 @@ def run_op(dag: DAG, ingredients: List[str], result, op) -> ProcedureResult:
 
     if not result:
         result = ingredient.ingred_id + '-op'
-    return ProcedureResult(result, ingredient.key, data=data)
+    return ProcedureResult(chef, result, ingredient.key, data=data)
 
 
 @debuggable
-def extract_concepts(dag: DAG, ingredients: List[str], result,
+def extract_concepts(chef: Chef, ingredients: List[str], result,
                      join=None, overwrite=None, include_keys=False) -> ProcedureResult:
     """extract concepts from other ingredients.
 
@@ -830,11 +831,11 @@ def extract_concepts(dag: DAG, ingredients: List[str], result,
 
     """
 
-    ingredients = [dag.get_node(x).evaluate() for x in ingredients]
+    ingredients = [chef.dag.get_node(x).evaluate() for x in ingredients]
     logger.info("extract concepts: {}".format([x.ingred_id for x in ingredients]))
 
     if join:
-        base = dag.get_node(join['base']).evaluate()
+        base = chef.dag.get_node(join['base']).evaluate()
         try:
             join_type = join['type']
         except KeyError:
@@ -871,11 +872,11 @@ def extract_concepts(dag: DAG, ingredients: List[str], result,
             concepts.ix[k, 'concept_type'] = v
     if not result:
         result = 'concepts_extracted'
-    return ProcedureResult(result, 'concept', data={'concepts': concepts.reset_index()})
+    return ProcedureResult(chef, result, 'concept', data={'concepts': concepts.reset_index()})
 
 
 @debuggable
-def trend_bridge(dag: DAG, ingredients: List[str], bridge_start, bridge_end, bridge_length, bridge_on,
+def trend_bridge(chef: Chef, ingredients: List[str], bridge_start, bridge_end, bridge_length, bridge_on,
                  result, target_column=None) -> ProcedureResult:
     """run trend bridge on ingredients
 
@@ -936,15 +937,15 @@ def trend_bridge(dag: DAG, ingredients: List[str], bridge_start, bridge_end, bri
         ingredient = None
     else:
         assert len(ingredients) == 1, "procedure only support 1 ingredient for now."
-        ingredient = dag.get_node(ingredients[0]).evaluate()
+        ingredient = chef.dag.get_node(ingredients[0]).evaluate()
 
     # get data for start and end
     if 'ingredient' in bridge_start.keys():
-        start = dag.get_node(bridge_start['ingredient']).evaluate()
+        start = chef.dag.get_node(bridge_start['ingredient']).evaluate()
     else:
         start = ingredient
     if 'ingredient' in bridge_end.keys():
-        end = dag.get_node(bridge_end['ingredient']).evaluate()
+        end = chef.dag.get_node(bridge_end['ingredient']).evaluate()
     else:
         end = ingredient
 
@@ -998,19 +999,19 @@ def trend_bridge(dag: DAG, ingredients: List[str], bridge_start, bridge_end, bri
     if ingredient is not None:
         merged = _merge_two(ingredient.get_data(), {target_column: result_data},
                             start.key_to_list(), 'datapoints')
-        return ProcedureResult(result, start.key, merged)
+        return ProcedureResult(chef, result, start.key, merged)
     else:
-        return ProcedureResult(result, start.key, {target_column: result_data})
+        return ProcedureResult(chef, result, start.key, {target_column: result_data})
 
 
 @debuggable
-def merge_entity(dag: DAG, ingredients: List[str], dictionary,
+def merge_entity(chef: Chef, ingredients: List[str], dictionary,
                  target_column, result, merged='drop'):
     """merge entities"""
     from ..transformer import merge_keys
 
     assert len(ingredients) == 1, "procedure only support 1 ingredient for now."
-    ingredient = dag.get_node(ingredients[0]).evaluate()
+    ingredient = chef.dag.get_node(ingredients[0]).evaluate()
 
     data = ingredient.get_data()
 
@@ -1019,17 +1020,17 @@ def merge_entity(dag: DAG, ingredients: List[str], dictionary,
         res_data[k] = merge_keys(df.set_index(ingredient.key_to_list()),
                                  dictionary, target_column=target_column, merged=merged).reset_index()
 
-    return ProcedureResult(result, ingredient.key, res_data)
+    return ProcedureResult(chef, result, ingredient.key, res_data)
 
 
 @debuggable
-def split_entity(dag: DAG, ingredients: List[str], dictionary,
+def split_entity(chef: Chef, ingredients: List[str], dictionary,
                  target_column, result, splitted='drop'):
     """split entities"""
     from ..transformer import split_keys
 
     assert len(ingredients) == 1, "procedure only support 1 ingredient for now."
-    ingredient = dag.get_node(ingredients[0]).evaluate()
+    ingredient = chef.dag.get_node(ingredients[0]).evaluate()
 
     data = ingredient.get_data()
 
@@ -1038,4 +1039,4 @@ def split_entity(dag: DAG, ingredients: List[str], dictionary,
         res_data[k] = split_keys(df.set_index(ingredient.key_to_list()),
                                  target_column, dictionary, splitted).reset_index()
 
-    return ProcedureResult(result, ingredient.key, res_data)
+    return ProcedureResult(chef, result, ingredient.key, res_data)

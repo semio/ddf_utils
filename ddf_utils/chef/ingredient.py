@@ -8,12 +8,14 @@ from .helpers import read_opt
 import os
 import logging
 
-from ..ddf_reader import DDF
+from ddf_utils.ddf_reader import DDF
+from ddf_utils.model.package import Datapackage
 from .exceptions import IngredientError
 
 
 class BaseIngredient(object):
-    def __init__(self, ingred_id, key, data=None):
+    def __init__(self, chef, ingred_id, key, data=None):
+        self.chef = chef
         self.ingred_id = ingred_id
         self.key = key
         self.data = data
@@ -230,16 +232,16 @@ class Ingredient(BaseIngredient):
         read in and return the ingredient data
 
     """
-    def __init__(self, ingred_id,
+    def __init__(self, chef, ingred_id,
                  ddf_id=None, key=None, values=None, row_filter=None, data=None):
-        super(Ingredient, self).__init__(ingred_id, key, data)
+        super(Ingredient, self).__init__(chef, ingred_id, key, data)
         self.values = values
         self.row_filter = row_filter
         self._ddf_id = ddf_id
         self._ddf = None
 
     @classmethod
-    def from_dict(cls, data):
+    def from_dict(cls, chef, data):
         """create an instance by a dictionary
 
         The dictionary should provide following keys:
@@ -259,7 +261,7 @@ class Ingredient(BaseIngredient):
         if len(data.keys()) > 0:
             logging.warning("Ignoring following keys: {}".format(list(data.keys())))
 
-        return cls(ingred_id, ddf_id, key, values, row_filter)
+        return cls(chef, ingred_id, ddf_id, key, values, row_filter)
 
     @property
     def ddf(self):
@@ -268,61 +270,48 @@ class Ingredient(BaseIngredient):
             return self._ddf
         else:
             if self._ddf_id:
-                self._ddf = DDF(self._ddf_id)
+                self._ddf = Datapackage(os.path.join(self.chef.config['ddf_dir'], self._ddf_id)).load()
+                # self._ddf = DDF(os.path.join(self.chef.config['ddf_dir'], self._ddf_id))
                 return self._ddf
         return None
 
     @property
-    def ddf_path(self):
+    def ddf_id(self):
+        return self._ddf_id
+
+    @property
+    def dataset_path(self):
         """The path to the dataset"""
-        return self.ddf.dataset_path
+        return self._ddf.base_dir
 
     def __repr__(self):
         return '<Ingredient: {}>'.format(self.ingred_id)
 
-    def _get_data_datapoint(self, copy):
+    def _get_data_datapoint(self):
         data = dict()
         keys = self.key_to_list()
-        if self.values == '*':  # get all datapoints for the key
-            values = []
-            for k, v in self.ddf.get_datapoint_files().items():
-                for pkeys in v.keys():
-                    if set(keys) == set(pkeys):
-                        values.append(k)
-        else:
-            values = self.values
 
-        if not values or len(values) == 0:
+        if self.values == '*':
+            for i in self.ddf.indicators(by=keys):
+                data[i] = self.ddf.get_datapoint_df(i, primary_key=keys)
+        else:
+            for i in self.ddf.indicators(by=keys):
+                if i in self.values:
+                    data[i] = self.ddf.get_datapoint_df(i, primary_key=keys)
+
+        if len(data) == 0:
             raise IngredientError('no datapoint found for the ingredient: ' + self.ingred_id)
 
-        for v in values:
-            data[v] = self.ddf.get_datapoint_df(v, keys)
         return data
 
-    def _get_data_entities(self, copy):
-        # TODO: values should always be '*'?
-        if copy:
-            ent = self.ddf.get_entities(dtype=str)
-        else:
-            ent = self.ddf.get_entities()
-        conc = self.ddf.get_concepts()
-        values = []
+    def _get_data_entities(self):
+        return {self.key: self.ddf.get_entity(self.key)}
 
-        if conc.ix[self.key, 'concept_type'] == 'entity_domain':
-            if 'domain' in conc.columns and len(conc[conc['domain'] == self.key]) > 0:
-                [values.append(i) for i in conc[conc['domain'] == self.key].index]
-            else:
-                values.append(self.key)
-        else:
-            values.append(self.key)
-
-        return dict((k, ent[k]) for k in values)
-
-    def _get_data_concepts(self, copy):
+    def _get_data_concepts(self):
         if self.values == '*':
-            return {'concepts': self.ddf.get_concepts()}
+            return {'concepts': self.ddf.concepts}
         else:
-            return {'concepts': self.ddf.get_concepts()[self.values]}
+            return {'concepts': self.ddf.concepts[self.values]}
 
     def get_data(self, copy=False, key_as_index=False):
         """read in and return the ingredient data
@@ -346,14 +335,17 @@ class Ingredient(BaseIngredient):
             return df
 
         if self.data is None:
-            data = funcs[self.dtype](copy)
+            data = funcs[self.dtype]()
+            if self.dtype == 'datapoints':
+                for k, v in data.items():
+                    data[k] = v.compute()
+
             for k, v in data.items():
                 if self.row_filter:
                     # index_cols = data[k].index.names
                     # data[k] = self.filter_row(data[k].reset_index()).set_index(index_cols)
-                    data[k] = filter_row(data[k].reset_index())
-                else:
-                    data[k] = data[k].reset_index()
+                    data[k] = filter_row(data[k])
+
             self.data = data
         if key_as_index:
             # TODO set index when requiring data
@@ -362,8 +354,8 @@ class Ingredient(BaseIngredient):
 
 
 class ProcedureResult(BaseIngredient):
-    def __init__(self, ingred_id, key, data):
-        super(ProcedureResult, self).__init__(ingred_id, key, data)
+    def __init__(self, chef, ingred_id, key, data):
+        super(ProcedureResult, self).__init__(chef, ingred_id, key, data)
 
     def __repr__(self):
         return '<ProcedureResult: {}>'.format(self.ingred_id)
