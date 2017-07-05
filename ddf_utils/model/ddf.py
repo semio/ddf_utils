@@ -97,10 +97,21 @@ class Dataset:
 
         base_dir, dp = load_datapackage_json(datapackage)
 
+        # concepts
         for r in dp['resources']:
             pkey = r['schema']['primaryKey']
             if pkey == 'concept':
                 concepts.append(pd.read_csv(osp.join(base_dir, r['path'])))
+
+        concepts = pd.concat(concepts)
+
+        time_concepts = concepts[concepts['concept_type'] == 'time'].concept.values
+
+        # others
+        for r in dp['resources']:
+            pkey = r['schema']['primaryKey']
+            if pkey == 'concept':
+                continue
             elif isinstance(pkey, str):
                 entities_.append(
                     {
@@ -109,7 +120,9 @@ class Dataset:
                     })
             else:
                 if not no_datapoints:
-                    dtypes = dict([(x, 'str') for x in pkey])  # FIXME: time should not be string
+                    dtypes = dict([(x, 'str') for x in pkey])
+                    for tc in time_concepts:
+                        dtypes[tc] = int  # TODO: maybe there are other time format?
                     df = dd.read_csv(os.path.join(base_dir, r['path']), dtype=dtypes)
                     try:
                         indicator_name = list(set(df.columns) - set(pkey))[0]
@@ -132,9 +145,6 @@ class Dataset:
             for i, v in datapoints.items():
                 for k, l in v.items():
                     v[k] = dd.multi.concat(l)
-
-        # concepts
-        concepts = pd.concat(concepts)
 
         # entities
         if 'entity_set' not in concepts.concept_type.values:  # only domains
@@ -177,10 +187,6 @@ class Dataset:
         return self._concepts
 
     @property
-    def indicators(self):
-        return list(self._datapoints.keys())
-
-    @property
     def datapoints(self):
         return self._datapoints
 
@@ -199,6 +205,18 @@ class Dataset:
         else:
             return False
 
+    def indicators(self, by=None):
+        if not by:
+            return list(self._datapoints.keys())
+
+        res = list()
+        by = set(by)
+        for i, kvs in self._datapoints.items():
+            for k, v in kvs.items():
+                if by == set(k):
+                    res.append(i)
+        return res
+
     def get_entity(self, ent):
         conc = self.concepts.set_index('concept')
         if conc.loc[ent, 'concept_type'] == 'entity_domain':
@@ -206,7 +224,9 @@ class Dataset:
         else:
             domain = conc.loc[ent, 'domain']
             ent_domain = self.entities[domain]
-            return ent_domain[ent_domain['is--'+ent] == True].dropna(axis=1, how='all')
+            return (ent_domain[ent_domain['is--'+ent] == True]
+                    .dropna(axis=1, how='all')
+                    .rename(columns={domain: ent}))
 
     def get_datapoint_df(self, indicator, primary_key=None):
         if primary_key:
