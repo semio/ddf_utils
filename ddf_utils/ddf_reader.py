@@ -20,7 +20,7 @@ class DDF():
     def __init__(self, ddf_id, no_check_valid=False):
         if os.path.isabs(ddf_id):
             self.dataset_path = ddf_id
-            self.ddf_id = os.path.dirname(ddf_id)
+            self.ddf_id = os.path.basename(ddf_id)
         else:
             self.dataset_path = os.path.join(config.DDF_SEARCH_PATH, ddf_id)
             self.ddf_id = ddf_id
