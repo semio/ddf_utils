@@ -23,8 +23,8 @@ def test_chef_api_call():
 
     from ddf_utils.chef.ingredient import ProcedureResult
 
-    def multiply_1000(dag, ingredients, result, **options):
-        ingredients = [dag.get_node(x) for x in ingredients]
+    def multiply_1000(chef, ingredients, result, **options):
+        ingredients = [chef.dag.get_node(x) for x in ingredients]
         ingredient = ingredients[0].evaluate()
 
         new_data = dict()
@@ -33,7 +33,7 @@ def test_chef_api_call():
             df_[k] = df_[k] * 1000
             new_data[k] = df_
 
-        return ProcedureResult(result, ingredient.key, new_data)
+        return ProcedureResult(chef, result, ingredient.key, new_data)
 
     chef.register_procedure(multiply_1000)
     chef.add_procedure(collection='datapoints',
@@ -50,6 +50,6 @@ def test_chef_api_call():
 
 def test_chef_load_recipe():
     recipe_file = os.path.join(wd, 'recipes_pass/test_flatten.yml')
-    chef = Chef.from_recipe(recipe_file)
+    chef = Chef.from_recipe(recipe_file, ddf_dir=os.path.join(wd, 'datasets'))
     res = chef.run()
     assert 1

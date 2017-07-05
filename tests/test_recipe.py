@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+import sys
 import tempfile
 import shutil
 import logging
@@ -9,8 +10,8 @@ import pytest
 import glob
 
 # from ddf_utils.chef import *
-import ddf_utils.chef as chef
-from ddf_utils.chef.exceptions import ChefRuntimeError
+from ddf_utils.chef.api import Chef
+from ddf_utils.chef.exceptions import ChefRuntimeError, ProcedureError
 
 
 wd = os.path.dirname(__file__)
@@ -32,27 +33,30 @@ def recipe_file_fail(request):
 
 def test_run_recipe_pass(recipe_file_pass, to_disk=False):
     print('running test: ' + recipe_file_pass)
-    recipe = chef.build_recipe(recipe_file_pass)
+    chef = Chef.from_recipe(recipe_file_pass,
+                            ddf_dir=os.path.join(wd, 'datasets'),
+                            procedure_dir=os.path.join(wd, 'recipes_pass/procedures'))
     if to_disk:
         outdir = tempfile.mkdtemp()
         print('tmpdir: ' + outdir)
     else:
         outdir = None
 
-    chef.run_recipe(recipe, to_disk, outdir)
+    chef.run(to_disk, outdir)
 
 
 def test_run_recipe_fail(recipe_file_fail, to_disk=False):
     print('running test: ' + recipe_file_fail)
-    recipe = chef.build_recipe(recipe_file_fail)
+    chef = Chef.from_recipe(recipe_file_fail,
+                            ddf_dir=os.path.join(wd, 'datasets'))
     if to_disk:
         outdir = tempfile.mkdtemp()
         print('tmpdir: ' + outdir)
     else:
         outdir = None
     try:
-        chef.run_recipe(recipe, to_disk, outdir)
-    except ChefRuntimeError:
+        chef.run(to_disk, outdir)
+    except (ChefRuntimeError, ProcedureError):
         return
     else:
         raise Exception('test should fail')
