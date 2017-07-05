@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 
+import os
+import sys
 from functools import wraps, partial
 from .. import config
 from .. import ops
-import os
 import logging
 import click
+import hashlib
 import numpy as np
 
 
@@ -77,6 +79,39 @@ def mkfunc(options):
     else:
         func = getattr(ops, options.pop('function'))
         return partial(func, **options)
+
+
+def get_procedure(procedure, base_dir):
+    """return a procedure function from the procedure name
+
+    Parameters
+    ----------
+    procedure : `str`
+        the procedure to get, supported formats are
+        1. procedure: sub/dir/module.function
+        2. procedure: module.function
+    base_dir : `str`
+        the path for searching procedures
+    """
+    import ddf_utils.chef.procedure as pc
+    if '.' in procedure:
+        assert 'base_dir' is not None, "please set procedure_dir in config if you have custom procedures"
+        sys.path.insert(0, base_dir)
+        module_name, func_name = procedure.split('.')
+        _mod = __import__(module_name)
+        func = getattr(_mod, func_name)
+        sys.path.remove(base_dir)
+    else:
+        func = getattr(pc, procedure)
+
+    return func
+
+
+def gen_result_sym(procedure, ingredients, options):
+    """generate symbol for a procedure dictionary"""
+    first = procedure.split('_')[0]
+    last = hashlib.sha256((str(ingredients) + str(options)).encode('utf8')).hexdigest()[:6]
+    return '{}_{}'.format(first, last)
 
 
 # below functions are not used in ddf_utils yet, but may be useful.
