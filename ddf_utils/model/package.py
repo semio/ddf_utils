@@ -10,6 +10,7 @@ from .ddf import Dataset
 from itertools import product
 from .utils import load_datapackage_json
 from tqdm import tqdm
+from collections import Mapping
 
 import logging
 
@@ -20,11 +21,15 @@ class Datapackage:
 
         datapackage: can be a path to datapackage file or dictioinary in datapackage format
         """
-        if isinstance(datapackage, dict):
+        if isinstance(datapackage, Mapping):
             self.base_dir = base_dir
             self.datapackage = datapackage
         elif isinstance(datapackage, str):
             self.base_dir, self.datapackage = load_datapackage_json(datapackage)
+
+    @property
+    def name(self):
+        return self.datapackage['name']
 
     @property
     def resources(self):
@@ -43,7 +48,7 @@ class Datapackage:
     def datapoints_resources(self):
         return [r for r in self.resources if isinstance(r['schema']['primaryKey'], list)]
 
-    def load(self, **kwargs):
+    def load(self, **kwargs) -> Dataset:
         return Dataset.from_ddfcsv(self.base_dir, **kwargs)
 
     def generate_ddfschema(self):
