@@ -138,7 +138,7 @@ class Chef:
         # check if procedure is supported
         try:
             get_procedure(procedure, self.config.get('procedure_dir', None))
-        except (AttributeError, ModuleNotFoundError):
+        except (AttributeError, ImportError):
             logging.warning("{} is not a valid procedure, please double check "
                             "or register new procedure".format(procedure))
 
