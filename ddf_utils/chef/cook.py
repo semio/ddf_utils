@@ -103,7 +103,7 @@ class Chef:
             for p in ps:
                 try:
                     get_procedure(p['procedure'], self.config.get('procedure_dir', None))
-                except (AttributeError, ImportError, ModuleNotFoundError):
+                except (AttributeError, ImportError):
                     logger.warning("{} is not a valid procedure, please double check "
                                    "or register new procedure".format(p['procedure']))
                     raise ChefRuntimeError('procedures not ready')
