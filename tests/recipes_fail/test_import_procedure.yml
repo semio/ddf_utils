@@ -1,0 +1,15 @@
+info:
+    id: test_import_procedure
+
+ingredients:
+    - id: cme-datapoints
+      dataset: ddf--cme
+      key: country, year
+      value: "*"
+
+cooking:
+    datapoints:
+        - procedure: nonexists.notreal
+          ingredients:
+              - cme-datapoints
+          result: result

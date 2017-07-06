@@ -48,7 +48,9 @@ def test_run_recipe_pass(recipe_file_pass, to_disk=False):
 def test_run_recipe_fail(recipe_file_fail, to_disk=False):
     print('running test: ' + recipe_file_fail)
     chef = Chef.from_recipe(recipe_file_fail,
-                            ddf_dir=os.path.join(wd, 'datasets'))
+                            ddf_dir=os.path.join(wd, 'datasets'),
+                            procedure_dir=os.path.join(wd, 'recipes_fail'))
+
     if to_disk:
         outdir = tempfile.mkdtemp()
         print('tmpdir: ' + outdir)
