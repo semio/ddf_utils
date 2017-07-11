@@ -63,7 +63,7 @@ class Dataset:
                     docs.append('{}{}:'.format(' ' * indent, domain))
                     sets = concs[concs.domain == domain]
                     for i in sets.index:
-                        vals = self.get_entity(i)[domain].head(20).values
+                        vals = self.get_entity(i)[i].head(20).values
                         docs.append('{}- {}{}{}'.format(' ' * indent * 2,
                                                         maybe_truncate(i, 10, True),
                                                         ' ' * indent * 2,
@@ -112,13 +112,14 @@ class Dataset:
             pkey = r['schema']['primaryKey']
             if pkey == 'concept':
                 continue
-            elif isinstance(pkey, str):
+            elif isinstance(pkey, str):  # entities
                 entities_.append(
                     {
-                        "data": pd.read_csv(osp.join(base_dir, r['path']), dtype={pkey: str}),
+                        # "data": pd.read_csv(osp.join(base_dir, r['path']), dtype={pkey: str}),
+                        "data": pd.read_csv(osp.join(base_dir, r['path']), dtype=str),  # read all as string
                         "key": pkey
                     })
-            else:
+            else:  # datapoints
                 if not no_datapoints:
                     dtypes = dict([(x, 'str') for x in pkey])
                     for tc in time_concepts:
@@ -170,7 +171,8 @@ class Dataset:
                         for i in df.index:
                             if not pd.isnull(df.loc[i, c]):
                                 if not pd.isnull(df.loc[i, c_orig+'_y']):
-                                    assert df.loc[i, c] == df.loc[i, c_orig+'_y'], "different values for same cell"
+                                    assert df.loc[i, c] == df.loc[i, c_orig+'_y'], \
+                                        "different values for same cell:{}, {}".format(i, c)
                                     df.loc[i, c_orig] = df.loc[i, c]
                                 else:
                                     df.loc[i, c_orig] = df.loc[i, c]
@@ -224,7 +226,7 @@ class Dataset:
         else:
             domain = conc.loc[ent, 'domain']
             ent_domain = self.entities[domain]
-            return (ent_domain[ent_domain['is--'+ent] == True]
+            return (ent_domain[ent_domain['is--'+ent] == 'TRUE']
                     .dropna(axis=1, how='all')
                     .rename(columns={domain: ent}))
 

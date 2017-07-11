@@ -16,7 +16,7 @@ import logging
 
 
 class Datapackage:
-    def __init__(self, datapackage, base_dir='./'):
+    def __init__(self, datapackage, base_dir='./', dataset=None):
         """create datapackage object from datapackage descriptor.
 
         datapackage: can be a path to datapackage file or dictioinary in datapackage format
@@ -26,6 +26,8 @@ class Datapackage:
             self.datapackage = datapackage
         elif isinstance(datapackage, str):
             self.base_dir, self.datapackage = load_datapackage_json(datapackage)
+
+        self.dataset = dataset
 
     @property
     def name(self):
@@ -49,6 +51,7 @@ class Datapackage:
         return [r for r in self.resources if isinstance(r['schema']['primaryKey'], list)]
 
     def load(self, **kwargs) -> Dataset:
+        logging.info("loading dataset from disk: " + self.name)
         return Dataset.from_ddfcsv(self.base_dir, **kwargs)
 
     def generate_ddfschema(self):
@@ -66,7 +69,7 @@ class Datapackage:
                 sets.add(domain)
                 for c in df.columns:
                     if c.startswith('is--'):
-                        if row[c] == True:
+                        if row[c] == "TRUE":
                             sets.add(c[4:])
                 entity_value_cache[domain][row[domain]] = tuple(sets)
 

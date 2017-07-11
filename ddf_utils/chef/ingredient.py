@@ -3,6 +3,7 @@
 """main ingredient class"""
 
 import numpy as np
+import pandas as pd
 from ..str import format_float_digits
 from .helpers import read_opt
 import os
@@ -62,26 +63,45 @@ class BaseIngredient(object):
         assert isinstance(data, dict)
         for k, df in data.items():
             # change boolean into string
+            # and remove tailing spaces
             for i, v in df.dtypes.iteritems():
                 if v == 'bool':
                     df[i] = df[i].map(lambda x: str(x).upper())
+                if v == 'object':
+                    df[i] = df[i].str.strip()
             path = os.path.join(outpath, 'ddf--concepts.csv')
             df.to_csv(path, index=False, encoding='utf8')
 
     def _serve_entities(self, outpath, **options):
         data = self.copy_data()
         assert isinstance(data, dict)
+        sets = []
+        no_keep_sets = options.get('no_keep_sets', False)
         for k, df in data.items():
             # change boolean into string
-            for i, v in df.dtypes.iteritems():
-                if v == 'bool':
-                    df[i] = df[i].map(lambda x: str(x).upper())
+            # TODO: not only for is-- headers
+            for c in df.columns:
+                if df.dtypes[c] == 'bool':
+                    df[c] = df[c].map(lambda x: str(x).upper() if not pd.isnull(x) else x)
+                if c.startswith('is--'):
+                    if no_keep_sets:
+                        df = df.drop(c, axis=1)
+                    else:
+                        sets.append(c[4:])
+                        df[c] = df[c].map(lambda x: str(x).upper() if not pd.isnull(x) else x)
             domain = self.key
             if k == domain:
-                path = os.path.join(outpath, 'ddf--entities--{}.csv'.format(k))
+                if len(sets) == 0:
+                    path = os.path.join(outpath, 'ddf--entities--{}.csv'.format(k))
+                    df.to_csv(path, index=False, encoding='utf8')
+                else:
+                    for s in sets:
+                        path = os.path.join(outpath, 'ddf--entities--{}--{}.csv'.format(k, s))
+                        col = 'is--'+s
+                        df[df[col]=='TRUE'].dropna(axis=1, how='all').to_csv(path, index=False, encoding='utf8')
             else:
                 path = os.path.join(outpath, 'ddf--entities--{}--{}.csv'.format(domain, k))
-            df.to_csv(path, index=False, encoding='utf8')
+                df.to_csv(path, index=False, encoding='utf8')
 
     def _serve_datapoints(self, outpath, **options):
         data = self.copy_data()
@@ -206,7 +226,7 @@ class Ingredient(BaseIngredient):
         value:  # only include concepts listed here
           - concept_1
           - concept_2
-        row_filter:  # select rows by column values
+        filter:  # select rows by column values
           geo:  # only keep datapoint where `geo` is in [swe, usa, chn]
             - swe
             - usa
@@ -223,7 +243,7 @@ class Ingredient(BaseIngredient):
     value : `list`
         concept filter applied to the dataset. if `value` == "*", all concept of
         the dataset will be in the ingredient
-    row_filter : `dict`
+    filter : `dict`
         row filter applied to the dataset
 
     Methods
@@ -250,13 +270,13 @@ class Ingredient(BaseIngredient):
         - dataset
         - key
         - value
-        - row_filter (optional)
+        - filter (optional)
         """
         ingred_id = read_opt(data, 'id', required=True)
         ddf_id = read_opt(data, 'dataset', required=True)
         key = read_opt(data, 'key', required=True)
         values = read_opt(data, 'value', required=True)
-        row_filter = read_opt(data, 'row_filter', required=False, default=None)
+        row_filter = read_opt(data, 'filter', required=False, default=None)
 
         if len(data.keys()) > 0:
             logging.warning("Ignoring following keys: {}".format(list(data.keys())))
@@ -270,7 +290,11 @@ class Ingredient(BaseIngredient):
             return self._ddf
         else:
             if self._ddf_id:
-                self._ddf = Datapackage(os.path.join(self.chef.config['ddf_dir'], self._ddf_id)).load()
+                if self._ddf_id not in self.chef.ddf_object_cache.keys():
+                    self._ddf = Datapackage(os.path.join(self.chef.config['ddf_dir'], self._ddf_id)).load()
+                    self.chef.ddf_object_cache[self._ddf_id] = self._ddf
+                else:
+                    self._ddf = self.chef.ddf_object_cache[self._ddf_id]
                 # self._ddf = DDF(os.path.join(self.chef.config['ddf_dir'], self._ddf_id))
                 return self._ddf
         return None

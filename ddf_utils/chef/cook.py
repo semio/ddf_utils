@@ -45,6 +45,7 @@ class Chef:
             self.serving = serving
 
         self._recipe = recipe
+        self.ddf_object_cache = {}
 
     @classmethod
     def from_recipe(cls, recipe_file, **config):
@@ -141,6 +142,8 @@ class Chef:
         except (AttributeError, ImportError):
             logging.warning("{} is not a valid procedure, please double check "
                             "or register new procedure".format(procedure))
+
+        assert result is not None, "result is mandatory for {}".format(procedure)
 
         def add_dependency(dag, upstream_id, downstream):
             if not dag.has_node(upstream_id):
