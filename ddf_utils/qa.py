@@ -22,8 +22,8 @@ def compare_with_func(dataset1, dataset2, fns=['rval', 'avg_pct_chg'],
                       indicators=None, key=None):
     """compare 2 datasets with functions"""
 
-    indicators1 = [(k, v) for k, v in _gen_indicator_key_list(dataset1.indicator_dict)]
-    indicators2 = [(k, v) for k, v in _gen_indicator_key_list(dataset2.indicator_dict)]
+    indicators1 = [(k, tuple(sorted(v))) for k, v in _gen_indicator_key_list(dataset1.datapoints)]
+    indicators2 = [(k, tuple(sorted(v))) for k, v in _gen_indicator_key_list(dataset2.datapoints)]
 
     # check availability for indicators
     s1 = set(indicators1)
@@ -33,13 +33,13 @@ def compare_with_func(dataset1, dataset2, fns=['rval', 'avg_pct_chg'],
     diff21 = s2 - s1
 
     if len(diff12) > 0:
-        msg = ["below indicators are noly available in {}".format(dataset1.ddf_id)]
+        msg = ["below indicators are only available in {}".format(dataset1.attrs['name'])]
         for item in diff12:
             msg.append("- {} by {}".format(item[0], ', '.join(item[1])))
         msg.append('')
         logger.warning('\n'.join(msg))
     if len(diff21) > 0:
-        msg = ["below indicators are noly available in {}".format(dataset2.ddf_id)]
+        msg = ["below indicators are only available in {}".format(dataset2.attrs['name'])]
         for item in diff21:
             msg.append("- {} by {}".format(item[0], ', '.join(item[1])))
         msg.append('')
@@ -53,16 +53,17 @@ def compare_with_func(dataset1, dataset2, fns=['rval', 'avg_pct_chg'],
         # FIXME: support multiple indicator in one file
         # like the indicators in ddf--sodertorn--stockholm_lan_basomrade
         try:
-            i1 = dataset1.get_datapoint_df(indicator, k)
+            i1 = dataset1.get_datapoint_df(indicator, k).compute().set_index(list(k))
         except KeyError:
             raise
         try:
-            i2 = dataset2.get_datapoint_df(indicator, k)
+            i2 = dataset2.get_datapoint_df(indicator, k).compute().set_index(list(k))
         except KeyError:
             raise
-        i1 = i1.rename(columns={indicator: 'old'})
-        i2 = i2.rename(columns={indicator: 'new'})
-        comp = pd.concat([i1, i2], axis=1)
+        # i1 = i1.rename(columns={indicator: 'old'})
+        # i2 = i2.rename(columns={indicator: 'new'})
+        # comp = pd.concat([i1, i2], axis=1)
+        comp = i1.join(i2, lsuffix='_old', rsuffix='_new')
 
         return comp
 
@@ -72,7 +73,7 @@ def compare_with_func(dataset1, dataset2, fns=['rval', 'avg_pct_chg'],
         except KeyError:
             return [np.nan] * len(fns)
 
-        return [f(comp_df) if callable(f) else getattr(this, f)(comp_df)
+        return [f(comp_df, indicator) if callable(f) else getattr(this, f)(comp_df, indicator)
                 for f in fns]
 
     # only keep indicators we want to compare
@@ -94,12 +95,18 @@ def compare_with_func(dataset1, dataset2, fns=['rval', 'avg_pct_chg'],
     return result.reset_index()
 
 
-def rval(comp_df):
+def rval(comp_df, indicator):
     """return r-value between old and new data"""
-    return comp_df.corr().ix['old', 'new']
+    old_name = indicator+'_old'
+    new_name = indicator+'_new'
+    # logger.warning("{}".format(old_name, new_name))
+    # logger.warning("{}".format(comp_df.columns))
+    return comp_df.corr().ix[old_name, new_name]
 
 
-def avg_pct_chg(comp_df):
+def avg_pct_chg(comp_df, indicator):
     """return average precentage changes between old and new data"""
-    res = (comp_df['new'] - comp_df['old']) / comp_df['old'] * 100
+    old_name = indicator+'_old'
+    new_name = indicator+'_new'
+    res = (comp_df[new_name] - comp_df[old_name]) / comp_df[old_name] * 100
     return res.replace([np.inf, -np.inf], np.nan).mean()
