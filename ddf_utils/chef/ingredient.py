@@ -9,7 +9,6 @@ from .helpers import read_opt
 import os
 import logging
 
-from ddf_utils.ddf_reader import DDF
 from ddf_utils.model.package import Datapackage
 from .exceptions import IngredientError
 

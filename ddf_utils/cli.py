@@ -43,7 +43,7 @@ def cleanup(path, how, force):
     path: the dataset path
     """
     from ddf_utils.io import cleanup as cl
-    from ddf_utils.ddf_reader import is_dataset
+    from ddf_utils.model.utils import is_dataset
     if force:
         cl(path, how)
     else:
@@ -225,14 +225,15 @@ def merge_translation(path, split_path, lang_path, dtype, overwrite):
 @click.option('--diff-only', is_flag=True)
 def diff(dataset1, dataset2, git, checkout_path, diff_only):
     """give a report on the statistical differences for datapoints between 2 datasets."""
-    import ddf_utils.ddf_reader as dr
+    from ddf_utils.model.package import Datapackage
+    from ddf_utils.model.utils import is_dataset
     from ddf_utils.qa import compare_with_func
     import tabulate
     from os.path import join
 
     if git:
         from subprocess import check_output
-        assert dr.is_dataset('./')
+        assert is_dataset('./')
 
         c1 = check_output(['git', 'rev-parse', dataset1])
         p1 = c1.strip().decode('utf8')
@@ -254,14 +255,12 @@ def diff(dataset1, dataset2, git, checkout_path, diff_only):
         except FileExistsError:
             pass
 
-        dr.config.DDF_SEARCH_PATH = checkout_path
-
-        d1 = dr.DDF(p1)
-        d2 = dr.DDF(p2)
+        d1 = Datapackage(join(checkout_path, p1)).dataset
+        d2 = Datapackage(join(checkout_path, p2)).dataset
 
     else:
-        d1 = dr.DDF(dataset1)
-        d2 = dr.DDF(dataset2)
+        d1 = Datapackage(join(checkout_path, dataset1)).dataset
+        d2 = Datapackage(join(checkout_path, dataset2)).dataset
 
     result = compare_with_func(d1, d2)
     if diff_only:
