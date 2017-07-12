@@ -46,12 +46,12 @@ def test_create_datapackage_2():
 
 
 def test_dataset():
-    from ddf_utils.model.ddf import Dataset
+    from ddf_utils.model.package import Datapackage
 
     dataset_path = os.path.join(os.path.dirname(__file__),
                                 'datasets/ddf--gapminder--dummy_companies')
 
-    ds = Dataset.from_ddfcsv(dataset_path)
+    ds = Datapackage(dataset_path).dataset
 
     conc = ds.concepts
     ent = ds.entities
