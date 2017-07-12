@@ -23,3 +23,19 @@ def load_datapackage_json(path):
         basedir = osp.dirname(path)
 
     return basedir, dp
+
+
+# helper functions:
+# check if a directory is dataset root dir
+def is_dataset(path):
+    """check if a directory is a dataset directory
+
+    This function checks if ddf--index.csv and datapackage.json exists
+    to judge if the dir is a dataset.
+    """
+    index_path = os.path.join(path, 'ddf--index.csv')
+    datapackage_path = os.path.join(path, 'datapackage.json')
+    if os.path.exists(index_path) or os.path.exists(datapackage_path):
+        return True
+    else:
+        return False
