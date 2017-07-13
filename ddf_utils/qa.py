@@ -18,7 +18,7 @@ def _gen_indicator_key_list(d):
             yield (k, i)
 
 
-def compare_with_func(dataset1, dataset2, fns=['rval', 'avg_pct_chg'],
+def compare_with_func(dataset1, dataset2, fns=['rval', 'avg_pct_chg', 'max_change_index'],
                       indicators=None, key=None):
     """compare 2 datasets with functions"""
 
@@ -73,6 +73,10 @@ def compare_with_func(dataset1, dataset2, fns=['rval', 'avg_pct_chg'],
         except KeyError:
             return [np.nan] * len(fns)
 
+        # return nan if indicator is not number type
+        if comp_df.dtypes[indicator+'_old'] == 'object' or comp_df.dtypes[indicator+'_new'] == 'object':
+            return [np.nan] * len(fns)
+
         return [f(comp_df, indicator) if callable(f) else getattr(this, f)(comp_df, indicator)
                 for f in fns]
 
@@ -110,3 +114,33 @@ def avg_pct_chg(comp_df, indicator):
     new_name = indicator+'_new'
     res = (comp_df[new_name] - comp_df[old_name]) / comp_df[old_name] * 100
     return res.replace([np.inf, -np.inf], np.nan).mean()
+
+
+def max_pct_chg(comp_df, indicator):
+    """return average precentage changes between old and new data"""
+    old_name = indicator+'_old'
+    new_name = indicator+'_new'
+    res = (comp_df[new_name] - comp_df[old_name]) / comp_df[old_name] * 100
+    res = res.replace([np.inf, -np.inf], np.nan)
+    return res.max()
+
+
+def min_pct_chg(comp_df, indicator):
+    """return average precentage changes between old and new data"""
+    old_name = indicator+'_old'
+    new_name = indicator+'_new'
+    res = (comp_df[new_name] - comp_df[old_name]) / comp_df[old_name] * 100
+    res = res.replace([np.inf, -np.inf], np.nan)
+    return res.min()
+
+
+def max_change_index(comp_df, indicator):
+    old_name = indicator+'_old'
+    new_name = indicator+'_new'
+    diff = (comp_df[new_name] - comp_df[old_name]) / comp_df[old_name] * 100
+    diff = diff.replace([np.inf, -np.inf], np.nan)
+    diff = abs(diff)
+    if len(diff.dropna()) == 0 or diff.max() == 0:
+        return ''
+    idx = diff[diff == diff.max()].index.values[0]
+    return str(idx)
