@@ -33,9 +33,9 @@ def is_dataset(path):
     This function checks if ddf--index.csv and datapackage.json exists
     to judge if the dir is a dataset.
     """
-    index_path = os.path.join(path, 'ddf--index.csv')
-    datapackage_path = os.path.join(path, 'datapackage.json')
-    if os.path.exists(index_path) or os.path.exists(datapackage_path):
+    index_path = osp.join(path, 'ddf--index.csv')
+    datapackage_path = osp.join(path, 'datapackage.json')
+    if osp.exists(index_path) or osp.exists(datapackage_path):
         return True
     else:
         return False
