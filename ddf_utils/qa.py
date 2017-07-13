@@ -18,7 +18,7 @@ def _gen_indicator_key_list(d):
             yield (k, i)
 
 
-def compare_with_func(dataset1, dataset2, fns=['rval', 'avg_pct_chg', 'max_change_index'],
+def compare_with_func(dataset1, dataset2, fns=['rval', 'avg_pct_chg'],
                       indicators=None, key=None):
     """compare 2 datasets with functions"""
 
@@ -135,6 +135,8 @@ def min_pct_chg(comp_df, indicator):
 
 
 def max_change_index(comp_df, indicator):
+    # FIXME: this function makes all result column type to be object
+    # see test cases in test_qa.py
     old_name = indicator+'_old'
     new_name = indicator+'_new'
     diff = (comp_df[new_name] - comp_df[old_name]) / comp_df[old_name] * 100
