@@ -60,7 +60,7 @@ def csvs_to_ddf(files, out_path):
     import re
     from os.path import join
     from ddf_utils.str import to_concept_id
-    from ddf_utils.datapackage import get_datapackage
+    from ddf_utils.datapackage import get_datapackage, dump_json
 
     concepts_df = pd.DataFrame([['name', 'Name', 'string']],
                                columns=['concept', 'name', 'concept_type'])
@@ -136,6 +136,7 @@ def csvs_to_ddf(files, out_path):
     for c, df in all_entities.items():
         df.to_csv(join(out_path, 'ddf--entities--{}.csv'.format(c)), index=False)
 
-    _ = get_datapackage(out_path, to_disk=True, use_existing=False)
+    dp = get_datapackage(out_path, use_existing=False)
+    dump_json(os.path.join(out_path, 'datapackage.json'), dp)
 
     return
