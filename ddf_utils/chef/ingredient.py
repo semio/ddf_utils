@@ -318,9 +318,11 @@ class Ingredient(BaseIngredient):
             for i in self.ddf.indicators(by=keys):
                 data[i] = self.ddf.get_datapoint_df(i, primary_key=keys)
         else:
-            for i in self.ddf.indicators(by=keys):
-                if i in self.values:
+            for i in self.values:
+                if i in self.ddf.indicators(by=keys):
                     data[i] = self.ddf.get_datapoint_df(i, primary_key=keys)
+                else:
+                    logging.warning("indicator {} not found in dataset {}".format(i, self._ddf_id))
 
         if len(data) == 0:
             raise IngredientError('no datapoint found for the ingredient: ' + self.ingred_id)
