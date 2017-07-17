@@ -5,7 +5,6 @@ import sys
 import tempfile
 import shutil
 import logging
-import common
 import pytest
 import glob
 

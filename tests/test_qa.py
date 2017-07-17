@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import common
 import os
 from ddf_utils.model.package import Datapackage
 import numpy as np

@@ -28,3 +28,4 @@ def test_dataset():
 
     path = tempfile.mkdtemp()
     ds.to_ddfcsv(path)
+    str(ds)
