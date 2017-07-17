@@ -3,7 +3,6 @@
 import os
 import sys
 from functools import wraps, partial
-from .. import config
 from .. import ops
 import logging
 import click
@@ -148,11 +147,14 @@ def debuggable(func):
         if 'debug' in kwargs.keys():
             debug = kwargs.pop('debug')
             result = func(*args, **kwargs)
+            chef = args[0]
             if debug:
-                if config.DEBUG_OUTPUT_PATH is None:
+                debug_path = chef.config.get('debug_output_path', None)
+                if debug_path is None:
                     logging.warning('debug output path not set!')
-                    config.DEBUG_OUTPUT_PATH = './_debug'  # TODO: handle the config better
-                outpath = os.path.join(config.DEBUG_OUTPUT_PATH, result.ingred_id)
+                    chef.add_config(debug_output_path='./_debug')
+                    debug_path = './_debug'
+                outpath = os.path.join(debug_path, result.ingred_id)
                 if os.path.exists(outpath):
                     import shutil
                     shutil.rmtree(outpath)
