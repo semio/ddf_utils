@@ -1,3 +1,15 @@
+## version 0.3.0 2017-07-18
+
+- totally rewrite the ddf reader, make separated models for dataset and datapackage in 
+  `ddf_utils.models`.
+- add Chef class, which can create or load recipes interactively. Now all recipe related
+  tasks should run under a Chef instance.
+- all procedures takes a chef instance as first arguments now. Also we support writing 
+  custom procedures now.
+- removed `indentity` and `copy` procedure, updated `filter_row` and `groupby` procedure
+- added new `flatten` procedure
+- minor improvements
+
 ## version 0.2.20 2017-06-17
 
 - bug fix: #67
