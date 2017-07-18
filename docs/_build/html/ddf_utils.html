@@ -97,8 +97,6 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#submodules">Submodules</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-ddf_utils.cli">ddf_utils.cli module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#module-ddf_utils.config">ddf_utils.config module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#module-ddf_utils.ddf_reader">ddf_utils.ddf_reader module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-ddf_utils.i18n">ddf_utils.i18n module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-ddf_utils.datapackage">ddf_utils.datapackage module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-ddf_utils.io">ddf_utils.io module</a></li>
@@ -188,176 +186,6 @@
 <div class="section" id="module-ddf_utils.cli">
 <span id="ddf-utils-cli-module"></span><h2>ddf_utils.cli module<a class="headerlink" href="#module-ddf_utils.cli" title="Permalink to this headline">¶</a></h2>
 <p>script for ddf dataset management tasks</p>
-</div>
-<div class="section" id="module-ddf_utils.config">
-<span id="ddf-utils-config-module"></span><h2>ddf_utils.config module<a class="headerlink" href="#module-ddf_utils.config" title="Permalink to this headline">¶</a></h2>
-<p>global variables for ddf_utils</p>
-</div>
-<div class="section" id="module-ddf_utils.ddf_reader">
-<span id="ddf-utils-ddf-reader-module"></span><h2>ddf_utils.ddf_reader module<a class="headerlink" href="#module-ddf_utils.ddf_reader" title="Permalink to this headline">¶</a></h2>
-<p>new version of ddf_reader, base on datapackage.json</p>
-<dl class="class">
-<dt id="ddf_utils.ddf_reader.DDF">
-<em class="property">class </em><code class="descclassname">ddf_utils.ddf_reader.</code><code class="descname">DDF</code><span class="sig-paren">(</span><em>ddf_id</em>, <em>no_check_valid=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.ddf_reader.DDF" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
-<p>DDF reader class</p>
-<p>The reader instance accepts an dataset id or absolute path on init. If absolute path is given,
-it will load the dataset in path. Other wise it will search the dataset id in the path set by
-the <cite>DDF_SEARCH_PATH</cite> global variable.</p>
-<dl class="attribute">
-<dt id="ddf_utils.ddf_reader.DDF.concepts">
-<code class="descname">concepts</code><a class="headerlink" href="#ddf_utils.ddf_reader.DDF.concepts" title="Permalink to this definition">¶</a></dt>
-<dd><p>convenient function to get all concepts</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="ddf_utils.ddf_reader.DDF.datapackage">
-<code class="descname">datapackage</code><a class="headerlink" href="#ddf_utils.ddf_reader.DDF.datapackage" title="Permalink to this definition">¶</a></dt>
-<dd><p>the datapackage object. create one if it doesn’t exist</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="ddf_utils.ddf_reader.DDF.describe">
-<code class="descname">describe</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.ddf_reader.DDF.describe" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="ddf_utils.ddf_reader.DDF.dtypes">
-<code class="descname">dtypes</code><a class="headerlink" href="#ddf_utils.ddf_reader.DDF.dtypes" title="Permalink to this definition">¶</a></dt>
-<dd><p>return a mapping for column -&gt; python object type. internal use only.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="ddf_utils.ddf_reader.DDF.get_all_files">
-<code class="descname">get_all_files</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.ddf_reader.DDF.get_all_files" title="Permalink to this definition">¶</a></dt>
-<dd><p>return a list of all files in this dataset</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="ddf_utils.ddf_reader.DDF.get_concept_files">
-<code class="descname">get_concept_files</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.ddf_reader.DDF.get_concept_files" title="Permalink to this definition">¶</a></dt>
-<dd><p>return a list of all concept files</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="ddf_utils.ddf_reader.DDF.get_concepts">
-<code class="descname">get_concepts</code><span class="sig-paren">(</span><em>concept_type=’all’</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.ddf_reader.DDF.get_concepts" title="Permalink to this definition">¶</a></dt>
-<dd><p>get concepts from the concept table</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>concept_type</strong> (<cite>str</cite> or <cite>list</cite>) – the concept type(s) to filter, if ‘all’ is provided, all concepts will be returned</li>
-<li><strong>**kwargs</strong> (<em>dict</em>) – keyword arguments provided to <a class="reference external" href="http://pandas.pydata.org/pandas-docs/stable/generated/pandas.read_csv.html#pandas.read_csv" title="(in pandas v0.20.2)"><code class="xref py py-func docutils literal"><span class="pre">pandas.read_csv()</span></code></a></li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">concept table</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">DataFrame</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="ddf_utils.ddf_reader.DDF.get_datapoint_df">
-<code class="descname">get_datapoint_df</code><span class="sig-paren">(</span><em>measure</em>, <em>primaryKey=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.ddf_reader.DDF.get_datapoint_df" title="Permalink to this definition">¶</a></dt>
-<dd><p>get datapoints by measure, returns a DataFrame</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>measure</strong> (<cite>str</cite>) – the measure to get</li>
-<li><strong>primaryKey</strong> (<cite>str</cite>, optional) – the primaryKey to get, if not provided and the datapoint have multiple
-primaryKeys avaliable, the first primaryKey in datapackage will be returned</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="ddf_utils.ddf_reader.DDF.get_datapoint_files">
-<code class="descname">get_datapoint_files</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.ddf_reader.DDF.get_datapoint_files" title="Permalink to this definition">¶</a></dt>
-<dd><p>return a list of datapoints files</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="ddf_utils.ddf_reader.DDF.get_datapoints">
-<code class="descname">get_datapoints</code><span class="sig-paren">(</span><em>measure=None</em>, <em>primaryKey=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.ddf_reader.DDF.get_datapoints" title="Permalink to this definition">¶</a></dt>
-<dd><p>get datapoints, filter by concept or primaryKey</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>measure</strong> (<cite>str</cite>, optional) – only get this measure</li>
-<li><strong>primaryKey</strong> (<cite>str</cite>, optional) – only get this primaryKey</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A dictionary like <code class="docutils literal"><span class="pre">{</span> <span class="pre">measure_name</span> <span class="pre">:</span> <span class="pre">{</span> <span class="pre">primaryKeys</span> <span class="pre">:</span> <span class="pre">DataFrame</span> <span class="pre">}}</span></code></p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">dict</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="ddf_utils.ddf_reader.DDF.get_entities">
-<code class="descname">get_entities</code><span class="sig-paren">(</span><em>domain=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.ddf_reader.DDF.get_entities" title="Permalink to this definition">¶</a></dt>
-<dd><p>get entities from one or all domains</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>domain</strong> (<cite>str</cite>, optional) – the domain to filter, if not provided, all domain will be returned</li>
-<li><strong>**kwargs</strong> (<em>dict</em>) – keyword arguments provided to <a class="reference external" href="http://pandas.pydata.org/pandas-docs/stable/generated/pandas.read_csv.html#pandas.read_csv" title="(in pandas v0.20.2)"><code class="xref py py-func docutils literal"><span class="pre">pandas.read_csv()</span></code></a></li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">a dictionary like <code class="docutils literal"><span class="pre">{entity_set_name</span> <span class="pre">:</span> <span class="pre">DataFrame}</span></code></p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">dict</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="ddf_utils.ddf_reader.DDF.indicator_dict">
-<code class="descname">indicator_dict</code><a class="headerlink" href="#ddf_utils.ddf_reader.DDF.indicator_dict" title="Permalink to this definition">¶</a></dt>
-<dd><p>return all indicators</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="function">
-<dt id="ddf_utils.ddf_reader.is_dataset">
-<code class="descclassname">ddf_utils.ddf_reader.</code><code class="descname">is_dataset</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.ddf_reader.is_dataset" title="Permalink to this definition">¶</a></dt>
-<dd><p>check if a directory is a dataset directory</p>
-<p>This function checks if ddf–index.csv and datapackage.json exists
-to judge if the dir is a dataset.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="ddf_utils.ddf_reader.list_datasets">
-<code class="descclassname">ddf_utils.ddf_reader.</code><code class="descname">list_datasets</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.ddf_reader.list_datasets" title="Permalink to this definition">¶</a></dt>
-<dd><p>list all availabile datasets</p>
-</dd></dl>
-
 </div>
 <div class="section" id="module-ddf_utils.i18n">
 <span id="ddf-utils-i18n-module"></span><h2>ddf_utils.i18n module<a class="headerlink" href="#module-ddf_utils.i18n" title="Permalink to this headline">¶</a></h2>
@@ -485,7 +313,7 @@ the file path of csv will be out_dir/ddf–$ftype–$concept–$by.csv</p>
 <p>commonly used calculation methods</p>
 <dl class="function">
 <dt id="ddf_utils.ops.aagr">
-<code class="descclassname">ddf_utils.ops.</code><code class="descname">aagr</code><span class="sig-paren">(</span><em>df: &lt;Mock name=’mock.DataFrame’ id=‘4475143840’&gt;</em>, <em>window: int = 10</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.ops.aagr" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.ops.</code><code class="descname">aagr</code><span class="sig-paren">(</span><em>df: &lt;Mock name=’mock.DataFrame’ id=‘4455733904’&gt;</em>, <em>window: int = 10</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.ops.aagr" title="Permalink to this definition">¶</a></dt>
 <dd><p>average annual growth rate</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -539,7 +367,7 @@ more on the diff format, see: <a class="reference external" href="http://specs.f
 <p>QA functioins.</p>
 <dl class="function">
 <dt id="ddf_utils.qa.avg_pct_chg">
-<code class="descclassname">ddf_utils.qa.</code><code class="descname">avg_pct_chg</code><span class="sig-paren">(</span><em>comp_df</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.qa.avg_pct_chg" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.qa.</code><code class="descname">avg_pct_chg</code><span class="sig-paren">(</span><em>comp_df</em>, <em>indicator</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.qa.avg_pct_chg" title="Permalink to this definition">¶</a></dt>
 <dd><p>return average precentage changes between old and new data</p>
 </dd></dl>
 
@@ -550,8 +378,25 @@ more on the diff format, see: <a class="reference external" href="http://specs.f
 </dd></dl>
 
 <dl class="function">
+<dt id="ddf_utils.qa.max_change_index">
+<code class="descclassname">ddf_utils.qa.</code><code class="descname">max_change_index</code><span class="sig-paren">(</span><em>comp_df</em>, <em>indicator</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.qa.max_change_index" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ddf_utils.qa.max_pct_chg">
+<code class="descclassname">ddf_utils.qa.</code><code class="descname">max_pct_chg</code><span class="sig-paren">(</span><em>comp_df</em>, <em>indicator</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.qa.max_pct_chg" title="Permalink to this definition">¶</a></dt>
+<dd><p>return average precentage changes between old and new data</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ddf_utils.qa.min_pct_chg">
+<code class="descclassname">ddf_utils.qa.</code><code class="descname">min_pct_chg</code><span class="sig-paren">(</span><em>comp_df</em>, <em>indicator</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.qa.min_pct_chg" title="Permalink to this definition">¶</a></dt>
+<dd><p>return average precentage changes between old and new data</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="ddf_utils.qa.rval">
-<code class="descclassname">ddf_utils.qa.</code><code class="descname">rval</code><span class="sig-paren">(</span><em>comp_df</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.qa.rval" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.qa.</code><code class="descname">rval</code><span class="sig-paren">(</span><em>comp_df</em>, <em>indicator</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.qa.rval" title="Permalink to this definition">¶</a></dt>
 <dd><p>return r-value between old and new data</p>
 </dd></dl>
 
@@ -713,7 +558,7 @@ avaliable options are <cite>drop</cite>, <cite>error</cite>, <cite>include</cite
 
 <dl class="function">
 <dt id="ddf_utils.transformer.trend_bridge">
-<code class="descclassname">ddf_utils.transformer.</code><code class="descname">trend_bridge</code><span class="sig-paren">(</span><em>old_data: &lt;Mock name=’mock.Series’ id=‘4476858608’&gt;</em>, <em>new_data: &lt;Mock name=’mock.Series’ id=‘4476858608’&gt;</em>, <em>bridge_length: int</em><span class="sig-paren">)</span> &#x2192; &lt;Mock name=’mock.Series’ id=‘4476858608’&gt;<a class="headerlink" href="#ddf_utils.transformer.trend_bridge" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.transformer.</code><code class="descname">trend_bridge</code><span class="sig-paren">(</span><em>old_data: &lt;Mock name=’mock.Series’ id=‘4458415216’&gt;</em>, <em>new_data: &lt;Mock name=’mock.Series’ id=‘4458415216’&gt;</em>, <em>bridge_length: int</em><span class="sig-paren">)</span> &#x2192; &lt;Mock name=’mock.Series’ id=‘4458415216’&gt;<a class="headerlink" href="#ddf_utils.transformer.trend_bridge" title="Permalink to this definition">¶</a></dt>
 <dd><p>smoothing data between series.</p>
 <p>To avoid getting artificial stairs in the data, we smooth between to
 series. Sometime one source is systematically higher than another source,
