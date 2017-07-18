@@ -30,10 +30,10 @@ def assign_value(chef: Chef, ingredients: List[str], result, dictionary) -> Proc
 
        procedure: assign_value
        ingredients:
-	 - ingredient_id
+         - ingredient_id
        result: str
        option:
-	 dictionary: str or dict  # file name or mappings
+         dictionary: str or dict  # file name or mappings
 
     dictionary format: {column -> [{key -> value}]}
 
@@ -42,13 +42,13 @@ def assign_value(chef: Chef, ingredients: List[str], result, dictionary) -> Proc
     .. code-block:: json
 
        {
-	 "concept": {
-	   [
-	     "key": "concept_to_change"
-	     "column": "description"
-	     "value": "new value to use"
-	   ]
-	 }
+         "concept": {
+           [
+             "key": "concept_to_change"
+             "column": "description"
+             "value": "new value to use"
+           ]
+         }
        }
 
     """
@@ -78,8 +78,8 @@ def translate_header(chef: Chef, ingredients: List[str], result, dictionary) -> 
 
     Parameters
     ----------
-    dag : DAG
-        The procedure will run on
+    chef : Chef
+        The Chef the procedure will run on
     ingredients : list
         A list of ingredient id in the dag to translate
     dictionary : dict
@@ -168,8 +168,8 @@ def translate_column(chef: Chef, ingredients: List[str], result, dictionary,
 
     Parameters
     ----------
-    dag : DAG
-        The procedure will run on
+    chef : Chef
+        The Chef the procedure will run on
     ingredients : list
         A list of ingredient id in the dag to translate
 
@@ -250,8 +250,8 @@ def merge(chef: Chef, ingredients: List[str], result, deep=False) -> ProcedureRe
 
     Parameters
     ----------
-    dag: DAG
-        a DAG instance
+    chef: Chef
+        a Chef instance
     ingredients:
         Any numbers of ingredients to be merged
 
@@ -398,8 +398,8 @@ def filter_row(chef: Chef, ingredients: List[str], result, **options) -> Procedu
 
     Parameters
     ----------
-    dag: DAG
-        the DAG instance
+    chef: Chef
+        the Chef instance
     ingredients:
         list of ingredient id in the DAG
     result: `str`
@@ -465,6 +465,22 @@ def flatten(chef: Chef, ingredients: List[str], result, **options) -> ProcedureR
     The ``dictionary`` can have multiple entries, for each entry the concepts that matches the key in wildcard
     matching will be flatten to the value, which should be a template string. The variables for the templates
     will be provided with a dictionary contains ``concept``, and all columns from ``flatten_dimensions`` as keys.
+
+    Parameters
+    ----------
+    chef : Chef
+        the Chef instance
+    ingredients : list
+        a list of ingredients
+    result : `str`
+        id of result ingredient
+
+    Keyword Args
+    ------------
+    flatten_dimensions: list
+        a list of dimension to be flattened
+    dictionary: dict
+        the dictionary for old name -> new name mapping
     """
     assert len(ingredients) == 1, "procedure only support 1 ingredient for now."
 
@@ -596,7 +612,6 @@ def groupby(chef: Chef, ingredients: List[str], result, **options) -> ProcedureR
     ----
     - Only one of ``aggregate``, ``transform`` or ``filter`` can be used in one procedure.
     - Any columns not mentioned in groupby or functions are dropped.
-
     """
     assert len(ingredients) == 1, "procedure only support 1 ingredient for now."
     logger.info("groupby: " + ingredients[0])
@@ -768,7 +783,7 @@ def run_op(chef: Chef, ingredients: List[str], result, op) -> ProcedureResult:
        procedure: filter_item
        ingredients:  # list of ingredient id
          - ingredient_id
-       result: str  # new ingledient id
+       result: str  # new ingredient id
        options:
          items: list  # a list of items should be in the result ingredient
 
@@ -946,8 +961,8 @@ def trend_bridge(chef: Chef, ingredients: List[str], bridge_start, bridge_end, b
 
     Parameters
     ----------
-    dag: DAG
-        A DAG instance
+    chef: Chef
+        A Chef instance
     ingredients : list
         The input ingredient. The bridged result will be merged in to this ingredient. If this is
         None, then the only the bridged result will be returned

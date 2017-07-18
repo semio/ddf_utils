@@ -355,6 +355,11 @@ def split_keys(df, target_column, dictionary, splited='drop'):
     ratio = dict()
 
     for k, v in dictionary.items():
+        # dictionary format:
+        # {entity_to_split: [sub_entity_1, ...]}
+        # the split ratio will be calculated from first valid values of sub entities.
+        # so it assumes existence of sub entities
+        # TODO: maybe make it work even sub entities not exists.
         before_spl = list()
         for spl in v:
             if spl not in df_[target_column].values:

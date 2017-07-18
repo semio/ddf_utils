@@ -21,22 +21,6 @@ ddf_utils.cli module
     :undoc-members:
     :show-inheritance:
 
-ddf_utils.config module
------------------------
-
-.. automodule:: ddf_utils.config
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-ddf_utils.ddf_reader module
----------------------------
-
-.. automodule:: ddf_utils.ddf_reader
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 ddf_utils.i18n module
 ---------------------
 
