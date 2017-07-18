@@ -19,6 +19,49 @@ logger = logging.getLogger('Chef')
 
 
 @debuggable
+def assign_value(chef: Chef, ingredients: List[str], result, dictionary) -> ProcedureResult:
+    """Assign value to specific key/value pair
+
+    NOT IMPLEMENTED YET.
+
+    Procedure format:
+
+    .. code-block:: yaml
+
+       procedure: assign_value
+       ingredients:
+	 - ingredient_id
+       result: str
+       option:
+	 dictionary: str or dict  # file name or mappings
+
+    dictionary format: {column -> [{key -> value}]}
+
+    for example:
+
+    .. code-block:: json
+
+       {
+	 "concept": {
+	   [
+	     "key": "concept_to_change"
+	     "column": "description"
+	     "value": "new value to use"
+	   ]
+	 }
+       }
+
+    """
+    assert len(ingredients) == 1, "procedure only support 1 ingredient for now."
+    ingredient = chef.dag.get_node(ingredients[0]).evaluate()
+    logger.info("assign_value: " + ingredients[0])
+
+    data = ingredient.copy_data()
+
+    raise NotImplementedError
+
+
+@debuggable
 def translate_header(chef: Chef, ingredients: List[str], result, dictionary) -> ProcedureResult:
     """Translate column headers
 
