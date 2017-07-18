@@ -4,11 +4,14 @@
 
 import pandas as pd
 import numpy as np
-from . ingredient import BaseIngredient, ProcedureResult
+from . dag import DAG
+from ddf_utils.chef.cook import Chef
+from .ingredient import BaseIngredient, ProcedureResult
 from .helpers import read_opt, mkfunc, debuggable
 from .exceptions import ProcedureError
 import time
 from typing import List, Union, Dict, Optional
+import fnmatch
 
 import logging
 
@@ -16,7 +19,50 @@ logger = logging.getLogger('Chef')
 
 
 @debuggable
-def translate_header(ingredient: BaseIngredient, result, dictionary) -> ProcedureResult:
+def assign_value(chef: Chef, ingredients: List[str], result, dictionary) -> ProcedureResult:
+    """Assign value to specific key/value pair
+
+    NOT IMPLEMENTED YET.
+
+    Procedure format:
+
+    .. code-block:: yaml
+
+       procedure: assign_value
+       ingredients:
+         - ingredient_id
+       result: str
+       option:
+         dictionary: str or dict  # file name or mappings
+
+    dictionary format: {column -> [{key -> value}]}
+
+    for example:
+
+    .. code-block:: json
+
+       {
+         "concept": {
+           [
+             "key": "concept_to_change"
+             "column": "description"
+             "value": "new value to use"
+           ]
+         }
+       }
+
+    """
+    assert len(ingredients) == 1, "procedure only support 1 ingredient for now."
+    ingredient = chef.dag.get_node(ingredients[0]).evaluate()
+    logger.info("assign_value: " + ingredients[0])
+
+    data = ingredient.copy_data()
+
+    raise NotImplementedError
+
+
+@debuggable
+def translate_header(chef: Chef, ingredients: List[str], result, dictionary) -> ProcedureResult:
     """Translate column headers
 
     Procedure format:
@@ -32,24 +78,25 @@ def translate_header(ingredient: BaseIngredient, result, dictionary) -> Procedur
 
     Parameters
     ----------
-    ingredient : BaseIngredient
-        The ingredient to translate
+    chef : Chef
+        The Chef the procedure will run on
+    ingredients : list
+        A list of ingredient id in the dag to translate
+    dictionary : dict
+        A dictionary for name mapping
     result : `str`
         The result ingredient id
-
-    Keyword Args
-    ------------
-    dictionary: dict
-        a dictionary of oldname -> newname mappings
 
     See Also
     --------
     :py:func:`ddf_utils.transformer.translate_header` : Related function in transformer module
     """
-    logger.info("translate_header: " + ingredient.ingred_id)
+    assert len(ingredients) == 1, "procedure only support 1 ingredient for now."
+    ingredient = chef.dag.get_node(ingredients[0]).evaluate()
+    logger.info("translate_header: " + ingredients[0])
 
-    rm = dictionary
     data = ingredient.copy_data()
+    rm = dictionary
 
     for k in list(data.keys()):
         df_new = data[k].rename(columns=rm).copy()
@@ -82,13 +129,13 @@ def translate_header(ingredient: BaseIngredient, result, dictionary) -> Procedur
 
     if not result:
         result = ingredient.ingred_id + '-translated'
-    return ProcedureResult(result, newkey, data=data)
+    return ProcedureResult(chef, result, newkey, data=data)
 
 
 @debuggable
-def translate_column(ingredient: BaseIngredient, result, dictionary, column, *,
-                     target_column=None, not_found='drop', ambiguity='prompt',
-                     ignore_case=False) -> ProcedureResult:
+def translate_column(chef: Chef, ingredients: List[str], result, dictionary,
+                     column, *, target_column=None, not_found='drop',
+                     ambiguity='prompt', ignore_case=False) -> ProcedureResult:
     """Translate column values.
 
     Procedure format:
@@ -98,10 +145,10 @@ def translate_column(ingredient: BaseIngredient, result, dictionary, column, *,
        procedure: translate_column
        ingredients:  # list of ingredient id
          - ingredient_id
-       result: str  # new ingledient id
+       result: str  # new ingredient id
        options:
          column: str  # the column to be translated
-         target_column: str  # optinoal, the target column to store the translated data
+         target_column: str  # optional, the target column to store the translated data
          not_found: {'drop', 'include', 'error'}  # optional, the behavior when there is values not
                                                   # found in the mapping dictionary, default is 'drop'
          ambiguity: {'prompt', 'skip', 'error'}  # optional, the behavior when there is ambiguity
@@ -118,6 +165,13 @@ def translate_column(ingredient: BaseIngredient, result, dictionary, column, *,
          base: str  # ingredient name
          key: str or list  # the columns to be the keys of the dictionary, can accept a list
          value: str  # the column to be the values of the the dictionary, must be one column
+
+    Parameters
+    ----------
+    chef : Chef
+        The Chef the procedure will run on
+    ingredients : list
+        A list of ingredient id in the dag to translate
 
     Keyword Args
     ------------
@@ -139,9 +193,11 @@ def translate_column(ingredient: BaseIngredient, result, dictionary, column, *,
     --------
     :py:func:`ddf_utils.transformer.translate_column` : related function in transformer module
     """
-    logger.info("translate_column: " + ingredient.ingred_id)
-
     from ..transformer import translate_column as tc
+    assert len(ingredients) == 1, "procedure only support 1 ingredient for now."
+
+    ingredient = chef.dag.get_node(ingredients[0]).evaluate()
+    logger.info("translate_column: " + ingredients[0])
 
     di = ingredient.copy_data()
 
@@ -152,8 +208,8 @@ def translate_column(ingredient: BaseIngredient, result, dictionary, column, *,
     else:
         if 'base' in dictionary.keys():
             dict_type = 'dataframe'
-            base = dictionary.pop('base')
-            base_data = base.get_data()
+            base = chef.dag.get_node(dictionary.pop('base')).evaluate()
+            base_data = base.copy_data()
             if len(base_data) > 1:
                 raise ProcedureError('only support ingredient with 1 item')
             base_df = list(base_data.values())[0]
@@ -168,67 +224,15 @@ def translate_column(ingredient: BaseIngredient, result, dictionary, column, *,
 
     if not result:
         result = ingredient.ingred_id + '-translated'
-    return ProcedureResult(result, ingredient.key, data=di)
+    return ProcedureResult(chef, result, ingredient.key, data=di)
 
 
 @debuggable
-def copy(ingredient: BaseIngredient, result, dictionary: Dict) -> ProcedureResult:
-    """make copy of ingredient data columns, with new names.
-
-    Procedure format:
-
-    .. code-block:: yaml
-
-       procedure: copy
-       ingredients:  # list of ingredient id
-         - ingredient_id
-       result: str  # new ingledient id
-       options:
-       dictionary: dict  # old name -> new name mappings
-
-    An example of dictionary:
-
-    .. code-block:: yaml
-
-       dictionary:
-         col1: copy_1_1  # string
-         col2:  # list of string
-           - copy_2_1
-           - copy_2_2
-
-    where 'col1' and 'col2' should be existing columns in the input ingredient
-
-    Keyword Args
-    ------------
-    dictionary: dict
-        a dictionary of oldname -> newname mappings
-
-    """
-    logger.info("copy: " + ingredient.ingred_id)
-
-    data = ingredient.copy_data()
-
-    for k, v in dictionary.items():
-        if isinstance(v, str):  # value is str, means only make one copy
-            data[v] = data[k].rename(columns={k: v}).copy()
-        else:  # then it's a list, should make multiple copy
-            for n in v:
-                data[n] = data[k].rename(columns={k: n}).copy()
-
-    # usually the old ingredient won't be used after creating copy.
-    # just reset the data to save memory
-    ingredient.reset_data()
-    if not result:
-        result = ingredient.ingred_id + '_'
-    return ProcedureResult(result, ingredient.key, data=data)
-
-
-@debuggable
-def merge(*ingredients: List[BaseIngredient], result, deep=False) -> ProcedureResult:
+def merge(chef: Chef, ingredients: List[str], result, deep=False) -> ProcedureResult:
     """merge a list of ingredients
 
     The ingredients will be merged one by one in the order of how they are provided to this
-    function. Later ones will overwrite the pervious merged results.
+    function. Later ones will overwrite the previous merged results.
 
     Procedure format:
 
@@ -246,7 +250,9 @@ def merge(*ingredients: List[BaseIngredient], result, deep=False) -> ProcedureRe
 
     Parameters
     ----------
-    BaseIngredient
+    chef: Chef
+        a Chef instance
+    ingredients:
         Any numbers of ingredients to be merged
 
     Keyword Args
@@ -262,6 +268,7 @@ def merge(*ingredients: List[BaseIngredient], result, deep=False) -> ProcedureRe
     if true, overwrite is on the row level. If values
     (e.g. afr,2015-population_total) exists, it gets overwritten, if it doesn't it stays
     """
+    ingredients = [chef.dag.get_node(x).evaluate() for x in ingredients]
     logger.info("merge: " + str([i.ingred_id for i in ingredients]))
 
     # assert that dtype and key are same in all dataframe
@@ -293,12 +300,12 @@ def merge(*ingredients: List[BaseIngredient], result, deep=False) -> ProcedureRe
     res_all = {}
 
     for i in ingredients:
-        res_all = _merge_two(res_all, i.get_data(), index_col, dtype, deep)
+        res_all = _merge_two(res_all, i.copy_data(), index_col, dtype, deep)
 
     if not result:
         result = 'all_data_merged_'+str(int(time.time() * 1000))
 
-    return ProcedureResult(result, newkey, data=res_all)
+    return ProcedureResult(chef, result, newkey, data=res_all)
 
 
 def __get_last_item(ser):
@@ -362,26 +369,7 @@ def _merge_two(left: Dict[str, pd.DataFrame],
 
 
 @debuggable
-def identity(ingredient: BaseIngredient, result, copy=False) -> BaseIngredient:
-    """return the ingredient as is.
-
-    Keyword Args
-    ------------
-    copy: bool, optional
-        if copy is True, then treat all data as string. Default: False
-    """
-    if copy:
-        ingredient.data = ingredient.get_data(copy=True)
-    else:
-        ingredient.data = ingredient.get_data()
-
-    if result:
-        ingredient.ingred_id = result + '-identity'
-    return ingredient
-
-
-@debuggable
-def filter_row(ingredient: BaseIngredient, result, **options) -> ProcedureResult:
+def filter_row(chef: Chef, ingredients: List[str], result, **options) -> ProcedureResult:
     """filter an ingredient based on a set of options and return
     the result as new ingredient.
 
@@ -392,51 +380,49 @@ def filter_row(ingredient: BaseIngredient, result, **options) -> ProcedureResult
        procedure: filter_row
        ingredients:  # list of ingredient id
          - ingredient_id
-       result: str  # new ingledient id
+       result: str  # new ingredient id
        options:
-         dictionary: dict  # filter definition block
+         filters: dict  # filter definition block
 
     A dictionary should be provided in options with the following format:
 
     .. code-block:: yaml
 
-        dictionary:
-          new_key_in_new_ingredient:
-            from: old_key_in_old_ingredient
-            filter_col_1: filter_val_1
-            filter_col_2: filter_val_2
+        filters:
+            concept_1:
+                filter_col_1: filter_val_1
+                filter_col_2: filter_val_2
 
-    See a detail example in this `github issue <https://github.com/semio/ddf_utils/issues/2#issuecomment-254132615>`_
+    See a detail example in this `recipe
+    <https://github.com/semio/ddf_utils/blob/dev/tests/recipes_pass/test_filter_row.yml>`_
 
     Parameters
     ----------
-    ingredient: BaseIngredient
+    chef: Chef
+        the Chef instance
+    ingredients:
+        list of ingredient id in the DAG
     result: `str`
 
     Keyword Args
     ------------
-    dictionary: dict
+    filters: dict
         The filter description dictionary
-    keep_all_columns: bool
-        don't drop any column if true
     """
+    assert len(ingredients) == 1, "procedure only support 1 ingredient for now."
+    ingredient = chef.dag.get_node(ingredients[0]).evaluate()
+    logger.info("filter_row: " + ingredients[0])
 
-    logger.info("filter_row: " + ingredient.ingred_id)
-
-    data = ingredient.get_data()
-    dictionary = read_opt(options, 'dictionary', True)
-    keep_all_columns = read_opt(options, 'keep_all_columns', False, False)
+    data = ingredient.copy_data()
+    filters = read_opt(options, 'filters', True)
 
     res = {}
 
-    for k, v in dictionary.items():
-        from_name = v.pop('from')
-        df = data[from_name]
-        if len(v) == 0:
-            res[k] = df.rename(columns={from_name: k})
-            continue
-        queries = []
+    for k, v in filters.items():
 
+        df = data[k].copy()
+
+        queries = []
         for col, val in v.items():
             if isinstance(val, list):
                 queries.append("{} in {}".format(col, val))
@@ -447,36 +433,91 @@ def filter_row(ingredient: BaseIngredient, result, **options) -> ProcedureResult
             # TODO: support more query methods.
             else:
                 raise ProcedureError("not supported in query: " + str(type(val)))
-
         query_string = ' and '.join(queries)
+        logger.debug("querying: {}".format(query_string))
 
         df = df.query(query_string).copy()
-        df = df.rename(columns={from_name: k})
-        # drops all columns with unique contents. and update the key.
-        newkey = ingredient.key
-        keys = ingredient.key_to_list()
-        if not keep_all_columns:
-            for c in v.keys():
-                if ingredient.dtype == 'datapoints':
-                    if len(df[c].unique()) > 1:
-                        logger.debug("column {} have multiple values: {}".format(c, df[c].unique()))
-                    elif len(df[c].unique()) <= 1:
-                        df = df.drop(c, axis=1)
-                        if c in keys:
-                            keys.remove(c)
-                        newkey = ','.join(keys)
-                else:
-                    raise NotImplementedError("filtering concept/entity")
-
-        res[k] = df
+        res[k] = df.query(query_string).copy()
 
     if not result:
         result = ingredient.ingred_id + '-filtered'
-    return ProcedureResult(result, newkey, data=res)
+    return ProcedureResult(chef, result, ingredient.key, data=res)
 
 
 @debuggable
-def filter_item(ingredient: BaseIngredient, result, items: list) -> ProcedureResult:
+def flatten(chef: Chef, ingredients: List[str], result, **options) -> ProcedureResult:
+    """flattening some dimensions, create new indicators.
+
+    procedure format:
+
+    .. code-block:: yaml
+
+       procedure: flatten
+       ingredients:
+           - ingredient_to_run
+       options:
+           flatten_dimensions:
+               - entity_1
+               - entity_2
+           dictionary:
+               "concept_name_wildcard": "new_concept_name_template"
+
+    The ``dictionary`` can have multiple entries, for each entry the concepts that matches the key in wildcard
+    matching will be flatten to the value, which should be a template string. The variables for the templates
+    will be provided with a dictionary contains ``concept``, and all columns from ``flatten_dimensions`` as keys.
+
+    Parameters
+    ----------
+    chef : Chef
+        the Chef instance
+    ingredients : list
+        a list of ingredients
+    result : `str`
+        id of result ingredient
+
+    Keyword Args
+    ------------
+    flatten_dimensions: list
+        a list of dimension to be flattened
+    dictionary: dict
+        the dictionary for old name -> new name mapping
+    """
+    assert len(ingredients) == 1, "procedure only support 1 ingredient for now."
+
+    ingredient = chef.dag.get_node(ingredients[0]).evaluate()
+    data = ingredient.copy_data()
+
+    logger.info("flatten: " + ingredients[0])
+
+    flatten_dimensions = options['flatten_dimensions']
+    if not isinstance(flatten_dimensions, list):
+        flatten_dimensions = [flatten_dimensions]
+    dictionary = options['dictionary']
+
+    newkey = [x for x in ingredient.key_to_list() if x not in flatten_dimensions]
+    newkey = ','.join(newkey)
+
+    res = {}
+    for from_name_tmpl, new_name_tmpl in dictionary.items():
+        dfs = dict([(x, data[x]) for x in fnmatch.filter(data.keys(), from_name_tmpl)])
+        for from_name, df in dfs.items():
+            groups = df.groupby(flatten_dimensions).groups
+            for g, idx in groups.items():
+                if not isinstance(g, tuple):
+                    g = [g]
+                df_ = df.loc[idx].copy()
+                tmpl_dict = dict(zip(flatten_dimensions, g))
+                tmpl_dict['concept'] = from_name
+                new_name = new_name_tmpl.format(**tmpl_dict)
+                if new_name in res.keys():
+                    raise ProcedureError("{} already created! check your name template please.".format(new_name))
+                res[new_name] = df_.rename(columns={from_name: new_name}).drop(flatten_dimensions, axis=1)
+
+    return ProcedureResult(chef, result, newkey, data=res)
+
+
+@debuggable
+def filter_item(chef: Chef, ingredients: List[str], result, items: list) -> ProcedureResult:
     """filter items from the ingredient data
 
     Procedure format:
@@ -486,7 +527,7 @@ def filter_item(ingredient: BaseIngredient, result, items: list) -> ProcedureRes
        procedure: filter_item
        ingredients:  # list of ingredient id
          - ingredient_id
-       result: str  # new ingledient id
+       result: str  # new ingredient id
        options:
          items: list  # a list of items should be in the result ingredient
 
@@ -495,24 +536,26 @@ def filter_item(ingredient: BaseIngredient, result, items: list) -> ProcedureRes
     items: list
         a list of items to filter from base ingredient
     """
-    logger.info("filter_item: " + ingredient.ingred_id)
+    assert len(ingredients) == 1, "procedure only support 1 ingredient for now."
+    ingredient = chef.dag.get_node(ingredients[0]).evaluate()
+    logger.info("filter_item: " + ingredients[0])
 
-    data = ingredient.get_data()
+    data = ingredient.copy_data()
 
     try:
         data = dict([(k, data[k]) for k in items])
     except KeyError as e:
         logger.debug("keys in {}: {}".format(ingredient.ingred_id, str(list(data.keys()))))
-        raise ProcedureError(e.message)
+        raise ProcedureError(str(e))
 
     if not result:
         result = ingredient.ingred_id
 
-    return ProcedureResult(result, ingredient.key, data=data)
+    return ProcedureResult(chef, result, ingredient.key, data=data)
 
 
 @debuggable
-def groupby(ingredient: BaseIngredient, result, **options) -> ProcedureResult:
+def groupby(chef: Chef, ingredients: List[str], result, **options) -> ProcedureResult:
     """group ingredient data by column(s) and run aggregate function
 
     .. highlight:: yaml
@@ -524,9 +567,9 @@ def groupby(ingredient: BaseIngredient, result, **options) -> ProcedureResult:
        procedure: groupby
        ingredients:  # list of ingredient id
          - ingredient_id
-       result: str  # new ingledient id
+       result: str  # new ingredient id
        options:
-         groupby: str or list  # colunm(s) to group
+         groupby: str or list  # column(s) to group
          aggregate: dict  # function block
          transform: dict  # function block
          filter: dict  # function block
@@ -549,6 +592,8 @@ def groupby(ingredient: BaseIngredient, result, **options) -> ProcedureResult:
             param1: foo
             param2: baz
 
+    wildcard is supported in the column names. So ``aggreagte: {"*": "sum"}`` will run on every indicator in
+    the ingredient
 
     Keyword Args
     ------------
@@ -567,12 +612,12 @@ def groupby(ingredient: BaseIngredient, result, **options) -> ProcedureResult:
     ----
     - Only one of ``aggregate``, ``transform`` or ``filter`` can be used in one procedure.
     - Any columns not mentioned in groupby or functions are dropped.
-
     """
+    assert len(ingredients) == 1, "procedure only support 1 ingredient for now."
+    logger.info("groupby: " + ingredients[0])
 
-    logger.info("groupby: " + ingredient.ingred_id)
-
-    data = ingredient.get_data()
+    ingredient = chef.dag.get_node(ingredients[0]).evaluate()
+    data = ingredient.copy_data()
     by = options.pop('groupby')
     if 'insert_key' in options:
         insert_key = options.pop('insert_key')
@@ -597,31 +642,32 @@ def groupby(ingredient: BaseIngredient, result, **options) -> ProcedureResult:
 
     newdata = dict()
 
-    # TODO: support apply function to all items?
-    for k, func in options[comp_type].items():
+    for name_tmpl, func in options[comp_type].items():
         func = mkfunc(func)
-        if comp_type == 'aggregate':
-            newdata[k] = (data[k].groupby(by=by).agg({k: func})
-                          .reset_index().dropna())
-        if comp_type == 'transform':
-            df = data[k].set_index(ingredient.key_to_list())
-            levels = [df.index.names.index(x) for x in by]
-            newdata[k] = (df.groupby(level=levels)[k].transform(func)
-                          .reset_index().dropna())
-        if comp_type == 'filter':
-            df = data[k].set_index(ingredient.key_to_list())
-            levels = [df.index.names.index(x) for x in by]
-            newdata[k] = (df.groupby(level=levels)[k].filter(func)
-                          .reset_index().dropna())
-        for col, val in insert_key.items():
-            newdata[k][col] = val
-            newkey = newkey+','+col
+        indicator_names = fnmatch.filter(data.keys(), name_tmpl)
+        for k in indicator_names:
+            if comp_type == 'aggregate':
+                newdata[k] = (data[k].groupby(by=by).agg({k: func})
+                              .reset_index().dropna())
+            if comp_type == 'transform':
+                df = data[k].set_index(ingredient.key_to_list())
+                levels = [df.index.names.index(x) for x in by]
+                newdata[k] = (df.groupby(level=levels)[k].transform(func)
+                              .reset_index().dropna())
+            if comp_type == 'filter':
+                df = data[k].set_index(ingredient.key_to_list())
+                levels = [df.index.names.index(x) for x in by]
+                newdata[k] = (df.groupby(level=levels)[k].filter(func)
+                              .reset_index().dropna())
+            for col, val in insert_key.items():
+                newdata[k][col] = val
+                newkey = newkey+','+col
 
-    return ProcedureResult(result, newkey, data=newdata)
+    return ProcedureResult(chef, result, newkey, data=newdata)
 
 
 @debuggable
-def window(ingredient: BaseIngredient, result, **options) -> ProcedureResult:
+def window(chef: Chef, ingredients: List[str], result, **options) -> ProcedureResult:
     """apply functions on a rolling window
 
     .. highlight:: yaml
@@ -686,8 +732,9 @@ def window(ingredient: BaseIngredient, result, **options) -> ProcedureResult:
     -----
     Any column not mentioned in the `aggregate` block will be dropped in the returned ingredient.
     """
-
-    logger.info('window: ' + ingredient.ingred_id)
+    assert len(ingredients) == 1, "procedure only support 1 ingredient for now."
+    ingredient = chef.dag.get_node(ingredients[0]).evaluate()
+    logger.info('window: ' + ingredients[0])
 
     # reading options
     window = options.pop('window')
@@ -698,7 +745,7 @@ def window(ingredient: BaseIngredient, result, **options) -> ProcedureResult:
     min_periods = read_opt(window, 'min_periods', default=0)
     center = read_opt(window, 'center', default=False)
 
-    data = ingredient.get_data()
+    data = ingredient.copy_data()
     newdata = dict()
 
     for k, func in aggregate.items():
@@ -722,11 +769,11 @@ def window(ingredient: BaseIngredient, result, **options) -> ProcedureResult:
             newdata[k] = (df.groupby(level=levels, group_keys=False)
                           .rolling(window=size, min_periods=min_periods, center=center)
                           .agg(f).reset_index().dropna())
-    return ProcedureResult(result, ingredient.key, newdata)
+    return ProcedureResult(chef, result, ingredient.key, newdata)
 
 
 @debuggable
-def run_op(ingredient: BaseIngredient, result, op) -> ProcedureResult:
+def run_op(chef: Chef, ingredients: List[str], result, op) -> ProcedureResult:
     """run math operation on each row of ingredient data.
 
     Procedure format:
@@ -736,7 +783,7 @@ def run_op(ingredient: BaseIngredient, result, op) -> ProcedureResult:
        procedure: filter_item
        ingredients:  # list of ingredient id
          - ingredient_id
-       result: str  # new ingledient id
+       result: str  # new ingredient id
        options:
          items: list  # a list of items should be in the result ingredient
 
@@ -763,10 +810,12 @@ def run_op(ingredient: BaseIngredient, result, op) -> ProcedureResult:
             new_col_name: "col_a + col_b"
     """
 
+    assert len(ingredients) == 1, "procedure only support 1 ingredient for now."
+    ingredient = chef.dag.get_node(ingredients[0]).evaluate()
     assert ingredient.dtype == 'datapoints'
     logger.info("run_op: " + ingredient.ingred_id)
 
-    data = ingredient.get_data()
+    data = ingredient.copy_data()
     keys = ingredient.key_to_list()
 
     # concat all the datapoint dataframe first, and eval the ops
@@ -782,11 +831,11 @@ def run_op(ingredient: BaseIngredient, result, op) -> ProcedureResult:
 
     if not result:
         result = ingredient.ingred_id + '-op'
-    return ProcedureResult(result, ingredient.key, data=data)
+    return ProcedureResult(chef, result, ingredient.key, data=data)
 
 
 @debuggable
-def extract_concepts(*ingredients: List[BaseIngredient], result,
+def extract_concepts(chef: Chef, ingredients: List[str], result,
                      join=None, overwrite=None, include_keys=False) -> ProcedureResult:
     """extract concepts from other ingredients.
 
@@ -839,13 +888,17 @@ def extract_concepts(*ingredients: List[BaseIngredient], result,
       only keep concepts from ``ingredients``
 
     """
+
+    ingredients = [chef.dag.get_node(x).evaluate() for x in ingredients]
+    logger.info("extract concepts: {}".format([x.ingred_id for x in ingredients]))
+
     if join:
-        base = join['base']
+        base = chef.dag.get_node(join['base']).evaluate()
         try:
             join_type = join['type']
         except KeyError:
             join_type = 'full_outer'
-        concepts = base.get_data()['concepts'].set_index('concept')
+        concepts = base.copy_data()['concepts'].set_index('concept')
     else:
         concepts = pd.DataFrame([], columns=['concept', 'concept_type']).set_index('concept')
         join_type = 'full_outer'
@@ -853,7 +906,7 @@ def extract_concepts(*ingredients: List[BaseIngredient], result,
     new_concepts = set()
 
     for i in ingredients:
-        data = i.get_data()
+        data = i.copy_data()
         pks = i.key_to_list()
         for k, df in data.items():
             if include_keys:
@@ -877,11 +930,11 @@ def extract_concepts(*ingredients: List[BaseIngredient], result,
             concepts.ix[k, 'concept_type'] = v
     if not result:
         result = 'concepts_extracted'
-    return ProcedureResult(result, 'concept', data={'concepts': concepts.reset_index()})
+    return ProcedureResult(chef, result, 'concept', data={'concepts': concepts.reset_index()})
 
 
 @debuggable
-def trend_bridge(ingredient: BaseIngredient, bridge_start, bridge_end, bridge_length, bridge_on,
+def trend_bridge(chef: Chef, ingredients: List[str], bridge_start, bridge_end, bridge_length, bridge_on,
                  result, target_column=None) -> ProcedureResult:
     """run trend bridge on ingredients
 
@@ -908,7 +961,9 @@ def trend_bridge(ingredient: BaseIngredient, bridge_start, bridge_end, bridge_le
 
     Parameters
     ----------
-    ingredient : BaseIngredient
+    chef: Chef
+        A Chef instance
+    ingredients : list
         The input ingredient. The bridged result will be merged in to this ingredient. If this is
         None, then the only the bridged result will be returned
     bridge_start : dict
@@ -933,23 +988,29 @@ def trend_bridge(ingredient: BaseIngredient, bridge_start, bridge_end, bridge_le
     """
     from ..transformer import trend_bridge as tb
 
-    # check paramaters
-    if ingredient is None:
+    # check parameters
+    if ingredients is None:
         assert 'ingredient' in bridge_start.keys()
         assert 'ingredient' in bridge_end.keys()
+        ingredient = None
+    else:
+        assert len(ingredients) == 1, "procedure only support 1 ingredient for now."
+        ingredient = chef.dag.get_node(ingredients[0]).evaluate()
 
     # get data for start and end
     if 'ingredient' in bridge_start.keys():
-        start = bridge_start['ingredient']
+        start = chef.dag.get_node(bridge_start['ingredient']).evaluate()
     else:
         start = ingredient
     if 'ingredient' in bridge_end.keys():
-        end = bridge_end['ingredient']
+        end = chef.dag.get_node(bridge_end['ingredient']).evaluate()
     else:
         end = ingredient
 
     assert start.dtype == 'datapoints'
     assert end.dtype == 'datapoints'
+
+    logger.info("trend_bridge: {} and {}".format(start.ingred_id, end.ingred_id))
 
     if target_column is None:
         target_column = bridge_start['column']
@@ -961,8 +1022,8 @@ def trend_bridge(ingredient: BaseIngredient, bridge_start, bridge_end, bridge_le
     keys = start.key_to_list()
     keys.remove(bridge_on)
 
-    start_group = start.get_data()[bridge_start['column']].set_index(bridge_on).groupby(keys)
-    end_group = end.get_data()[bridge_end['column']].set_index(bridge_on).groupby(keys)
+    start_group = start.copy_data()[bridge_start['column']].set_index(bridge_on).groupby(keys)
+    end_group = end.copy_data()[bridge_end['column']].set_index(bridge_on).groupby(keys)
 
     # calculate trend bridge on each group
     res_grouped = []
@@ -994,40 +1055,46 @@ def trend_bridge(ingredient: BaseIngredient, bridge_start, bridge_end, bridge_le
     result_data = pd.concat(res, ignore_index=True)
 
     if ingredient is not None:
-        merged = _merge_two(ingredient.get_data(), {target_column: result_data},
+        merged = _merge_two(ingredient.copy_data(), {target_column: result_data},
                             start.key_to_list(), 'datapoints')
-        return ProcedureResult(result, start.key, merged)
+        return ProcedureResult(chef, result, start.key, merged)
     else:
-        return ProcedureResult(result, start.key, {target_column: result_data})
+        return ProcedureResult(chef, result, start.key, {target_column: result_data})
 
 
 @debuggable
-def merge_entity(ingredient: BaseIngredient, dictionary,
+def merge_entity(chef: Chef, ingredients: List[str], dictionary,
                  target_column, result, merged='drop'):
     """merge entities"""
     from ..transformer import merge_keys
 
-    data = ingredient.get_data()
+    assert len(ingredients) == 1, "procedure only support 1 ingredient for now."
+    ingredient = chef.dag.get_node(ingredients[0]).evaluate()
+
+    data = ingredient.copy_data()
 
     res_data = dict()
     for k, df in data.items():
         res_data[k] = merge_keys(df.set_index(ingredient.key_to_list()),
-                                 dictionary, merged).reset_index()
+                                 dictionary, target_column=target_column, merged=merged).reset_index()
 
-    return ProcedureResult(result, ingredient.key, res_data)
+    return ProcedureResult(chef, result, ingredient.key, res_data)
 
 
 @debuggable
-def split_entity(ingredient: BaseIngredient, dictionary,
+def split_entity(chef: Chef, ingredients: List[str], dictionary,
                  target_column, result, splitted='drop'):
     """split entities"""
     from ..transformer import split_keys
 
-    data = ingredient.get_data()
+    assert len(ingredients) == 1, "procedure only support 1 ingredient for now."
+    ingredient = chef.dag.get_node(ingredients[0]).evaluate()
+
+    data = ingredient.copy_data()
 
     res_data = dict()
     for k, df in data.items():
         res_data[k] = split_keys(df.set_index(ingredient.key_to_list()),
                                  target_column, dictionary, splitted).reset_index()
 
-    return ProcedureResult(result, ingredient.key, res_data)
+    return ProcedureResult(chef, result, ingredient.key, res_data)

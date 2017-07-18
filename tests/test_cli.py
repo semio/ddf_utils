@@ -6,10 +6,8 @@ need input from user.
 
 import ddf_utils.chef as chef
 
-import common
 import click
 from click.testing import CliRunner
-import pytest
 import pandas as pd
 
 

@@ -9,7 +9,6 @@ import numpy as np
 import pandas as pd
 import dask.dataframe as dd
 from .utils import load_datapackage_json
-from ..chef_new.helpers import read_opt
 
 
 class Dataset:
@@ -64,7 +63,7 @@ class Dataset:
                     docs.append('{}{}:'.format(' ' * indent, domain))
                     sets = concs[concs.domain == domain]
                     for i in sets.index:
-                        vals = self.get_entity(i)[domain].head(20).values
+                        vals = self.get_entity(i)[i].head(20).values
                         docs.append('{}- {}{}{}'.format(' ' * indent * 2,
                                                         maybe_truncate(i, 10, True),
                                                         ' ' * indent * 2,
@@ -85,101 +84,9 @@ class Dataset:
 
         return '\n'.join(docs)
 
-    @classmethod
-    def from_ddfcsv(cls, datapackage, no_datapoints=False):
-        """read from local DDF csv dataset.
-
-        datapackage: path to the datapackage folder or datapackage.json
-        """
-        concepts = list()
-        entities_ = list()  # temp, the final data will be entities
-        entities = dict()
-        datapoints = dict()
-
-        base_dir, dp = load_datapackage_json(datapackage)
-
-        for r in dp['resources']:
-            pkey = r['schema']['primaryKey']
-            if pkey == 'concept':
-                concepts.append(pd.read_csv(osp.join(base_dir, r['path'])))
-            elif isinstance(pkey, str):
-                entities_.append(
-                    {
-                        "data": pd.read_csv(osp.join(base_dir, r['path']), dtype={pkey: str}),
-                        "key": pkey
-                    })
-            else:
-                if not no_datapoints:
-                    dtypes = dict([(x, 'str') for x in pkey])  # FIXME: time should not be string
-                    df = dd.read_csv(os.path.join(base_dir, r['path']), dtype=dtypes)
-                    try:
-                        indicator_name = list(set(df.columns) - set(pkey))[0]
-                    except:
-                        print(df.columns)
-                        print(pkey)
-                        raise
-                    keys = tuple(sorted(pkey))
-                    if indicator_name in datapoints.keys():
-                        if keys in datapoints[indicator_name]:
-                            datapoints[indicator_name][keys].append(df)
-                        else:
-                            datapoints[indicator_name][keys] = [df]
-                    else:
-                        datapoints[indicator_name] = dict()
-                        datapoints[indicator_name][keys] = [df]
-
-        # datapoints
-        if not no_datapoints:
-            for i, v in datapoints.items():
-                for k, l in v.items():
-                    v[k] = dd.multi.concat(l)
-
-        # concepts
-        concepts = pd.concat(concepts)
-
-        # entities
-        if 'entity_set' not in concepts.concept_type.values:  # only domains
-            for e in entities_:
-                entities[e['key']] = [e['data']]
-        else:
-            for domain in concepts[concepts.concept_type == 'entity_domain']['concept']:
-                entities[domain] = []
-                for e in entities_:
-                    if e['key'] == domain:
-                        entities[domain].append(e['data'])
-                    elif e['key'] in concepts[concepts.domain == domain]['concept'].values:
-                        e['data'] = e['data'].rename(columns={e['key']: domain})
-                        entities[domain].append(e['data'])
-        for e, l in entities.items():
-            df = l[0]
-            for df_ in l[1:]:
-                df = pd.merge(df, df_, on=e, how='outer')
-                for c in list(df.columns):
-                    if c.endswith('_x'):
-                        c_orig = c[:-2]
-                        df[c_orig] = None
-                        for i in df.index:
-                            if not pd.isnull(df.loc[i, c]):
-                                if not pd.isnull(df.loc[i, c_orig+'_y']):
-                                    assert df.loc[i, c] == df.loc[i, c_orig+'_y'], "different values for same cell"
-                                    df.loc[i, c_orig] = df.loc[i, c]
-                                else:
-                                    df.loc[i, c_orig] = df.loc[i, c]
-                            else:
-                                df.loc[i, c_orig] = df.loc[i, c_orig+'_y']
-                        df = df.drop([c, c_orig+'_y'], axis=1)
-            entities[e] = df
-
-        return cls(concepts=concepts, entities=entities,
-                   datapoints=datapoints, attrs=dp)
-
     @property
     def concepts(self):
         return self._concepts
-
-    @property
-    def indicators(self):
-        return list(self._datapoints.keys())
 
     @property
     def datapoints(self):
@@ -200,6 +107,18 @@ class Dataset:
         else:
             return False
 
+    def indicators(self, by=None):
+        if not by:
+            return list(self._datapoints.keys())
+
+        res = list()
+        by = set(by)
+        for i, kvs in self._datapoints.items():
+            for k, v in kvs.items():
+                if by == set(k):
+                    res.append(i)
+        return res
+
     def get_entity(self, ent):
         conc = self.concepts.set_index('concept')
         if conc.loc[ent, 'concept_type'] == 'entity_domain':
@@ -207,7 +126,9 @@ class Dataset:
         else:
             domain = conc.loc[ent, 'domain']
             ent_domain = self.entities[domain]
-            return ent_domain[ent_domain['is--'+ent] == True].dropna(axis=1, how='all')
+            return (ent_domain[ent_domain['is--'+ent] == 'TRUE']
+                    .dropna(axis=1, how='all')
+                    .rename(columns={domain: ent}))
 
     def get_datapoint_df(self, indicator, primary_key=None):
         if primary_key:

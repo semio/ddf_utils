@@ -35,6 +35,7 @@
         <link rel="search" title="Search" href="search.html"/>
     <link rel="top" title="ddf_utils 0.1dev documentation" href="index.html"/>
         <link rel="up" title="ddf_utils package" href="ddf_utils.html"/>
+        <link rel="next" title="ddf_utils.model package" href="ddf_utils.model.html"/>
         <link rel="prev" title="ddf_utils package" href="ddf_utils.html"/> 
 
   
@@ -91,17 +92,17 @@
 <li class="toctree-l2 current"><a class="reference internal" href="ddf_utils.html">ddf_utils package</a><ul class="current">
 <li class="toctree-l3 current"><a class="reference internal" href="ddf_utils.html#subpackages">Subpackages</a><ul class="current">
 <li class="toctree-l4 current"><a class="current reference internal" href="#">ddf_utils.chef package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ddf_utils.model.html">ddf_utils.model package</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="ddf_utils.html#submodules">Submodules</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ddf_utils.html#module-ddf_utils.cli">ddf_utils.cli module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ddf_utils.html#module-ddf_utils.config">ddf_utils.config module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ddf_utils.html#module-ddf_utils.ddf_reader">ddf_utils.ddf_reader module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ddf_utils.html#module-ddf_utils.i18n">ddf_utils.i18n module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ddf_utils.html#module-ddf_utils.index">ddf_utils.index module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ddf_utils.html#module-ddf_utils.datapackage">ddf_utils.datapackage module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ddf_utils.html#module-ddf_utils.io">ddf_utils.io module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ddf_utils.html#module-ddf_utils.ops">ddf_utils.ops module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ddf_utils.html#module-ddf_utils.patch">ddf_utils.patch module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ddf_utils.html#module-ddf_utils.qa">ddf_utils.qa module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ddf_utils.html#module-ddf_utils.str">ddf_utils.str module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ddf_utils.html#module-ddf_utils.transformer">ddf_utils.transformer module</a></li>
 </ul>
@@ -161,81 +162,74 @@
 <div class="section" id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
 </div>
+<div class="section" id="module-ddf_utils.chef.api">
+<span id="ddf-utils-chef-api-module"></span><h2>ddf_utils.chef.api module<a class="headerlink" href="#module-ddf_utils.chef.api" title="Permalink to this headline">¶</a></h2>
+<p>APIs for chef</p>
+</div>
 <div class="section" id="module-ddf_utils.chef.cook">
 <span id="ddf-utils-chef-cook-module"></span><h2>ddf_utils.chef.cook module<a class="headerlink" href="#module-ddf_utils.chef.cook" title="Permalink to this headline">¶</a></h2>
 <p>recipe cooking</p>
-<dl class="function">
-<dt id="ddf_utils.chef.cook.build_dag">
-<code class="descclassname">ddf_utils.chef.cook.</code><code class="descname">build_dag</code><span class="sig-paren">(</span><em>recipe</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.cook.build_dag" title="Permalink to this definition">¶</a></dt>
-<dd><p>build a DAG model for the recipe.</p>
-<p>For more detail for DAG model, see <a class="reference internal" href="#module-ddf_utils.chef.dag" title="ddf_utils.chef.dag"><code class="xref py py-mod docutils literal"><span class="pre">ddf_utils.chef.dag</span></code></a>.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="ddf_utils.chef.cook.build_recipe">
-<code class="descclassname">ddf_utils.chef.cook.</code><code class="descname">build_recipe</code><span class="sig-paren">(</span><em>recipe_file</em>, <em>to_disk=False</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.cook.build_recipe" title="Permalink to this definition">¶</a></dt>
-<dd><p>build a complete recipe object.</p>
-<p>This function will check each part of recipe, convert string (the ingredient ids,
-dictionaries file names) into actual objects.</p>
-<p>If there are includes in recipe file, this function will run recurivly.
-If no includes found then return the parsed object as is.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>recipe_file</strong> (<cite>str</cite>) &#8211; path to recipe file</td>
-</tr>
-<tr class="field-even field"><th class="field-name" colspan="2">Keyword Arguments:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><strong>to_disk</strong> (<em>bool</em>) &#8211; if true, save the parsed reslut to a yaml file in working dir</td>
-</tr>
-<tr class="field-odd field"><th class="field-name" colspan="2">Other Parameters:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><strong>ddf_dir</strong> (<cite>str</cite>) &#8211; path to search for DDF datasets, will overwrite the contfig in recipe</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="ddf_utils.chef.cook.check_dataset_availability">
-<code class="descclassname">ddf_utils.chef.cook.</code><code class="descname">check_dataset_availability</code><span class="sig-paren">(</span><em>recipe</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.cook.check_dataset_availability" title="Permalink to this definition">¶</a></dt>
-<dd><p>check availability of all datasets required by the recipe.</p>
-<p>raise error if some dataset not available. otherwise do nothing.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="ddf_utils.chef.cook.get_dishes">
-<code class="descclassname">ddf_utils.chef.cook.</code><code class="descname">get_dishes</code><span class="sig-paren">(</span><em>recipe</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.cook.get_dishes" title="Permalink to this definition">¶</a></dt>
-<dd><p>get all dishes in the recipe</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="ddf_utils.chef.cook.run_recipe">
-<code class="descclassname">ddf_utils.chef.cook.</code><code class="descname">run_recipe</code><span class="sig-paren">(</span><em>recipe</em>, <em>serve=False</em>, <em>outpath=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.cook.run_recipe" title="Permalink to this definition">¶</a></dt>
-<dd><p>run the recipe.</p>
-<p>returns a dictionary. keys are <cite>concepts</cite>, <cite>entities</cite> and <cite>datapoints</cite>,
-and values are ingredients defined in the <cite>serve</cite> procedures or <cite>serving</cite> section.
-for example:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span>
-    <span class="s2">&quot;concepts&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;ingredient&quot;</span><span class="p">:</span> <span class="n">DataFrame1</span><span class="p">,</span> <span class="s2">&quot;options&quot;</span><span class="p">:</span> <span class="bp">None</span><span class="p">}]</span>
-    <span class="s2">&quot;datapoints&quot;</span><span class="p">:</span> <span class="p">[</span>
-        <span class="p">{</span>
-            <span class="s2">&quot;ingredient&quot;</span><span class="p">:</span> <span class="n">DataFrame2</span><span class="p">,</span>
-            <span class="s2">&quot;options&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;digits&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">}</span>
-        <span class="p">},</span>
-        <span class="p">{</span>
-            <span class="s2">&quot;ingredient&quot;</span><span class="p">:</span> <span class="n">DataFrame3</span><span class="p">,</span>
-            <span class="s2">&quot;options&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;digits&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}</span>
-        <span class="p">},</span>
-    <span class="p">]</span>
-<span class="p">}</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="function">
-<dt id="ddf_utils.chef.cook.update_recipe_last_update">
-<code class="descclassname">ddf_utils.chef.cook.</code><code class="descname">update_recipe_last_update</code><span class="sig-paren">(</span><em>recipe</em>, <em>outdir</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.cook.update_recipe_last_update" title="Permalink to this definition">¶</a></dt>
+<dl class="class">
+<dt id="ddf_utils.chef.cook.Chef">
+<em class="property">class </em><code class="descclassname">ddf_utils.chef.cook.</code><code class="descname">Chef</code><span class="sig-paren">(</span><em>dag=None</em>, <em>metadata=None</em>, <em>config=None</em>, <em>cooking=None</em>, <em>serving=None</em>, <em>recipe=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.cook.Chef" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>the chef api</p>
+<dl class="method">
+<dt id="ddf_utils.chef.cook.Chef.add_config">
+<code class="descname">add_config</code><span class="sig-paren">(</span><em>**config</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.cook.Chef.add_config" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="method">
+<dt id="ddf_utils.chef.cook.Chef.add_ingredient">
+<code class="descname">add_ingredient</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.cook.Chef.add_ingredient" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ddf_utils.chef.cook.Chef.add_metadata">
+<code class="descname">add_metadata</code><span class="sig-paren">(</span><em>**metadata</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.cook.Chef.add_metadata" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ddf_utils.chef.cook.Chef.add_procedure">
+<code class="descname">add_procedure</code><span class="sig-paren">(</span><em>collection</em>, <em>procedure</em>, <em>ingredients</em>, <em>result=None</em>, <em>options=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.cook.Chef.add_procedure" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="ddf_utils.chef.cook.Chef.from_recipe">
+<em class="property">classmethod </em><code class="descname">from_recipe</code><span class="sig-paren">(</span><em>recipe_file</em>, <em>**config</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.cook.Chef.from_recipe" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ddf_utils.chef.cook.Chef.ingredients">
+<code class="descname">ingredients</code><a class="headerlink" href="#ddf_utils.chef.cook.Chef.ingredients" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="ddf_utils.chef.cook.Chef.register_procedure">
+<em class="property">static </em><code class="descname">register_procedure</code><span class="sig-paren">(</span><em>func</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.cook.Chef.register_procedure" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ddf_utils.chef.cook.Chef.run">
+<code class="descname">run</code><span class="sig-paren">(</span><em>serve=False</em>, <em>outpath=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.cook.Chef.run" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ddf_utils.chef.cook.Chef.to_graph">
+<code class="descname">to_graph</code><span class="sig-paren">(</span><em>g=None</em>, <em>node=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.cook.Chef.to_graph" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ddf_utils.chef.cook.Chef.to_recipe">
+<code class="descname">to_recipe</code><span class="sig-paren">(</span><em>fp=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.cook.Chef.to_recipe" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ddf_utils.chef.cook.Chef.validate">
+<code class="descname">validate</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.cook.Chef.validate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
 
 </div>
 <div class="section" id="module-ddf_utils.chef.ingredient">
@@ -243,7 +237,7 @@ for example:</p>
 <p>main ingredient class</p>
 <dl class="class">
 <dt id="ddf_utils.chef.ingredient.BaseIngredient">
-<em class="property">class </em><code class="descclassname">ddf_utils.chef.ingredient.</code><code class="descname">BaseIngredient</code><span class="sig-paren">(</span><em>ingred_id</em>, <em>key</em>, <em>data=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.ingredient.BaseIngredient" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">ddf_utils.chef.ingredient.</code><code class="descname">BaseIngredient</code><span class="sig-paren">(</span><em>chef</em>, <em>ingred_id</em>, <em>key</em>, <em>data=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.ingredient.BaseIngredient" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <dl class="method">
 <dt id="ddf_utils.chef.ingredient.BaseIngredient.copy_data">
@@ -282,10 +276,15 @@ for example:</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>outpath</strong> (<a class="reference internal" href="ddf_utils.html#module-ddf_utils.str" title="ddf_utils.str"><em>str</em></a>) &#8211; the path to save the ingredient</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>outpath</strong> (<a class="reference internal" href="ddf_utils.html#module-ddf_utils.str" title="ddf_utils.str"><em>str</em></a>) – the path to save the ingredient</p>
+</td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Other Parameters:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><strong>digits</strong> (<em>int</em>) &#8211; how many digits to keep at most.</td>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><ul class="first last simple">
+<li><strong>digits</strong> (<em>int</em>) – how many digits to keep at most.</li>
+<li><strong>path</strong> (<cite>str</cite>) – which sub-folder under the outpath to save the output files</li>
+</ul>
+</td>
 </tr>
 </tbody>
 </table>
@@ -295,7 +294,7 @@ for example:</p>
 
 <dl class="class">
 <dt id="ddf_utils.chef.ingredient.Ingredient">
-<em class="property">class </em><code class="descclassname">ddf_utils.chef.ingredient.</code><code class="descname">Ingredient</code><span class="sig-paren">(</span><em>ingred_id</em>, <em>ddf_id=None</em>, <em>key=None</em>, <em>values=None</em>, <em>row_filter=None</em>, <em>data=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.ingredient.Ingredient" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">ddf_utils.chef.ingredient.</code><code class="descname">Ingredient</code><span class="sig-paren">(</span><em>chef</em>, <em>ingred_id</em>, <em>ddf_id=None</em>, <em>key=None</em>, <em>values=None</em>, <em>row_filter=None</em>, <em>data=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.ingredient.Ingredient" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#ddf_utils.chef.ingredient.BaseIngredient" title="ddf_utils.chef.ingredient.BaseIngredient"><code class="xref py py-class docutils literal"><span class="pre">ddf_utils.chef.ingredient.BaseIngredient</span></code></a></p>
 <p>ingredient class: represents an ingredient object in recipe file.
 see the implement of from_dict() method for how the object is constructed.</p>
@@ -316,32 +315,32 @@ see the implement of from_dict() method for how the object is constructed.</p>
 <dl class="attribute">
 <dt id="ddf_utils.chef.ingredient.Ingredient.ingred_id">
 <code class="descname">ingred_id</code><a class="headerlink" href="#ddf_utils.chef.ingredient.Ingredient.ingred_id" title="Permalink to this definition">¶</a></dt>
-<dd><p><cite>str</cite> &#8211; The id string</p>
+<dd><p><cite>str</cite> – The id string</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="ddf_utils.chef.ingredient.Ingredient.ddf_id">
 <code class="descname">ddf_id</code><a class="headerlink" href="#ddf_utils.chef.ingredient.Ingredient.ddf_id" title="Permalink to this definition">¶</a></dt>
-<dd><p><cite>str</cite> &#8211; the underlaying dataset id</p>
+<dd><p><cite>str</cite> – the underlaying dataset id</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="ddf_utils.chef.ingredient.Ingredient.key">
 <code class="descname">key</code><a class="headerlink" href="#ddf_utils.chef.ingredient.Ingredient.key" title="Permalink to this definition">¶</a></dt>
-<dd><p><cite>str</cite> &#8211; the key columns of the ingredient</p>
+<dd><p><cite>str</cite> – the key columns of the ingredient</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="ddf_utils.chef.ingredient.Ingredient.value">
 <code class="descname">value</code><a class="headerlink" href="#ddf_utils.chef.ingredient.Ingredient.value" title="Permalink to this definition">¶</a></dt>
-<dd><p><cite>list</cite> &#8211; concept filter applied to the dataset. if <cite>value</cite> == &#8220;*&#8221;, all concept of
+<dd><p><cite>list</cite> – concept filter applied to the dataset. if <cite>value</cite> == “*”, all concept of
 the dataset will be in the ingredient</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="ddf_utils.chef.ingredient.Ingredient.row_filter">
-<code class="descname">row_filter</code><a class="headerlink" href="#ddf_utils.chef.ingredient.Ingredient.row_filter" title="Permalink to this definition">¶</a></dt>
-<dd><p><cite>dict</cite> &#8211; row filter applied to the dataset</p>
+<dt id="ddf_utils.chef.ingredient.Ingredient.filter">
+<code class="descname">filter</code><a class="headerlink" href="#ddf_utils.chef.ingredient.Ingredient.filter" title="Permalink to this definition">¶</a></dt>
+<dd><p><cite>dict</cite> – row filter applied to the dataset</p>
 </dd></dl>
 
 <dl class="method">
@@ -351,20 +350,25 @@ the dataset will be in the ingredient</p>
 </dd></dl>
 
 <dl class="attribute">
+<dt id="ddf_utils.chef.ingredient.Ingredient.dataset_path">
+<code class="descname">dataset_path</code><a class="headerlink" href="#ddf_utils.chef.ingredient.Ingredient.dataset_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>The path to the dataset</p>
+</dd></dl>
+
+<dl class="attribute">
 <dt id="ddf_utils.chef.ingredient.Ingredient.ddf">
 <code class="descname">ddf</code><a class="headerlink" href="#ddf_utils.chef.ingredient.Ingredient.ddf" title="Permalink to this definition">¶</a></dt>
 <dd><p>The DDF reader object</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="ddf_utils.chef.ingredient.Ingredient.ddf_path">
-<code class="descname">ddf_path</code><a class="headerlink" href="#ddf_utils.chef.ingredient.Ingredient.ddf_path" title="Permalink to this definition">¶</a></dt>
-<dd><p>The path to the dataset</p>
-</dd></dl>
+<dt>
+<code class="descname">ddf_id</code></dt>
+<dd></dd></dl>
 
 <dl class="classmethod">
 <dt id="ddf_utils.chef.ingredient.Ingredient.from_dict">
-<em class="property">classmethod </em><code class="descname">from_dict</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.ingredient.Ingredient.from_dict" title="Permalink to this definition">¶</a></dt>
+<em class="property">classmethod </em><code class="descname">from_dict</code><span class="sig-paren">(</span><em>chef</em>, <em>data</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.ingredient.Ingredient.from_dict" title="Permalink to this definition">¶</a></dt>
 <dd><p>create an instance by a dictionary</p>
 <p>The dictionary should provide following keys:</p>
 <ul class="simple">
@@ -386,7 +390,7 @@ the dataset will be in the ingredient</p>
 
 <dl class="class">
 <dt id="ddf_utils.chef.ingredient.ProcedureResult">
-<em class="property">class </em><code class="descclassname">ddf_utils.chef.ingredient.</code><code class="descname">ProcedureResult</code><span class="sig-paren">(</span><em>ingred_id</em>, <em>key</em>, <em>data</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.ingredient.ProcedureResult" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">ddf_utils.chef.ingredient.</code><code class="descname">ProcedureResult</code><span class="sig-paren">(</span><em>chef</em>, <em>ingred_id</em>, <em>key</em>, <em>data</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.ingredient.ProcedureResult" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#ddf_utils.chef.ingredient.BaseIngredient" title="ddf_utils.chef.ingredient.BaseIngredient"><code class="xref py py-class docutils literal"><span class="pre">ddf_utils.chef.ingredient.BaseIngredient</span></code></a></p>
 <dl class="method">
 <dt id="ddf_utils.chef.ingredient.ProcedureResult.reset_data">
@@ -400,41 +404,37 @@ the dataset will be in the ingredient</p>
 <span id="ddf-utils-chef-procedure-module"></span><h2>ddf_utils.chef.procedure module<a class="headerlink" href="#module-ddf_utils.chef.procedure" title="Permalink to this headline">¶</a></h2>
 <p>all procedures for recipes</p>
 <dl class="function">
-<dt id="ddf_utils.chef.procedure.copy">
-<code class="descclassname">ddf_utils.chef.procedure.</code><code class="descname">copy</code><span class="sig-paren">(</span><em>ingredient: ddf_utils.chef.ingredient.BaseIngredient</em>, <em>result</em>, <em>dictionary: typing.Dict</em><span class="sig-paren">)</span> &rarr; ddf_utils.chef.ingredient.ProcedureResult<a class="headerlink" href="#ddf_utils.chef.procedure.copy" title="Permalink to this definition">¶</a></dt>
-<dd><p>make copy of ingredient data columns, with new names.</p>
+<dt id="ddf_utils.chef.procedure.assign_value">
+<code class="descclassname">ddf_utils.chef.procedure.</code><code class="descname">assign_value</code><span class="sig-paren">(</span><em>chef: ddf_utils.chef.cook.Chef, ingredients: typing.List[str], result, dictionary</em><span class="sig-paren">)</span> &#x2192; ddf_utils.chef.ingredient.ProcedureResult<a class="headerlink" href="#ddf_utils.chef.procedure.assign_value" title="Permalink to this definition">¶</a></dt>
+<dd><p>Assign value to specific key/value pair</p>
+<p>NOT IMPLEMENTED YET.</p>
 <p>Procedure format:</p>
-<div class="highlight-yaml"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">procedure</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">copy</span>
-<span class="l l-Scalar l-Scalar-Plain">ingredients</span><span class="p p-Indicator">:</span>  <span class="c1"># list of ingredient id</span>
+<div class="highlight-yaml"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">procedure</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">assign_value</span>
+<span class="l l-Scalar l-Scalar-Plain">ingredients</span><span class="p p-Indicator">:</span>
   <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">ingredient_id</span>
-<span class="l l-Scalar l-Scalar-Plain">result</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">str</span>  <span class="c1"># new ingledient id</span>
-<span class="l l-Scalar l-Scalar-Plain">options</span><span class="p p-Indicator">:</span>
-<span class="l l-Scalar l-Scalar-Plain">dictionary</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">dict</span>  <span class="c1"># old name -&gt; new name mappings</span>
+<span class="l l-Scalar l-Scalar-Plain">result</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">str</span>
+<span class="l l-Scalar l-Scalar-Plain">option</span><span class="p p-Indicator">:</span>
+  <span class="l l-Scalar l-Scalar-Plain">dictionary</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">str or dict</span>  <span class="c1"># file name or mappings</span>
 </pre></div>
 </div>
-<p>An example of dictionary:</p>
-<div class="highlight-yaml"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">dictionary</span><span class="p p-Indicator">:</span>
-  <span class="l l-Scalar l-Scalar-Plain">col1</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">copy_1_1</span>  <span class="c1"># string</span>
-  <span class="l l-Scalar l-Scalar-Plain">col2</span><span class="p p-Indicator">:</span>  <span class="c1"># list of string</span>
-    <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">copy_2_1</span>
-    <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">copy_2_2</span>
+<p>dictionary format: {column -&gt; [{key -&gt; value}]}</p>
+<p>for example:</p>
+<div class="highlight-json"><div class="highlight"><pre><span></span>{
+  &quot;concept&quot;: {
+    [
+      &quot;key&quot;: &quot;concept_to_change&quot;
+      &quot;column&quot;: &quot;description&quot;
+      &quot;value&quot;: &quot;new value to use&quot;
+    ]
+  }
+}
 </pre></div>
 </div>
-<p>where &#8216;col1&#8217; and &#8216;col2&#8217; should be existing columns in the input ingredient</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name" colspan="2">Keyword Arguments:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><strong>dictionary</strong> (<em>dict</em>) &#8211; a dictionary of oldname -&gt; newname mappings</td>
-</tr>
-</tbody>
-</table>
 </dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.chef.procedure.extract_concepts">
-<code class="descclassname">ddf_utils.chef.procedure.</code><code class="descname">extract_concepts</code><span class="sig-paren">(</span><em>*ingredients: typing.List[ddf_utils.chef.ingredient.BaseIngredient], result, join=None, overwrite=None, include_keys=False</em><span class="sig-paren">)</span> &rarr; ddf_utils.chef.ingredient.ProcedureResult<a class="headerlink" href="#ddf_utils.chef.procedure.extract_concepts" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.chef.procedure.</code><code class="descname">extract_concepts</code><span class="sig-paren">(</span><em>chef: ddf_utils.chef.cook.Chef, ingredients: typing.List[str], result, join=None, overwrite=None, include_keys=False</em><span class="sig-paren">)</span> &#x2192; ddf_utils.chef.ingredient.ProcedureResult<a class="headerlink" href="#ddf_utils.chef.procedure.extract_concepts" title="Permalink to this definition">¶</a></dt>
 <dd><p>extract concepts from other ingredients.</p>
 <p>Procedure format:</p>
 <div class="highlight-yaml"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">procedure</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">extract_concepts</span>
@@ -456,14 +456,14 @@ the dataset will be in the ingredient</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>ingredients</strong> &#8211; any numbers of ingredient that needs to extract concepts from</p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>ingredients</strong> – any numbers of ingredient that needs to extract concepts from</p>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Keyword Arguments:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><ul class="first last simple">
-<li><strong>join</strong> (<em>dict</em><em>, </em><em>optional</em>) &#8211; the base ingredient to join</li>
-<li><strong>overwrite</strong> (<em>dict</em><em>, </em><em>optional</em>) &#8211; overwrite concept types for some concepts</li>
-<li><strong>include_keys</strong> (<em>bool</em><em>, </em><em>optional</em>) &#8211; if we shuld include the primaryKeys of the ingredients, default to false</li>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><ul class="first last simple">
+<li><strong>join</strong> (<em>dict</em><em>, </em><em>optional</em>) – the base ingredient to join</li>
+<li><strong>overwrite</strong> (<em>dict</em><em>, </em><em>optional</em>) – overwrite concept types for some concepts</li>
+<li><strong>include_keys</strong> (<em>bool</em><em>, </em><em>optional</em>) – if we shuld include the primaryKeys of the ingredients, default to false</li>
 </ul>
 </td>
 </tr>
@@ -489,13 +489,13 @@ only keep concepts from <code class="docutils literal"><span class="pre">ingredi
 
 <dl class="function">
 <dt id="ddf_utils.chef.procedure.filter_item">
-<code class="descclassname">ddf_utils.chef.procedure.</code><code class="descname">filter_item</code><span class="sig-paren">(</span><em>ingredient: ddf_utils.chef.ingredient.BaseIngredient</em>, <em>result</em>, <em>items: list</em><span class="sig-paren">)</span> &rarr; ddf_utils.chef.ingredient.ProcedureResult<a class="headerlink" href="#ddf_utils.chef.procedure.filter_item" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.chef.procedure.</code><code class="descname">filter_item</code><span class="sig-paren">(</span><em>chef: ddf_utils.chef.cook.Chef, ingredients: typing.List[str], result, items: list</em><span class="sig-paren">)</span> &#x2192; ddf_utils.chef.ingredient.ProcedureResult<a class="headerlink" href="#ddf_utils.chef.procedure.filter_item" title="Permalink to this definition">¶</a></dt>
 <dd><p>filter items from the ingredient data</p>
 <p>Procedure format:</p>
 <div class="highlight-yaml"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">procedure</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">filter_item</span>
 <span class="l l-Scalar l-Scalar-Plain">ingredients</span><span class="p p-Indicator">:</span>  <span class="c1"># list of ingredient id</span>
   <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">ingredient_id</span>
-<span class="l l-Scalar l-Scalar-Plain">result</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">str</span>  <span class="c1"># new ingledient id</span>
+<span class="l l-Scalar l-Scalar-Plain">result</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">str</span>  <span class="c1"># new ingredient id</span>
 <span class="l l-Scalar l-Scalar-Plain">options</span><span class="p p-Indicator">:</span>
   <span class="l l-Scalar l-Scalar-Plain">items</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">list</span>  <span class="c1"># a list of items should be in the result ingredient</span>
 </pre></div>
@@ -505,7 +505,7 @@ only keep concepts from <code class="docutils literal"><span class="pre">ingredi
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name" colspan="2">Keyword Arguments:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><strong>items</strong> (<em>list</em>) &#8211; a list of items to filter from base ingredient</td>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body"><strong>items</strong> (<em>list</em>) – a list of items to filter from base ingredient</td>
 </tr>
 </tbody>
 </table>
@@ -513,41 +513,79 @@ only keep concepts from <code class="docutils literal"><span class="pre">ingredi
 
 <dl class="function">
 <dt id="ddf_utils.chef.procedure.filter_row">
-<code class="descclassname">ddf_utils.chef.procedure.</code><code class="descname">filter_row</code><span class="sig-paren">(</span><em>ingredient: ddf_utils.chef.ingredient.BaseIngredient</em>, <em>result</em>, <em>**options</em><span class="sig-paren">)</span> &rarr; ddf_utils.chef.ingredient.ProcedureResult<a class="headerlink" href="#ddf_utils.chef.procedure.filter_row" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.chef.procedure.</code><code class="descname">filter_row</code><span class="sig-paren">(</span><em>chef: ddf_utils.chef.cook.Chef, ingredients: typing.List[str], result, **options</em><span class="sig-paren">)</span> &#x2192; ddf_utils.chef.ingredient.ProcedureResult<a class="headerlink" href="#ddf_utils.chef.procedure.filter_row" title="Permalink to this definition">¶</a></dt>
 <dd><p>filter an ingredient based on a set of options and return
 the result as new ingredient.</p>
 <p>Procedure format:</p>
 <div class="highlight-yaml"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">procedure</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">filter_row</span>
 <span class="l l-Scalar l-Scalar-Plain">ingredients</span><span class="p p-Indicator">:</span>  <span class="c1"># list of ingredient id</span>
   <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">ingredient_id</span>
-<span class="l l-Scalar l-Scalar-Plain">result</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">str</span>  <span class="c1"># new ingledient id</span>
+<span class="l l-Scalar l-Scalar-Plain">result</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">str</span>  <span class="c1"># new ingredient id</span>
 <span class="l l-Scalar l-Scalar-Plain">options</span><span class="p p-Indicator">:</span>
-  <span class="l l-Scalar l-Scalar-Plain">dictionary</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">dict</span>  <span class="c1"># filter definition block</span>
+  <span class="l l-Scalar l-Scalar-Plain">filters</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">dict</span>  <span class="c1"># filter definition block</span>
 </pre></div>
 </div>
 <p>A dictionary should be provided in options with the following format:</p>
-<div class="highlight-yaml"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">dictionary</span><span class="p p-Indicator">:</span>
-  <span class="l l-Scalar l-Scalar-Plain">new_key_in_new_ingredient</span><span class="p p-Indicator">:</span>
-    <span class="l l-Scalar l-Scalar-Plain">from</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">old_key_in_old_ingredient</span>
-    <span class="l l-Scalar l-Scalar-Plain">filter_col_1</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">filter_val_1</span>
-    <span class="l l-Scalar l-Scalar-Plain">filter_col_2</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">filter_val_2</span>
+<div class="highlight-yaml"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">filters</span><span class="p p-Indicator">:</span>
+    <span class="l l-Scalar l-Scalar-Plain">concept_1</span><span class="p p-Indicator">:</span>
+        <span class="l l-Scalar l-Scalar-Plain">filter_col_1</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">filter_val_1</span>
+        <span class="l l-Scalar l-Scalar-Plain">filter_col_2</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">filter_val_2</span>
 </pre></div>
 </div>
-<p>See a detail example in this <a class="reference external" href="https://github.com/semio/ddf_utils/issues/2#issuecomment-254132615">github issue</a></p>
+<p>See a detail example in this <a class="reference external" href="https://github.com/semio/ddf_utils/blob/dev/tests/recipes_pass/test_filter_row.yml">recipe</a></p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>ingredient</strong> (<a class="reference internal" href="#ddf_utils.chef.ingredient.BaseIngredient" title="ddf_utils.chef.ingredient.BaseIngredient"><em>BaseIngredient</em></a>) &#8211; </li>
-<li><strong>result</strong> (<cite>str</cite>) &#8211; </li>
+<li><strong>chef</strong> (<a class="reference internal" href="#ddf_utils.chef.cook.Chef" title="ddf_utils.chef.cook.Chef"><em>Chef</em></a>) – the Chef instance</li>
+<li><strong>ingredients</strong> – list of ingredient id in the DAG</li>
+<li><strong>result</strong> (<cite>str</cite>) – </li>
 </ul>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Keyword Arguments:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><ul class="first last simple">
-<li><strong>dictionary</strong> (<em>dict</em>) &#8211; The filter description dictionary</li>
-<li><strong>keep_all_columns</strong> (<em>bool</em>) &#8211; don&#8217;t drop any column if true</li>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first last"><strong>filters</strong> (<em>dict</em>) – The filter description dictionary</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="ddf_utils.chef.procedure.flatten">
+<code class="descclassname">ddf_utils.chef.procedure.</code><code class="descname">flatten</code><span class="sig-paren">(</span><em>chef: ddf_utils.chef.cook.Chef, ingredients: typing.List[str], result, **options</em><span class="sig-paren">)</span> &#x2192; ddf_utils.chef.ingredient.ProcedureResult<a class="headerlink" href="#ddf_utils.chef.procedure.flatten" title="Permalink to this definition">¶</a></dt>
+<dd><p>flattening some dimensions, create new indicators.</p>
+<p>procedure format:</p>
+<div class="highlight-yaml"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">procedure</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">flatten</span>
+<span class="l l-Scalar l-Scalar-Plain">ingredients</span><span class="p p-Indicator">:</span>
+    <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">ingredient_to_run</span>
+<span class="l l-Scalar l-Scalar-Plain">options</span><span class="p p-Indicator">:</span>
+    <span class="l l-Scalar l-Scalar-Plain">flatten_dimensions</span><span class="p p-Indicator">:</span>
+        <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">entity_1</span>
+        <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">entity_2</span>
+    <span class="l l-Scalar l-Scalar-Plain">dictionary</span><span class="p p-Indicator">:</span>
+        <span class="s">&quot;concept_name_wildcard&quot;</span><span class="p p-Indicator">:</span> <span class="s">&quot;new_concept_name_template&quot;</span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal"><span class="pre">dictionary</span></code> can have multiple entries, for each entry the concepts that matches the key in wildcard
+matching will be flatten to the value, which should be a template string. The variables for the templates
+will be provided with a dictionary contains <code class="docutils literal"><span class="pre">concept</span></code>, and all columns from <code class="docutils literal"><span class="pre">flatten_dimensions</span></code> as keys.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>chef</strong> (<a class="reference internal" href="#ddf_utils.chef.cook.Chef" title="ddf_utils.chef.cook.Chef"><em>Chef</em></a>) – the Chef instance</li>
+<li><strong>ingredients</strong> (<em>list</em>) – a list of ingredients</li>
+<li><strong>result</strong> (<cite>str</cite>) – id of result ingredient</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Keyword Arguments:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><ul class="first last simple">
+<li><strong>flatten_dimensions</strong> (<em>list</em>) – a list of dimension to be flattened</li>
+<li><strong>dictionary</strong> (<em>dict</em>) – the dictionary for old name -&gt; new name mapping</li>
 </ul>
 </td>
 </tr>
@@ -557,15 +595,15 @@ the result as new ingredient.</p>
 
 <dl class="function">
 <dt id="ddf_utils.chef.procedure.groupby">
-<code class="descclassname">ddf_utils.chef.procedure.</code><code class="descname">groupby</code><span class="sig-paren">(</span><em>ingredient: ddf_utils.chef.ingredient.BaseIngredient</em>, <em>result</em>, <em>**options</em><span class="sig-paren">)</span> &rarr; ddf_utils.chef.ingredient.ProcedureResult<a class="headerlink" href="#ddf_utils.chef.procedure.groupby" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.chef.procedure.</code><code class="descname">groupby</code><span class="sig-paren">(</span><em>chef: ddf_utils.chef.cook.Chef, ingredients: typing.List[str], result, **options</em><span class="sig-paren">)</span> &#x2192; ddf_utils.chef.ingredient.ProcedureResult<a class="headerlink" href="#ddf_utils.chef.procedure.groupby" title="Permalink to this definition">¶</a></dt>
 <dd><p>group ingredient data by column(s) and run aggregate function</p>
 <p>Procedure format:</p>
 <div class="highlight-yaml"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">procedure</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">groupby</span>
 <span class="l l-Scalar l-Scalar-Plain">ingredients</span><span class="p p-Indicator">:</span>  <span class="c1"># list of ingredient id</span>
   <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">ingredient_id</span>
-<span class="l l-Scalar l-Scalar-Plain">result</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">str</span>  <span class="c1"># new ingledient id</span>
+<span class="l l-Scalar l-Scalar-Plain">result</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">str</span>  <span class="c1"># new ingredient id</span>
 <span class="l l-Scalar l-Scalar-Plain">options</span><span class="p p-Indicator">:</span>
-  <span class="l l-Scalar l-Scalar-Plain">groupby</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">str or list</span>  <span class="c1"># colunm(s) to group</span>
+  <span class="l l-Scalar l-Scalar-Plain">groupby</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">str or list</span>  <span class="c1"># column(s) to group</span>
   <span class="l l-Scalar l-Scalar-Plain">aggregate</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">dict</span>  <span class="c1"># function block</span>
   <span class="l l-Scalar l-Scalar-Plain">transform</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">dict</span>  <span class="c1"># function block</span>
   <span class="l l-Scalar l-Scalar-Plain">filter</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">dict</span>  <span class="c1"># function block</span>
@@ -585,19 +623,21 @@ the result as new ingredient.</p>
     <span class="l l-Scalar l-Scalar-Plain">param2</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">baz</span>
 </pre></div>
 </div>
+<p>wildcard is supported in the column names. So <code class="docutils literal"><span class="pre">aggreagte:</span> <span class="pre">{&quot;*&quot;:</span> <span class="pre">&quot;sum&quot;}</span></code> will run on every indicator in
+the ingredient</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name" colspan="2">Keyword Arguments:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><ul class="first last simple">
-<li><strong>groubby</strong> (<cite>str</cite> or <cite>list</cite>) &#8211; the column(s) to group, can be a list or a string</li>
-<li><strong>insert_key</strong> (<cite>dict</cite>) &#8211; manually insert keys in to result. This is useful when we want to add back the
+<tr class="field-odd field"><td>&#160;</td><td class="field-body"><ul class="first last simple">
+<li><strong>groubby</strong> (<cite>str</cite> or <cite>list</cite>) – the column(s) to group, can be a list or a string</li>
+<li><strong>insert_key</strong> (<cite>dict</cite>) – manually insert keys in to result. This is useful when we want to add back the
 aggregated column and set them to one value. For example <code class="docutils literal"><span class="pre">geo:</span> <span class="pre">global</span></code> inserts
-the <code class="docutils literal"><span class="pre">geo</span></code> column with all values are &#8220;global&#8221;</li>
-<li><strong>aggregate</strong> &#8211; </li>
-<li><strong>transform</strong> &#8211; </li>
-<li><strong>filter</strong> (<cite>dict</cite>, optinoal) &#8211; the function to run. only one of <cite>aggregate</cite>, <cite>transform</cite> and <cite>filter</cite> should be supplied.</li>
+the <code class="docutils literal"><span class="pre">geo</span></code> column with all values are “global”</li>
+<li><strong>aggregate</strong> – </li>
+<li><strong>transform</strong> – </li>
+<li><strong>filter</strong> (<cite>dict</cite>, optinoal) – the function to run. only one of <cite>aggregate</cite>, <cite>transform</cite> and <cite>filter</cite> should be supplied.</li>
 </ul>
 </td>
 </tr>
@@ -613,26 +653,11 @@ the <code class="docutils literal"><span class="pre">geo</span></code> column wi
 </dd></dl>
 
 <dl class="function">
-<dt id="ddf_utils.chef.procedure.identity">
-<code class="descclassname">ddf_utils.chef.procedure.</code><code class="descname">identity</code><span class="sig-paren">(</span><em>ingredient: ddf_utils.chef.ingredient.BaseIngredient</em>, <em>result</em>, <em>copy=False</em><span class="sig-paren">)</span> &rarr; ddf_utils.chef.ingredient.BaseIngredient<a class="headerlink" href="#ddf_utils.chef.procedure.identity" title="Permalink to this definition">¶</a></dt>
-<dd><p>return the ingredient as is.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name" colspan="2">Keyword Arguments:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><strong>copy</strong> (<em>bool</em><em>, </em><em>optional</em>) &#8211; if copy is True, then treat all data as string. Default: False</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
 <dt id="ddf_utils.chef.procedure.merge">
-<code class="descclassname">ddf_utils.chef.procedure.</code><code class="descname">merge</code><span class="sig-paren">(</span><em>*ingredients: typing.List[ddf_utils.chef.ingredient.BaseIngredient], result, deep=False</em><span class="sig-paren">)</span> &rarr; ddf_utils.chef.ingredient.ProcedureResult<a class="headerlink" href="#ddf_utils.chef.procedure.merge" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.chef.procedure.</code><code class="descname">merge</code><span class="sig-paren">(</span><em>chef: ddf_utils.chef.cook.Chef, ingredients: typing.List[str], result, deep=False</em><span class="sig-paren">)</span> &#x2192; ddf_utils.chef.ingredient.ProcedureResult<a class="headerlink" href="#ddf_utils.chef.procedure.merge" title="Permalink to this definition">¶</a></dt>
 <dd><p>merge a list of ingredients</p>
 <p>The ingredients will be merged one by one in the order of how they are provided to this
-function. Later ones will overwrite the pervious merged results.</p>
+function. Later ones will overwrite the previous merged results.</p>
 <p>Procedure format:</p>
 <div class="highlight-yaml"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">procedure</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">merge</span>
 <span class="l l-Scalar l-Scalar-Plain">ingredients</span><span class="p p-Indicator">:</span>  <span class="c1"># list of ingredient id</span>
@@ -649,10 +674,15 @@ function. Later ones will overwrite the pervious merged results.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>BaseIngredient</strong> &#8211; Any numbers of ingredients to be merged</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>chef</strong> (<a class="reference internal" href="#ddf_utils.chef.cook.Chef" title="ddf_utils.chef.cook.Chef"><em>Chef</em></a>) – a Chef instance</li>
+<li><strong>ingredients</strong> – Any numbers of ingredients to be merged</li>
+</ul>
+</td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Keyword Arguments:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><strong>deep</strong> (<cite>bool</cite>, optional) &#8211; if True, then do deep merging. Default is False</td>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first last"><strong>deep</strong> (<cite>bool</cite>, optional) – if True, then do deep merging. Default is False</p>
+</td>
 </tr>
 </tbody>
 </table>
@@ -661,18 +691,24 @@ function. Later ones will overwrite the pervious merged results.</p>
 if false, overwrite is on the file level. If key-value
 (e.g. geo,year-population_total) exists, whole file gets overwritten
 if true, overwrite is on the row level. If values
-(e.g. afr,2015-population_total) exists, it gets overwritten, if it doesn&#8217;t it stays</p>
+(e.g. afr,2015-population_total) exists, it gets overwritten, if it doesn’t it stays</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ddf_utils.chef.procedure.merge_entity">
+<code class="descclassname">ddf_utils.chef.procedure.</code><code class="descname">merge_entity</code><span class="sig-paren">(</span><em>chef: ddf_utils.chef.cook.Chef, ingredients: typing.List[str], dictionary, target_column, result, merged=’drop’</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.procedure.merge_entity" title="Permalink to this definition">¶</a></dt>
+<dd><p>merge entities</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.chef.procedure.run_op">
-<code class="descclassname">ddf_utils.chef.procedure.</code><code class="descname">run_op</code><span class="sig-paren">(</span><em>ingredient: ddf_utils.chef.ingredient.BaseIngredient</em>, <em>result</em>, <em>op</em><span class="sig-paren">)</span> &rarr; ddf_utils.chef.ingredient.ProcedureResult<a class="headerlink" href="#ddf_utils.chef.procedure.run_op" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.chef.procedure.</code><code class="descname">run_op</code><span class="sig-paren">(</span><em>chef: ddf_utils.chef.cook.Chef, ingredients: typing.List[str], result, op</em><span class="sig-paren">)</span> &#x2192; ddf_utils.chef.ingredient.ProcedureResult<a class="headerlink" href="#ddf_utils.chef.procedure.run_op" title="Permalink to this definition">¶</a></dt>
 <dd><p>run math operation on each row of ingredient data.</p>
 <p>Procedure format:</p>
 <div class="highlight-yaml"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">procedure</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">filter_item</span>
 <span class="l l-Scalar l-Scalar-Plain">ingredients</span><span class="p p-Indicator">:</span>  <span class="c1"># list of ingredient id</span>
   <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">ingredient_id</span>
-<span class="l l-Scalar l-Scalar-Plain">result</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">str</span>  <span class="c1"># new ingledient id</span>
+<span class="l l-Scalar l-Scalar-Plain">result</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">str</span>  <span class="c1"># new ingredient id</span>
 <span class="l l-Scalar l-Scalar-Plain">options</span><span class="p p-Indicator">:</span>
   <span class="l l-Scalar l-Scalar-Plain">items</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">list</span>  <span class="c1"># a list of items should be in the result ingredient</span>
 </pre></div>
@@ -682,7 +718,7 @@ if true, overwrite is on the row level. If values
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name" colspan="2">Keyword Arguments:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><strong>op</strong> (<em>dict</em>) &#8211; a dictionary of concept_name -&gt; function mapping</td>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body"><strong>op</strong> (<em>dict</em>) – a dictionary of concept_name -&gt; function mapping</td>
 </tr>
 </tbody>
 </table>
@@ -701,17 +737,23 @@ write</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="ddf_utils.chef.procedure.split_entity">
+<code class="descclassname">ddf_utils.chef.procedure.</code><code class="descname">split_entity</code><span class="sig-paren">(</span><em>chef: ddf_utils.chef.cook.Chef, ingredients: typing.List[str], dictionary, target_column, result, splitted=’drop’</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.procedure.split_entity" title="Permalink to this definition">¶</a></dt>
+<dd><p>split entities</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="ddf_utils.chef.procedure.translate_column">
-<code class="descclassname">ddf_utils.chef.procedure.</code><code class="descname">translate_column</code><span class="sig-paren">(</span><em>ingredient: ddf_utils.chef.ingredient.BaseIngredient</em>, <em>result</em>, <em>dictionary</em>, <em>column</em>, <em>*</em>, <em>target_column=None</em>, <em>not_found='drop'</em>, <em>ambiguity='prompt'</em><span class="sig-paren">)</span> &rarr; ddf_utils.chef.ingredient.ProcedureResult<a class="headerlink" href="#ddf_utils.chef.procedure.translate_column" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.chef.procedure.</code><code class="descname">translate_column</code><span class="sig-paren">(</span><em>chef: ddf_utils.chef.cook.Chef, ingredients: typing.List[str], result, dictionary, column, *, target_column=None, not_found=’drop’, ambiguity=’prompt’, ignore_case=False</em><span class="sig-paren">)</span> &#x2192; ddf_utils.chef.ingredient.ProcedureResult<a class="headerlink" href="#ddf_utils.chef.procedure.translate_column" title="Permalink to this definition">¶</a></dt>
 <dd><p>Translate column values.</p>
 <p>Procedure format:</p>
 <div class="highlight-yaml"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">procedure</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">translate_column</span>
 <span class="l l-Scalar l-Scalar-Plain">ingredients</span><span class="p p-Indicator">:</span>  <span class="c1"># list of ingredient id</span>
   <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">ingredient_id</span>
-<span class="l l-Scalar l-Scalar-Plain">result</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">str</span>  <span class="c1"># new ingledient id</span>
+<span class="l l-Scalar l-Scalar-Plain">result</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">str</span>  <span class="c1"># new ingredient id</span>
 <span class="l l-Scalar l-Scalar-Plain">options</span><span class="p p-Indicator">:</span>
   <span class="l l-Scalar l-Scalar-Plain">column</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">str</span>  <span class="c1"># the column to be translated</span>
-  <span class="l l-Scalar l-Scalar-Plain">target_column</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">str</span>  <span class="c1"># optinoal, the target column to store the translated data</span>
+  <span class="l l-Scalar l-Scalar-Plain">target_column</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">str</span>  <span class="c1"># optional, the target column to store the translated data</span>
   <span class="l l-Scalar l-Scalar-Plain">not_found</span><span class="p p-Indicator">:</span> <span class="p p-Indicator">{</span><span class="s">&#39;drop&#39;</span><span class="p p-Indicator">,</span> <span class="s">&#39;include&#39;</span><span class="p p-Indicator">,</span> <span class="s">&#39;error&#39;</span><span class="p p-Indicator">}</span>  <span class="c1"># optional, the behavior when there is values not</span>
                                            <span class="c1"># found in the mapping dictionary, default is &#39;drop&#39;</span>
   <span class="l l-Scalar l-Scalar-Plain">ambiguity</span><span class="p p-Indicator">:</span> <span class="p p-Indicator">{</span><span class="s">&#39;prompt&#39;</span><span class="p p-Indicator">,</span> <span class="s">&#39;skip&#39;</span><span class="p p-Indicator">,</span> <span class="s">&#39;error&#39;</span><span class="p p-Indicator">}</span>  <span class="c1"># optional, the behavior when there is ambiguity</span>
@@ -732,16 +774,22 @@ The dictionary format will be:</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name" colspan="2">Keyword Arguments:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><ul class="first last simple">
-<li><strong>dictionary</strong> (<em>dict</em>) &#8211; A dictionary of oldname -&gt; newname mappings.
-If &#8216;base&#8217; is provided in the dictionary, &#8216;key&#8217; and &#8216;value&#8217; should also in the dictionary.
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>chef</strong> (<a class="reference internal" href="#ddf_utils.chef.cook.Chef" title="ddf_utils.chef.cook.Chef"><em>Chef</em></a>) – The Chef the procedure will run on</li>
+<li><strong>ingredients</strong> (<em>list</em>) – A list of ingredient id in the dag to translate</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Keyword Arguments:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><ul class="first last simple">
+<li><strong>dictionary</strong> (<em>dict</em>) – A dictionary of oldname -&gt; newname mappings.
+If ‘base’ is provided in the dictionary, ‘key’ and ‘value’ should also in the dictionary.
 See <a class="reference internal" href="ddf_utils.html#ddf_utils.transformer.translate_column" title="ddf_utils.transformer.translate_column"><code class="xref py py-func docutils literal"><span class="pre">ddf_utils.transformer.translate_column()</span></code></a> for more on how this is handled.</li>
-<li><strong>column</strong> (<cite>str</cite>) &#8211; the column to be translated</li>
-<li><strong>target_column</strong> (<cite>str</cite>, optional) &#8211; the target column to store the translated data. If this is not set then the <cite>column</cite>
+<li><strong>column</strong> (<cite>str</cite>) – the column to be translated</li>
+<li><strong>target_column</strong> (<cite>str</cite>, optional) – the target column to store the translated data. If this is not set then the <cite>column</cite>
 cloumn will be replaced</li>
-<li><strong>not_found</strong> (<em>{'drop'</em><em>, </em><em>'include'</em><em>, </em><em>'error'}</em><em>, </em><em>optional</em>) &#8211; the behavior when there is values not found in the mapping dictionary, default is &#8216;drop&#8217;</li>
-<li><strong>ambiguity</strong> (<em>{'prompt'</em><em>, </em><em>'skip'</em><em>, </em><em>'error'}</em><em>, </em><em>optional</em>) &#8211; the behavior when there is ambiguity in the dictionary, default is &#8216;prompt&#8217;</li>
+<li><strong>not_found</strong> (<em>{'drop'</em><em>, </em><em>'include'</em><em>, </em><em>'error'}</em><em>, </em><em>optional</em>) – the behavior when there is values not found in the mapping dictionary, default is ‘drop’</li>
+<li><strong>ambiguity</strong> (<em>{'prompt'</em><em>, </em><em>'skip'</em><em>, </em><em>'error'}</em><em>, </em><em>optional</em>) – the behavior when there is ambiguity in the dictionary, default is ‘prompt’</li>
 </ul>
 </td>
 </tr>
@@ -755,7 +803,7 @@ cloumn will be replaced</li>
 
 <dl class="function">
 <dt id="ddf_utils.chef.procedure.translate_header">
-<code class="descclassname">ddf_utils.chef.procedure.</code><code class="descname">translate_header</code><span class="sig-paren">(</span><em>ingredient: ddf_utils.chef.ingredient.BaseIngredient</em>, <em>result</em>, <em>dictionary</em><span class="sig-paren">)</span> &rarr; ddf_utils.chef.ingredient.ProcedureResult<a class="headerlink" href="#ddf_utils.chef.procedure.translate_header" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.chef.procedure.</code><code class="descname">translate_header</code><span class="sig-paren">(</span><em>chef: ddf_utils.chef.cook.Chef, ingredients: typing.List[str], result, dictionary</em><span class="sig-paren">)</span> &#x2192; ddf_utils.chef.ingredient.ProcedureResult<a class="headerlink" href="#ddf_utils.chef.procedure.translate_header" title="Permalink to this definition">¶</a></dt>
 <dd><p>Translate column headers</p>
 <p>Procedure format:</p>
 <div class="highlight-yaml"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">procedure</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">translate_header</span>
@@ -770,14 +818,12 @@ cloumn will be replaced</li>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>ingredient</strong> (<a class="reference internal" href="#ddf_utils.chef.ingredient.BaseIngredient" title="ddf_utils.chef.ingredient.BaseIngredient"><em>BaseIngredient</em></a>) &#8211; The ingredient to translate</li>
-<li><strong>result</strong> (<cite>str</cite>) &#8211; The result ingredient id</li>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>chef</strong> (<a class="reference internal" href="#ddf_utils.chef.cook.Chef" title="ddf_utils.chef.cook.Chef"><em>Chef</em></a>) – The Chef the procedure will run on</li>
+<li><strong>ingredients</strong> (<em>list</em>) – A list of ingredient id in the dag to translate</li>
+<li><strong>dictionary</strong> (<em>dict</em>) – A dictionary for name mapping</li>
+<li><strong>result</strong> (<cite>str</cite>) – The result ingredient id</li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name" colspan="2">Keyword Arguments:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first last"><strong>dictionary</strong> (<em>dict</em>) &#8211; a dictionary of oldname -&gt; newname mappings</p>
 </td>
 </tr>
 </tbody>
@@ -790,7 +836,7 @@ cloumn will be replaced</li>
 
 <dl class="function">
 <dt id="ddf_utils.chef.procedure.trend_bridge">
-<code class="descclassname">ddf_utils.chef.procedure.</code><code class="descname">trend_bridge</code><span class="sig-paren">(</span><em>ingredient: ddf_utils.chef.ingredient.BaseIngredient</em>, <em>bridge_start</em>, <em>bridge_end</em>, <em>bridge_length</em>, <em>bridge_on</em>, <em>result</em>, <em>target_column=None</em><span class="sig-paren">)</span> &rarr; ddf_utils.chef.ingredient.ProcedureResult<a class="headerlink" href="#ddf_utils.chef.procedure.trend_bridge" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.chef.procedure.</code><code class="descname">trend_bridge</code><span class="sig-paren">(</span><em>chef: ddf_utils.chef.cook.Chef, ingredients: typing.List[str], bridge_start, bridge_end, bridge_length, bridge_on, result, target_column=None</em><span class="sig-paren">)</span> &#x2192; ddf_utils.chef.ingredient.ProcedureResult<a class="headerlink" href="#ddf_utils.chef.procedure.trend_bridge" title="Permalink to this definition">¶</a></dt>
 <dd><p>run trend bridge on ingredients</p>
 <p>Procedure format:</p>
 <div class="highlight-yaml"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">procedure</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">trend_bridge</span>
@@ -814,18 +860,19 @@ cloumn will be replaced</li>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>ingredient</strong> (<a class="reference internal" href="#ddf_utils.chef.ingredient.BaseIngredient" title="ddf_utils.chef.ingredient.BaseIngredient"><em>BaseIngredient</em></a>) &#8211; The input ingredient. The bridged result will be merged in to this ingredient. If this is
+<li><strong>chef</strong> (<a class="reference internal" href="#ddf_utils.chef.cook.Chef" title="ddf_utils.chef.cook.Chef"><em>Chef</em></a>) – A Chef instance</li>
+<li><strong>ingredients</strong> (<em>list</em>) – The input ingredient. The bridged result will be merged in to this ingredient. If this is
 None, then the only the bridged result will be returned</li>
-<li><strong>bridge_start</strong> (<em>dict</em>) &#8211; Describe the start of bridge</li>
-<li><strong>bridge_end</strong> (<em>dict</em>) &#8211; Describe the end of bridge</li>
-<li><strong>bridge_length</strong> (<em>int</em>) &#8211; The size of bridge</li>
-<li><strong>bridge_on</strong> (<cite>str</cite>) &#8211; The column to bridge</li>
-<li><strong>result</strong> (<cite>str</cite>) &#8211; The output ingredient id</li>
+<li><strong>bridge_start</strong> (<em>dict</em>) – Describe the start of bridge</li>
+<li><strong>bridge_end</strong> (<em>dict</em>) – Describe the end of bridge</li>
+<li><strong>bridge_length</strong> (<em>int</em>) – The size of bridge</li>
+<li><strong>bridge_on</strong> (<cite>str</cite>) – The column to bridge</li>
+<li><strong>result</strong> (<cite>str</cite>) – The output ingredient id</li>
 </ul>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Keyword Arguments:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first last"><strong>target_column</strong> (<cite>str</cite>, optional) &#8211; The column name of the bridge result. default to <cite>bridge_end.column</cite></p>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first last"><strong>target_column</strong> (<cite>str</cite>, optional) – The column name of the bridge result. default to <cite>bridge_end.column</cite></p>
 </td>
 </tr>
 </tbody>
@@ -838,7 +885,7 @@ None, then the only the bridged result will be returned</li>
 
 <dl class="function">
 <dt id="ddf_utils.chef.procedure.window">
-<code class="descclassname">ddf_utils.chef.procedure.</code><code class="descname">window</code><span class="sig-paren">(</span><em>ingredient: ddf_utils.chef.ingredient.BaseIngredient</em>, <em>result</em>, <em>**options</em><span class="sig-paren">)</span> &rarr; ddf_utils.chef.ingredient.ProcedureResult<a class="headerlink" href="#ddf_utils.chef.procedure.window" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.chef.procedure.</code><code class="descname">window</code><span class="sig-paren">(</span><em>chef: ddf_utils.chef.cook.Chef, ingredients: typing.List[str], result, **options</em><span class="sig-paren">)</span> &#x2192; ddf_utils.chef.ingredient.ProcedureResult<a class="headerlink" href="#ddf_utils.chef.procedure.window" title="Permalink to this definition">¶</a></dt>
 <dd><p>apply functions on a rolling window</p>
 <p>Procedure format:</p>
 <div class="highlight-yaml"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">procedure</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">window</span>
@@ -868,9 +915,9 @@ None, then the only the bridged result will be returned</li>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name" colspan="2">Keyword Arguments:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><ul class="first last simple">
-<li><strong>window</strong> (<em>dict</em>) &#8211; window definition, see above for the dictionary format</li>
-<li><strong>aggregate</strong> (<em>dict</em>) &#8211; aggregation functions</li>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body"><ul class="first last simple">
+<li><strong>window</strong> (<em>dict</em>) – window definition, see above for the dictionary format</li>
+<li><strong>aggregate</strong> (<em>dict</em>) – aggregation functions</li>
 </ul>
 </td>
 </tr>
@@ -905,7 +952,7 @@ each node will have a <cite>evaluate()</cite> function, which will return an ing
 on eval.</p>
 <dl class="class">
 <dt id="ddf_utils.chef.dag.BaseNode">
-<em class="property">class </em><code class="descclassname">ddf_utils.chef.dag.</code><code class="descname">BaseNode</code><span class="sig-paren">(</span><em>node_id</em>, <em>dag</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.dag.BaseNode" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">ddf_utils.chef.dag.</code><code class="descname">BaseNode</code><span class="sig-paren">(</span><em>node_id</em>, <em>chef</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.dag.BaseNode" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <p>The base node which IngredientNode and ProcedureNode inherit from</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -913,8 +960,8 @@ on eval.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>node_id</strong> (<cite>str</cite>) &#8211; the name of the node</li>
-<li><strong>dag</strong> (<a class="reference internal" href="#ddf_utils.chef.dag.DAG" title="ddf_utils.chef.dag.DAG"><em>DAG</em></a>) &#8211; the <cite>DAG</cite> object the node is in</li>
+<li><strong>node_id</strong> (<cite>str</cite>) – the name of the node</li>
+<li><strong>dag</strong> (<a class="reference internal" href="#ddf_utils.chef.dag.DAG" title="ddf_utils.chef.dag.DAG"><em>DAG</em></a>) – the <cite>DAG</cite> object the node is in</li>
 </ul>
 </td>
 </tr>
@@ -1027,14 +1074,14 @@ already have been added to the DAG using add_node()</p>
 
 <dl class="class">
 <dt id="ddf_utils.chef.dag.IngredientNode">
-<em class="property">class </em><code class="descclassname">ddf_utils.chef.dag.</code><code class="descname">IngredientNode</code><span class="sig-paren">(</span><em>node_id</em>, <em>ingredient</em>, <em>dag</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.dag.IngredientNode" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">ddf_utils.chef.dag.</code><code class="descname">IngredientNode</code><span class="sig-paren">(</span><em>node_id</em>, <em>ingredient</em>, <em>chef</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.dag.IngredientNode" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#ddf_utils.chef.dag.BaseNode" title="ddf_utils.chef.dag.BaseNode"><code class="xref py py-class docutils literal"><span class="pre">ddf_utils.chef.dag.BaseNode</span></code></a></p>
 <p>Node for storing dataset ingredients.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>ingredient</strong> (<a class="reference internal" href="#ddf_utils.chef.ingredient.Ingredient" title="ddf_utils.chef.ingredient.Ingredient"><em>Ingredient</em></a>) &#8211; the ingredient in this node</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>ingredient</strong> (<a class="reference internal" href="#ddf_utils.chef.ingredient.Ingredient" title="ddf_utils.chef.ingredient.Ingredient"><em>Ingredient</em></a>) – the ingredient in this node</td>
 </tr>
 </tbody>
 </table>
@@ -1048,16 +1095,16 @@ already have been added to the DAG using add_node()</p>
 
 <dl class="class">
 <dt id="ddf_utils.chef.dag.ProcedureNode">
-<em class="property">class </em><code class="descclassname">ddf_utils.chef.dag.</code><code class="descname">ProcedureNode</code><span class="sig-paren">(</span><em>node_id</em>, <em>procedure</em>, <em>dag</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.dag.ProcedureNode" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">ddf_utils.chef.dag.</code><code class="descname">ProcedureNode</code><span class="sig-paren">(</span><em>node_id</em>, <em>procedure</em>, <em>chef</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.dag.ProcedureNode" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#ddf_utils.chef.dag.BaseNode" title="ddf_utils.chef.dag.BaseNode"><code class="xref py py-class docutils literal"><span class="pre">ddf_utils.chef.dag.BaseNode</span></code></a></p>
 <p>The node for storing procedure results</p>
 <p>The evaluate() function will run a procedure according to <cite>self.procedure</cite>, using
-other nodes&#8217; data. Other nodes will be evaluated if when necessary.</p>
+other nodes’ data. Other nodes will be evaluated if when necessary.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>procedure</strong> (<em>dict</em>) &#8211; the procedure dictionary</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>procedure</strong> (<em>dict</em>) – the procedure dictionary</td>
 </tr>
 </tbody>
 </table>
@@ -1075,6 +1122,32 @@ other nodes&#8217; data. Other nodes will be evaluated if when necessary.</p>
 <dt id="ddf_utils.chef.helpers.debuggable">
 <code class="descclassname">ddf_utils.chef.helpers.</code><code class="descname">debuggable</code><span class="sig-paren">(</span><em>func</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.helpers.debuggable" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="function">
+<dt id="ddf_utils.chef.helpers.gen_result_sym">
+<code class="descclassname">ddf_utils.chef.helpers.</code><code class="descname">gen_result_sym</code><span class="sig-paren">(</span><em>procedure</em>, <em>ingredients</em>, <em>options</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.helpers.gen_result_sym" title="Permalink to this definition">¶</a></dt>
+<dd><p>generate symbol for a procedure dictionary</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ddf_utils.chef.helpers.get_procedure">
+<code class="descclassname">ddf_utils.chef.helpers.</code><code class="descname">get_procedure</code><span class="sig-paren">(</span><em>procedure</em>, <em>base_dir</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.helpers.get_procedure" title="Permalink to this definition">¶</a></dt>
+<dd><p>return a procedure function from the procedure name</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>procedure</strong> (<cite>str</cite>) – the procedure to get, supported formats are
+1. procedure: sub/dir/module.function
+2. procedure: module.function</li>
+<li><strong>base_dir</strong> (<cite>str</cite>) – the path for searching procedures</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.chef.helpers.log_dtypes">
@@ -1102,7 +1175,7 @@ from numpy or <a class="reference internal" href="ddf_utils.html#module-ddf_util
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>options</strong> (<cite>str</cite> or dict) &#8211; if a dictionary provided, &#8220;function&#8221; should be a key in the dictionary</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>options</strong> (<cite>str</cite> or dict) – if a dictionary provided, “function” should be a key in the dictionary</td>
 </tr>
 </tbody>
 </table>
@@ -1123,15 +1196,15 @@ from numpy or <a class="reference internal" href="ddf_utils.html#module-ddf_util
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>options</strong> (<em>dict</em>) &#8211; the option dictionary to read</li>
-<li><strong>key</strong> (<cite>str</cite>) &#8211; the key to read</li>
+<li><strong>options</strong> (<em>dict</em>) – the option dictionary to read</li>
+<li><strong>key</strong> (<cite>str</cite>) – the key to read</li>
 </ul>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Keyword Arguments:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><ul class="first last simple">
-<li><strong>required</strong> (<em>bool</em>) &#8211; if true, raise error if the <cite>key</cite> is not in the option dict</li>
-<li><strong>default</strong> (<em>object</em>) &#8211; a default to return if <cite>key</cite> is not in option dict and <cite>required</cite> is false</li>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><ul class="first last simple">
+<li><strong>required</strong> (<em>bool</em>) – if true, raise error if the <cite>key</cite> is not in the option dict</li>
+<li><strong>default</strong> (<em>object</em>) – a default to return if <cite>key</cite> is not in option dict and <cite>required</cite> is false</li>
 </ul>
 </td>
 </tr>
@@ -1149,6 +1222,8 @@ from numpy or <a class="reference internal" href="ddf_utils.html#module-ddf_util
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
+        <a href="ddf_utils.model.html" class="btn btn-neutral float-right" title="ddf_utils.model package" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
       
         <a href="ddf_utils.html" class="btn btn-neutral" title="ddf_utils package" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
@@ -1159,7 +1234,7 @@ from numpy or <a class="reference internal" href="ddf_utils.html#module-ddf_util
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2016, Semio Zheng.
+        &copy; Copyright 2017, Gapminder Fundation.
 
     </p>
   </div>

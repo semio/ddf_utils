@@ -8,6 +8,7 @@ Subpackages
    :maxdepth: 4
 
    ddf_utils.chef
+   ddf_utils.model
 
 Submodules
 ----------
@@ -20,22 +21,6 @@ ddf_utils.cli module
     :undoc-members:
     :show-inheritance:
 
-ddf_utils.config module
------------------------
-
-.. automodule:: ddf_utils.config
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-ddf_utils.ddf_reader module
----------------------------
-
-.. automodule:: ddf_utils.ddf_reader
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 ddf_utils.i18n module
 ---------------------
 
@@ -44,10 +29,10 @@ ddf_utils.i18n module
     :undoc-members:
     :show-inheritance:
 
-ddf_utils.index module
-----------------------
+ddf_utils.datapackage module
+----------------------------
 
-.. automodule:: ddf_utils.index
+.. automodule:: ddf_utils.datapackage
     :members:
     :undoc-members:
     :show-inheritance:

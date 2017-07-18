@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 
-from functools import wraps, partial
-from .. import config
-from .. import ops
 import os
+import sys
+from functools import wraps, partial
+from .. import ops
 import logging
 import click
+import hashlib
 import numpy as np
 
 
@@ -56,7 +57,7 @@ def read_opt(options, key, required=False, default=None):
     if key in options.keys():
         return options.pop(key)
     if required:
-        raise KeyError('field {} is mandantory'.format(key))
+        raise KeyError('Field "{}" is mandatory. Please provide this field in the options.'.format(key))
     return default
 
 
@@ -77,6 +78,39 @@ def mkfunc(options):
     else:
         func = getattr(ops, options.pop('function'))
         return partial(func, **options)
+
+
+def get_procedure(procedure, base_dir):
+    """return a procedure function from the procedure name
+
+    Parameters
+    ----------
+    procedure : `str`
+        the procedure to get, supported formats are
+        1. procedure: sub/dir/module.function
+        2. procedure: module.function
+    base_dir : `str`
+        the path for searching procedures
+    """
+    import ddf_utils.chef.procedure as pc
+    if '.' in procedure:
+        assert 'base_dir' is not None, "please set procedure_dir in config if you have custom procedures"
+        sys.path.insert(0, base_dir)
+        module_name, func_name = procedure.split('.')
+        _mod = __import__(module_name)
+        func = getattr(_mod, func_name)
+        sys.path.remove(base_dir)
+    else:
+        func = getattr(pc, procedure)
+
+    return func
+
+
+def gen_result_sym(procedure, ingredients, options):
+    """generate symbol for a procedure dictionary"""
+    first = procedure.split('_')[0]
+    last = hashlib.sha256((str(ingredients) + str(options)).encode('utf8')).hexdigest()[:6]
+    return '{}_{}'.format(first, last)
 
 
 # below functions are not used in ddf_utils yet, but may be useful.
@@ -113,11 +147,14 @@ def debuggable(func):
         if 'debug' in kwargs.keys():
             debug = kwargs.pop('debug')
             result = func(*args, **kwargs)
+            chef = args[0]
             if debug:
-                if config.DEBUG_OUTPUT_PATH is None:
+                debug_path = chef.config.get('debug_output_path', None)
+                if debug_path is None:
                     logging.warning('debug output path not set!')
-                    config.DEBUG_OUTPUT_PATH = './_debug'  # TODO: handle the config better
-                outpath = os.path.join(config.DEBUG_OUTPUT_PATH, result.ingred_id)
+                    chef.add_config(debug_output_path='./_debug')
+                    debug_path = './_debug'
+                outpath = os.path.join(debug_path, result.ingred_id)
                 if os.path.exists(outpath):
                     import shutil
                     shutil.rmtree(outpath)

@@ -1,36 +1,264 @@
 # -*- coding: utf-8 -*-
 """recipe cooking"""
 
-import json
-import yaml
-import re
 import os
-from orderedattrdict import AttrDict
-from orderedattrdict.yamlutils import AttrDictYAMLLoader
-
-from . ingredient import Ingredient
-from . dag import DAG, IngredientNode, ProcedureNode
-from . helpers import read_opt
-from .. import config
-from . exceptions import ChefRuntimeError
-
+import sys
 import logging
+import re
+from ddf_utils.chef.dag import DAG, ProcedureNode, IngredientNode
+from ddf_utils.chef.ingredient import Ingredient
+from ddf_utils.chef.helpers import get_procedure
+from ddf_utils.chef.exceptions import ChefRuntimeError
+from copy import deepcopy
+import json
+import ruamel.yaml as yaml
+from collections import Mapping
+from graphviz import Digraph
 
-logger = logging.getLogger('Chef')
+
+logger = logging.Logger('Chef')
+
+
+class Chef:
+    """the chef api"""
+
+    def __init__(self, dag=None, metadata=None, config=None, cooking=None, serving=None, recipe=None):
+        if dag is None:
+            self.dag = DAG()
+        else:
+            self.dag = dag
+        if metadata is None:
+            self.metadata = dict()
+        else:
+            self.metadata = metadata
+        if config is None:
+            self.config = dict()
+        else:
+            self.config = config
+        if cooking is None:
+            self.cooking = {'concepts': list(), 'datapoints': list(), 'entities': list()}
+        else:
+            self.cooking = cooking
+        if serving is None:
+            self.serving = list()
+        else:
+            self.serving = serving
+
+        self._recipe = recipe
+        self.ddf_object_cache = {}
+
+    @classmethod
+    def from_recipe(cls, recipe_file, **config):
+        recipe = _build_recipe(recipe_file)
+        chef = cls()
+
+        if 'info' in recipe.keys():
+            chef.add_metadata(**recipe['info'])
+        if 'config' in recipe.keys():
+            chef.add_config(**recipe['config'])
+        chef.add_config(**config)
+        if 'ddf_dir' not in chef.config.keys():
+            logger.warning('ddf_dir not in config, assuming current directory')
+            chef.add_config(ddf_dir=os.path.abspath('./'))
+
+        assert 'ingredients' in recipe.keys(), "recipe must have ingredients section"
+        assert 'cooking' in recipe.keys(), "recipe must have cooking section!"
+
+        for ingred in recipe['ingredients']:
+            chef.add_ingredient(**ingred)
+
+        for k, ps in recipe['cooking'].items():
+            for p in ps:
+                result = p.get('result', None)
+                options = p.get('options', None)
+                chef.add_procedure(k, p['procedure'], p['ingredients'], result, options)
+
+        chef.serving = _get_dishes(recipe)
+        return chef
+
+    @property
+    def ingredients(self):
+        return [x.evaluate() for x in self.dag.nodes if isinstance(x, IngredientNode)]
+
+    def validate(self):
+        # 1. check dataset availability
+        try:
+            ddf_dir = self.config['ddf_dir']
+        except (KeyError, AttributeError):
+            logger.warning("no ddf_dir configured, assuming current working directory")
+            ddf_dir = './'
+        datasets = set()
+        for ingred in self.ingredients:
+            datasets.add(ingred.ddf_id)
+        not_exists = []
+        for d in datasets:
+            if not os.path.exists(os.path.join(ddf_dir, d)):
+                not_exists.append(d)
+        if len(not_exists) > 0:
+            logger.critical("not enough datasets! please checkout following datasets:\n{}\n"
+                            .format('\n'.join(not_exists)))
+            raise ChefRuntimeError('not enough datasets')
+
+        # 2. check procedure availability
+        for k, ps in self.cooking.items():
+            for p in ps:
+                try:
+                    get_procedure(p['procedure'], self.config.get('procedure_dir', None))
+                except (AttributeError, ImportError):
+                    logger.warning("{} is not a valid procedure, please double check "
+                                   "or register new procedure".format(p['procedure']))
+                    raise ChefRuntimeError('procedures not ready')
+
+    def add_config(self, **config):
+        for k, v in config.items():
+            self.config[k] = v
+        return self
+
+    def add_metadata(self, **metadata):
+        for k, v in metadata.items():
+            self.metadata[k] = v
+        return self
+
+    def add_ingredient(self, **kwargs):
+        try:
+            ddf_dir = self.config['ddf_dir']
+        except KeyError:
+            logger.warning('no ddf_dir in config, assuming current working dir')
+            ddf_dir = './'
+        ingredient = Ingredient.from_dict(chef=self, data=kwargs)
+        self.dag.add_node(IngredientNode(ingredient.ingred_id, ingredient, self))
+        return self
+
+    def add_procedure(self, collection, procedure, ingredients, result=None, options=None):
+
+        if procedure == 'serve':
+            [self.serving.append({'id': x,
+                                  'options': options}) for x in ingredients]
+            return self
+
+        # check if procedure is supported
+        try:
+            get_procedure(procedure, self.config.get('procedure_dir', None))
+        except (AttributeError, ImportError):
+            logging.warning("{} is not a valid procedure, please double check "
+                            "or register new procedure".format(procedure))
+
+        assert result is not None, "result is mandatory for {}".format(procedure)
+
+        def add_dependency(dag, upstream_id, downstream):
+            if not dag.has_node(upstream_id):
+                upstream = ProcedureNode(upstream_id, None, self)
+                dag.add_node(upstream)
+            else:
+                upstream = dag.get_node(ing)
+            dag.add_dependency(upstream.node_id, downstream.node_id)
+
+        if options is None:
+            pdict = {'procedure': procedure, 'ingredients': ingredients, 'result': result}
+        else:
+            pdict = {'procedure': procedure, 'ingredients': ingredients, 'options': options, 'result': result}
+        pnode = ProcedureNode(result, pdict, self)
+        self.dag.add_node(pnode)
+        self.cooking[collection].append(pnode.procedure)
+
+        # adding dependencies
+        for ing in ingredients:
+            add_dependency(self.dag, ing, pnode)
+
+        if options is not None:
+            for ingredient_key in ['base', 'ingredient']:
+                if ingredient_key in options.keys():
+                    add_dependency(self.dag, options[ingredient_key], pnode)
+                for opt, val in options.items():
+                    if isinstance(val, Mapping) and ingredient_key in val.keys():
+                        add_dependency(self.dag, options[opt][ingredient_key], pnode)
+        return self
+
+    @staticmethod
+    def register_procedure(func):
+        from ddf_utils.chef import procedure as pc
+        assert callable(func)
+        setattr(pc, func.__name__, func)
+
+    def run(self, serve=False, outpath=None):
+        self.validate()
+
+        results = list()
+        if len(self.serving) == 0:
+            for k, v in self.cooking.items():
+                if len(v) > 0:
+                    self.serving.append({'id': v[-1]['result']})
+
+        for dish in self.serving:
+            dish_result = self.dag.get_node(dish['id']).evaluate()
+            results.append(dish_result)
+            if serve:
+                if not outpath:
+                    outpath = self.config.get('out_dir', './')
+                if 'options' in dish:
+                    dish_result.serve(outpath, **dish['options'])
+                else:
+                    dish_result.serve(outpath)
+        return results
+
+    def to_recipe(self, fp=None):
+        if fp is None:
+            fp = sys.stdout
+        recipe = dict()
+        recipe['info'] = self.metadata
+        recipe['config'] = self.config
+        recipe['ingredients'] = list()
+        recipe['cooking'] = dict()
+
+        for ingredient in self.ingredients:
+            info = {'id': ingredient.ingred_id,
+                    'dataset': ingredient.ddf_id,
+                    'key': ingredient.key,
+                    'values': ingredient.values,
+                    }
+            if ingredient.row_filter is not None:
+                info['row_filter'] = ingredient.row_filter
+            recipe['ingredients'].append(info)
+
+        for k, v in self.cooking.items():
+            if len(v) > 0:
+                recipe['cooking'][k] = v
+
+        yaml.round_trip_dump(recipe, fp)
+
+    def to_graph(self, g=None, node=None):
+        if not g:
+            g = Digraph()
+
+        if node is not None:
+            g.node(node.node_id)
+            r = node.get_direct_relatives(upstream=True)
+            if len(r) > 0:
+                for n in set(r):
+                    g.edge(n.node_id, node.node_id)
+                    self.to_graph(g, n)
+        else:
+            for k, v in self.dag.node_dict.items():
+                g.node(k)
+                r = v.get_direct_relatives()
+                if len(r) > 0:
+                    for n in set(r):
+                        g.node(n.node_id)
+                        g.edge(k, n.node_id)
+        return g
 
 
 def _loadfile(f):
     """load json/yaml file, into AttrDict"""
     if re.match('.*\.json', f):
-        res = json.load(open(f), object_pairs_hook=AttrDict)
+        res = json.load(open(f))
     else:
-        res = yaml.load(open(f), Loader=AttrDictYAMLLoader)
+        res = yaml.load(open(f), Loader=yaml.Loader)
 
     return res
 
 
-# functions for reading/running recipe
-def build_recipe(recipe_file, to_disk=False, **kwargs):
+def _build_recipe(recipe_file, to_disk=False, **kwargs):
     """build a complete recipe object.
 
     This function will check each part of recipe, convert string (the ingredient ids,
@@ -64,9 +292,8 @@ def build_recipe(recipe_file, to_disk=False, **kwargs):
     # the dictionary dir to retrieve translation dictionaries
     try:
         dict_dir = recipe['config']['dictionary_dir']
-        config.DICT_PATH = dict_dir
     except KeyError:
-        dict_dir = config.DICT_PATH
+        dict_dir = None
 
     # expand all files in the options
     if 'cooking' in recipe.keys():
@@ -89,13 +316,6 @@ def build_recipe(recipe_file, to_disk=False, **kwargs):
 
                     recipe['cooking'][p][i]['options']['dictionary'] = _loadfile(path)
 
-    # setting ddf search path if option is provided
-    if 'ddf_dir' in kwargs.keys():
-        if 'config' not in recipe.keys():
-            recipe['config'] = AttrDict()
-        recipe.config.ddf_dir = kwargs['ddf_dir']
-        config.DDF_SEARCH_PATH = kwargs['ddf_dir']
-
     if 'include' not in recipe.keys():
         return recipe
     else:  # append sub-recipe entities into main recipe
@@ -108,7 +328,7 @@ def build_recipe(recipe_file, to_disk=False, **kwargs):
                 path = os.path.join(recipe_dir, i)
             else:
                 path = os.path.join(base_dir, recipe_dir, i)
-            sub_recipes.append(build_recipe(path))
+            sub_recipes.append(_build_recipe(path))
 
         for rcp in sub_recipes:
             # appending ingredients
@@ -160,102 +380,7 @@ def build_recipe(recipe_file, to_disk=False, **kwargs):
         return recipe
 
 
-def update_recipe_last_update(recipe, outdir):
-    pass
-
-
-def check_dataset_availability(recipe):
-    """check availability of all datasets required by the recipe.
-
-    raise error if some dataset not available. otherwise do nothing.
-    """
-    try:
-        ddf_dir = recipe.config.ddf_dir
-    except (KeyError, AttributeError):
-        ddf_dir = config.DDF_SEARCH_PATH
-
-    datasets = set()
-    for ingred in recipe.ingredients:
-        datasets.add(ingred.dataset)
-
-    not_exists = []
-    for d in datasets:
-        if not os.path.exists(os.path.join(ddf_dir, d)):
-            not_exists.append(d)
-
-    if len(not_exists) > 0:
-        logging.critical("not enough datasets! please checkout following datasets:\n{}\n"
-                         .format('\n'.join(not_exists)))
-        raise ChefRuntimeError('not enough datasets')
-    return
-
-
-def build_dag(recipe):
-    """build a DAG model for the recipe.
-
-    For more detail for DAG model, see :py:mod:`ddf_utils.chef.dag`.
-    """
-
-    def add_dependency(dag, upstream_id, downstream):
-        if not dag.has_node(upstream_id):
-            upstream = ProcedureNode(upstream_id, None, dag)
-            dag.add_node(upstream)
-        else:
-            upstream = dag.get_node(ing)
-        dag.add_dependency(upstream.node_id, downstream.node_id)
-
-    dag = DAG()
-    ingredients = [Ingredient.from_dict(x) for x in recipe.ingredients]
-    # ingredients_names = [x.ingred_id for x in ingredients]
-    serving = []
-
-    # adding ingredient nodes
-    for i in ingredients:
-        dag.add_node(IngredientNode(i.ingred_id, i, dag))
-
-    for k, d in recipe.cooking.items():
-        for proc in d:
-            if proc['procedure'] == 'serve':
-                [serving.append(x) for x in proc.ingredients]
-                continue
-            try:
-                node = ProcedureNode(proc.result, proc, dag)
-            except KeyError:
-                logger.critical('Please set the result id for procedure: ' + proc['procedure'])
-                raise
-            dag.add_node(node)
-            # add nodes from base ingredients
-            for ing in proc.ingredients:
-                add_dependency(dag, ing, node)
-            # also add nodes from options
-            # for now, if a key in option named base or ingredient, it will be treat as ingredients
-            # TODO: see if there is better way to do
-            if 'options' in proc.keys():
-                options = proc['options']
-                for ingredient_key in ['base', 'ingredient']:
-                    if ingredient_key in options.keys():
-                        add_dependency(dag, options[ingredient_key], node)
-                    for opt, val in options.items():
-                        if isinstance(val, AttrDict) and ingredient_key in val.keys():
-                            add_dependency(dag, options[opt][ingredient_key], node)
-            # detect cycles in recipe after adding all related nodes
-            node.detect_downstream_cycle()
-    # check if all serving ingredients are available
-    for i in serving:
-        if not dag.has_node(i):
-            raise ChefRuntimeError('Ingredient not found: ' + i)
-    if 'serving' in recipe.keys():
-        if len(serving) > 0:
-            raise ChefRuntimeError('can not have serve procedure and serving section at same time!')
-        for i in recipe['serving']:
-            if not dag.has_node(i['id']):
-                raise ChefRuntimeError('Ingredient not found: ' + i['id'])
-    # display the tree
-    # dag.tree_view()
-    return dag
-
-
-def get_dishes(recipe):
+def _get_dishes(recipe):
     """get all dishes in the recipe"""
 
     if 'serving' in recipe:
@@ -273,68 +398,8 @@ def get_dishes(recipe):
                     except KeyError:
                         dishes.append({'id': i, 'options': dict()})
         if not serve_proc_exists:
-            logger.warning('no serve procedure found, serving the last result: ' + p['result'])
+            logger.warning('no serve procedure found, will serve the last result: ' + p['result'])
             dishes.append({'id': p['result'], 'options': dict()})
 
     return dishes
 
-
-def run_recipe(recipe, serve=False, outpath=None):
-    """run the recipe.
-
-    returns a dictionary. keys are `concepts`, `entities` and `datapoints`,
-    and values are ingredients defined in the `serve` procedures or `serving` section.
-    for example:
-
-    .. code-block:: python
-
-        {
-            "concepts": [{"ingredient": DataFrame1, "options": None}]
-            "datapoints": [
-                {
-                    "ingredient": DataFrame2,
-                    "options": {"digits": 5}
-                },
-                {
-                    "ingredient": DataFrame3,
-                    "options": {"digits": 1}
-                },
-            ]
-        }
-
-    """
-    try:
-        config.DDF_SEARCH_PATH = recipe['config']['ddf_dir']
-    except KeyError:
-        if not config.DDF_SEARCH_PATH:
-            raise ChefRuntimeError("no ddf_dir configured, please check your recipe")
-    logging.info('path for searching DDF: ' + str(config.DDF_SEARCH_PATH))
-
-    # make a copy recipe, don't change the origin recipe
-    from copy import deepcopy
-    recipe_ = deepcopy(recipe)
-
-    # check all datasets availability
-    check_dataset_availability(recipe_)
-
-    # create DAG of recipe
-    dag = build_dag(recipe_)
-
-    # check all ingredients availability
-    for root in dag.roots:
-        root.detect_missing_dependency()
-
-    # now run the recipe
-    dishes = get_dishes(recipe_)
-
-    results = list()
-    for dish in dishes:
-        dish_result = dag.get_node(dish['id']).evaluate()
-        results.append(dish_result)
-        if serve:
-            if 'options' in dish:
-                dish_result.serve(outpath, **dish['options'])
-            else:
-                dish_result.serve(outpath)
-
-    return results

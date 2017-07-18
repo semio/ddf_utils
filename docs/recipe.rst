@@ -497,7 +497,6 @@ Currently supported procedures:
    header according to a mapping dictionary
 -  `translate\_column <#translate-column>`__: change column values of
    ingredient data according to a mapping dictionary
--  `identity <#identity>`__: return the ingredient as is
 -  `merge <#merge>`__: merge ingredients together on their keys
 -  `groupby <#groubby>`__: group ingredient by columns and do
    aggregate/filter/transform
@@ -506,11 +505,14 @@ Currently supported procedures:
    values
 -  `filter\_item <#filter-item>`__: filter ingredient data by concepts
 -  `run\_op <#run-op>`__: run math operations on ingredient columns
--  `copy <#copy>`__: make copy of columns of ingredient data
 -  `extract\_concepts <#extract-concepts>`__: generate concepts
    ingredient from other ingredients
--  `trend\_bridge <#trend-bridge>`__\ (WIP): connect 2 ingredients and
+-  `trend\_bridge <#trend-bridge>`__: connect 2 ingredients and
    make custom smoothing
+-  `flatten <#flatten>`__: flatten dimensions in the indicators to
+   create new indicators
+-  `split_entity <#split-entity>`__: (WIP) split an entity and create new entity from it
+-  `merge_entity <#merge-entity>`__: (WIP) merge some entity to create a new entity
 
 translate\_header
 ~~~~~~~~~~~~~~~~~
@@ -596,26 +598,6 @@ here is an example when we translate the BP geo names into Gapminder's
         not_found: drop
     result: geo-aligned
 
-identity
-~~~~~~~~
-
-Return the ingredient as is.
-
-**usage and options**
-
-.. code-block:: yaml
-
-    procedure: identity
-    ingredients:  # list of ingredient id
-      - ingredient_id
-    result: str  # new ingledient id
-    options:
-      copy: bool  # if true, treat all data as string, default is false
-
-**notes**
-
--  currently chef only support one ingredient in the ``ingredients``
-   parameter
 
 merge
 ~~~~~
@@ -692,6 +674,13 @@ procedure:
         function: foo
         param1: baz
 
+also, we can use wildcard in the column names:
+
+.. code-block:: yaml
+
+    aggregate:  # or transform, filter
+      "population*": sum  # run sum to all indicators starts with "population"
+
 window
 ~~~~~~
 
@@ -735,8 +724,7 @@ procedure:
 filter\_row
 ~~~~~~~~~~~
 
-Filter ingredient data by column values. By default, it will remove columns if
-they contain only one value.
+Filter ingredient data by column values.
 
 **usage and options**
 
@@ -747,8 +735,7 @@ they contain only one value.
       - ingredient_id
     result: str  # new ingledient id
     options:
-      dictionary: dict  # filter definition block
-      keep_all_columns: bool  # if true don't drop any columns
+      filters: dict  # filter definition block
 
 **filter definition**
 
@@ -756,15 +743,18 @@ A filter definitioin block have following format:
 
 .. code-block:: yaml
 
-    new_column_name:
-      from: column_name_to_filter
-      key_col_1: object  # type should match the data type of the key column, can be a list
-      key_col_2: object
+    filters:
+        column_name:
+          key_col_1: object  # type should match the data type of the key column, can be a list
+          key_col_2: object
 
-**example**
+also, wildcard is supported for column names:
 
-An example can be found in this `github
-issue <https://github.com/semio/ddf_utils/issues/2#issuecomment-254132615>`__.
+.. code-block:: yaml
+
+    filters:
+        population*:
+          gender: ["male"]  # filter gender == "male" for all indicators starts with population
 
 **notes**
 
@@ -828,38 +818,6 @@ create an new column, we can write
       op:
         new_col_name: "col_a + col_b"
 
-copy
-~~~~
-
-Make copy of columns of ingredient data.
-
-**usage and options**
-
-.. code-block:: yaml
-
-    procedure: copy
-    ingredients:  # list of ingredient id
-      - ingredient_id
-    result: str  # new ingledient id
-    options:
-      dictionary: dict  # old name -> new name mappings
-
-**dictionary object**
-
-The ``dictionary`` option should be in following format:
-
-.. code-block:: yaml
-
-    dictionary:
-      col1: copy_1_1  # string
-      col2:  # list of string 
-        - copy_2_1
-        - copy_2_2
-
-**notes**
-
--  currently chef only support one ingredient in the ``ingredients``
-   parameter
 
 extract\_concepts
 ~~~~~~~~~~~~~~~~~
@@ -895,7 +853,7 @@ Generate concepts ingredient from other ingredients.
 trend\_bridge
 ~~~~~~~~~~~~~
 
-(WIP) Connect 2 ingredients and make custom smoothing.
+Connect 2 ingredients and make custom smoothing.
 
 **usage and options**
 
@@ -916,6 +874,56 @@ trend\_bridge
         target_column: concept_in_result  # overwrites if exists. creates if not exists.
                                           # defaults to bridge_end.column
       result: data_bridged
+
+flatten
+~~~~~~~
+
+Flatten dimension to create new indicators.
+
+This procedure only applies for datapoints ingredients.
+
+**usage and options**
+
+.. code-block:: yaml
+
+    - procedure: flatten
+      ingredients:
+        - data_ingredient
+      options:
+        flatten_dimensions:  # a list of dimensions to be flattened
+          - entity_1
+          - entity_2
+        dictionary:  # old name -> new name mappings, supports wildcard and template.
+          "old_name_wildcard": "new_name_{entity_1}_{entity_2}"
+
+**example**
+
+For example, if we have datapoints for population by gender, year, country. And gender entity domain
+has ``male`` and ``female`` entity. And we want to create 2 seperated indicators: ``population_male``
+and ``population_female``. The procedure should be:
+
+.. code-block:: yaml
+
+    - procedure: flatten
+      ingerdients:
+        - population_by_gender_ingredient
+      options:
+        flatten_dimensions:
+          - gender
+        dictionary:
+          "population": "{concept}_{gender}"  # concept will be mapped to the concept name being flattened
+
+
+split_entity
+~~~~~~~~~~~~
+
+(WIP) split an entity into several entities
+
+
+merge_entity
+~~~~~~~~~~~~
+
+(WIP) merge several entities into one new entity
 
 Checking Intermediate Results
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
