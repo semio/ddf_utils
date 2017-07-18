@@ -25,7 +25,8 @@ requirements = [
     'dask[dataframe]',
     'tqdm',
     'ruamel.yaml',
-    'graphviz'
+    'graphviz',
+    'coloredlogs'
 ]
 
 setup(

@@ -7,6 +7,7 @@ import click
 import os
 import shutil
 import logging
+import coloredlogs
 
 
 @click.group()
@@ -16,9 +17,10 @@ def ddf(debug):
         level = logging.DEBUG
     else:
         level = logging.INFO
-    logging.basicConfig(level=level, format='%(asctime)s -%(levelname)s- %(message)s',
-                        datefmt="%H:%M:%S"
-                        )
+    # logging.basicConfig(level=level, format='%(asctime)s -%(levelname)s- %(message)s',
+    #                     datefmt="%H:%M:%S"
+    #                     )
+    coloredlogs.install(level=level, fmt='%(asctime)s %(name)s %(levelname)s %(message)s')
 
 
 # project management
