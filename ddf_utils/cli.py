@@ -102,7 +102,7 @@ def create_datapackage(path, update, overwrite):
 def run_recipe(recipe, outdir, ddf_dir, update, dry_run, show_tree):
     """generate new ddf dataset with recipe"""
     from ddf_utils.chef.api import Chef
-    from ddf_utils.datapackage import get_datapackage, dump_json
+    from ddf_utils.datapackage import create_datapackage, dump_json
     click.echo('building recipe...')
     if ddf_dir:
         chef = Chef.from_recipe(recipe, ddf_dir=ddf_dir)
@@ -117,7 +117,8 @@ def run_recipe(recipe, outdir, ddf_dir, update, dry_run, show_tree):
     chef.run(serve=serve, outpath=outdir)
     if serve:
         click.echo('creating datapackage file...')
-        dump_json(os.path.join(outdir, 'datapackage.json'), get_datapackage(outdir))
+        dump_json(os.path.join(outdir, 'datapackage.json'),
+                  create_datapackage(outdir, gen_schema=True, **chef.metadata))
     click.echo("Done.")
 
 
