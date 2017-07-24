@@ -914,6 +914,8 @@ def extract_concepts(chef: Chef, ingredients: List[str], result,
             else:
                 cols = [x for x in df.columns if x not in pks]
             for col in cols:
+                if col.startswith('is--'):
+                    continue
                 new_concepts.add(col)
                 if col in concepts.index:
                     continue
@@ -921,6 +923,10 @@ def extract_concepts(chef: Chef, ingredients: List[str], result,
                     concepts.ix[col, 'concept_type'] = 'measure'
                 else:
                     concepts.ix[col, 'concept_type'] = 'string'
+        # add name column if there isn't one
+        if 'name' not in concepts.columns:
+            concepts['name'] = np.nan
+
     if join_type == 'ingredients_outer':
         # ingredients_outer join: only keep concepts appears in ingredients
         concepts = concepts.ix[new_concepts]
