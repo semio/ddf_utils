@@ -3,6 +3,7 @@
 import os
 import sys
 from functools import wraps, partial
+from time import time
 from .. import ops
 import logging
 import click
@@ -106,11 +107,10 @@ def get_procedure(procedure, base_dir):
     return func
 
 
-def gen_result_sym(procedure, ingredients, options):
-    """generate symbol for a procedure dictionary"""
-    first = procedure.split('_')[0]
-    last = hashlib.sha256((str(ingredients) + str(options)).encode('utf8')).hexdigest()[:6]
-    return '{}_{}'.format(first, last)
+def gen_sym(key, others, options):
+    """generate symbol for chef ingredient/procedure result"""
+    tail = hashlib.sha256((str(others) + str(options) + str(time())).encode('utf8')).hexdigest()[:6]
+    return '{}_{}'.format(key, tail)
 
 
 # below functions are not used in ddf_utils yet, but may be useful.

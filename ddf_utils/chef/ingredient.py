@@ -5,7 +5,7 @@
 import numpy as np
 import pandas as pd
 from ..str import format_float_digits
-from .helpers import read_opt
+from .helpers import read_opt, gen_sym
 import os
 import logging
 
@@ -251,36 +251,52 @@ class Ingredient(BaseIngredient):
         read in and return the ingredient data
 
     """
-    def __init__(self, chef, ingred_id,
-                 ddf_id=None, key=None, values=None, row_filter=None, data=None):
+    def __init__(self, chef=None, ingred_id=None, ddf_id=None, data_def=None,
+                 key=None, values=None, row_filter=None, data=None):
         super(Ingredient, self).__init__(chef, ingred_id, key, data)
         self.values = values
         self.row_filter = row_filter
+        self.data_def = data_def
         self._ddf_id = ddf_id
         self._ddf = None
 
     @classmethod
-    def from_dict(cls, chef, data):
+    def from_dict(cls, chef, dictionary):
         """create an instance by a dictionary
 
         The dictionary should provide following keys:
 
         - id
-        - dataset
+        - dataset or data
         - key
-        - value
+        - value (optional)
         - filter (optional)
+
+        if dataset is provided, data will be read from ddf dataset; if data is provided, then either data will be read
+        from a local csv file or be created on-the-fly base on the description.
         """
-        ingred_id = read_opt(data, 'id', required=True)
-        ddf_id = read_opt(data, 'dataset', required=True)
-        key = read_opt(data, 'key', required=True)
-        values = read_opt(data, 'value', required=True)
-        row_filter = read_opt(data, 'filter', required=False, default=None)
+        ingred_id = read_opt(dictionary, 'id', default=None)
+        ddf_id = read_opt(dictionary, 'dataset', default=None)
+        data_def = read_opt(dictionary, 'data', default=None)
+        key = read_opt(dictionary, 'key', required=True)
+        values = read_opt(dictionary, 'value', default='*')
+        row_filter = read_opt(dictionary, 'filter', default=None)
 
-        if len(data.keys()) > 0:
-            logging.warning("Ignoring following keys: {}".format(list(data.keys())))
+        if ingred_id is None:
+            ingred_id = gen_sym('inline', None, dictionary)
 
-        return cls(chef, ingred_id, ddf_id, key, values, row_filter)
+        if ddf_id is not None:
+            assert data_def is None, 'one of `dataset` and `data` should be provided'
+        else:
+            assert data_def is not None, 'one of `dataset` and `data` should be provided'
+
+        if len(dictionary.keys()) > 0:
+            logging.warning("Ignoring following keys: {}".format(list(dictionary.keys())))
+
+        if ddf_id is not None:  # data will read from ddf dataset
+            return cls(chef, ingred_id, ddf_id=ddf_id, key=key, values=values, row_filter=row_filter)
+        else:  # data will be read from csv file or create on-the-fly
+            return cls(chef, ingred_id, data_def=data_def, key=key, values=values, row_filter=row_filter)
 
     @property
     def ddf(self):
@@ -341,6 +357,33 @@ class Ingredient(BaseIngredient):
     def get_data(self, copy=False, key_as_index=False):
         """read in and return the ingredient data
         """
+        if self._ddf_id:
+            return self._get_data_ddf(copy, key_as_index)
+        else:
+            return self._get_data_external(copy, key_as_index)
+
+    def _get_data_external(self, copy=False, key_as_index=False):
+        """read data from csv or on-the-fly"""
+        if isinstance(self.data_def, str):  # it should be a file name
+            df = pd.read_csv(self.data_def)
+        else:  # it should be a dict
+            df = pd.DataFrame.from_dict(self.data_def)
+
+        data = {}
+        if self.dtype == 'datapoints':
+            df = df.set_index(self.key_to_list())
+            for c in df.columns:
+                data[c] = df[c].reset_index()
+        if self.dtype == 'concepts':
+            data['concepts'] = df
+        if self.dtype == 'entities':
+            data[self.key] = df
+
+        self.data = data
+        return self.data
+
+    def _get_data_ddf(self, copy=False, key_as_index=False):
+        """read data from ddf dataset"""
         funcs = {
             'datapoints': self._get_data_datapoint,
             'entities': self._get_data_entities,
