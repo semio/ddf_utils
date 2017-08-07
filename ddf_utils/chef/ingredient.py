@@ -5,7 +5,8 @@
 import numpy as np
 import pandas as pd
 from ..str import format_float_digits
-from .helpers import read_opt, gen_sym
+from .helpers import read_opt, gen_sym, query
+from collections import Sequence
 import os
 import logging
 
@@ -334,12 +335,27 @@ class Ingredient(BaseIngredient):
             for i in self.ddf.indicators(by=keys):
                 data[i] = self.ddf.get_datapoint_df(i, primary_key=keys)
         else:
-            for i in self.values:
-                if i in self.ddf.indicators(by=keys):
-                    data[i] = self.ddf.get_datapoint_df(i, primary_key=keys)
-                else:
-                    logging.warning("indicator {} not found in dataset {}".format(i, self._ddf_id))
-
+            # TODO: add wildcard support for `value` option
+            if isinstance(self.values, Sequence):  # just a list of indicators to include
+                for i in self.values:
+                    if i in self.ddf.indicators(by=keys):
+                        data[i] = self.ddf.get_datapoint_df(i, primary_key=keys)
+                    else:
+                        logging.warning("indicator {} not found in dataset {}".format(i, self._ddf_id))
+            else:  # a dictionary with queries
+                assert len(self.values) == 1
+                assert list(self.values.keys())[0] in ['$in', '$nin']
+                for keyword, items in self.values.items():
+                    if keyword == '$in':
+                        for i in items:
+                            if i in self.ddf.indicators(by=keys):
+                                data[i] = self.ddf.get_datapoint_df(i, primary_key=keys)
+                            else:
+                                logging.warning("indicator {} not found in dataset {}".format(i, self._ddf_id))
+                    else:
+                        for i in self.ddf.indicators(by=keys):
+                            if i not in items:
+                                data[i] = self.ddf.get_datapoint_df(i, primary_key=keys)
         if len(data) == 0:
             raise IngredientError('no datapoint found for the ingredient: ' + self.ingred_id)
 
@@ -390,16 +406,10 @@ class Ingredient(BaseIngredient):
             'concepts': self._get_data_concepts
         }
 
-        def filter_row(df):
+        def filter_row(df, avaliable_scopes):
             """return the rows selected by self.row_filter."""
-            # TODO: improve filtering function
-            # 1. know more about the row_filter syntax
-            # 2. The query() Method is Experimental
             if self.row_filter:
-                query_str = "and".join(["{} in {}".format(k, v) for k, v in self.row_filter.items()])
-                # logging.debug(query_str)
-                df = df.query(query_str)
-                # logging.debug(df.head())
+                df = query(df, self.row_filter, avaliable_scopes)
             return df
 
         if self.data is None:
@@ -410,9 +420,7 @@ class Ingredient(BaseIngredient):
 
             for k, v in data.items():
                 if self.row_filter:
-                    # index_cols = data[k].index.names
-                    # data[k] = self.filter_row(data[k].reset_index()).set_index(index_cols)
-                    data[k] = filter_row(data[k])
+                    data[k] = filter_row(data[k], avaliable_scopes=data[k].columns)
 
             self.data = data
         if key_as_index:
