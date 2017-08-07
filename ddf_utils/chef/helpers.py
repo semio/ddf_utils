@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 
+import hashlib
+import logging
 import os
 import sys
 from functools import wraps, partial
+from collections import Sequence, Mapping
 from time import time
-from .. import ops
-import logging
+from . import ops
 import click
-import hashlib
 import numpy as np
 
 
@@ -111,6 +112,66 @@ def gen_sym(key, others, options):
     """generate symbol for chef ingredient/procedure result"""
     tail = hashlib.sha256((str(others) + str(options) + str(time())).encode('utf8')).hexdigest()[:6]
     return '{}_{}'.format(key, tail)
+
+
+def gen_query(conds, scope=None, available_scopes=None):
+    """generate dataframe query from mongo-like queries"""
+    comparison_keywords = {
+        '$eq': '==',
+        '$gt': '>',
+        '$gte': '>=',
+        '$lt': '<',
+        '$lte': '>',
+        '$ne': '!=',
+        '$in': 'in',
+        '$nin': 'not in'
+    }
+    logical_keywords = ['$and', '$or', '$not', '$nor']
+
+    def process_values(n):
+        if isinstance(n, str):
+            return "'{}'".format(n)
+        else:
+            return str(n)
+
+    res = []
+
+    for key, val in conds.items():
+        if key in logical_keywords:
+            if key in ['$and', '$or']:
+                to_join = ' {} '.format(key[1:])
+                queries = [gen_query({k: v}, scope, available_scopes) for k, v in val.items()]
+                return '({})'.format(to_join.join(filter(lambda x: x != '', queries)))
+            if key == '$not':
+                queries = [gen_query({k: v}, scope, available_scopes) for k, v in val.items()]
+                return '~({})'.format(' and '.join(filter(lambda x: x != '', queries)))
+            if key == '$nor':
+                queries = [gen_query({k: v}, scope, available_scopes) for k, v in val.items()]
+                return ' and '.join(['~({})'.format(filter(lambda x: x != '', queries))])
+        else:
+            if key in comparison_keywords.keys():
+                assert not isinstance(val, Mapping)
+                assert scope != None
+                res.append("{} {} {}".format(scope,
+                                             comparison_keywords[key],
+                                             process_values(val)))
+            elif isinstance(val, str):
+                res.append("{} == {}".format(key, process_values(val)))
+            elif isinstance(val, Sequence):
+                res.append("{} in {}".format(key, process_values(val)))
+            else:
+                if available_scopes is None or key in available_scopes:
+                    res.append(gen_query(val, scope=key, available_scopes=available_scopes))
+    return ' and '.join(res)
+
+
+def query(df, conditions, available_scopes=None):
+    """query a dataframe with mongo-like queries"""
+    q = gen_query(conditions, available_scopes=available_scopes)
+    if q == '' or q == '()':
+        logging.warning("empty query")
+        return df
+    return df.query(q)
 
 
 # below functions are not used in ddf_utils yet, but may be useful.
