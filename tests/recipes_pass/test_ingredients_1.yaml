@@ -21,7 +21,7 @@ ingredients:
   - id: external_concept
     key: concept
     data: ./external.csv
-  - id: on_the_fiy_datapoints
+  - id: on_the_fly_datapoints
     key: geo, year
     value: '*'
     data:
@@ -64,4 +64,4 @@ cooking:
         - procedure: serve
           ingredients:
               - bp-datapoints
-              - on_the_fiy_datapoints
+              - on_the_fly_datapoints
