@@ -452,8 +452,9 @@ class Ingredient(BaseIngredient):
             data[self.key] = df
 
         # applying row filter
-        for k, df in data.items():
-            data[k] = query(df, self.row_filter, available_scopes=df.columns)
+        if self.row_filter is not None:
+            for k, df in data.items():
+                data[k] = query(df, self.row_filter, available_scopes=df.columns)
 
         self.data = data
         return self.data
