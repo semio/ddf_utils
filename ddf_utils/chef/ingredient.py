@@ -398,6 +398,10 @@ class Ingredient(BaseIngredient):
         if self.dtype == 'entities':
             data[self.key] = df
 
+	# applying row filter
+	for k, df in data.items():
+	    data[k] = query(df, self.row_filter, available_scopes=df.columns)
+
         self.data = data
         return self.data
 
