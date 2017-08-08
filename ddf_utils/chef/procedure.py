@@ -372,7 +372,45 @@ def _merge_two(left: Dict[str, pd.DataFrame],
 
 @debuggable
 def filter(chef: Chef, ingredients: List[str], result, **options) -> ProcedureResult:
-    """filter items and rows just as what `values` and `filter` do in ingredient definition.
+    """filter items and rows just as what `value` and `filter` do in ingredient definition.
+
+    Procedure format:
+
+    .. code-block:: yaml
+
+       - procedure: filter
+         ingredients:
+             - ingredient_id
+         options:
+             item:  # just as `value` in ingredient def
+                 $in:
+                     - concept_1
+                     - concept_2
+             row:  # just as `filter` in ingredient def
+                 $and:
+                     geo:
+                         $ne: usa
+                     year:
+                         $gt: 2010
+
+         result: output_ingredient
+
+    for more information, see the :py:class:`ddf_utils.chef.ingredient.Ingredient` class.
+
+    Parameters
+    ----------
+    chef: Chef
+        the Chef instance
+    ingredients:
+        list of ingredient id in the DAG
+    result: `str`
+
+    Keyword Args
+    ------------
+    item: list or dict, optional
+        The item filter
+    row: dict, optional
+        The row filter
     """
 
     assert len(ingredients) == 1, "procedure only support 1 ingredient for now."

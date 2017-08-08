@@ -214,7 +214,7 @@ class BaseIngredient(object):
 class Ingredient(BaseIngredient):
     """
     ingredient class: represents an ingredient object in recipe file.
-    see the implement of from_dict() method for how the object is constructed.
+    see the implement of `Ingredient.from_dict()` method for how the object is constructed.
 
     Here is an example ingredient object in recipe:
 
@@ -232,19 +232,72 @@ class Ingredient(BaseIngredient):
             - usa
             - chn
 
+    ``value`` and ``filter`` can accept mongo like queries to make more complex statements, for example:
+
+    .. code-block:: yaml
+
+       id: example-ingredient
+       dataset: ddf--example--dataset
+       key: geo, time
+       value:
+           $nin:  # exclude following indicators
+               - concept1
+               - concept2
+       filter:
+           geo:
+               $in:
+                   - swe
+                   - usa
+                   - chn
+           year:
+               $and:
+                   $gt: 2000
+                   $lt: 2015
+
+    for now, value accepts ``$in`` and ``$nin`` keywords, but only one of them can be in the value option;
+    filter supports logical keywords: ``$and``, ``$or``, ``$not``, ``$nor``, and comparision keywords:
+    ``$eq``, ``$gt``, ``$gte``, ``$lt``, ``$lte``, ``$ne``, ``$in``, ``$nin``.
+
+    The other way to define the ingredient data is using the ``data`` keyword to include external csv file, or
+    inline the data in the ingredient definition. Example:
+
+    .. code-block:: yaml
+
+       id: example-ingredient
+       key: concept
+       data: external_concepts.csv
+
+    On-the-fly ingredient:
+
+    .. code-block:: yaml
+
+       id: example-ingredient
+       key: concept
+       data:
+           - concept: concept_1
+             name: concept_name_1
+             concept_type: string
+             description: concept_description_1
+           - concept: concept_2
+             name: concept_name_2
+             concept_type: measure
+             description: concept_description_2
+
     Attributes
     ----------
     ingred_id : `str`
         The id string
-    ddf_id : `str`
-        the underlaying dataset id
+    ddf_id : `str`, optional
+        the underlying dataset id
     key : `str`
         the key columns of the ingredient
-    value : `list`
+    values : `str` or `list` or `dict`, optional
         concept filter applied to the dataset. if `value` == "*", all concept of
         the dataset will be in the ingredient
-    filter : `dict`
+    row_filter : `dict`, optional
         row filter applied to the dataset
+    data : `dict`, optional
+        the data in the ingredient
 
     Methods
     -------
@@ -398,9 +451,9 @@ class Ingredient(BaseIngredient):
         if self.dtype == 'entities':
             data[self.key] = df
 
-	# applying row filter
-	for k, df in data.items():
-	    data[k] = query(df, self.row_filter, available_scopes=df.columns)
+        # applying row filter
+        for k, df in data.items():
+            data[k] = query(df, self.row_filter, available_scopes=df.columns)
 
         self.data = data
         return self.data
