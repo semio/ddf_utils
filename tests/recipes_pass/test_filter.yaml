@@ -1,0 +1,45 @@
+info:
+    id: test-filter_row
+
+ingredients:
+    - id: cme-datapoints
+      dataset: ddf--cme
+      key: "country,year"
+      value: "*"
+    - id: cme-entities
+      dataset: ddf--cme
+      key: country
+      value: "*"
+    - id: cme-concepts
+      dataset: ddf--cme
+      key: concept
+      filter:
+        concept:
+          $nin:
+              - imr_median
+
+cooking:
+  datapoints:
+    - procedure: filter
+      ingredients:
+        - cme-datapoints
+      options:
+        item:
+          - imr_upper
+          - imr_lower
+        row:
+          country:
+              $in:
+                - usa
+                - swe
+          year:
+              $gt: 2000
+      result: final_datapoints
+  concepts:
+    - procedure: serve
+      ingredients:
+        - cme-concepts
+  entities:
+    - procedure: serve
+      ingredients:
+        - cme-entities
