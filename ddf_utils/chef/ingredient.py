@@ -361,14 +361,17 @@ class Ingredient(BaseIngredient):
 
         return data
 
+    # because concept ingerdient and entity ingerdient only have one key in the
+    # data dictionary, so they don't need to support the column filter
     def _get_data_entities(self):
+        if not (self.values == '*' or self.values == [self.key]):
+            logging.warning("entities don't accept the `value` option")
         return {self.key: self.ddf.get_entity(self.key)}
 
     def _get_data_concepts(self):
-        if self.values == '*':
-            return {'concepts': self.ddf.concepts}
-        else:
-            return {'concepts': self.ddf.concepts[self.values]}
+        if not (self.values == '*' or self.values == ['concept']):
+            logging.warning("concepts don't accept the `value` option")
+        return {'concepts': self.ddf.concepts}
 
     def get_data(self, copy=False, key_as_index=False):
         """read in and return the ingredient data
