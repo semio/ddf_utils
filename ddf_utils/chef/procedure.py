@@ -11,7 +11,9 @@ from .helpers import read_opt, mkfunc, debuggable
 from .exceptions import ProcedureError
 import time
 from typing import List, Union, Dict, Optional
+from collections import Sequence, Mapping
 import fnmatch
+from .helpers import query
 
 import logging
 
@@ -366,6 +368,60 @@ def _merge_two(left: Dict[str, pd.DataFrame],
         # raise NotImplementedError('entity data do not support merging yet.')
 
     return res_data
+
+
+@debuggable
+def filter(chef: Chef, ingredients: List[str], result, **options) -> ProcedureResult:
+    """filter items and rows just as what `values` and `filter` do in ingredient definition.
+    """
+
+    assert len(ingredients) == 1, "procedure only support 1 ingredient for now."
+    ingredient = chef.dag.get_node(ingredients[0]).evaluate()
+    logger.info("filter_row: " + ingredients[0])
+
+    data = ingredient.copy_data()
+    row_filters = read_opt(options, 'row', False, None)
+    items = read_opt(options, 'item', False, None)
+
+    res = {}
+
+    if row_filters is None and items is None:
+        raise ProcedureError('filter procedure: at least one of `row` and `item` should be set in the options!')
+
+    if ingredient.dtype in ['concepts', 'entities']:
+        logger.warning("{} don't support `item` option".format(ingredient.dtype))
+        items = None
+
+    if items is not None:
+        if isinstance(items, Sequence):
+            for i in items:
+                if i in data.keys():
+                    res[i] = data[i].copy()
+                else:
+                    logger.warning("concept {} not found in ingredient {}".format(i, ingredient.ingred_id))
+        else:
+            assert len(items) == 1
+            assert list(items.keys())[0] in ['$in', '$nin']
+            for k, v in items.items():
+                if k == '$in':
+                    for i in v:
+                        if i in data.keys():
+                            res[i] = data[i].copy()
+                        else:
+                            logger.warning("concept {} not found in ingredient {}".format(i, ingredient.ingred_id))
+                else:
+                    for j, df in data.items():
+                        if j not in v:
+                            res[j] = data[j].copy()
+    else:
+        for k, df in data.items():
+            res[k] = df.copy()
+
+    if row_filters is not None:
+        for k, df in res.items():
+            res[k] = query(df, row_filters, available_scopes=df.columns)
+
+    return ProcedureResult(chef, result, ingredient.key, data=res)
 
 
 @debuggable
