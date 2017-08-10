@@ -16,7 +16,7 @@ from collections import Mapping
 from graphviz import Digraph
 
 
-logger = logging.Logger('Chef')
+logger = logging.getLogger('Chef')
 
 
 class Chef:
@@ -104,7 +104,7 @@ class Chef:
         for k, ps in self.cooking.items():
             for p in ps:
                 try:
-                    get_procedure(p['procedure'], self.config.get('procedure_dir', None))
+                    get_procedure(p['procedure'], self.config.get('procedure_dir'))
                 except (AttributeError, ImportError):
                     logger.warning("{} is not a valid procedure, please double check "
                                    "or register new procedure".format(p['procedure']))
