@@ -477,7 +477,10 @@ class Ingredient(BaseIngredient):
             data = funcs[self.dtype]()
             if self.dtype == 'datapoints':
                 for k, v in data.items():
-                    data[k] = v.compute()
+                    if not isinstance(v, pd.DataFrame):
+                        data[k] = v.compute()
+                    else:
+                        data[k] = v
 
             for k, v in data.items():
                 if self.row_filter:

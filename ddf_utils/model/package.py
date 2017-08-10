@@ -97,18 +97,22 @@ class Datapackage:
                         "key": pkey
                     })
             else:  # datapoints
+                dtypes = dict([(x, 'str') for x in pkey])
+                for tc in time_concepts:
+                    dtypes[tc] = int  # TODO: maybe there are other time format?
                 if not no_datapoints:
-                    dtypes = dict([(x, 'str') for x in pkey])
-                    for tc in time_concepts:
-                        dtypes[tc] = int  # TODO: maybe there are other time format?
                     df = dd.read_csv(os.path.join(base_dir, r['path']), dtype=dtypes)
-                    try:
-                        indicator_name = list(set(df.columns) - set(pkey))[0]
-                    except:
-                        print(df.columns)
-                        print(pkey)
-                        raise
-                    keys = tuple(sorted(pkey))
+                else:
+                    df = next(pd.read_csv(os.path.join(base_dir, r['path']), dtype=dtypes, chunksize=3))
+
+                try:
+                    indicator_name = list(set(df.columns) - set(pkey))[0]
+                except:
+                    print(df.columns)
+                    print(pkey)
+                    raise
+                keys = tuple(sorted(pkey))
+                if not no_datapoints:
                     if indicator_name in datapoints.keys():
                         if keys in datapoints[indicator_name]:
                             datapoints[indicator_name][keys].append(df)
@@ -117,6 +121,12 @@ class Datapackage:
                     else:
                         datapoints[indicator_name] = dict()
                         datapoints[indicator_name][keys] = [df]
+                else:  # no datapoints needed, just create an empty dataframe with columns
+                    try:
+                        datapoints.get(indicator_name, {})[keys]
+                    except KeyError:
+                        datapoints[indicator_name] = {}
+                        datapoints[indicator_name][keys] = pd.DataFrame([], columns=df.columns)
 
         # datapoints
         if not no_datapoints:
@@ -248,10 +258,11 @@ class Datapackage:
 
         pbar = tqdm(total=len(self.resources))
         for g in map(_gen_key_value_object, self.resources):
+            # FIXME: pbar count seems not correct
+            pbar.update(1)
             for kvo in g:
                 # logging.debug("adding kvo {}".format(str(kvo)))
                 _add_to_schema(kvo)
-            pbar.update(1)
 
         for sch in hash_table.values():
             sch['resources'] = list(sch['resources'])
