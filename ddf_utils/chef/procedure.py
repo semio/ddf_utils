@@ -426,31 +426,55 @@ def filter(chef: Chef, ingredients: List[str], result, **options) -> ProcedureRe
     if row_filters is None and items is None:
         raise ProcedureError('filter procedure: at least one of `row` and `item` should be set in the options!')
 
-    if ingredient.dtype in ['concepts', 'entities']:
-        logger.warning("{} don't support `item` option".format(ingredient.dtype))
-        items = None
-
     if items is not None:
         if isinstance(items, Sequence):
-            for i in items:
-                if i in data.keys():
-                    res[i] = data[i].copy()
-                else:
-                    logger.warning("concept {} not found in ingredient {}".format(i, ingredient.ingred_id))
+            if ingredient.dtype == 'datapoints':
+                for i in items:
+                    if i in data.keys():
+                        res[i] = data[i].copy()
+                    else:
+                        logger.warning("concept {} not found in ingredient {}".format(i, ingredient.ingred_id))
+            else:
+                for k, v in data.items():
+                    items_ = items.copy()
+                    for i in items_:
+                        if i not in v.columns:
+                            items_.remove(i)
+                            logger.warning("concept {} not found in ingredient {}".format(i, ingredient.ingred_id))
+                    res[k] = v[items_].copy()
         else:
             assert len(items) == 1
             assert list(items.keys())[0] in ['$in', '$nin']
-            for k, v in items.items():
-                if k == '$in':
-                    for i in v:
+            selector = list(items.keys())[0]
+            item_list = list(items.values())[0]
+            if ingredient.dtype == 'datapoints':
+                if selector == '$in':
+                    for i in item_list:
                         if i in data.keys():
                             res[i] = data[i].copy()
                         else:
                             logger.warning("concept {} not found in ingredient {}".format(i, ingredient.ingred_id))
                 else:
-                    for j, df in data.items():
-                        if j not in v:
-                            res[j] = data[j].copy()
+                    for k, df in data.items():
+                        if k not in item_list:
+                            res[k] = data[k].copy()
+            else:
+                if selector == '$in':
+                    items_ = items.copy()
+                    for k, v in data.items():
+                        for i in items_:
+                            if i not in v.columns:
+                                items_.remove(i)
+                                logger.warning("concept {} not found in ingredient {}".format(i, ingredient.ingred_id))
+                        res[k] = v[item_list].copy()
+                else:
+                    items_ = items.copy()
+                    for k, v in data.items():
+                        for i in items_:
+                            if i not in v.columns:
+                                items_.remove(i)
+                                logger.warning("concept {} not found in ingredient {}".format(i, ingredient.ingred_id))
+                        res[k] = v[v.columns.drop(item_list)].copy()
     else:
         for k, df in data.items():
             res[k] = df.copy()

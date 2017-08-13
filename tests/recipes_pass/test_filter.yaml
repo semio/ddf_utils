@@ -40,6 +40,20 @@ cooking:
       ingredients:
         - cme-concepts
   entities:
-    - procedure: serve
+    - procedure: filter
       ingredients:
         - cme-entities
+      options:
+        item:
+          - country
+          - name
+        row:
+          country:
+            $in:
+              - usa
+              - swe
+      result: final-entities
+
+    - procedure: serve
+      ingredients:
+        - final-entities

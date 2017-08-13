@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 from ..str import format_float_digits
 from .helpers import read_opt, gen_sym, query
-from collections import Sequence
+from collections import Sequence, Mapping
 import os
 import logging
 
@@ -48,7 +48,7 @@ class BaseIngredient(object):
     def copy_data(self):
         """this function makes copy of self.data.
         """
-        if not self.data:
+        if self.data is None:
             self.get_data()
         # v: DataFrame. DataFrame.copy() is by default deep copy,
         # but I just call it explicitly here.
@@ -417,14 +417,36 @@ class Ingredient(BaseIngredient):
     # because concept ingerdient and entity ingerdient only have one key in the
     # data dictionary, so they don't need to support the column filter
     def _get_data_entities(self):
-        if not (self.values == '*' or self.values == [self.key]):
-            logging.warning("entities don't accept the `value` option")
-        return {self.key: self.ddf.get_entity(self.key)}
+        df = self.ddf.get_entity(self.key)
+        if self.values != '*':
+            if isinstance(self.values, Mapping):
+                assert len(self.values) == 1
+                assert list(self.values.keys())[0] in ['$in', '$nin']
+                kw = list(self.values.keys())[0]
+                if kw == ['$in']:
+                    return {self.key: df[self.values[kw]]}
+                else:
+                    return {self.key: df[df.columns.drop(self.values[kw])]}
+            else:
+                return {self.key: df[self.values]}
+        else:
+            return {self.key: df}
 
     def _get_data_concepts(self):
-        if not (self.values == '*' or self.values == ['concept']):
-            logging.warning("concepts don't accept the `value` option")
-        return {'concepts': self.ddf.concepts}
+        df = self.ddf.concepts
+        if self.values != '*':
+            if isinstance(self.values, Mapping):
+                assert len(self.values) == 1
+                assert list(self.values.keys())[0] in ['$in', '$nin']
+                kw = list(self.values.keys())[0]
+                if kw == ['$in']:
+                    return {'concepts': df[self.values[kw]]}  # FIXME: just use concept as key..
+                else:
+                    return {'concepts': df[df.columns.drop(self.values[kw])]}
+            else:
+                return {'concepts': df[self.values]}
+        else:
+            return {'concepts': df}
 
     def get_data(self, copy=False, key_as_index=False):
         """read in and return the ingredient data
@@ -495,6 +517,7 @@ class Ingredient(BaseIngredient):
 
 class ProcedureResult(BaseIngredient):
     def __init__(self, chef, ingred_id, key, data):
+        assert isinstance(data, Mapping), "data should be dictionary, {} provided".format(type(data))
         super(ProcedureResult, self).__init__(chef, ingred_id, key, data)
 
     def __repr__(self):
