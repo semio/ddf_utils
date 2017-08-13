@@ -40,12 +40,24 @@ class Chef:
         else:
             self.cooking = cooking
         if serving is None:
-            self.serving = list()
+            self._serving = list()
         else:
-            self.serving = serving
+            self._serving = serving
 
         self._recipe = recipe
         self.ddf_object_cache = {}
+
+    @property
+    def serving(self):
+        if len(self._serving) == 0:
+            for k, v in self.cooking.items():
+                if len(v) > 0:
+                    self._serving.append({'id': v[-1]['result']})
+        return self._serving
+
+    @serving.setter
+    def serving(self, serving):
+        self._serving = serving
 
     @classmethod
     def from_recipe(cls, recipe_file, **config):
@@ -109,6 +121,11 @@ class Chef:
                     logger.warning("{} is not a valid procedure, please double check "
                                    "or register new procedure".format(p['procedure']))
                     raise ChefRuntimeError('procedures not ready')
+
+        # 3. check if the DAG is valid
+        for ing in self.serving:
+            self.dag.get_node(ing['id']).detect_downstream_cycle()
+            self.dag.get_node(ing['id']).detect_missing_dependency()
 
     def add_config(self, **config):
         for k, v in config.items():
@@ -193,10 +210,6 @@ class Chef:
         self.validate()
 
         results = list()
-        if len(self.serving) == 0:
-            for k, v in self.cooking.items():
-                if len(v) > 0:
-                    self.serving.append({'id': v[-1]['result']})
 
         for dish in self.serving:
             dish_result = self.dag.get_node(dish['id']).evaluate()
