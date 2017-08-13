@@ -43,6 +43,7 @@ def test_chef_api_call():
 
     g = chef.to_graph()
     r = chef.to_recipe()
+    chef.validate()
     res = chef.run()
 
     assert 1
