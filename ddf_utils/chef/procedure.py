@@ -2,6 +2,7 @@
 
 """all procedures for recipes"""
 
+import warnings
 import pandas as pd
 import numpy as np
 from . dag import DAG
@@ -11,54 +12,13 @@ from .helpers import read_opt, mkfunc, debuggable
 from .exceptions import ProcedureError
 import time
 from typing import List, Union, Dict, Optional
+from collections import Sequence, Mapping
 import fnmatch
+from .helpers import query
 
 import logging
 
 logger = logging.getLogger('Chef')
-
-
-@debuggable
-def assign_value(chef: Chef, ingredients: List[str], result, dictionary) -> ProcedureResult:
-    """Assign value to specific key/value pair
-
-    NOT IMPLEMENTED YET.
-
-    Procedure format:
-
-    .. code-block:: yaml
-
-       procedure: assign_value
-       ingredients:
-         - ingredient_id
-       result: str
-       option:
-         dictionary: str or dict  # file name or mappings
-
-    dictionary format: {column -> [{key -> value}]}
-
-    for example:
-
-    .. code-block:: json
-
-       {
-         "concept": {
-           [
-             "key": "concept_to_change"
-             "column": "description"
-             "value": "new value to use"
-           ]
-         }
-       }
-
-    """
-    assert len(ingredients) == 1, "procedure only support 1 ingredient for now."
-    ingredient = chef.dag.get_node(ingredients[0]).evaluate()
-    logger.info("assign_value: " + ingredients[0])
-
-    data = ingredient.copy_data()
-
-    raise NotImplementedError
 
 
 @debuggable
@@ -183,7 +143,7 @@ def translate_column(chef: Chef, ingredients: List[str], result, dictionary,
         the column to be translated
     target_column : `str`, optional
         the target column to store the translated data. If this is not set then the `column`
-        cloumn will be replaced
+        column will be replaced
     not_found : {'drop', 'include', 'error'}, optional
         the behavior when there is values not found in the mapping dictionary, default is 'drop'
     ambiguity : {'prompt', 'skip', 'error'}, optional
@@ -244,7 +204,7 @@ def merge(chef: Chef, ingredients: List[str], result, deep=False) -> ProcedureRe
          - ingredient_id_2
          - ingredient_id_3
          # ...
-       result: str  # new ingledient id
+       result: str  # new ingredient id
        options:
          deep: bool  # use deep merge if true
 
@@ -309,7 +269,7 @@ def merge(chef: Chef, ingredients: List[str], result, deep=False) -> ProcedureRe
 
 
 def __get_last_item(ser):
-    """get the last vaild item of a Series, or Nan."""
+    """get the last valid item of a Series, or Nan."""
     if ser.last_valid_index() is None:
         return np.nan
     else:
@@ -369,6 +329,122 @@ def _merge_two(left: Dict[str, pd.DataFrame],
 
 
 @debuggable
+def filter(chef: Chef, ingredients: List[str], result, **options) -> ProcedureResult:
+    """filter items and rows just as what `value` and `filter` do in ingredient definition.
+
+    Procedure format:
+
+    .. code-block:: yaml
+
+       - procedure: filter
+         ingredients:
+             - ingredient_id
+         options:
+             item:  # just as `value` in ingredient def
+                 $in:
+                     - concept_1
+                     - concept_2
+             row:  # just as `filter` in ingredient def
+                 $and:
+                     geo:
+                         $ne: usa
+                     year:
+                         $gt: 2010
+
+         result: output_ingredient
+
+    for more information, see the :py:class:`ddf_utils.chef.ingredient.Ingredient` class.
+
+    Parameters
+    ----------
+    chef: Chef
+        the Chef instance
+    ingredients:
+        list of ingredient id in the DAG
+    result: `str`
+
+    Keyword Args
+    ------------
+    item: list or dict, optional
+        The item filter
+    row: dict, optional
+        The row filter
+    """
+
+    assert len(ingredients) == 1, "procedure only support 1 ingredient for now."
+    ingredient = chef.dag.get_node(ingredients[0]).evaluate()
+    logger.info("filter_row: " + ingredients[0])
+
+    data = ingredient.copy_data()
+    row_filters = read_opt(options, 'row', False, None)
+    items = read_opt(options, 'item', False, None)
+
+    res = {}
+
+    if row_filters is None and items is None:
+        raise ProcedureError('filter procedure: at least one of `row` and `item` should be set in the options!')
+
+    if items is not None:
+        if isinstance(items, Sequence):
+            if ingredient.dtype == 'datapoints':
+                for i in items:
+                    if i in data.keys():
+                        res[i] = data[i].copy()
+                    else:
+                        logger.warning("concept {} not found in ingredient {}".format(i, ingredient.ingred_id))
+            else:
+                for k, v in data.items():
+                    items_ = items.copy()
+                    for i in items_:
+                        if i not in v.columns:
+                            items_.remove(i)
+                            logger.warning("concept {} not found in ingredient {}".format(i, ingredient.ingred_id))
+                    res[k] = v[items_].copy()
+        else:
+            assert len(items) == 1
+            assert list(items.keys())[0] in ['$in', '$nin']
+            selector = list(items.keys())[0]
+            item_list = list(items.values())[0]
+            if ingredient.dtype == 'datapoints':
+                if selector == '$in':
+                    for i in item_list:
+                        if i in data.keys():
+                            res[i] = data[i].copy()
+                        else:
+                            logger.warning("concept {} not found in ingredient {}".format(i, ingredient.ingred_id))
+                else:
+                    for k, df in data.items():
+                        if k not in item_list:
+                            res[k] = data[k].copy()
+            else:
+                if selector == '$in':
+                    items_ = items.copy()
+                    for k, v in data.items():
+                        for i in items_:
+                            if i not in v.columns:
+                                items_.remove(i)
+                                logger.warning("concept {} not found in ingredient {}".format(i, ingredient.ingred_id))
+                        res[k] = v[item_list].copy()
+                else:
+                    items_ = items.copy()
+                    for k, v in data.items():
+                        for i in items_:
+                            if i not in v.columns:
+                                items_.remove(i)
+                                logger.warning("concept {} not found in ingredient {}".format(i, ingredient.ingred_id))
+                        res[k] = v[v.columns.drop(item_list)].copy()
+    else:
+        for k, df in data.items():
+            res[k] = df.copy()
+
+    if row_filters is not None:
+        for k, df in res.items():
+            res[k] = query(df, row_filters, available_scopes=df.columns)
+
+    return ProcedureResult(chef, result, ingredient.key, data=res)
+
+
+@debuggable
 def filter_row(chef: Chef, ingredients: List[str], result, **options) -> ProcedureResult:
     """filter an ingredient based on a set of options and return
     the result as new ingredient.
@@ -409,6 +485,10 @@ def filter_row(chef: Chef, ingredients: List[str], result, **options) -> Procedu
     filters: dict
         The filter description dictionary
     """
+    warnings.simplefilter('always', DeprecationWarning)
+    warnings.warn("filter_row is deprecated, please use filter function instead.", category=DeprecationWarning)
+    warnings.simplefilter('default', DeprecationWarning)
+
     assert len(ingredients) == 1, "procedure only support 1 ingredient for now."
     ingredient = chef.dag.get_node(ingredients[0]).evaluate()
     logger.info("filter_row: " + ingredients[0])
@@ -536,6 +616,10 @@ def filter_item(chef: Chef, ingredients: List[str], result, items: list) -> Proc
     items: list
         a list of items to filter from base ingredient
     """
+    warnings.simplefilter('always', DeprecationWarning)
+    warnings.warn("filter_item is deprecated, please use filter function instead.", category=DeprecationWarning)
+    warnings.simplefilter('default', DeprecationWarning)
+
     assert len(ingredients) == 1, "procedure only support 1 ingredient for now."
     ingredient = chef.dag.get_node(ingredients[0]).evaluate()
     logger.info("filter_item: " + ingredients[0])
@@ -679,7 +763,7 @@ def window(chef: Chef, ingredients: List[str], result, **options) -> ProcedureRe
        procedure: window
        ingredients:  # list of ingredient id
          - ingredient_id
-       result: str  # new ingledient id
+       result: str  # new ingredient id
        options:
          window:
            column: str  # column which window is created from
@@ -849,7 +933,7 @@ def extract_concepts(chef: Chef, ingredients: List[str], result,
        ingredients:  # list of ingredient id
          - ingredient_id_1
          - ingredient_id_2
-       result: str  # new ingledient id
+       result: str  # new ingredient id
        options:
          join:  # optional
            base: str  # base concept ingredient id
@@ -914,6 +998,8 @@ def extract_concepts(chef: Chef, ingredients: List[str], result,
             else:
                 cols = [x for x in df.columns if x not in pks]
             for col in cols:
+                if col.startswith('is--'):
+                    continue
                 new_concepts.add(col)
                 if col in concepts.index:
                     continue
@@ -921,6 +1007,10 @@ def extract_concepts(chef: Chef, ingredients: List[str], result,
                     concepts.ix[col, 'concept_type'] = 'measure'
                 else:
                     concepts.ix[col, 'concept_type'] = 'string'
+        # add name column if there isn't one
+        if 'name' not in concepts.columns:
+            concepts['name'] = np.nan
+
     if join_type == 'ingredients_outer':
         # ingredients_outer join: only keep concepts appears in ingredients
         concepts = concepts.ix[new_concepts]

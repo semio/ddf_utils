@@ -45,14 +45,6 @@ ddf_utils.io module
     :undoc-members:
     :show-inheritance:
 
-ddf_utils.ops module
---------------------
-
-.. automodule:: ddf_utils.ops
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 ddf_utils.patch module
 ----------------------
 

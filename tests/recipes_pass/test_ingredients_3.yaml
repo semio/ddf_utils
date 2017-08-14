@@ -1,0 +1,58 @@
+info:
+  id: test_ingredients
+
+ingredients:
+  - id: cme-concept
+    dataset: ddf--cme
+    key: concept
+    value: '*'
+    filter:
+      concept:
+          $nin:
+              - imr_median
+  - id: gw-geo
+    dataset: ddf--gapminder--geo_entity_domain
+    key: geo
+    value: '*'
+  - id: cme-datapoints
+    dataset: ddf--cme
+    key: country, year
+    value:
+        $in:
+          - imr_lower
+          - imr_upper
+    filter:
+       $or:
+          country:
+            $in:
+              - usa
+              - swe
+          imr_lower:
+            $and:
+                $gt: 100
+                $lt: 300
+  - id: cme-datapoints_empty_query
+    dataset: ddf--cme
+    key: country, year
+    value:
+      - imr_median
+    filter:
+        geo:
+          $in:
+            - usa
+            - swe
+
+cooking:
+  datapoints:
+    - procedure: serve
+      ingredients:
+        - cme-datapoints
+        - cme-datapoints_empty_query
+  entities:
+    - procedure: serve
+      ingredients:
+        - gw-geo
+  concepts:
+    - procedure: serve
+      ingredients:
+        - cme-concept

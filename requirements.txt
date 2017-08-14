@@ -17,3 +17,4 @@ pytest-cov
 tqdm
 ruamel.yaml
 graphviz
+coloredlogs

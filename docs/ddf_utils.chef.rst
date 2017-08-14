@@ -20,6 +20,14 @@ ddf_utils.chef.cook module
     :undoc-members:
     :show-inheritance:
 
+ddf_utils.chef.ops module
+-------------------------
+
+.. automodule:: ddf_utils.chef.ops
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 ddf_utils.chef.ingredient module
 --------------------------------
 

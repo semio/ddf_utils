@@ -222,9 +222,12 @@ class Dataset:
 
             df.to_csv(fn, index=False)
 
-        # datapoints. Because it's dask dataframe, we should compute it before save to disk
+        # datapoints. If it's dask dataframe, we should compute it before save to disk
         for indicator, kvs in self.datapoints.items():
             for keys, df in kvs.items():
                 keys_str = '--'.join(keys)
                 fn = osp.join(out_dir, 'ddf--datapoints--{}--by--{}.csv'.format(indicator, keys_str))
-                df.compute().to_csv(fn, index=False)
+                if not isinstance(df, pd.DataFrame):
+                    df.compute().to_csv(fn, index=False)
+                else:
+                    df.to_csv(fn, index=False)

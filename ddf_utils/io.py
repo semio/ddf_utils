@@ -2,8 +2,12 @@
 """io functions for ddf files"""
 
 import os
+import time
 import shutil
 import pandas as pd
+import requests
+import threading
+from urllib.parse import urlsplit
 
 
 def to_csv(df, out_dir, ftype, concept, by=None, **kwargs):
@@ -44,6 +48,36 @@ def cleanup(path, how='ddf'):
     if how == 'langsplit':
         if os.path.exists(os.path.join(path, 'langsplit')):
             shutil.rmtree(os.path.join(path, 'langsplit'))
+
+
+def download_csv(urls, out_path):
+    """download csv files"""
+
+    def download(url_, out_path_):
+        r = requests.get(url_, stream=True)
+        total_length = int(r.headers.get('content-length'))
+        if total_length == 0:
+            return
+        fn = urlsplit(url_).path.split('/')[-1]
+        print('writing to: {}\n'.format(fn), end='')
+        with open(os.path.join(out_path, fn), 'wb') as fd:
+            for chunk in r.iter_content(chunk_size=128):
+                fd.write(chunk)
+
+    def create_tread(url_, out_path_):
+        download_thread = threading.Thread(target=download, args=(url_, out_path_))
+        download_thread.start()
+        return download_thread
+
+    threads = []
+    for url in urls:
+        threads.append(create_tread(url, out_path))
+
+    # wait until all downloads are done
+    is_alive = [t.is_alive() for t in threads]
+    while any(is_alive):
+        time.sleep(1)
+        is_alive = [t.is_alive() for t in threads]
 
 
 def csvs_to_ddf(files, out_path):

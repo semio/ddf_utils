@@ -100,7 +100,6 @@
 <li class="toctree-l3"><a class="reference internal" href="#module-ddf_utils.i18n">ddf_utils.i18n module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-ddf_utils.datapackage">ddf_utils.datapackage module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-ddf_utils.io">ddf_utils.io module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#module-ddf_utils.ops">ddf_utils.ops module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-ddf_utils.patch">ddf_utils.patch module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-ddf_utils.qa">ddf_utils.qa module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-ddf_utils.str">ddf_utils.str module</a></li>
@@ -165,6 +164,7 @@
 <li class="toctree-l2"><a class="reference internal" href="ddf_utils.chef.html#submodules">Submodules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ddf_utils.chef.html#module-ddf_utils.chef.api">ddf_utils.chef.api module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ddf_utils.chef.html#module-ddf_utils.chef.cook">ddf_utils.chef.cook module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ddf_utils.chef.html#module-ddf_utils.chef.ops">ddf_utils.chef.ops module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ddf_utils.chef.html#module-ddf_utils.chef.ingredient">ddf_utils.chef.ingredient module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ddf_utils.chef.html#module-ddf_utils.chef.procedure">ddf_utils.chef.procedure module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ddf_utils.chef.html#module-ddf_utils.chef.dag">ddf_utils.chef.dag module</a></li>
@@ -296,6 +296,12 @@ keyword arguments to this function</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="ddf_utils.io.download_csv">
+<code class="descclassname">ddf_utils.io.</code><code class="descname">download_csv</code><span class="sig-paren">(</span><em>urls</em>, <em>out_path</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.io.download_csv" title="Permalink to this definition">¶</a></dt>
+<dd><p>download csv files</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="ddf_utils.io.load_google_xls">
 <code class="descclassname">ddf_utils.io.</code><code class="descname">load_google_xls</code><span class="sig-paren">(</span><em>filehash</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.io.load_google_xls" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -306,48 +312,6 @@ keyword arguments to this function</p>
 <dd><p>save a ddf dataframe to csv file.
 the file path of csv will be out_dir/ddf–$ftype–$concept–$by.csv</p>
 </dd></dl>
-
-</div>
-<div class="section" id="module-ddf_utils.ops">
-<span id="ddf-utils-ops-module"></span><h2>ddf_utils.ops module<a class="headerlink" href="#module-ddf_utils.ops" title="Permalink to this headline">¶</a></h2>
-<p>commonly used calculation methods</p>
-<dl class="function">
-<dt id="ddf_utils.ops.aagr">
-<code class="descclassname">ddf_utils.ops.</code><code class="descname">aagr</code><span class="sig-paren">(</span><em>df: &lt;Mock name=’mock.DataFrame’ id=‘4455733904’&gt;</em>, <em>window: int = 10</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.ops.aagr" title="Permalink to this definition">¶</a></dt>
-<dd><p>average annual growth rate</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>window</strong> (<cite>int</cite>) – the rolling window size</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>return</strong> – The rolling apply result</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><cite>DataFrame</cite></td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="ddf_utils.ops.between">
-<code class="descclassname">ddf_utils.ops.</code><code class="descname">between</code><span class="sig-paren">(</span><em>x</em>, <em>upper</em>, <em>lower</em>, <em>how=’all’</em>, <em>include_upper=False</em>, <em>include_lower=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.ops.between" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="ddf_utils.ops.gt">
-<code class="descclassname">ddf_utils.ops.</code><code class="descname">gt</code><span class="sig-paren">(</span><em>x</em>, <em>val</em>, <em>how=’all’</em>, <em>include_eq=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.ops.gt" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="ddf_utils.ops.lt">
-<code class="descclassname">ddf_utils.ops.</code><code class="descname">lt</code><span class="sig-paren">(</span><em>x</em>, <em>val</em>, <em>how=’all’</em>, <em>include_eq=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.ops.lt" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="ddf_utils.ops.zcore">
-<code class="descclassname">ddf_utils.ops.</code><code class="descname">zcore</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.ops.zcore" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
 
 </div>
 <div class="section" id="module-ddf_utils.patch">
@@ -558,7 +522,7 @@ avaliable options are <cite>drop</cite>, <cite>error</cite>, <cite>include</cite
 
 <dl class="function">
 <dt id="ddf_utils.transformer.trend_bridge">
-<code class="descclassname">ddf_utils.transformer.</code><code class="descname">trend_bridge</code><span class="sig-paren">(</span><em>old_data: &lt;Mock name=’mock.Series’ id=‘4458415216’&gt;</em>, <em>new_data: &lt;Mock name=’mock.Series’ id=‘4458415216’&gt;</em>, <em>bridge_length: int</em><span class="sig-paren">)</span> &#x2192; &lt;Mock name=’mock.Series’ id=‘4458415216’&gt;<a class="headerlink" href="#ddf_utils.transformer.trend_bridge" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.transformer.</code><code class="descname">trend_bridge</code><span class="sig-paren">(</span><em>old_data: &lt;Mock name=’mock.Series’ id=‘4595868616’&gt;</em>, <em>new_data: &lt;Mock name=’mock.Series’ id=‘4595868616’&gt;</em>, <em>bridge_length: int</em><span class="sig-paren">)</span> &#x2192; &lt;Mock name=’mock.Series’ id=‘4595868616’&gt;<a class="headerlink" href="#ddf_utils.transformer.trend_bridge" title="Permalink to this definition">¶</a></dt>
 <dd><p>smoothing data between series.</p>
 <p>To avoid getting artificial stairs in the data, we smooth between to
 series. Sometime one source is systematically higher than another source,

@@ -5,7 +5,8 @@
 import numpy as np
 import pandas as pd
 from ..str import format_float_digits
-from .helpers import read_opt
+from .helpers import read_opt, gen_sym, query
+from collections import Sequence, Mapping
 import os
 import logging
 
@@ -47,7 +48,7 @@ class BaseIngredient(object):
     def copy_data(self):
         """this function makes copy of self.data.
         """
-        if not self.data:
+        if self.data is None:
             self.get_data()
         # v: DataFrame. DataFrame.copy() is by default deep copy,
         # but I just call it explicitly here.
@@ -213,7 +214,7 @@ class BaseIngredient(object):
 class Ingredient(BaseIngredient):
     """
     ingredient class: represents an ingredient object in recipe file.
-    see the implement of from_dict() method for how the object is constructed.
+    see the implement of `Ingredient.from_dict()` method for how the object is constructed.
 
     Here is an example ingredient object in recipe:
 
@@ -231,19 +232,72 @@ class Ingredient(BaseIngredient):
             - usa
             - chn
 
+    ``value`` and ``filter`` can accept mongo like queries to make more complex statements, for example:
+
+    .. code-block:: yaml
+
+       id: example-ingredient
+       dataset: ddf--example--dataset
+       key: geo, time
+       value:
+           $nin:  # exclude following indicators
+               - concept1
+               - concept2
+       filter:
+           geo:
+               $in:
+                   - swe
+                   - usa
+                   - chn
+           year:
+               $and:
+                   $gt: 2000
+                   $lt: 2015
+
+    for now, value accepts ``$in`` and ``$nin`` keywords, but only one of them can be in the value option;
+    filter supports logical keywords: ``$and``, ``$or``, ``$not``, ``$nor``, and comparision keywords:
+    ``$eq``, ``$gt``, ``$gte``, ``$lt``, ``$lte``, ``$ne``, ``$in``, ``$nin``.
+
+    The other way to define the ingredient data is using the ``data`` keyword to include external csv file, or
+    inline the data in the ingredient definition. Example:
+
+    .. code-block:: yaml
+
+       id: example-ingredient
+       key: concept
+       data: external_concepts.csv
+
+    On-the-fly ingredient:
+
+    .. code-block:: yaml
+
+       id: example-ingredient
+       key: concept
+       data:
+           - concept: concept_1
+             name: concept_name_1
+             concept_type: string
+             description: concept_description_1
+           - concept: concept_2
+             name: concept_name_2
+             concept_type: measure
+             description: concept_description_2
+
     Attributes
     ----------
     ingred_id : `str`
         The id string
-    ddf_id : `str`
-        the underlaying dataset id
+    ddf_id : `str`, optional
+        the underlying dataset id
     key : `str`
         the key columns of the ingredient
-    value : `list`
+    values : `str` or `list` or `dict`, optional
         concept filter applied to the dataset. if `value` == "*", all concept of
         the dataset will be in the ingredient
-    filter : `dict`
+    row_filter : `dict`, optional
         row filter applied to the dataset
+    data : `dict`, optional
+        the data in the ingredient
 
     Methods
     -------
@@ -251,36 +305,52 @@ class Ingredient(BaseIngredient):
         read in and return the ingredient data
 
     """
-    def __init__(self, chef, ingred_id,
-                 ddf_id=None, key=None, values=None, row_filter=None, data=None):
+    def __init__(self, chef=None, ingred_id=None, ddf_id=None, data_def=None,
+                 key=None, values=None, row_filter=None, data=None):
         super(Ingredient, self).__init__(chef, ingred_id, key, data)
         self.values = values
         self.row_filter = row_filter
+        self.data_def = data_def
         self._ddf_id = ddf_id
         self._ddf = None
 
     @classmethod
-    def from_dict(cls, chef, data):
+    def from_dict(cls, chef, dictionary):
         """create an instance by a dictionary
 
         The dictionary should provide following keys:
 
         - id
-        - dataset
+        - dataset or data
         - key
-        - value
+        - value (optional)
         - filter (optional)
+
+        if dataset is provided, data will be read from ddf dataset; if data is provided, then either data will be read
+        from a local csv file or be created on-the-fly base on the description.
         """
-        ingred_id = read_opt(data, 'id', required=True)
-        ddf_id = read_opt(data, 'dataset', required=True)
-        key = read_opt(data, 'key', required=True)
-        values = read_opt(data, 'value', required=True)
-        row_filter = read_opt(data, 'filter', required=False, default=None)
+        ingred_id = read_opt(dictionary, 'id', default=None)
+        ddf_id = read_opt(dictionary, 'dataset', default=None)
+        data_def = read_opt(dictionary, 'data', default=None)
+        key = read_opt(dictionary, 'key', required=True)
+        values = read_opt(dictionary, 'value', default='*')
+        row_filter = read_opt(dictionary, 'filter', default=None)
 
-        if len(data.keys()) > 0:
-            logging.warning("Ignoring following keys: {}".format(list(data.keys())))
+        if ingred_id is None:
+            ingred_id = gen_sym('inline', None, dictionary)
 
-        return cls(chef, ingred_id, ddf_id, key, values, row_filter)
+        if ddf_id is not None:
+            assert data_def is None, 'one of `dataset` and `data` should be provided'
+        else:
+            assert data_def is not None, 'one of `dataset` and `data` should be provided'
+
+        if len(dictionary.keys()) > 0:
+            logging.warning("Ignoring following keys: {}".format(list(dictionary.keys())))
+
+        if ddf_id is not None:  # data will read from ddf dataset
+            return cls(chef, ingred_id, ddf_id=ddf_id, key=key, values=values, row_filter=row_filter)
+        else:  # data will be read from csv file or create on-the-fly
+            return cls(chef, ingred_id, data_def=data_def, key=key, values=values, row_filter=row_filter)
 
     @property
     def ddf(self):
@@ -318,58 +388,125 @@ class Ingredient(BaseIngredient):
             for i in self.ddf.indicators(by=keys):
                 data[i] = self.ddf.get_datapoint_df(i, primary_key=keys)
         else:
-            for i in self.values:
-                if i in self.ddf.indicators(by=keys):
-                    data[i] = self.ddf.get_datapoint_df(i, primary_key=keys)
-                else:
-                    logging.warning("indicator {} not found in dataset {}".format(i, self._ddf_id))
-
+            # TODO: add wildcard support for `value` option
+            if isinstance(self.values, Sequence):  # just a list of indicators to include
+                for i in self.values:
+                    if i in self.ddf.indicators(by=keys):
+                        data[i] = self.ddf.get_datapoint_df(i, primary_key=keys)
+                    else:
+                        logging.warning("indicator {} not found in dataset {}".format(i, self._ddf_id))
+            else:  # a dictionary with queries
+                assert len(self.values) == 1
+                assert list(self.values.keys())[0] in ['$in', '$nin']
+                for keyword, items in self.values.items():
+                    if keyword == '$in':
+                        for i in items:
+                            if i in self.ddf.indicators(by=keys):
+                                data[i] = self.ddf.get_datapoint_df(i, primary_key=keys)
+                            else:
+                                logging.warning("indicator {} not found in dataset {}".format(i, self._ddf_id))
+                    else:
+                        for i in self.ddf.indicators(by=keys):
+                            if i not in items:
+                                data[i] = self.ddf.get_datapoint_df(i, primary_key=keys)
         if len(data) == 0:
             raise IngredientError('no datapoint found for the ingredient: ' + self.ingred_id)
 
         return data
 
+    # because concept ingerdient and entity ingerdient only have one key in the
+    # data dictionary, so they don't need to support the column filter
     def _get_data_entities(self):
-        return {self.key: self.ddf.get_entity(self.key)}
+        df = self.ddf.get_entity(self.key)
+        if self.values != '*':
+            if isinstance(self.values, Mapping):
+                assert len(self.values) == 1
+                assert list(self.values.keys())[0] in ['$in', '$nin']
+                kw = list(self.values.keys())[0]
+                if kw == ['$in']:
+                    return {self.key: df[self.values[kw]]}
+                else:
+                    return {self.key: df[df.columns.drop(self.values[kw])]}
+            else:
+                return {self.key: df[self.values]}
+        else:
+            return {self.key: df}
 
     def _get_data_concepts(self):
-        if self.values == '*':
-            return {'concepts': self.ddf.concepts}
+        df = self.ddf.concepts
+        if self.values != '*':
+            if isinstance(self.values, Mapping):
+                assert len(self.values) == 1
+                assert list(self.values.keys())[0] in ['$in', '$nin']
+                kw = list(self.values.keys())[0]
+                if kw == ['$in']:
+                    return {'concepts': df[self.values[kw]]}  # FIXME: just use concept as key..
+                else:
+                    return {'concepts': df[df.columns.drop(self.values[kw])]}
+            else:
+                return {'concepts': df[self.values]}
         else:
-            return {'concepts': self.ddf.concepts[self.values]}
+            return {'concepts': df}
 
     def get_data(self, copy=False, key_as_index=False):
         """read in and return the ingredient data
         """
+        if self._ddf_id:
+            return self._get_data_ddf(copy, key_as_index)
+        else:
+            return self._get_data_external(copy, key_as_index)
+
+    def _get_data_external(self, copy=False, key_as_index=False):
+        """read data from csv or on-the-fly"""
+        if isinstance(self.data_def, str):  # it should be a file name
+            df = pd.read_csv(self.data_def)
+        else:  # it should be a dict
+            df = pd.DataFrame.from_dict(self.data_def)
+
+        data = {}
+        if self.dtype == 'datapoints':
+            df = df.set_index(self.key_to_list())
+            for c in df.columns:
+                data[c] = df[c].reset_index()
+        if self.dtype == 'concepts':
+            data['concepts'] = df
+        if self.dtype == 'entities':
+            data[self.key] = df
+
+        # applying row filter
+        if self.row_filter is not None:
+            for k, df in data.items():
+                data[k] = query(df, self.row_filter, available_scopes=df.columns)
+
+        self.data = data
+        return self.data
+
+    def _get_data_ddf(self, copy=False, key_as_index=False):
+        """read data from ddf dataset"""
         funcs = {
             'datapoints': self._get_data_datapoint,
             'entities': self._get_data_entities,
             'concepts': self._get_data_concepts
         }
 
-        def filter_row(df):
+        def filter_row(df, avaliable_scopes):
             """return the rows selected by self.row_filter."""
-            # TODO: improve filtering function
-            # 1. know more about the row_filter syntax
-            # 2. The query() Method is Experimental
             if self.row_filter:
-                query_str = "and".join(["{} in {}".format(k, v) for k, v in self.row_filter.items()])
-                # logging.debug(query_str)
-                df = df.query(query_str)
-                # logging.debug(df.head())
+                df = query(df, self.row_filter, avaliable_scopes)
             return df
 
         if self.data is None:
             data = funcs[self.dtype]()
             if self.dtype == 'datapoints':
                 for k, v in data.items():
-                    data[k] = v.compute()
+                    if not isinstance(v, pd.DataFrame):
+                        data[k] = v.compute()
+                    else:
+                        data[k] = v
 
             for k, v in data.items():
                 if self.row_filter:
-                    # index_cols = data[k].index.names
-                    # data[k] = self.filter_row(data[k].reset_index()).set_index(index_cols)
-                    data[k] = filter_row(data[k])
+                    data[k] = filter_row(data[k], avaliable_scopes=data[k].columns)
 
             self.data = data
         if key_as_index:
@@ -380,6 +517,7 @@ class Ingredient(BaseIngredient):
 
 class ProcedureResult(BaseIngredient):
     def __init__(self, chef, ingred_id, key, data):
+        assert isinstance(data, Mapping), "data should be dictionary, {} provided".format(type(data))
         super(ProcedureResult, self).__init__(chef, ingred_id, key, data)
 
     def __repr__(self):

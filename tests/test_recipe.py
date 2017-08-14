@@ -30,7 +30,7 @@ def recipe_file_fail(request):
     return request.param
 
 
-def test_run_recipe_pass(recipe_file_pass, to_disk=False):
+def test_run_recipe_pass(recipe_file_pass, to_disk=True):
     print('running test: ' + recipe_file_pass)
     chef = Chef.from_recipe(recipe_file_pass,
                             ddf_dir=os.path.join(wd, 'datasets'),
@@ -44,7 +44,7 @@ def test_run_recipe_pass(recipe_file_pass, to_disk=False):
     chef.run(to_disk, outdir)
 
 
-def test_run_recipe_fail(recipe_file_fail, to_disk=False):
+def test_run_recipe_fail(recipe_file_fail, to_disk=True):
     print('running test: ' + recipe_file_fail)
     chef = Chef.from_recipe(recipe_file_fail,
                             ddf_dir=os.path.join(wd, 'datasets'),

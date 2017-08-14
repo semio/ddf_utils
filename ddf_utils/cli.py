@@ -7,18 +7,21 @@ import click
 import os
 import shutil
 import logging
+import coloredlogs
+
+LOG_LEVEL = logging.INFO
 
 
 @click.group()
 @click.option('--debug/--no-debug', default=False)
 def ddf(debug):
+    global LOG_LEVEL
     if debug:
-        level = logging.DEBUG
-    else:
-        level = logging.INFO
-    logging.basicConfig(level=level, format='%(asctime)s -%(levelname)s- %(message)s',
-                        datefmt="%H:%M:%S"
-                        )
+        LOG_LEVEL = logging.DEBUG
+    # logging.basicConfig(level=level, format='%(asctime)s -%(levelname)s- %(message)s',
+    #                     datefmt="%H:%M:%S"
+    #                     )
+    coloredlogs.install(level=LOG_LEVEL, fmt='%(asctime)s %(name)s %(levelname)s %(message)s')
 
 
 # project management
@@ -100,7 +103,12 @@ def create_datapackage(path, update, overwrite):
 def run_recipe(recipe, outdir, ddf_dir, update, dry_run, show_tree):
     """generate new ddf dataset with recipe"""
     from ddf_utils.chef.api import Chef
-    from ddf_utils.datapackage import get_datapackage, dump_json
+    from ddf_utils.datapackage import create_datapackage, dump_json
+
+    coloredlogs.install(logger=logging.getLogger('Chef'),
+                        fmt='%(asctime)s %(name)s %(levelname)s %(message)s',
+                        level=LOG_LEVEL)
+
     click.echo('building recipe...')
     if ddf_dir:
         chef = Chef.from_recipe(recipe, ddf_dir=ddf_dir)
@@ -115,7 +123,8 @@ def run_recipe(recipe, outdir, ddf_dir, update, dry_run, show_tree):
     chef.run(serve=serve, outpath=outdir)
     if serve:
         click.echo('creating datapackage file...')
-        dump_json(os.path.join(outdir, 'datapackage.json'), get_datapackage(outdir))
+        dump_json(os.path.join(outdir, 'datapackage.json'),
+                  create_datapackage(outdir, gen_schema=True, **chef.metadata))
     click.echo("Done.")
 
 

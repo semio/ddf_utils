@@ -43,6 +43,9 @@ cooking:
         - procedure: serve
           ingredients:
               - grouped-datapoints-1
+          options:
+              split_datapoints_by:
+                - country
         - procedure: serve
           ingredients:
               - grouped-datapoints-2
