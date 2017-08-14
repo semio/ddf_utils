@@ -2,6 +2,7 @@
 
 """all procedures for recipes"""
 
+import warnings
 import pandas as pd
 import numpy as np
 from . dag import DAG
@@ -18,49 +19,6 @@ from .helpers import query
 import logging
 
 logger = logging.getLogger('Chef')
-
-
-@debuggable
-def assign_value(chef: Chef, ingredients: List[str], result, dictionary) -> ProcedureResult:
-    """Assign value to specific key/value pair
-
-    NOT IMPLEMENTED YET.
-
-    Procedure format:
-
-    .. code-block:: yaml
-
-       procedure: assign_value
-       ingredients:
-         - ingredient_id
-       result: str
-       option:
-         dictionary: str or dict  # file name or mappings
-
-    dictionary format: {column -> [{key -> value}]}
-
-    for example:
-
-    .. code-block:: json
-
-       {
-         "concept": {
-           [
-             "key": "concept_to_change"
-             "column": "description"
-             "value": "new value to use"
-           ]
-         }
-       }
-
-    """
-    assert len(ingredients) == 1, "procedure only support 1 ingredient for now."
-    ingredient = chef.dag.get_node(ingredients[0]).evaluate()
-    logger.info("assign_value: " + ingredients[0])
-
-    data = ingredient.copy_data()
-
-    raise NotImplementedError
 
 
 @debuggable
@@ -527,6 +485,10 @@ def filter_row(chef: Chef, ingredients: List[str], result, **options) -> Procedu
     filters: dict
         The filter description dictionary
     """
+    warnings.simplefilter('always', DeprecationWarning)
+    warnings.warn("filter_row is deprecated, please use filter function instead.", category=DeprecationWarning)
+    warnings.simplefilter('default', DeprecationWarning)
+
     assert len(ingredients) == 1, "procedure only support 1 ingredient for now."
     ingredient = chef.dag.get_node(ingredients[0]).evaluate()
     logger.info("filter_row: " + ingredients[0])
@@ -654,6 +616,10 @@ def filter_item(chef: Chef, ingredients: List[str], result, items: list) -> Proc
     items: list
         a list of items to filter from base ingredient
     """
+    warnings.simplefilter('always', DeprecationWarning)
+    warnings.warn("filter_item is deprecated, please use filter function instead.", category=DeprecationWarning)
+    warnings.simplefilter('default', DeprecationWarning)
+
     assert len(ingredients) == 1, "procedure only support 1 ingredient for now."
     ingredient = chef.dag.get_node(ingredients[0]).evaluate()
     logger.info("filter_item: " + ingredients[0])
