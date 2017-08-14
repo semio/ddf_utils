@@ -1,3 +1,12 @@
+## version 0.3.1 2017-8-14
+
+- support mongo-like queries in ingredient definition and filter procedures (#72)
+- new procedure: filter (#72)
+- inline ingredients in ingredients section and procedures (#36)
+- external csv file as ingredient (#36)
+- colourful terminal output for chef
+- bug fix and minor improvements
+
 ## version 0.3.0 2017-07-18
 
 - totally rewrite the ddf reader, make separated models for dataset and datapackage in 
