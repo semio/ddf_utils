@@ -185,7 +185,7 @@ def translate_column(chef: Chef, ingredients: List[str], result, dictionary,
         the column to be translated
     target_column : `str`, optional
         the target column to store the translated data. If this is not set then the `column`
-        cloumn will be replaced
+        column will be replaced
     not_found : {'drop', 'include', 'error'}, optional
         the behavior when there is values not found in the mapping dictionary, default is 'drop'
     ambiguity : {'prompt', 'skip', 'error'}, optional
@@ -246,7 +246,7 @@ def merge(chef: Chef, ingredients: List[str], result, deep=False) -> ProcedureRe
          - ingredient_id_2
          - ingredient_id_3
          # ...
-       result: str  # new ingledient id
+       result: str  # new ingredient id
        options:
          deep: bool  # use deep merge if true
 
@@ -311,7 +311,7 @@ def merge(chef: Chef, ingredients: List[str], result, deep=False) -> ProcedureRe
 
 
 def __get_last_item(ser):
-    """get the last vaild item of a Series, or Nan."""
+    """get the last valid item of a Series, or Nan."""
     if ser.last_valid_index() is None:
         return np.nan
     else:
@@ -797,7 +797,7 @@ def window(chef: Chef, ingredients: List[str], result, **options) -> ProcedureRe
        procedure: window
        ingredients:  # list of ingredient id
          - ingredient_id
-       result: str  # new ingledient id
+       result: str  # new ingredient id
        options:
          window:
            column: str  # column which window is created from
@@ -967,7 +967,7 @@ def extract_concepts(chef: Chef, ingredients: List[str], result,
        ingredients:  # list of ingredient id
          - ingredient_id_1
          - ingredient_id_2
-       result: str  # new ingledient id
+       result: str  # new ingredient id
        options:
          join:  # optional
            base: str  # base concept ingredient id
