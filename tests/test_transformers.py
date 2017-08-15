@@ -19,13 +19,13 @@ def test_trend_bridge():
     data1 = (1+roc1).cumprod()
     data1 = pd.Series(data1, index=time_range1)
 
-    data2 = (1 + roc2).cumprod() * data1.ix['1980-12-31', 'old_data'] + 0.15
+    data2 = (1 + roc2).cumprod() * data1.loc['1980-12-31'] + 0.15
     data2 = pd.Series(data2, index=time_range2)
 
     data3 = trend_bridge(data1, data2, 60)
 
     assert not data3.index.has_duplicates
-    assert_almost_equal(data3.ix['1979-12-31'], 0.497, 5)
+    assert_almost_equal(data3.loc['1979-12-31'], 0.497, 5)
 
 
 def test_extract_concept():

@@ -267,20 +267,20 @@ def trend_bridge(old_data: pd.Series, new_data: pd.Series, bridge_length: int) -
     bridge_end = new_data.index[0]
     bridge_start = bridge_end - bridge_length
 
-    assert not pd.isnull(old_data.ix[bridge_start]), 'no data for bridge start'
+    assert not pd.isnull(old_data.loc[bridge_start]), 'no data for bridge start'
 
-    bridge_height = new_data.ix[bridge_end] - old_data.ix[bridge_end]
+    bridge_height = new_data.loc[bridge_end] - old_data.loc[bridge_end]
     fraction = bridge_height / bridge_length
 
     bridge_data = old_data.copy()
 
-    for i, row in bridge_data.ix[bridge_start:bridge_end].iteritems():
+    for i, row in bridge_data.loc[bridge_start:bridge_end].iteritems():
         if i == bridge_end:
             break
-        bridge_data.ix[i:bridge_end] = bridge_data.ix[i:bridge_end] + fraction
+        bridge_data.loc[i:bridge_end] = bridge_data.loc[i:bridge_end] + fraction
 
     # combine old/new/bridged data
-    result = pd.concat([bridge_data.ix[:bridge_end], new_data.iloc[1:]])
+    result = pd.concat([bridge_data.loc[:bridge_end], new_data.iloc[1:]])
     return result
 
 
