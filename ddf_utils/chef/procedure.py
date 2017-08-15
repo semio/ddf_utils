@@ -982,7 +982,7 @@ def extract_concepts(chef: Chef, ingredients: List[str], result,
             join_type = join['type']
         except KeyError:
             join_type = 'full_outer'
-        concepts = base.copy_data()['concepts'].set_index('concept')
+        concepts = base.copy_data()['concept'].set_index('concept')
     else:
         concepts = pd.DataFrame([], columns=['concept', 'concept_type']).set_index('concept')
         join_type = 'full_outer'
@@ -1020,7 +1020,7 @@ def extract_concepts(chef: Chef, ingredients: List[str], result,
             concepts.ix[k, 'concept_type'] = v
     if not result:
         result = 'concepts_extracted'
-    return ProcedureResult(chef, result, 'concept', data={'concepts': concepts.reset_index()})
+    return ProcedureResult(chef, result, 'concept', data={'concept': concepts.reset_index()})
 
 
 @debuggable

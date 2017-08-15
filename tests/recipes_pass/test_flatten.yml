@@ -3,9 +3,9 @@ info:
 
 
 ingredients:
-    - id: cme-datapoints
-      dataset: ddf--cme
-      key: "country,year"
+    - id: kilm-datapoints
+      dataset: ddf--ilo--kilm_employment_sector
+      key: "country,sex,year"
       value: "*"
 
 
@@ -14,16 +14,16 @@ cooking:
     datapoints:
         - procedure: filter_row
           ingredients:
-              - cme-datapoints
+              - kilm-datapoints
           result: filtered
           options:
               filters:
-                imr_lower:
+                agriculture_thousands:
                     country: afg
                     year:
                         - 1990
                         - 1991
-                imr_upper:
+                agriculture_percentage:
                     country:
                         - usa
                         - swe
@@ -40,7 +40,7 @@ cooking:
               - filtered
           options:
               dictionary:
-                  "imr*": "{concept}_{country}"
+                  "agriculture*": "{concept}_{sex}"
               flatten_dimensions:
-                  - country
+                  - sex
           result: res

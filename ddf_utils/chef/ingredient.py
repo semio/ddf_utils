@@ -61,7 +61,8 @@ class BaseIngredient(object):
     def _serve_concepts(self, outpath, **options):
         data = self.copy_data()
         assert isinstance(data, dict)
-        for k, df in data.items():
+        assert len(data) == 1
+        for _, df in data.items():
             # change boolean into string
             # and remove tailing spaces
             for i, v in df.dtypes.iteritems():
@@ -75,6 +76,7 @@ class BaseIngredient(object):
     def _serve_entities(self, outpath, **options):
         data = self.copy_data()
         assert isinstance(data, dict)
+        assert len(data) == 1
         sets = []
         no_keep_sets = options.get('no_keep_sets', False)
         for k, df in data.items():
@@ -440,13 +442,13 @@ class Ingredient(BaseIngredient):
                 assert list(self.values.keys())[0] in ['$in', '$nin']
                 kw = list(self.values.keys())[0]
                 if kw == ['$in']:
-                    return {'concepts': df[self.values[kw]]}  # FIXME: just use concept as key..
+                    return {'concept': df[self.values[kw]]}
                 else:
-                    return {'concepts': df[df.columns.drop(self.values[kw])]}
+                    return {'concept': df[df.columns.drop(self.values[kw])]}
             else:
-                return {'concepts': df[self.values]}
+                return {'concept': df[self.values]}
         else:
-            return {'concepts': df}
+            return {'concept': df}
 
     def get_data(self, copy=False, key_as_index=False):
         """read in and return the ingredient data
@@ -468,9 +470,7 @@ class Ingredient(BaseIngredient):
             df = df.set_index(self.key_to_list())
             for c in df.columns:
                 data[c] = df[c].reset_index()
-        if self.dtype == 'concepts':
-            data['concepts'] = df
-        if self.dtype == 'entities':
+        else:
             data[self.key] = df
 
         # applying row filter
