@@ -5,6 +5,7 @@ import os
 import sys
 import logging
 import re
+from time import time
 from ddf_utils.chef.dag import DAG, ProcedureNode, IngredientNode
 from ddf_utils.chef.ingredient import Ingredient
 from ddf_utils.chef.helpers import get_procedure
@@ -248,25 +249,39 @@ class Chef:
 
         yaml.round_trip_dump(recipe, fp)
 
-    def to_graph(self, g=None, node=None):
-        if not g:
-            g = Digraph()
+    def to_graph(self, node=None):
 
-        if node is not None:
-            g.node(node.node_id)
-            r = node.get_direct_relatives(upstream=True)
-            if len(r) > 0:
-                for n in set(r):
-                    g.edge(n.node_id, node.node_id)
-                    self.to_graph(g, n)
-        else:
+        def process_node(g_, k_, recursive=False):
+            pc = self.dag.get_node(k_).procedure['procedure']
+            node_name = pc + str(time())
+            g_.node(node_name, label=pc, shape='box')
+            g_.edge(node_name, k_)
+
+            for ing in self.dag.get_node(k_).get_direct_relatives(upstream=True):
+                g_.edge(ing.node_id, node_name)
+                if recursive:
+                    process_node(g_, ing.node_id)
+
+        g = Digraph()
+        g.attr(rankdir='TB', fontsize='8')
+
+        if node is None:
+            # define all nodes
+            to_serve = [x['id'] for x in self.serving]
             for k, v in self.dag.node_dict.items():
-                g.node(k)
-                r = v.get_direct_relatives()
-                if len(r) > 0:
-                    for n in set(r):
-                        g.node(n.node_id)
-                        g.edge(k, n.node_id)
+                if k in to_serve:
+                    g.node(k, color='red')
+                elif isinstance(self.dag.get_node(k), IngredientNode):
+                    g.node(k, color='blue')
+                else:
+                    g.node(k)
+                if isinstance(self.dag.get_node(k), ProcedureNode):
+                    process_node(g, k)
+        else:
+            assert node in self.dag.node_dict.keys()
+            g.node(node)
+            process_node(g, node, recursive=True)
+
         return g
 
 
