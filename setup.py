@@ -26,7 +26,8 @@ requirements = [
     'tqdm',
     'ruamel.yaml',
     'graphviz',
-    'coloredlogs'
+    'coloredlogs',
+    'pytz'
 ]
 
 setup(
