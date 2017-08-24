@@ -6,6 +6,8 @@ import re
 import json
 import csv
 import logging
+from datetime import datetime
+import pytz
 from .model.package import Datapackage
 from collections import OrderedDict
 
@@ -106,6 +108,7 @@ def create_datapackage(path, gen_schema=True, **kwargs):
 
     datapackage['name'] = name
     datapackage['language'] = lang
+    datapackage['last_updated'] = datetime.today().astimezone(pytz.utc).strftime("%Y-%m-%d %H:%M:%S")
 
     # add all optional settings
     for k in sorted(kwargs.keys()):
