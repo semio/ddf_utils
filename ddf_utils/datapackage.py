@@ -24,6 +24,9 @@ def get_datapackage(path, use_existing=True, update=True):
     ------------
     use_existing : bool
         whether or not to use the existing datapackage
+    update : bool
+        if update is true, will update the resources and schema in existing datapackage.json. else just return existing
+        datapackage.json
     """
     datapackage_path = os.path.join(path, 'datapackage.json')
 
