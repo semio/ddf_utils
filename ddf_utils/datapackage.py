@@ -111,7 +111,7 @@ def create_datapackage(path, gen_schema=True, **kwargs):
 
     datapackage['name'] = name
     datapackage['language'] = lang
-    datapackage['last_updated'] = datetime.today().astimezone(pytz.utc).strftime("%Y-%m-%d %H:%M:%S")
+    datapackage['last_updated'] = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
 
     # add all optional settings
     for k in sorted(kwargs.keys()):
