@@ -307,15 +307,15 @@ class Ingredient(BaseIngredient):
         read in and return the ingredient data
 
     """
-    # TODO: add dry run option here.
     def __init__(self, chef=None, ingred_id=None, ddf_id=None, data_def=None,
-                 key=None, values=None, row_filter=None, data=None):
+                 key=None, values=None, row_filter=None, data=None, dry_run=False):
         super(Ingredient, self).__init__(chef, ingred_id, key, data)
         self.values = values
         self.row_filter = row_filter
         self.data_def = data_def
         self._ddf_id = ddf_id
         self._ddf = None
+        self.is_dry_run = dry_run
 
     @classmethod
     def from_dict(cls, chef, dictionary):
@@ -363,7 +363,8 @@ class Ingredient(BaseIngredient):
         else:
             if self._ddf_id:
                 if self._ddf_id not in self.chef.ddf_object_cache.keys():
-                    self._ddf = Datapackage(os.path.join(self.chef.config['ddf_dir'], self._ddf_id)).load()
+                    self._ddf = Datapackage(
+                        os.path.join(self.chef.config['ddf_dir'], self._ddf_id)).load(no_datapoints=self.is_dry_run)
                     self.chef.ddf_object_cache[self._ddf_id] = self._ddf
                 else:
                     self._ddf = self.chef.ddf_object_cache[self._ddf_id]

@@ -62,6 +62,11 @@ class Datapackage:
         """read from local DDF csv dataset.
 
         datapackage: path to the datapackage folder or datapackage.json
+
+        Keyword Args
+        ============
+        no_datapoints : bool
+            if true, return only first few rows of a datapoints dataframe, to speedup things.
         """
         logging.info("loading dataset from disk: " + self.name)
 
@@ -70,7 +75,7 @@ class Datapackage:
         entities = dict()
         datapoints = dict()
 
-        no_datapoints = kwargs.get('no_datapoints', None)
+        no_datapoints = kwargs.get('no_datapoints', False)
 
         base_dir, dp = self.base_dir, self.datapackage
 
