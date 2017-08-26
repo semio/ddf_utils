@@ -126,7 +126,7 @@ class Datapackage:
                         datapoints.get(indicator_name, {})[keys]
                     except KeyError:
                         datapoints[indicator_name] = {}
-                        datapoints[indicator_name][keys] = pd.DataFrame([], columns=df.columns)
+                        datapoints[indicator_name][keys] = df
 
         # datapoints
         if not no_datapoints:

@@ -307,6 +307,7 @@ class Ingredient(BaseIngredient):
         read in and return the ingredient data
 
     """
+    # TODO: add dry run option here.
     def __init__(self, chef=None, ingred_id=None, ddf_id=None, data_def=None,
                  key=None, values=None, row_filter=None, data=None):
         super(Ingredient, self).__init__(chef, ingred_id, key, data)
@@ -499,10 +500,7 @@ class Ingredient(BaseIngredient):
             data = funcs[self.dtype]()
             if self.dtype == 'datapoints':
                 for k, v in data.items():
-                    if not isinstance(v, pd.DataFrame):
-                        data[k] = v.compute()
-                    else:
-                        data[k] = v
+                    data[k] = v
 
             for k, v in data.items():
                 if self.row_filter:
