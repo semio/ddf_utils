@@ -15,6 +15,7 @@ from collections import Mapping
 
 import logging
 
+logger = logging.getLogger('root')
 
 class Datapackage:
     def __init__(self, datapackage, base_dir='./', dataset=None):
@@ -261,10 +262,12 @@ class Datapackage:
             else:
                 hash_table[hash_val]['resources'].add(resource_schema['resource'])
 
-        pbar = tqdm(total=len(self.resources))
+        if logger.getEffectiveLevel() != 10:
+            pbar = tqdm(total=len(self.resources))
+
         for g in map(_gen_key_value_object, self.resources):
-            # FIXME: pbar count seems not correct
-            pbar.update(1)
+            if logger.getEffectiveLevel() != 10:
+                pbar.update(1)
             for kvo in g:
                 # logging.debug("adding kvo {}".format(str(kvo)))
                 _add_to_schema(kvo)

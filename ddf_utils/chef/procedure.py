@@ -310,8 +310,7 @@ def _merge_two(left: Dict[str, pd.DataFrame],
             res_data = {'concept': res.reset_index()}
         else:
             res_data = {'concept': right_df.drop_duplicates(subset='concept', keep='last')}
-    else:
-        # TODO: improve this
+    else:  # entities
         if deep:
             for k, df in right.items():
                 if k in left.keys():

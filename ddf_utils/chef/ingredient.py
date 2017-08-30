@@ -2,13 +2,14 @@
 
 """main ingredient class"""
 
+import os
+import logging
+import fnmatch
 import numpy as np
 import pandas as pd
 from ..str import format_float_digits
 from .helpers import read_opt, gen_sym, query
 from collections import Sequence, Mapping
-import os
-import logging
 
 from ddf_utils.model.package import Datapackage
 from .exceptions import IngredientError
@@ -81,11 +82,10 @@ class BaseIngredient(object):
         no_keep_sets = options.get('no_keep_sets', False)
         for k, df in data.items():
             # change boolean into string
-            # TODO: not only for is-- headers
             for c in df.columns:
-                if df.dtypes[c] == 'bool':
+                if df.dtypes[c] == 'bool':  # inferred boolean values
                     df[c] = df[c].map(lambda x: str(x).upper() if not pd.isnull(x) else x)
-                if c.startswith('is--'):
+                if c.startswith('is--'):  # is-- columns
                     if no_keep_sets:
                         df = df.drop(c, axis=1)
                     else:
@@ -392,7 +392,6 @@ class Ingredient(BaseIngredient):
             for i in self.ddf.indicators(by=keys):
                 data[i] = self.ddf.get_datapoint_df(i, primary_key=keys)
         else:
-            # TODO: add wildcard support for `value` option
             if isinstance(self.values, Sequence):  # just a list of indicators to include
                 for i in self.values:
                     if i in self.ddf.indicators(by=keys):
@@ -405,14 +404,23 @@ class Ingredient(BaseIngredient):
                 for keyword, items in self.values.items():
                     if keyword == '$in':
                         for i in items:
-                            if i in self.ddf.indicators(by=keys):
-                                data[i] = self.ddf.get_datapoint_df(i, primary_key=keys)
-                            else:
-                                logging.warning("indicator {} not found in dataset {}".format(i, self._ddf_id))
+                            matches = fnmatch.filter(self.ddf.indicators(by=keys), i)
+                            if len(matches) == 0:
+                                logging.warning("indicator matching {} not found in dataset {}".format(i, self._ddf_id))
+                                continue
+                            for m in matches:
+                                data[m] = self.ddf.get_datapoint_df(m, primary_key=keys)
                     else:
-                        for i in self.ddf.indicators(by=keys):
-                            if i not in items:
-                                data[i] = self.ddf.get_datapoint_df(i, primary_key=keys)
+                        all_indicators = self.ddf.indicators(by=keys)
+                        matches = set(all_indicators) - set(fnmatch.filter(all_indicators, items[0]))
+                        for i in items[1:]:
+                            matches = matches - set(fnmatch.filter(list(matches), i))
+                        if len(matches) == 0:
+                            logging.warning("indicators matching the value descriptor not "
+                                            "found in dataset " + self._ddf_id)
+                            continue
+                        for m in matches:
+                            data[m] = self.ddf.get_datapoint_df(m, primary_key=keys)
         if len(data) == 0:
             raise IngredientError('no datapoint found for the ingredient: ' + self.ingred_id)
 
@@ -521,7 +529,3 @@ class ProcedureResult(BaseIngredient):
 
     def __repr__(self):
         return '<ProcedureResult: {}>'.format(self.ingred_id)
-
-    def reset_data(self):
-        # TODO: allowing reset data? It can not be reconstructed.
-        raise NotImplementedError('')

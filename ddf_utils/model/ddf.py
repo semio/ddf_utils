@@ -23,7 +23,7 @@ class Dataset:
         datapoints: dictionary of indicator name and primarykey -> dataframe mapping.
         So it's a nested dictionary. Note that datapoints are dask dataframes.
         """
-        # TODO: add type check.
+        # TODO: add type check using the type defined in datapackage schema
         self._concepts = concepts
         self._entities = entities
         self._datapoints = datapoints

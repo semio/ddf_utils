@@ -134,7 +134,6 @@ def create_datapackage(path, gen_schema=True, **kwargs):
 
         resources.append(OrderedDict([('path', path_res), ('name', name_res)]))
 
-    # TODO: make separate functions. this function is too long.
     for n, r in enumerate(resources):
         name_res = r['name']
         schema = {"fields": [], "primaryKey": None}

@@ -149,12 +149,11 @@ class Chef:
         return self
 
     def add_ingredient(self, **kwargs):
-        # TODO: fix this
         try:
-            ddf_dir = self.config['ddf_dir']
+            self.config['ddf_dir']
         except KeyError:
             logger.warning('no ddf_dir in config, assuming current working dir')
-            ddf_dir = './'
+            self.config['ddf_dir'] = './'
         ingredient = Ingredient.from_dict(chef=self, dictionary=kwargs)
         self.dag.add_node(IngredientNode(ingredient.ingred_id, ingredient, self))
         return self
@@ -374,11 +373,10 @@ class Chef:
         else:  # append sub-recipe entities into main recipe
             sub_recipes = []
             for i in recipe['include']:
-                # TODO: maybe add support to expand user home and env vars
                 if os.path.isabs(recipe_dir):
                     path = os.path.join(recipe_dir, i)
                 else:
-                    path = os.path.join(base_dir, recipe_dir, i)
+                    path = os.path.expanduser(os.path.join(base_dir, recipe_dir, i))
                 sub_recipes.append(Chef._build_recipe(path))
 
             for rcp in sub_recipes:

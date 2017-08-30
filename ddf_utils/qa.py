@@ -49,7 +49,7 @@ def compare_with_func(dataset1, dataset2, fns=['rval', 'avg_pct_chg'],
     result = pd.DataFrame(list(s1.union(s2)), columns=['indicator', 'primary_key'])
 
     def get_comp_df(indicator, k):
-        '''get dataframes from old and new datasets, and combine them into one dataframe'''
+        """get dataframes from old and new datasets, and combine them into one dataframe"""
         # FIXME: support multiple indicator in one file
         # like the indicators in ddf--sodertorn--stockholm_lan_basomrade
         try:

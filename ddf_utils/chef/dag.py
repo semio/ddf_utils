@@ -125,8 +125,9 @@ class ProcedureNode(BaseNode):
         self.result_ingredient = None
 
     def evaluate(self):
-        if self.result_ingredient:
-            return self.result_ingredient
+        if self.result_ingredient is not None:
+            if self.result_ingredient.get_data() is not None:
+                return self.result_ingredient
 
         # get the procedure function, raise error if procedure not supported
         # supported format:
