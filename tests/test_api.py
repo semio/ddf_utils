@@ -4,6 +4,8 @@
 import os
 import ruamel.yaml as yaml
 from ddf_utils.chef.api import Chef
+from ddf_utils.chef.ingredient import Ingredient
+from ddf_utils.chef.exceptions import IngredientError
 
 wd = os.path.dirname(__file__)
 
@@ -54,3 +56,71 @@ def test_chef_load_recipe():
     chef = Chef.from_recipe(recipe_file, ddf_dir=os.path.join(wd, 'datasets'))
     res = chef.run()
     assert 1
+
+
+def test_ingredients():
+    chef = Chef()
+    chef = chef.add_config(ddf_dir=os.path.join(wd, 'datasets'))
+
+    i = Ingredient.from_dict(chef, {
+        'id': 'ddf--cme',
+        'dataset': 'ddf--cme',
+        'key': 'country, year',
+        'value': {
+            '$in': ['*lower']
+        }
+    })
+    assert set(list(i.get_data().keys())) == set(['imr_lower'])
+
+    i = Ingredient.from_dict(chef, {
+        'id': 'ddf--cme',
+        'dataset': 'ddf--cme',
+        'key': 'country, year',
+        'value': {
+            '$nin': ['*lower']
+        }
+    })
+    assert set(list(i.get_data().keys())) == set(['imr_upper', 'imr_median'])
+
+    i = Ingredient.from_dict(chef, {
+        'id': 'ddf--cme',
+        'dataset': 'ddf--cme',
+        'key': 'country, year',
+        'value': {
+            '$nin': ['imr_lower', 'imr_upper']
+        }
+    })
+    assert set(list(i.get_data().keys())) == set(['imr_median'])
+
+    i = Ingredient.from_dict(chef, {
+        'id': 'ddf--cme',
+        'dataset': 'ddf--cme',
+        'key': 'country, year',
+        'value': {
+            '$in': ['imr_lower', 'imr_upper']
+        }
+    })
+    assert set(list(i.get_data().keys())) == set(['imr_lower', 'imr_upper'])
+
+    i = Ingredient.from_dict(chef, {
+        'id': 'ddf--cme',
+        'dataset': 'ddf--cme',
+        'key': 'country, year',
+        'value': {
+            '$in': ['imr_lower', 'lsdf']
+        }
+    })
+    assert set(list(i.get_data().keys())) == set(['imr_lower'])
+
+    i = Ingredient.from_dict(chef, {
+        'id': 'ddf--cme',
+        'dataset': 'ddf--cme',
+        'key': 'country, year',
+        'value': {
+            '$nin': ['imr_*']
+        }
+    })
+    try:
+        i.get_data()
+    except IngredientError:
+        pass

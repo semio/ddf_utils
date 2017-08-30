@@ -66,3 +66,33 @@ def test_split_keys():
 
     res1 = split_keys(df.set_index(['geo', 'time']), 'geo', di)
     assert res1.get_value(('c1', 1991), 'val') == 1
+
+
+def test_extract_concepts():
+    from ddf_utils.transformer import extract_concepts
+
+    geo_data = [{'geo': 'abkh',
+                 'is--country': 'TRUE',
+                 'name': 'Abkhazia',
+                 'world_4region': 'europe',
+                 'world_6region': 'europe_central_asia'},
+                {'geo': 'afg',
+                 'is--country': 'TRUE',
+                 'name': 'Afghanistan',
+                 'world_4region': 'asia',
+                 'world_6region': 'south_asia'}]
+
+    datapoint_data = [{'geo': 'abkh',
+                       'time': 1999,
+                       'indicator': 10},
+                      {'geo': 'afg',
+                       'time': 2000,
+                       'indicator': 20}]
+
+    df1 = pd.DataFrame.from_records(geo_data)
+    df2 = pd.DataFrame.from_records(datapoint_data)
+
+    concepts = extract_concepts([df1, df2]).set_index('concept')
+    assert 'country' in concepts.index
+    assert 'time' in concepts.index
+    assert concepts.loc['country', 'concept_type'] == 'entity_set'
