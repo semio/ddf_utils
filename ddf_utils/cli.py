@@ -21,7 +21,7 @@ def ddf(debug):
     # logging.basicConfig(level=level, format='%(asctime)s -%(levelname)s- %(message)s',
     #                     datefmt="%H:%M:%S"
     #                     )
-    coloredlogs.install(level=LOG_LEVEL, fmt='%(asctime)s %(name)s %(levelname)s %(message)s')
+    coloredlogs.install(level=LOG_LEVEL, fmt='%(asctime)s %(levelname)s %(message)s')
 
 
 # project management
