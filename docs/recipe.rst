@@ -43,8 +43,11 @@ use YAML recipes.
 
 First of all, we want to add some meta data to describe the target dataset. This
 kind of information can be written in the ``info`` section. The ``info`` section
-is optional and it's only for human reading for now. You can put anything you
-want in this section. In our example, we add the following information:
+is optional and these metadata will be also written in the `datapackage.json`_
+in the final output. You can put anything you want in this section. In our
+example, we add the following information:
+
+.. _datapackage.json: http://frictionlessdata.io/guides/data-package/#datapackagejson
 
 .. code-block:: yaml
 
@@ -78,12 +81,12 @@ available options.
 
 The basic object in recipe is ingredient. A ingredient defines a collection of
 data which comes form existing dataset or result of computation between several
-ingredients. To define ingredients form existing datasets, we append the
-``ingredients`` section; to define ingredients from computation, we append the
-``cooking`` section.
+ingredients. To define ingredients form existing datasets or csv files, we
+append to the ``ingredients`` section; to define ingredients on the fly, we
+append to the ``cooking`` section.
 
-The ``ingredients`` section is a list of ingredient objects. An
-ingredient should be defined with following parameters:
+The ``ingredients`` section is a list of ingredient objects. An ingredient that
+reads data from a data package should be defined with following parameters:
 
 -  ``id``: the name of the ingredient
 -  ``dataset``: the dataset where the ingredient is from
@@ -94,6 +97,9 @@ ingredient should be defined with following parameters:
 - ``row_filter``: optional, only select rows match the filter. The
   filter is a dictionary where keys are colunm names and values are
   values to filter
+
+There are more parameters for ingredient definition, see the `ingredients
+section`_ document.
 
 In our example, we need datapoints from both gapminder population dataset and
 oil consumption datapoints from bp dataset. Noticing the bp is using lower case
@@ -308,9 +314,8 @@ info section
 All basic info are stored in ``info`` section of the recipe. an ``id``
 field is required inside this section. Any other information about the
 new dataset can be store inside this section, such as ``name``,
-``provider``, ``description`` and so on. This part is mainly for human
-and is optional for now, but **later on we might add connections for
-this section and the datapackage file.**
+``provider``, ``description`` and so on. Data in this section will be
+written into `datapackage.json`_ file of the generated dataset.
 
 
 config section
@@ -340,22 +345,30 @@ should be a absolute path or a filename inside the ``recipes_dir``.
 ingredients section
 ~~~~~~~~~~~~~~~~~~~
 
-A recipe must have some ingredients for cooking. We can either define
-the ingredients in the ``ingredients`` section or include other recipes
-which have an ``ingredients`` section.
+A recipe must have some ingredients for cooking. There are 2 places where we can
+define ingredients in recipe:
 
-The ``ingredients`` section is a list of ingredient objects. An
+- in ``ingredients`` section
+- in the ``ingredients`` parameter in procedures, which is called on-the-fly
+  ingredients
+
+in either case, the format of ingredient definition object is the same. An
 ingredient should be defined with following parameters:
 
--  ``id``: the name of the ingredient
--  ``dataset``: the dataset where the ingredient is from
+- ``id``: the name of the ingredient, which we can refer later in the
+  procedures. ``id`` is optional when the ingredient is in a procedure object.
+- ``dataset`` or ``data``: one of them should be defined in the ingredient. Use
+  ``dataset`` when we want to read data from an dataset, and use ``data`` when
+  we want to read data from a csv file.
 - ``key``: the primary keys to filter from datapackage, should be comma
-   seperated strings
-- ``value``: a list of concept names to filter from the result of filtering
-   keys, or pass "*" to select all.
--  ``row_filter``: optional, only select rows match the filter. The
-   filter is a dictionary where keys are colunm names and values are
-   values to filter
+  seperated strings
+- ``value``: optional, a list of concept names to filter from the result of
+  filtering keys, or pass "\*" to select all. Mongo-like queries are also
+  supported, see examples below. If omitted, assume "\*".
+- ``row_filter``: optional, only select rows match the filter. The filter is a
+  dictionary where keys are colunm names and values are values to filter.
+  Mongo-like queries are also supported, see examples below and examples in
+  ``filter`` procedure.
 
 Here is an example of ``ingredient`` section:
 
@@ -493,26 +506,27 @@ Available procedures
 
 Currently supported procedures:
 
--  `translate\_header <#translate-header>`__: change ingredient data
-   header according to a mapping dictionary
--  `translate\_column <#translate-column>`__: change column values of
-   ingredient data according to a mapping dictionary
--  `merge <#merge>`__: merge ingredients together on their keys
--  `groupby <#groubby>`__: group ingredient by columns and do
-   aggregate/filter/transform
--  `window <#window>`__: run function on rolling windows
--  `filter\_row <#filter-row>`__: filter ingredient data by column
-   values
--  `filter\_item <#filter-item>`__: filter ingredient data by concepts
--  `run\_op <#run-op>`__: run math operations on ingredient columns
--  `extract\_concepts <#extract-concepts>`__: generate concepts
-   ingredient from other ingredients
--  `trend\_bridge <#trend-bridge>`__: connect 2 ingredients and
-   make custom smoothing
--  `flatten <#flatten>`__: flatten dimensions in the indicators to
-   create new indicators
--  `split_entity <#split-entity>`__: (WIP) split an entity and create new entity from it
--  `merge_entity <#merge-entity>`__: (WIP) merge some entity to create a new entity
+- `translate\_header <#translate-header>`__: change ingredient data
+  header according to a mapping dictionary
+- `translate\_column <#translate-column>`__: change column values of
+  ingredient data according to a mapping dictionary
+- `merge <#merge>`__: merge ingredients together on their keys
+- `groupby <#groubby>`__: group ingredient by columns and do
+  aggregate/filter/transform
+- `window <#window>`__: run function on rolling windows
+- `filter`_: filter ingredient data with Mongo-like query
+- `filter\_row <#filter-row>`__: filter ingredient data by column
+  values
+- `filter\_item <#filter-item>`__: filter ingredient data by concepts
+- `run\_op <#run-op>`__: run math operations on ingredient columns
+- `extract\_concepts <#extract-concepts>`__: generate concepts
+  ingredient from other ingredients
+- `trend\_bridge <#trend-bridge>`__: connect 2 ingredients and
+  make custom smoothing
+- `flatten <#flatten>`__: flatten dimensions in the indicators to
+  create new indicators
+- `split_entity <#split-entity>`__: split an entity and create new entity from it
+- `merge_entity <#merge-entity>`__: merge some entity to create a new entity
 
 translate\_header
 ~~~~~~~~~~~~~~~~~
@@ -721,8 +735,41 @@ procedure:
 -  currently chef only support one ingredient in the ``ingredients``
    parameter
 
+filter
+~~~~~~
+
+Filter ingredient data with Mongo-like queries.
+
+**TODO**: More info
+
+**usage and options**:
+
+.. code-block:: yaml
+
+   - procedure: filter
+     ingredients:
+         - ingredient_id
+     options:
+         item:  # just as `value` in ingredient def
+             $in:
+                 - concept_1
+                 - concept_2
+         row:  # just as `filter` in ingredient def
+             $and:
+                 geo:
+                     $ne: usa
+                 year:
+                     $gt: 2010
+      result: output_ingredient
+
+for more information, see the :py:class:`ddf_utils.chef.ingredient.Ingredient` class.
+
 filter\_row
 ~~~~~~~~~~~
+
+.. warning::
+
+   Please use ``filter`` procedure. This one is deprecated
 
 Filter ingredient data by column values.
 
@@ -763,6 +810,10 @@ also, wildcard is supported for column names:
 
 filter\_item
 ~~~~~~~~~~~~
+
+.. warning::
+
+   Please use ``filter`` procedure. This one is deprecated
 
 Filter ingredient data by concepts.
 
@@ -905,7 +956,7 @@ and ``population_female``. The procedure should be:
 .. code-block:: yaml
 
     - procedure: flatten
-      ingerdients:
+      ingredients:
         - population_by_gender_ingredient
       options:
         flatten_dimensions:
@@ -991,8 +1042,7 @@ For a pretty printed output of the invalid path, try using json processors like
 General guideline for writing recipes
 -------------------------------------
 
-- if you need to use
-  ``translate_header``/``translate_column``/``align``/``copy`` in your recipe,
+- if you need to use ``translate_header`` / ``translate_column`` in your recipe,
   place them at the beginning of recipe. This can improve the performance of
   running the recipe.
 - run recipe with ``ddf --debug run_recipe`` will enable debug output when

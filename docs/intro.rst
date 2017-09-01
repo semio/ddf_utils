@@ -51,12 +51,11 @@ Library
 ddf_utils' helper functions are divided into a few modules based on their
 domain, namely:
 
-- :py:mod:`chef <ddf_utils.chef.cook>`: Recipe cooking functions. See :doc:`recipe`
+- :py:mod:`chef <ddf_utils.chef.api>`: Recipe cooking functions. See :doc:`recipe`
   for how to write recipes
-- :py:mod:`ddf_reader <ddf_utils.ddf_reader>`: Reader for reading data from DDF datasets
 - :py:mod:`i18n <ddf_utils.i18n>`: Splitting/merging translation files
-- :py:mod:`index <ddf_utils.index>`: Generating/updating datapackage.json
-- :py:mod:`ops <ddf_utils.ops>`: Computations on data
+- :py:mod:`datapackage <ddf_utils.datapackage>`: Generating/updating datapackage.json
+- :py:mod:`model <ddf_utils.model.ddf>`: Data Models for dataset and datapackage
 - :py:mod:`patch <ddf_utils.patch>`: Applying patch in `daff format`_
 - :py:mod:`qa <ddf_utils.qa>`: Functions for QA tasks
 - :py:mod:`str <ddf_utils.str>`: Functions for string/number formatting
@@ -89,6 +88,7 @@ commands are:
     cleanup             clean up ddf files or translation files.
     create_datapackage  create datapackage.json
     diff                give a report on the statistical differences...
+    from_csv            create ddfcsv dataset from a set of csv files
     merge_translation   merge all translation files from crowdin
     new                 create a new ddf project
     run_recipe          generate new ddf dataset with recipe
