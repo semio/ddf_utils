@@ -39,7 +39,7 @@ class Repo:
                 self.__repo = GRepo.clone_from(uri, to_path=self._local_path)
 
         else:
-            assert osp.exists(osp.abspath(uri)), f'the path "{uri}" does not exist'
+            assert osp.exists(osp.abspath(uri)), 'the path "{}" does not exist'.format(uri)
             self._name = osp.basename(uri)
             self._local_path = uri
             self.__repo = GRepo(uri)
