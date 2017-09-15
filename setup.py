@@ -27,7 +27,9 @@ requirements = [
     'ruamel.yaml',
     'graphviz',
     'coloredlogs',
-    'pytz'
+    'pytz',
+    'requests',
+    'gitpython'
 ]
 
 setup(

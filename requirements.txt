@@ -19,3 +19,5 @@ ruamel.yaml
 graphviz
 coloredlogs
 pytz
+requests
+gitpython
