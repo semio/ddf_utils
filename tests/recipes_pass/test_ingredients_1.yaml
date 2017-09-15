@@ -41,6 +41,9 @@ ingredients:
           year: 1990
           col1: 2
           col2: 2
+  - id: github-repo-datapoints
+    key: country, year
+    dataset: https://github.com/open-numbers/ddf--gapminder--co2_emission
 
 
 cooking:
@@ -61,7 +64,15 @@ cooking:
               - gw-countries
               - gw-geo
     datapoints:
+        - procedure: translate_header
+          ingredients:
+            - github-repo-datapoints
+          options:
+            dictionary:
+              country: geo
+          result: github-datapoints
         - procedure: serve
           ingredients:
               - bp-datapoints
               - on_the_fly_datapoints
+              - github-datapoints
