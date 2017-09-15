@@ -12,6 +12,7 @@ from .helpers import read_opt, gen_sym, query
 from collections import Sequence, Mapping
 
 from ddf_utils.model.package import Datapackage
+from ddf_utils.model.repo import is_url, Repo
 from .exceptions import IngredientError
 
 
@@ -333,7 +334,7 @@ class Ingredient(BaseIngredient):
         from a local csv file or be created on-the-fly base on the description.
         """
         ingred_id = read_opt(dictionary, 'id', default=None)
-        ddf_id = read_opt(dictionary, 'dataset', default=None)
+        dataset = read_opt(dictionary, 'dataset', default=None)
         data_def = read_opt(dictionary, 'data', default=None)
         key = read_opt(dictionary, 'key', required=True)
         values = read_opt(dictionary, 'value', default='*')
@@ -342,7 +343,7 @@ class Ingredient(BaseIngredient):
         if ingred_id is None:
             ingred_id = gen_sym('inline', None, dictionary)
 
-        if ddf_id is not None:
+        if dataset is not None:
             assert data_def is None, 'one of `dataset` and `data` should be provided'
         else:
             assert data_def is not None, 'one of `dataset` and `data` should be provided'
@@ -350,7 +351,13 @@ class Ingredient(BaseIngredient):
         if len(dictionary.keys()) > 0:
             logging.warning("Ignoring following keys: {}".format(list(dictionary.keys())))
 
-        if ddf_id is not None:  # data will read from ddf dataset
+        if dataset is not None:  # data will read from ddf dataset
+            if is_url(dataset):
+                repo = Repo(dataset, base_path=chef.config.get('ddf_dir', './'))
+                ddf_id = repo.name
+            else:
+                ddf_id = dataset
+
             return cls(chef, ingred_id, ddf_id=ddf_id, key=key, values=values, row_filter=row_filter)
         else:  # data will be read from csv file or create on-the-fly
             return cls(chef, ingred_id, data_def=data_def, key=key, values=values, row_filter=row_filter)
