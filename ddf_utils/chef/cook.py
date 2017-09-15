@@ -43,9 +43,9 @@ class Chef:
         else:
             self.metadata = metadata
         if config is None:
-            self.config = dict()
+            self._config = dict()
         else:
-            self.config = config
+            self._config = config
         if cooking is None:
             self.cooking = {'concepts': list(), 'datapoints': list(), 'entities': list()}
         else:
@@ -57,6 +57,13 @@ class Chef:
 
         self._recipe = recipe
         self.ddf_object_cache = {}
+
+    @property
+    def config(self):
+        if 'ddf_dir' not in self._config.keys():
+            logger.warning('ddf_dir not configured, assuming current directory')
+            self._config['ddf_dir'] = os.path.abspath('./')
+        return self._config
 
     @property
     def serving(self):
@@ -80,9 +87,6 @@ class Chef:
         if 'config' in recipe.keys():
             chef.add_config(**recipe['config'])
         chef.add_config(**config)
-        if 'ddf_dir' not in chef.config.keys():
-            logger.warning('ddf_dir not in config, assuming current directory')
-            chef.add_config(ddf_dir=os.path.abspath('./'))
 
         assert 'ingredients' in recipe.keys(), "recipe must have ingredients section"
         assert 'cooking' in recipe.keys(), "recipe must have cooking section!"
@@ -105,11 +109,7 @@ class Chef:
 
     def validate(self):
         # 1. check dataset availability
-        try:
-            ddf_dir = self.config['ddf_dir']
-        except (KeyError, AttributeError):
-            logger.warning("no ddf_dir configured, assuming current working directory")
-            ddf_dir = './'
+        ddf_dir = self.config['ddf_dir']
         datasets = set()
         for ingred in self.ingredients:
             if ingred.ddf_id:
@@ -140,7 +140,7 @@ class Chef:
 
     def add_config(self, **config):
         for k, v in config.items():
-            self.config[k] = v
+            self._config[k] = v
         return self
 
     def add_metadata(self, **metadata):
@@ -149,11 +149,6 @@ class Chef:
         return self
 
     def add_ingredient(self, **kwargs):
-        try:
-            self.config['ddf_dir']
-        except KeyError:
-            logger.warning('no ddf_dir in config, assuming current working dir')
-            self.config['ddf_dir'] = './'
         ingredient = Ingredient.from_dict(chef=self, dictionary=kwargs)
         self.dag.add_node(IngredientNode(ingredient.ingred_id, ingredient, self))
         return self
