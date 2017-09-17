@@ -12,7 +12,7 @@ from .model.package import Datapackage
 from collections import OrderedDict
 
 
-def get_datapackage(path, use_existing=True, update=True):
+def get_datapackage(path, use_existing=True, update=False):
     """get the datapackage.json from a dataset path, create one if it's not exists
 
     Parameters
