@@ -22,7 +22,9 @@ def test_dataset():
     assert 'lines_of_code' in dp.columns
 
     assert not ds.is_empty
-    assert len(ds.indicators()) == 3
+    assert len(ds.indicators()) == 5
+
+    assert len(ds.get_datapoint_df('indicator2', ('anno', 'project'))) == 2
 
     ds.get_data_copy()
 
