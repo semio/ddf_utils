@@ -1,4 +1,13 @@
-## version 0.3.1 2017-8-14
+## version 0.3.2 2017-09-28
+
+- add support for reading mutiple indicators in one DDF datapoints file (#76)
+- add support for reading repo from github / local path (#79)
+- add dry_run option in Ingredient to speed up loading speed
+- get_datapoints_df() for Dataset object always return a DataFrame
+- to_graph() for Chef now includes procedure names
+- bug fixes and improvements
+
+## version 0.3.1 2017-08-14
 
 - support mongo-like queries in ingredient definition and filter procedures (#72)
 - new procedure: filter (#72)
