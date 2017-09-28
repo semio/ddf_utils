@@ -7,7 +7,6 @@ import json
 import csv
 import logging
 from datetime import datetime
-import pytz
 from .model.package import Datapackage
 from collections import OrderedDict
 
@@ -136,6 +135,7 @@ def create_datapackage(path, gen_schema=True, **kwargs):
 
     for n, r in enumerate(resources):
         name_res = r['name']
+        path_res = r['path']
         schema = {"fields": [], "primaryKey": None}
 
         if 'datapoints' in name_res:
@@ -152,7 +152,18 @@ def create_datapackage(path, gen_schema=True, **kwargs):
                 else:
                     schema['fields'].append({'name': k})
 
-            schema['fields'].append({'name': conc})
+            with open(os.path.join(path, path_res)) as f:
+                headers_line = f.readline()
+                f.close()
+
+            headers_line = headers_line.strip('\n')
+            headers = headers_line.split(',')
+            headers = [x.strip() for x in headers]
+            headers = set(headers)
+            fields = headers.difference(set(primary_keys))
+
+            for field in fields:
+                schema['fields'].append({'name': field})
             schema['primaryKey'] = primary_keys
 
             resources[n].update({'schema': schema})

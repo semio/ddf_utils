@@ -76,6 +76,24 @@ class Datapackage:
         entities = dict()
         datapoints = dict()
 
+        def _update_datapoints(df_, keys_, indicator_name_):
+            """helper function to make datapoints dictionary"""
+            if not no_datapoints:
+                if indicator_name_ in datapoints.keys():
+                    if keys in datapoints[indicator_name_]:
+                        datapoints[indicator_name_][keys_].append(df_)
+                    else:
+                        datapoints[indicator_name_][keys_] = [df_]
+                else:
+                    datapoints[indicator_name_] = dict()
+                    datapoints[indicator_name_][keys_] = [df_]
+            else:  # no datapoints needed, just create an empty dataframe with columns
+                try:
+                    datapoints.get(indicator_name_, {})[keys_]
+                except KeyError:
+                    datapoints[indicator_name_] = {}
+                    datapoints[indicator_name_][keys_] = df_
+
         no_datapoints = kwargs.get('no_datapoints', False)
 
         base_dir, dp = self.base_dir, self.datapackage
@@ -111,28 +129,20 @@ class Datapackage:
                 else:
                     df = next(pd.read_csv(os.path.join(base_dir, r['path']), dtype=dtypes, chunksize=3))
 
-                try:
-                    indicator_name = list(set(df.columns) - set(pkey))[0]
-                except:
-                    print(df.columns)
-                    print(pkey)
-                    raise
+                indicator_names = list(set(df.columns) - set(pkey))
+                if len(indicator_names) == 0:
+                    raise ValueError('No indicator in {}'.format(r['path']))
+
                 keys = tuple(sorted(pkey))
-                if not no_datapoints:
-                    if indicator_name in datapoints.keys():
-                        if keys in datapoints[indicator_name]:
-                            datapoints[indicator_name][keys].append(df)
-                        else:
-                            datapoints[indicator_name][keys] = [df]
-                    else:
-                        datapoints[indicator_name] = dict()
-                        datapoints[indicator_name][keys] = [df]
-                else:  # no datapoints needed, just create an empty dataframe with columns
-                    try:
-                        datapoints.get(indicator_name, {})[keys]
-                    except KeyError:
-                        datapoints[indicator_name] = {}
-                        datapoints[indicator_name][keys] = df
+
+                if len(indicator_names) == 1:
+                    indicator_name = indicator_names[0]
+                    _update_datapoints(df, keys, indicator_name)
+                else:
+                    for indicator_name in indicator_names:
+                        cols = list(keys + tuple([indicator_name]))
+                        df_ = df[cols].copy()
+                        _update_datapoints(df_, keys, indicator_name)
 
         # datapoints
         if not no_datapoints:
