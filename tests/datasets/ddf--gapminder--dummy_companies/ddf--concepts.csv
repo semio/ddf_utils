@@ -16,3 +16,5 @@ num_users,measure,
 latitude,measure,
 longitude,measure,
 project,entity_domain,
+indicator1,measure
+indicator2,measure

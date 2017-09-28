@@ -23,7 +23,7 @@ class Dataset:
         datapoints: dictionary of indicator name and primarykey -> dataframe mapping.
         So it's a nested dictionary. Note that datapoints are dask dataframes.
         """
-        # TODO: add type check.
+        # TODO: add type check using the type defined in datapackage schema
         self._concepts = concepts
         self._entities = entities
         self._datapoints = datapoints
@@ -132,9 +132,18 @@ class Dataset:
 
     def get_datapoint_df(self, indicator, primary_key=None):
         if primary_key:
-            return self.datapoints[indicator][tuple(sorted(list(primary_key)))]
+            key = tuple(sorted(list(primary_key)))
+            if isinstance(self.datapoints[indicator][key], dd.DataFrame):
+                self.datapoints[indicator][key] = self.datapoints[indicator][key].compute()
+            return self.datapoints[indicator][key]
         else:
-            return list(self.datapoints[indicator].items())
+            res = {}
+            for k, df in list(self.datapoints[indicator].items()):
+                if isinstance(df, dd.DataFrame):
+                    df = df.compute()
+                res[k] = df
+            self.datapoints[indicator] = res
+            return res
 
     def validate(self, **options):
         """validate the dataset"""

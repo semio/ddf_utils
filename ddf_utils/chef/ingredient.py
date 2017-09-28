@@ -2,15 +2,17 @@
 
 """main ingredient class"""
 
+import os
+import logging
+import fnmatch
 import numpy as np
 import pandas as pd
 from ..str import format_float_digits
 from .helpers import read_opt, gen_sym, query
 from collections import Sequence, Mapping
-import os
-import logging
 
 from ddf_utils.model.package import Datapackage
+from ddf_utils.model.repo import is_url, Repo
 from .exceptions import IngredientError
 
 
@@ -81,11 +83,10 @@ class BaseIngredient(object):
         no_keep_sets = options.get('no_keep_sets', False)
         for k, df in data.items():
             # change boolean into string
-            # TODO: not only for is-- headers
             for c in df.columns:
-                if df.dtypes[c] == 'bool':
+                if df.dtypes[c] == 'bool':  # inferred boolean values
                     df[c] = df[c].map(lambda x: str(x).upper() if not pd.isnull(x) else x)
-                if c.startswith('is--'):
+                if c.startswith('is--'):  # is-- columns
                     if no_keep_sets:
                         df = df.drop(c, axis=1)
                     else:
@@ -308,13 +309,14 @@ class Ingredient(BaseIngredient):
 
     """
     def __init__(self, chef=None, ingred_id=None, ddf_id=None, data_def=None,
-                 key=None, values=None, row_filter=None, data=None):
+                 key=None, values=None, row_filter=None, data=None, dry_run=False):
         super(Ingredient, self).__init__(chef, ingred_id, key, data)
         self.values = values
         self.row_filter = row_filter
         self.data_def = data_def
         self._ddf_id = ddf_id
         self._ddf = None
+        self.is_dry_run = dry_run
 
     @classmethod
     def from_dict(cls, chef, dictionary):
@@ -332,7 +334,7 @@ class Ingredient(BaseIngredient):
         from a local csv file or be created on-the-fly base on the description.
         """
         ingred_id = read_opt(dictionary, 'id', default=None)
-        ddf_id = read_opt(dictionary, 'dataset', default=None)
+        dataset = read_opt(dictionary, 'dataset', default=None)
         data_def = read_opt(dictionary, 'data', default=None)
         key = read_opt(dictionary, 'key', required=True)
         values = read_opt(dictionary, 'value', default='*')
@@ -341,7 +343,7 @@ class Ingredient(BaseIngredient):
         if ingred_id is None:
             ingred_id = gen_sym('inline', None, dictionary)
 
-        if ddf_id is not None:
+        if dataset is not None:
             assert data_def is None, 'one of `dataset` and `data` should be provided'
         else:
             assert data_def is not None, 'one of `dataset` and `data` should be provided'
@@ -349,7 +351,13 @@ class Ingredient(BaseIngredient):
         if len(dictionary.keys()) > 0:
             logging.warning("Ignoring following keys: {}".format(list(dictionary.keys())))
 
-        if ddf_id is not None:  # data will read from ddf dataset
+        if dataset is not None:  # data will read from ddf dataset
+            if is_url(dataset):
+                repo = Repo(dataset, base_path=chef.config.get('ddf_dir', './'))
+                ddf_id = repo.name
+            else:
+                ddf_id = dataset
+
             return cls(chef, ingred_id, ddf_id=ddf_id, key=key, values=values, row_filter=row_filter)
         else:  # data will be read from csv file or create on-the-fly
             return cls(chef, ingred_id, data_def=data_def, key=key, values=values, row_filter=row_filter)
@@ -362,7 +370,8 @@ class Ingredient(BaseIngredient):
         else:
             if self._ddf_id:
                 if self._ddf_id not in self.chef.ddf_object_cache.keys():
-                    self._ddf = Datapackage(os.path.join(self.chef.config['ddf_dir'], self._ddf_id)).load()
+                    self._ddf = Datapackage(
+                        os.path.join(self.chef.config['ddf_dir'], self._ddf_id)).load(no_datapoints=self.is_dry_run)
                     self.chef.ddf_object_cache[self._ddf_id] = self._ddf
                 else:
                     self._ddf = self.chef.ddf_object_cache[self._ddf_id]
@@ -390,7 +399,6 @@ class Ingredient(BaseIngredient):
             for i in self.ddf.indicators(by=keys):
                 data[i] = self.ddf.get_datapoint_df(i, primary_key=keys)
         else:
-            # TODO: add wildcard support for `value` option
             if isinstance(self.values, Sequence):  # just a list of indicators to include
                 for i in self.values:
                     if i in self.ddf.indicators(by=keys):
@@ -403,14 +411,23 @@ class Ingredient(BaseIngredient):
                 for keyword, items in self.values.items():
                     if keyword == '$in':
                         for i in items:
-                            if i in self.ddf.indicators(by=keys):
-                                data[i] = self.ddf.get_datapoint_df(i, primary_key=keys)
-                            else:
-                                logging.warning("indicator {} not found in dataset {}".format(i, self._ddf_id))
+                            matches = fnmatch.filter(self.ddf.indicators(by=keys), i)
+                            if len(matches) == 0:
+                                logging.warning("indicator matching {} not found in dataset {}".format(i, self._ddf_id))
+                                continue
+                            for m in matches:
+                                data[m] = self.ddf.get_datapoint_df(m, primary_key=keys)
                     else:
-                        for i in self.ddf.indicators(by=keys):
-                            if i not in items:
-                                data[i] = self.ddf.get_datapoint_df(i, primary_key=keys)
+                        all_indicators = self.ddf.indicators(by=keys)
+                        matches = set(all_indicators) - set(fnmatch.filter(all_indicators, items[0]))
+                        for i in items[1:]:
+                            matches = matches - set(fnmatch.filter(list(matches), i))
+                        if len(matches) == 0:
+                            logging.warning("indicators matching the value descriptor not "
+                                            "found in dataset " + self._ddf_id)
+                            continue
+                        for m in matches:
+                            data[m] = self.ddf.get_datapoint_df(m, primary_key=keys)
         if len(data) == 0:
             raise IngredientError('no datapoint found for the ingredient: ' + self.ingred_id)
 
@@ -499,10 +516,7 @@ class Ingredient(BaseIngredient):
             data = funcs[self.dtype]()
             if self.dtype == 'datapoints':
                 for k, v in data.items():
-                    if not isinstance(v, pd.DataFrame):
-                        data[k] = v.compute()
-                    else:
-                        data[k] = v
+                    data[k] = v
 
             for k, v in data.items():
                 if self.row_filter:
@@ -522,7 +536,3 @@ class ProcedureResult(BaseIngredient):
 
     def __repr__(self):
         return '<ProcedureResult: {}>'.format(self.ingred_id)
-
-    def reset_data(self):
-        # TODO: allowing reset data? It can not be reconstructed.
-        raise NotImplementedError('')

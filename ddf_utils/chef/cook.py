@@ -5,6 +5,7 @@ import os
 import sys
 import logging
 import re
+from time import time
 from ddf_utils.chef.dag import DAG, ProcedureNode, IngredientNode
 from ddf_utils.chef.ingredient import Ingredient
 from ddf_utils.chef.helpers import get_procedure
@@ -17,6 +18,16 @@ from graphviz import Digraph
 
 
 logger = logging.getLogger('Chef')
+
+
+def _loadfile(f):
+    """load json/yaml file, into AttrDict"""
+    if re.match('.*\.json', f):
+        res = json.load(open(f))
+    else:
+        res = yaml.load(open(f), Loader=yaml.Loader)
+
+    return res
 
 
 class Chef:
@@ -32,9 +43,9 @@ class Chef:
         else:
             self.metadata = metadata
         if config is None:
-            self.config = dict()
+            self._config = dict()
         else:
-            self.config = config
+            self._config = config
         if cooking is None:
             self.cooking = {'concepts': list(), 'datapoints': list(), 'entities': list()}
         else:
@@ -46,6 +57,13 @@ class Chef:
 
         self._recipe = recipe
         self.ddf_object_cache = {}
+
+    @property
+    def config(self):
+        if 'ddf_dir' not in self._config.keys():
+            logger.warning('ddf_dir not configured, assuming current directory')
+            self._config['ddf_dir'] = os.path.abspath('./')
+        return self._config
 
     @property
     def serving(self):
@@ -61,7 +79,7 @@ class Chef:
 
     @classmethod
     def from_recipe(cls, recipe_file, **config):
-        recipe = _build_recipe(recipe_file)
+        recipe = Chef._build_recipe(recipe_file)
         chef = cls()
 
         if 'info' in recipe.keys():
@@ -69,9 +87,6 @@ class Chef:
         if 'config' in recipe.keys():
             chef.add_config(**recipe['config'])
         chef.add_config(**config)
-        if 'ddf_dir' not in chef.config.keys():
-            logger.warning('ddf_dir not in config, assuming current directory')
-            chef.add_config(ddf_dir=os.path.abspath('./'))
 
         assert 'ingredients' in recipe.keys(), "recipe must have ingredients section"
         assert 'cooking' in recipe.keys(), "recipe must have cooking section!"
@@ -85,7 +100,7 @@ class Chef:
                 options = p.get('options', None)
                 chef.add_procedure(k, p['procedure'], p['ingredients'], result, options)
 
-        chef.serving = _get_dishes(recipe)
+        chef.serving = Chef._get_dishes(recipe)
         return chef
 
     @property
@@ -94,11 +109,7 @@ class Chef:
 
     def validate(self):
         # 1. check dataset availability
-        try:
-            ddf_dir = self.config['ddf_dir']
-        except (KeyError, AttributeError):
-            logger.warning("no ddf_dir configured, assuming current working directory")
-            ddf_dir = './'
+        ddf_dir = self.config['ddf_dir']
         datasets = set()
         for ingred in self.ingredients:
             if ingred.ddf_id:
@@ -129,7 +140,7 @@ class Chef:
 
     def add_config(self, **config):
         for k, v in config.items():
-            self.config[k] = v
+            self._config[k] = v
         return self
 
     def add_metadata(self, **metadata):
@@ -138,12 +149,6 @@ class Chef:
         return self
 
     def add_ingredient(self, **kwargs):
-        # TODO: fix this
-        try:
-            ddf_dir = self.config['ddf_dir']
-        except KeyError:
-            logger.warning('no ddf_dir in config, assuming current working dir')
-            ddf_dir = './'
         ingredient = Ingredient.from_dict(chef=self, dictionary=kwargs)
         self.dag.add_node(IngredientNode(ingredient.ingred_id, ingredient, self))
         return self
@@ -248,194 +253,197 @@ class Chef:
 
         yaml.round_trip_dump(recipe, fp)
 
-    def to_graph(self, g=None, node=None):
-        if not g:
-            g = Digraph()
+    def to_graph(self, node=None):
 
-        if node is not None:
-            g.node(node.node_id)
-            r = node.get_direct_relatives(upstream=True)
-            if len(r) > 0:
-                for n in set(r):
-                    g.edge(n.node_id, node.node_id)
-                    self.to_graph(g, n)
-        else:
+        def process_node(g_, k_, recursive=False):
+            pc = self.dag.get_node(k_).procedure['procedure']
+            node_name = pc + str(time())
+            g_.node(node_name, label=pc, shape='box')
+            g_.edge(node_name, k_)
+
+            for ing in self.dag.get_node(k_).get_direct_relatives(upstream=True):
+                g_.edge(ing.node_id, node_name)
+                if recursive:
+                    process_node(g_, ing.node_id)
+
+        g = Digraph()
+        g.attr(rankdir='TB', fontsize='8')
+
+        if node is None:
+            # define all nodes
+            to_serve = [x['id'] for x in self.serving]
             for k, v in self.dag.node_dict.items():
-                g.node(k)
-                r = v.get_direct_relatives()
-                if len(r) > 0:
-                    for n in set(r):
-                        g.node(n.node_id)
-                        g.edge(k, n.node_id)
+                if k in to_serve:
+                    g.node(k, color='red')
+                elif isinstance(self.dag.get_node(k), IngredientNode):
+                    g.node(k, color='blue')
+                else:
+                    g.node(k)
+                if isinstance(self.dag.get_node(k), ProcedureNode):
+                    process_node(g, k)
+        else:
+            assert node in self.dag.node_dict.keys()
+            g.node(node)
+            process_node(g, node, recursive=True)
+
         return g
 
+    @staticmethod
+    def _build_recipe(recipe_file, to_disk=False, **kwargs):
+        """build a complete recipe object.
 
-def _loadfile(f):
-    """load json/yaml file, into AttrDict"""
-    if re.match('.*\.json', f):
-        res = json.load(open(f))
-    else:
-        res = yaml.load(open(f), Loader=yaml.Loader)
+        This function will check each part of recipe, convert string (the ingredient ids,
+        dictionaries file names) into actual objects.
 
-    return res
+        If there are includes in recipe file, this function will run recurivly.
+        If no includes found then return the parsed object as is.
 
+        Parameters
+        ----------
+        recipe_file : `str`
+            path to recipe file
 
-def _build_recipe(recipe_file, to_disk=False, **kwargs):
-    """build a complete recipe object.
+        Keyword Args
+        ------------
+        to_disk : bool
+            if true, save the parsed reslut to a yaml file in working dir
 
-    This function will check each part of recipe, convert string (the ingredient ids,
-    dictionaries file names) into actual objects.
+        Other Parameters
+        ----------------
+        ddf_dir : `str`
+            path to search for DDF datasets, will overwrite the contfig in recipe
 
-    If there are includes in recipe file, this function will run recurivly.
-    If no includes found then return the parsed object as is.
+        """
+        recipe = _loadfile(recipe_file)
 
-    Parameters
-    ----------
-    recipe_file : `str`
-        path to recipe file
+        # the base dir of recipe file. for building paths for dictionary_dir and
+        # sub recipe paths.
+        base_dir = os.path.dirname(recipe_file)
 
-    Keyword Args
-    ------------
-    to_disk : bool
-        if true, save the parsed reslut to a yaml file in working dir
+        # the dictionary dir to retrieve translation dictionaries
+        if 'config' not in recipe.keys():
+            dict_dir = None
+            external_csv_dir = base_dir
+            recipe_dir = base_dir
+        else:
+            dict_dir = recipe['config'].get('dictionary_dir', None)
+            external_csv_dir = recipe['config'].get('external_csv_dir', base_dir)
+            recipe_dir = recipe['config'].get('recipes_dir', base_dir)
 
-    Other Parameters
-    ----------------
-    ddf_dir : `str`
-        path to search for DDF datasets, will overwrite the contfig in recipe
+        def external_csv_abs_path(ing):
+            """change the csv file in `data` to full path"""
+            if isinstance(ing, dict) and 'data' in ing.keys() and isinstance(ing['data'], str):
+                if not os.path.isabs(ing['data']):
+                    ing['data'] = os.path.join(external_csv_dir, ing['data'])
+            return ing
 
-    """
-    recipe = _loadfile(recipe_file)
-
-    # the base dir of recipe file. for building paths for dictionary_dir and
-    # sub recipe paths.
-    base_dir = os.path.dirname(recipe_file)
-
-    # the dictionary dir to retrieve translation dictionaries
-    if 'config' not in recipe.keys():
-        dict_dir = None
-        external_csv_dir = base_dir
-        recipe_dir = base_dir
-    else:
-        dict_dir = recipe['config'].get('dictionary_dir', None)
-        external_csv_dir = recipe['config'].get('external_csv_dir', base_dir)
-        recipe_dir = recipe['config'].get('recipes_dir', base_dir)
-
-    def external_csv_abs_path(ing):
-        """change the csv file in `data` to full path"""
-        if isinstance(ing, dict) and 'data' in ing.keys() and isinstance(ing['data'], str):
-            if not os.path.isabs(ing['data']):
-                ing['data'] = os.path.join(external_csv_dir, ing['data'])
-        return ing
-
-    # expand all files in the options
-    if 'cooking' in recipe.keys():
-        for p in ['concepts', 'datapoints', 'entities']:
-            if p not in recipe['cooking'].keys():
-                continue
-            for i, procedure in enumerate(recipe['cooking'][p]):
-
-                procedure['ingredients'] = [external_csv_abs_path(ing) for ing in procedure['ingredients']]
-                try:
-                    opt_dict = procedure['options']['dictionary']
-                except KeyError:
+        # expand all files in the options
+        if 'cooking' in recipe.keys():
+            for p in ['concepts', 'datapoints', 'entities']:
+                if p not in recipe['cooking'].keys():
                     continue
-                if isinstance(opt_dict, str):
-                    # if the option dict is str, then it should be a filename
-                    if dict_dir is None:
-                        raise ChefRuntimeError("dictionary_dir not found in config!")
-                    if os.path.isabs(dict_dir):
-                        path = os.path.join(dict_dir, opt_dict)
-                    else:
-                        path = os.path.join(base_dir, dict_dir, opt_dict)
+                for i, procedure in enumerate(recipe['cooking'][p]):
 
-                    recipe['cooking'][p][i]['options']['dictionary'] = _loadfile(path)
-
-    if 'ingredients' in recipe.keys():
-        recipe['ingredients'] = [external_csv_abs_path(ing) for ing in recipe['ingredients']]
-
-    if 'include' not in recipe.keys():
-        return recipe
-    else:  # append sub-recipe entities into main recipe
-        sub_recipes = []
-        for i in recipe['include']:
-            # TODO: maybe add support to expand user home and env vars
-            if os.path.isabs(recipe_dir):
-                path = os.path.join(recipe_dir, i)
-            else:
-                path = os.path.join(base_dir, recipe_dir, i)
-            sub_recipes.append(_build_recipe(path))
-
-        for rcp in sub_recipes:
-            # appending ingredients
-            if 'ingredients' in recipe.keys():
-                # ingredients = [*recipe['ingredients'], *rcp['ingredients']]
-                # ^ not supportted by Python < 3.5
-                ingredients = []
-                if 'ingredients' in recipe.keys():
-                    [ingredients.append(ing) for ing in recipe['ingredients']]
-                if 'ingredients' in rcp.keys():
-                    [ingredients.append(external_csv_abs_path(ing)) for ing in rcp['ingredients']]
-                # drop duplicated ingredients.
-                rcp_dict_tmp = {}
-                for v in ingredients:
-                    if v['id'] not in rcp_dict_tmp.keys():
-                        rcp_dict_tmp[v['id']] = v
-                    else:
-                        # raise error when ingredients with same ID have different contents.
-                        if v != rcp_dict_tmp[v['id']]:
-                            raise ChefRuntimeError(
-                                "Different content with same ingredient id detected: " + v['id'])
-                recipe['ingredients'] = list(rcp_dict_tmp.values())
-            else:
-                recipe['ingredients'] = rcp['ingredients']
-
-            # appending cooking procedures
-            if 'cooking' not in rcp.keys():
-                continue
-            for p in ['datapoints', 'entities', 'concepts']:
-                if p not in rcp['cooking'].keys():
-                    continue
-                if 'cooking' in recipe.keys():
-                    if p in recipe['cooking'].keys():
-                        # NOTE: the included cooking procedures should be placed in front of
-                        # the origin ones.
-                        # recipe['cooking'][p] = [*rcp['cooking'][p], *recipe['cooking'][p]]
-                        # ^ not supportted by Python < 3.5
-                        new_procs = []
-                        [new_procs.append(proc) for proc in rcp['cooking'][p]]
-                        [new_procs.append(proc) for proc in recipe['cooking'][p]
-                         if proc not in new_procs]
-                        recipe['cooking'][p] = new_procs
-                    else:
-                        recipe['cooking'][p] = rcp['cooking'][p]
-                else:
-                    recipe['cooking'] = {}
-                    recipe['cooking'][p] = rcp['cooking'][p]
-
-        return recipe
-
-
-def _get_dishes(recipe):
-    """get all dishes in the recipe"""
-
-    if 'serving' in recipe:
-        return recipe['serving']
-
-    dishes = list()
-    for _, procs in recipe['cooking'].items():
-        serve_proc_exists = False
-        for p in procs:
-            if p['procedure'] == 'serve':
-                serve_proc_exists = True
-                for i in p['ingredients']:
+                    procedure['ingredients'] = [external_csv_abs_path(ing) for ing in procedure['ingredients']]
                     try:
-                        dishes.append({'id': i, 'options': p['options']})
+                        opt_dict = procedure['options']['dictionary']
                     except KeyError:
-                        dishes.append({'id': i, 'options': dict()})
-        if not serve_proc_exists:
-            logger.warning('no serve procedure found, will serve the last result: ' + p['result'])
-            dishes.append({'id': p['result'], 'options': dict()})
+                        continue
+                    if isinstance(opt_dict, str):
+                        # if the option dict is str, then it should be a filename
+                        if dict_dir is None:
+                            raise ChefRuntimeError("dictionary_dir not found in config!")
+                        if os.path.isabs(dict_dir):
+                            path = os.path.join(dict_dir, opt_dict)
+                        else:
+                            path = os.path.join(base_dir, dict_dir, opt_dict)
 
-    return dishes
+                        recipe['cooking'][p][i]['options']['dictionary'] = _loadfile(path)
+
+        if 'ingredients' in recipe.keys():
+            recipe['ingredients'] = [external_csv_abs_path(ing) for ing in recipe['ingredients']]
+
+        if 'include' not in recipe.keys():
+            return recipe
+        else:  # append sub-recipe entities into main recipe
+            sub_recipes = []
+            for i in recipe['include']:
+                if os.path.isabs(recipe_dir):
+                    path = os.path.join(recipe_dir, i)
+                else:
+                    path = os.path.expanduser(os.path.join(base_dir, recipe_dir, i))
+                sub_recipes.append(Chef._build_recipe(path))
+
+            for rcp in sub_recipes:
+                # appending ingredients
+                if 'ingredients' in recipe.keys():
+                    # ingredients = [*recipe['ingredients'], *rcp['ingredients']]
+                    # ^ not supportted by Python < 3.5
+                    ingredients = []
+                    if 'ingredients' in recipe.keys():
+                        [ingredients.append(ing) for ing in recipe['ingredients']]
+                    if 'ingredients' in rcp.keys():
+                        [ingredients.append(external_csv_abs_path(ing)) for ing in rcp['ingredients']]
+                    # drop duplicated ingredients.
+                    rcp_dict_tmp = {}
+                    for v in ingredients:
+                        if v['id'] not in rcp_dict_tmp.keys():
+                            rcp_dict_tmp[v['id']] = v
+                        else:
+                            # raise error when ingredients with same ID have different contents.
+                            if v != rcp_dict_tmp[v['id']]:
+                                raise ChefRuntimeError(
+                                    "Different content with same ingredient id detected: " + v['id'])
+                    recipe['ingredients'] = list(rcp_dict_tmp.values())
+                else:
+                    recipe['ingredients'] = rcp['ingredients']
+
+                # appending cooking procedures
+                if 'cooking' not in rcp.keys():
+                    continue
+                for p in ['datapoints', 'entities', 'concepts']:
+                    if p not in rcp['cooking'].keys():
+                        continue
+                    if 'cooking' in recipe.keys():
+                        if p in recipe['cooking'].keys():
+                            # NOTE: the included cooking procedures should be placed in front of
+                            # the origin ones.
+                            # recipe['cooking'][p] = [*rcp['cooking'][p], *recipe['cooking'][p]]
+                            # ^ not supportted by Python < 3.5
+                            new_procs = []
+                            [new_procs.append(proc) for proc in rcp['cooking'][p]]
+                            [new_procs.append(proc) for proc in recipe['cooking'][p]
+                             if proc not in new_procs]
+                            recipe['cooking'][p] = new_procs
+                        else:
+                            recipe['cooking'][p] = rcp['cooking'][p]
+                    else:
+                        recipe['cooking'] = {}
+                        recipe['cooking'][p] = rcp['cooking'][p]
+
+            return recipe
+
+    @staticmethod
+    def _get_dishes(recipe):
+        """get all dishes in the recipe"""
+
+        if 'serving' in recipe:
+            return recipe['serving']
+
+        dishes = list()
+        for _, procs in recipe['cooking'].items():
+            serve_proc_exists = False
+            for p in procs:
+                if p['procedure'] == 'serve':
+                    serve_proc_exists = True
+                    for i in p['ingredients']:
+                        try:
+                            dishes.append({'id': i, 'options': p['options']})
+                        except KeyError:
+                            dishes.append({'id': i, 'options': dict()})
+            if not serve_proc_exists:
+                logger.warning('no serve procedure found, will serve the last result: ' + p['result'])
+                dishes.append({'id': p['result'], 'options': dict()})
+
+        return dishes
 

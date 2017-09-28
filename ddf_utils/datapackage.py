@@ -6,11 +6,12 @@ import re
 import json
 import csv
 import logging
+from datetime import datetime
 from .model.package import Datapackage
 from collections import OrderedDict
 
 
-def get_datapackage(path, use_existing=True, update=True):
+def get_datapackage(path, use_existing=True, update=False):
     """get the datapackage.json from a dataset path, create one if it's not exists
 
     Parameters
@@ -22,6 +23,9 @@ def get_datapackage(path, use_existing=True, update=True):
     ------------
     use_existing : bool
         whether or not to use the existing datapackage
+    update : bool
+        if update is true, will update the resources and schema in existing datapackage.json. else just return existing
+        datapackage.json
     """
     datapackage_path = os.path.join(path, 'datapackage.json')
 
@@ -106,6 +110,7 @@ def create_datapackage(path, gen_schema=True, **kwargs):
 
     datapackage['name'] = name
     datapackage['language'] = lang
+    datapackage['last_updated'] = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
 
     # add all optional settings
     for k in sorted(kwargs.keys()):
@@ -121,19 +126,20 @@ def create_datapackage(path, gen_schema=True, **kwargs):
 
         if name_res in names_sofar.keys():
             names_sofar[name_res] = names_sofar[name_res] + 1
-            # adding a tail to the recource name, because it should be unique
+            # adding a tail to the resource name, because it should be unique
             name_res = name_res + '-' + str(names_sofar[name_res])
         else:
             names_sofar[name_res] = 0
 
         resources.append(OrderedDict([('path', path_res), ('name', name_res)]))
 
-    # TODO: make separate functions. this function is too long.
     for n, r in enumerate(resources):
         name_res = r['name']
+        path_res = r['path']
         schema = {"fields": [], "primaryKey": None}
 
         if 'datapoints' in name_res:
+            # TODO: judge from headers instead of filename (github#76)
             conc, keys = re.match('ddf--datapoints--([\w_]+)--by--(.*)', name_res).groups()
             primary_keys = keys.split('--')
             # print(conc, primary_keys)
@@ -146,7 +152,18 @@ def create_datapackage(path, gen_schema=True, **kwargs):
                 else:
                     schema['fields'].append({'name': k})
 
-            schema['fields'].append({'name': conc})
+            with open(os.path.join(path, path_res)) as f:
+                headers_line = f.readline()
+                f.close()
+
+            headers_line = headers_line.strip('\n')
+            headers = headers_line.split(',')
+            headers = [x.strip() for x in headers]
+            headers = set(headers)
+            fields = headers.difference(set(primary_keys))
+
+            for field in fields:
+                schema['fields'].append({'name': field})
             schema['primaryKey'] = primary_keys
 
             resources[n].update({'schema': schema})

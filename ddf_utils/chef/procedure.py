@@ -310,8 +310,7 @@ def _merge_two(left: Dict[str, pd.DataFrame],
             res_data = {'concept': res.reset_index()}
         else:
             res_data = {'concept': right_df.drop_duplicates(subset='concept', keep='last')}
-    else:
-        # TODO: improve this
+    else:  # entities
         if deep:
             for k, df in right.items():
                 if k in left.keys():
@@ -418,7 +417,7 @@ def filter(chef: Chef, ingredients: List[str], result, **options) -> ProcedureRe
                             res[k] = data[k].copy()
             else:
                 if selector == '$in':
-                    items_ = items.copy()
+                    items_ = item_list.copy()
                     for k, v in data.items():
                         for i in items_:
                             if i not in v.columns:
@@ -426,7 +425,7 @@ def filter(chef: Chef, ingredients: List[str], result, **options) -> ProcedureRe
                                 logger.warning("concept {} not found in ingredient {}".format(i, ingredient.ingred_id))
                         res[k] = v[item_list].copy()
                 else:
-                    items_ = items.copy()
+                    items_ = item_list.copy()
                     for k, v in data.items():
                         for i in items_:
                             if i not in v.columns:
@@ -1004,9 +1003,9 @@ def extract_concepts(chef: Chef, ingredients: List[str], result,
                 if col in concepts.index:
                     continue
                 if np.issubdtype(df[col].dtype, np.number):
-                    concepts.ix[col, 'concept_type'] = 'measure'
+                    concepts.loc[col, 'concept_type'] = 'measure'
                 else:
-                    concepts.ix[col, 'concept_type'] = 'string'
+                    concepts.loc[col, 'concept_type'] = 'string'
         # add name column if there isn't one
         if 'name' not in concepts.columns:
             concepts['name'] = np.nan

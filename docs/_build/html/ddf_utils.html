@@ -253,10 +253,16 @@ keyword arguments to this function</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>path</strong> (<cite>str</cite>) – the dataset path</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>path</strong> (<cite>str</cite>) – the dataset path</p>
+</td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Keyword Arguments:</th></tr>
-<tr class="field-even field"><td>&#160;</td><td class="field-body"><strong>use_existing</strong> (<em>bool</em>) – whether or not to use the existing datapackage</td>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><ul class="first last simple">
+<li><strong>use_existing</strong> (<em>bool</em>) – whether or not to use the existing datapackage</li>
+<li><strong>update</strong> (<em>bool</em>) – if update is true, will update the resources and schema in existing datapackage.json. else just return existing
+datapackage.json</li>
+</ul>
+</td>
 </tr>
 </tbody>
 </table>
@@ -522,7 +528,7 @@ avaliable options are <cite>drop</cite>, <cite>error</cite>, <cite>include</cite
 
 <dl class="function">
 <dt id="ddf_utils.transformer.trend_bridge">
-<code class="descclassname">ddf_utils.transformer.</code><code class="descname">trend_bridge</code><span class="sig-paren">(</span><em>old_data: &lt;Mock name=’mock.Series’ id=‘4595868616’&gt;</em>, <em>new_data: &lt;Mock name=’mock.Series’ id=‘4595868616’&gt;</em>, <em>bridge_length: int</em><span class="sig-paren">)</span> &#x2192; &lt;Mock name=’mock.Series’ id=‘4595868616’&gt;<a class="headerlink" href="#ddf_utils.transformer.trend_bridge" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.transformer.</code><code class="descname">trend_bridge</code><span class="sig-paren">(</span><em>old_data: &lt;Mock name=’mock.Series’ id=‘4563131584’&gt;</em>, <em>new_data: &lt;Mock name=’mock.Series’ id=‘4563131584’&gt;</em>, <em>bridge_length: int</em><span class="sig-paren">)</span> &#x2192; &lt;Mock name=’mock.Series’ id=‘4563131584’&gt;<a class="headerlink" href="#ddf_utils.transformer.trend_bridge" title="Permalink to this definition">¶</a></dt>
 <dd><p>smoothing data between series.</p>
 <p>To avoid getting artificial stairs in the data, we smooth between to
 series. Sometime one source is systematically higher than another source,

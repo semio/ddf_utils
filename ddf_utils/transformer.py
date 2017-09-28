@@ -317,9 +317,15 @@ def extract_concepts(dfs, base=None, join='full_outer'):
             new_concepts.add(c)
             if c in concepts.index:  # if the concept is in base, just use base data
                 continue
+            if c.startswith('is--'):
+                ent = c[4:]
+                new_concepts.add(ent)
+                # concept in the is--header should be entity_set
+                concepts.ix[c[4:], 'concept_type'] = 'entity_set'
+                continue
             if np.issubdtype(df[c].dtype, np.number):
                 concepts.ix[c, 'concept_type'] = 'measure'
-            else:  # TODO: add logic for concepts/entities ingredients
+            else:
                 concepts.ix[c, 'concept_type'] = 'string'
     if join == 'ingredients_outer':
         # ingredients_outer join: only keep concepts appears in ingredients

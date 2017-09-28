@@ -15,6 +15,7 @@ from collections import Mapping
 
 import logging
 
+logger = logging.getLogger('root')
 
 class Datapackage:
     def __init__(self, datapackage, base_dir='./', dataset=None):
@@ -62,6 +63,11 @@ class Datapackage:
         """read from local DDF csv dataset.
 
         datapackage: path to the datapackage folder or datapackage.json
+
+        Keyword Args
+        ============
+        no_datapoints : bool
+            if true, return only first few rows of a datapoints dataframe, to speedup things.
         """
         logging.info("loading dataset from disk: " + self.name)
 
@@ -70,7 +76,25 @@ class Datapackage:
         entities = dict()
         datapoints = dict()
 
-        no_datapoints = kwargs.get('no_datapoints', None)
+        def _update_datapoints(df_, keys_, indicator_name_):
+            """helper function to make datapoints dictionary"""
+            if not no_datapoints:
+                if indicator_name_ in datapoints.keys():
+                    if keys in datapoints[indicator_name_]:
+                        datapoints[indicator_name_][keys_].append(df_)
+                    else:
+                        datapoints[indicator_name_][keys_] = [df_]
+                else:
+                    datapoints[indicator_name_] = dict()
+                    datapoints[indicator_name_][keys_] = [df_]
+            else:  # no datapoints needed, just create an empty dataframe with columns
+                try:
+                    datapoints.get(indicator_name_, {})[keys_]
+                except KeyError:
+                    datapoints[indicator_name_] = {}
+                    datapoints[indicator_name_][keys_] = df_
+
+        no_datapoints = kwargs.get('no_datapoints', False)
 
         base_dir, dp = self.base_dir, self.datapackage
 
@@ -105,28 +129,20 @@ class Datapackage:
                 else:
                     df = next(pd.read_csv(os.path.join(base_dir, r['path']), dtype=dtypes, chunksize=3))
 
-                try:
-                    indicator_name = list(set(df.columns) - set(pkey))[0]
-                except:
-                    print(df.columns)
-                    print(pkey)
-                    raise
+                indicator_names = list(set(df.columns) - set(pkey))
+                if len(indicator_names) == 0:
+                    raise ValueError('No indicator in {}'.format(r['path']))
+
                 keys = tuple(sorted(pkey))
-                if not no_datapoints:
-                    if indicator_name in datapoints.keys():
-                        if keys in datapoints[indicator_name]:
-                            datapoints[indicator_name][keys].append(df)
-                        else:
-                            datapoints[indicator_name][keys] = [df]
-                    else:
-                        datapoints[indicator_name] = dict()
-                        datapoints[indicator_name][keys] = [df]
-                else:  # no datapoints needed, just create an empty dataframe with columns
-                    try:
-                        datapoints.get(indicator_name, {})[keys]
-                    except KeyError:
-                        datapoints[indicator_name] = {}
-                        datapoints[indicator_name][keys] = pd.DataFrame([], columns=df.columns)
+
+                if len(indicator_names) == 1:
+                    indicator_name = indicator_names[0]
+                    _update_datapoints(df, keys, indicator_name)
+                else:
+                    for indicator_name in indicator_names:
+                        cols = list(keys + tuple([indicator_name]))
+                        df_ = df[cols].copy()
+                        _update_datapoints(df_, keys, indicator_name)
 
         # datapoints
         if not no_datapoints:
@@ -256,10 +272,12 @@ class Datapackage:
             else:
                 hash_table[hash_val]['resources'].add(resource_schema['resource'])
 
-        pbar = tqdm(total=len(self.resources))
+        if logger.getEffectiveLevel() != 10:
+            pbar = tqdm(total=len(self.resources))
+
         for g in map(_gen_key_value_object, self.resources):
-            # FIXME: pbar count seems not correct
-            pbar.update(1)
+            if logger.getEffectiveLevel() != 10:
+                pbar.update(1)
             for kvo in g:
                 # logging.debug("adding kvo {}".format(str(kvo)))
                 _add_to_schema(kvo)

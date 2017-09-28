@@ -5,4 +5,4 @@ import logging
 import coloredlogs
 
 logger = logging.getLogger('Chef')
-coloredlogs.install(logger=logger, fmt='%(asctime)s %(name)s %(levelname)s %(message)s')
+coloredlogs.install(logger=logger, fmt='%(asctime)s %(levelname)s %(message)s')
