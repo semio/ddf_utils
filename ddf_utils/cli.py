@@ -104,6 +104,7 @@ def run_recipe(recipe, outdir, ddf_dir, update, dry_run, show_tree):
     """generate new ddf dataset with recipe"""
     from ddf_utils.chef.api import Chef
     from ddf_utils.datapackage import create_datapackage, dump_json
+    import json
 
     coloredlogs.install(logger=logging.getLogger('Chef'),
                         fmt='%(asctime)s %(name)s %(levelname)s %(message)s',
@@ -123,6 +124,14 @@ def run_recipe(recipe, outdir, ddf_dir, update, dry_run, show_tree):
     chef.run(serve=serve, outpath=outdir)
     if serve:
         click.echo('creating datapackage file...')
+        datapackage_path = os.path.join(outdir, 'datapackage.json')
+        if os.path.exists(datapackage_path):
+            click.echo('backup old datapackage.json to datapackage.json.bak')
+            shutil.copyfile(datapackage_path, os.path.join(outdir, 'datapackage.json.bak'))
+            dp_old = json.load(open(datapackage_path))
+            # copy translations info. other info should be in the recipe.
+            if 'translations' in dp_old.keys():
+                chef = chef.add_metadata(translations=dp_old['translations'])
         dump_json(os.path.join(outdir, 'datapackage.json'),
                   create_datapackage(outdir, gen_schema=True, **chef.metadata))
     click.echo("Done.")
