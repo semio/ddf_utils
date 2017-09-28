@@ -127,7 +127,7 @@ def create_datapackage(path, gen_schema=True, **kwargs):
 
         if name_res in names_sofar.keys():
             names_sofar[name_res] = names_sofar[name_res] + 1
-            # adding a tail to the recource name, because it should be unique
+            # adding a tail to the resource name, because it should be unique
             name_res = name_res + '-' + str(names_sofar[name_res])
         else:
             names_sofar[name_res] = 0
@@ -139,6 +139,7 @@ def create_datapackage(path, gen_schema=True, **kwargs):
         schema = {"fields": [], "primaryKey": None}
 
         if 'datapoints' in name_res:
+            # TODO: judge from headers instead of filename (github#76)
             conc, keys = re.match('ddf--datapoints--([\w_]+)--by--(.*)', name_res).groups()
             primary_keys = keys.split('--')
             # print(conc, primary_keys)
