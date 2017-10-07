@@ -87,7 +87,7 @@ class BaseNode:
                 not_found.add(n.node_id)
         if len(not_found) > 0:
             raise ChefRuntimeError(
-                "dependency not found/not definded for {}: {}".format(self.node_id, not_found))
+                "dependency not found/not defined for {}: {}".format(self.node_id, not_found))
         return False
 
 
