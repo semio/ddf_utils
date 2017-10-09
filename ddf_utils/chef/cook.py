@@ -107,6 +107,11 @@ class Chef:
     def ingredients(self):
         return [x.evaluate() for x in self.dag.nodes if isinstance(x, IngredientNode)]
 
+    def copy(self):
+	return Chef(dag=self.dag.copy(), metadata=deepcopy(self.metadata),
+		    config=deepcopy(self._config), cooking=deepcopy(self.cooking),
+		    serving=deepcopy(self._serving), recipe=deepcopy(self._recipe))
+
     def validate(self):
         # 1. check dataset availability
         ddf_dir = self.config['ddf_dir']
