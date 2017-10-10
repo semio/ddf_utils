@@ -7,7 +7,7 @@ def test_dataset():
     from ddf_utils.model.package import Datapackage
 
     dataset_path = os.path.join(os.path.dirname(__file__),
-                                'datasets/ddf--gapminder--dummy_companies')
+                                'chef/datasets/ddf--gapminder--dummy_companies')
 
     ds = Datapackage(dataset_path).dataset
 
