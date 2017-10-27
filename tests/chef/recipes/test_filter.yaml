@@ -46,7 +46,7 @@ cooking:
       options:
         item:
           - country
-          - name
+          - countryname
         row:
           country:
             $in:

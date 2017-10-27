@@ -1,6 +1,9 @@
 info:
     id: test_import_procedure
 
+config:
+    procedure_dir: ../procedures
+
 ingredients:
     - id: cme-datapoints
       dataset: ddf--cme
@@ -9,7 +12,7 @@ ingredients:
 
 cooking:
     datapoints:
-        - procedure: nonexists.notreal
+        - procedure: new_procedure.multiply_1000
           ingredients:
               - cme-datapoints
           result: result

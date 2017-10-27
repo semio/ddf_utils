@@ -52,7 +52,7 @@ def test_chef_api_call():
 
 
 def test_chef_load_recipe():
-    recipe_file = os.path.join(wd, 'recipes_pass/test_flatten.yml')
+    recipe_file = os.path.join(wd, 'recipes/test_flatten.yml')
     chef = Chef.from_recipe(recipe_file, ddf_dir=os.path.join(wd, 'datasets'))
     res = chef.run()
     assert 1

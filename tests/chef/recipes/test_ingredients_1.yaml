@@ -20,7 +20,7 @@ ingredients:
     value: '*'
   - id: external_concept
     key: concept
-    data: ./external.csv
+    data: ../csvs/external.csv
   - id: on_the_fly_datapoints
     key: geo, year
     value: '*'
