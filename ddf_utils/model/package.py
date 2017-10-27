@@ -174,8 +174,12 @@ class Datapackage:
                         for i in df.index:
                             if not pd.isnull(df.loc[i, c]):
                                 if not pd.isnull(df.loc[i, c_orig+'_y']):
-                                    assert df.loc[i, c] == df.loc[i, c_orig+'_y'], \
-                                        "different values for same cell:{}, {}".format(i, c)
+                                    # assert df.loc[i, c] == df.loc[i, c_orig+'_y'], \
+                                    #     "different values for same cell:{}, {}".format(i, c)
+                                    logger.warning('different values for same cell: '
+                                                   '{}: {}, {}'.format(c_orig,
+                                                                       df.at[i, c_orig],
+                                                                       df.at[i, c_orig+'_y']))
                                     df.loc[i, c_orig] = df.loc[i, c]
                                 else:
                                     df.loc[i, c_orig] = df.loc[i, c]
