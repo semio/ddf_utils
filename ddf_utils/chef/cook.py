@@ -108,11 +108,19 @@ class Chef:
         return [x.evaluate() for x in self.dag.nodes if isinstance(x, IngredientNode)]
 
     def copy(self):
-	return Chef(dag=self.dag.copy(), metadata=deepcopy(self.metadata),
-		    config=deepcopy(self._config), cooking=deepcopy(self.cooking),
-		    serving=deepcopy(self._serving), recipe=deepcopy(self._recipe))
+        return Chef(dag=self.dag.copy(), metadata=deepcopy(self.metadata),
+                    config=deepcopy(self._config), cooking=deepcopy(self.cooking),
+                    serving=deepcopy(self._serving), recipe=deepcopy(self._recipe))
 
     def validate(self):
+        """validate if the chef is good to run.
+
+        The following will be tested:
+
+        1. check if datasets required by ingredients are available
+        2. check if procedures are available
+        3. check if the DAG is valid. i.e no dependency cycle, no missing dependency.
+        """
         # 1. check dataset availability
         ddf_dir = self.config['ddf_dir']
         datasets = set()
@@ -144,16 +152,24 @@ class Chef:
             self.dag.get_node(ing['id']).detect_missing_dependency()
 
     def add_config(self, **config):
+        """add configs, all keyword args will be added/replace existing in config dictionary"""
         for k, v in config.items():
             self._config[k] = v
         return self
 
     def add_metadata(self, **metadata):
+        """add metadata, all keyword args will be added/replace existing in metadata dictionary"""
         for k, v in metadata.items():
             self.metadata[k] = v
         return self
 
     def add_ingredient(self, **kwargs):
+        """add a new ingredient in DAG.
+
+        keyword arguments will send as a dictionary to the ``dictionary`` keyword of
+        :py:meth:`ddf_utils.chef.ingredient.Ingredient.from_dict` method. Check ``from_dict()``
+        doc for available keywords
+        """
         ingredient = Ingredient.from_dict(chef=self, dictionary=kwargs)
         self.dag.add_node(IngredientNode(ingredient.ingred_id, ingredient, self))
         return self
