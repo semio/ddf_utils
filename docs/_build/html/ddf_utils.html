@@ -13,6 +13,8 @@
 
   
   
+  
+  
 
   
 
@@ -45,6 +47,7 @@
 
 <body class="wy-body-for-nav" role="document">
 
+   
   <div class="wy-grid-for-nav">
 
     
@@ -85,7 +88,10 @@
           
             
             
-                <ul class="current">
+              
+            
+            
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="recipe.html">Recipe Cookbook (draft)</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">API References</a><ul class="current">
@@ -120,8 +126,10 @@
 
       
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="index.html">ddf_utils</a>
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">ddf_utils</a>
+        
       </nav>
 
 
@@ -130,25 +138,42 @@
         <div class="rst-content">
           
 
- 
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="index.html">Docs</a> &raquo;</li>
-      
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
           <li><a href="modules.html">API References</a> &raquo;</li>
-      
-    <li>ddf_utils package</li>
+        
+      <li>ddf_utils package</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
         
-          
+            
             <a href="_sources/ddf_utils.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -193,25 +218,25 @@
 <p>The workflow is described in this <a class="reference external" href="https://docs.google.com/document/d/11d5D5CPlr6I2BqP8z0p2o_dYQC9AYUyxcLGUq1WYCfk/">google doc</a></p>
 <dl class="function">
 <dt id="ddf_utils.i18n.merge_translations_csv">
-<code class="descclassname">ddf_utils.i18n.</code><code class="descname">merge_translations_csv</code><span class="sig-paren">(</span><em>path</em>, <em>split_path=’langsplit’</em>, <em>lang_path=’lang’</em>, <em>overwrite=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.i18n.merge_translations_csv" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.i18n.</code><code class="descname">merge_translations_csv</code><span class="sig-paren">(</span><em>path</em>, <em>split_path='langsplit'</em>, <em>lang_path='lang'</em>, <em>overwrite=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.i18n.merge_translations_csv" title="Permalink to this definition">¶</a></dt>
 <dd><p>merge all translated csv files and update datapackage.json</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.i18n.merge_translations_json">
-<code class="descclassname">ddf_utils.i18n.</code><code class="descname">merge_translations_json</code><span class="sig-paren">(</span><em>path</em>, <em>split_path=’langsplit’</em>, <em>lang_path=’lang’</em>, <em>overwrite=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.i18n.merge_translations_json" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.i18n.</code><code class="descname">merge_translations_json</code><span class="sig-paren">(</span><em>path</em>, <em>split_path='langsplit'</em>, <em>lang_path='lang'</em>, <em>overwrite=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.i18n.merge_translations_json" title="Permalink to this definition">¶</a></dt>
 <dd><p>merge all translated json files and update datapackage.json</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.i18n.split_translations_csv">
-<code class="descclassname">ddf_utils.i18n.</code><code class="descname">split_translations_csv</code><span class="sig-paren">(</span><em>path</em>, <em>split_path=’langsplit’</em>, <em>exclude_concepts=None</em>, <em>overwrite=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.i18n.split_translations_csv" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.i18n.</code><code class="descname">split_translations_csv</code><span class="sig-paren">(</span><em>path</em>, <em>split_path='langsplit'</em>, <em>exclude_concepts=None</em>, <em>overwrite=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.i18n.split_translations_csv" title="Permalink to this definition">¶</a></dt>
 <dd><p>split all string concepts and save them as csv files</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.i18n.split_translations_json">
-<code class="descclassname">ddf_utils.i18n.</code><code class="descname">split_translations_json</code><span class="sig-paren">(</span><em>path</em>, <em>split_path=’langsplit’</em>, <em>exclude_concepts=None</em>, <em>overwrite=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.i18n.split_translations_json" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.i18n.</code><code class="descname">split_translations_json</code><span class="sig-paren">(</span><em>path</em>, <em>split_path='langsplit'</em>, <em>exclude_concepts=None</em>, <em>overwrite=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.i18n.split_translations_json" title="Permalink to this definition">¶</a></dt>
 <dd><p>split all string concepts and save them as json files</p>
 </dd></dl>
 
@@ -247,7 +272,7 @@ keyword arguments to this function</p>
 
 <dl class="function">
 <dt id="ddf_utils.datapackage.get_datapackage">
-<code class="descclassname">ddf_utils.datapackage.</code><code class="descname">get_datapackage</code><span class="sig-paren">(</span><em>path</em>, <em>use_existing=True</em>, <em>update=True</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.datapackage.get_datapackage" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.datapackage.</code><code class="descname">get_datapackage</code><span class="sig-paren">(</span><em>path</em>, <em>use_existing=True</em>, <em>update=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.datapackage.get_datapackage" title="Permalink to this definition">¶</a></dt>
 <dd><p>get the datapackage.json from a dataset path, create one if it’s not exists</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -279,7 +304,7 @@ datapackage.json</li>
 <p>io functions for ddf files</p>
 <dl class="function">
 <dt id="ddf_utils.io.cleanup">
-<code class="descclassname">ddf_utils.io.</code><code class="descname">cleanup</code><span class="sig-paren">(</span><em>path</em>, <em>how=’ddf’</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.io.cleanup" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.io.</code><code class="descname">cleanup</code><span class="sig-paren">(</span><em>path</em>, <em>how='ddf'</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.io.cleanup" title="Permalink to this definition">¶</a></dt>
 <dd><p>remove all ddf files in the given path</p>
 </dd></dl>
 
@@ -343,7 +368,7 @@ more on the diff format, see: <a class="reference external" href="http://specs.f
 
 <dl class="function">
 <dt id="ddf_utils.qa.compare_with_func">
-<code class="descclassname">ddf_utils.qa.</code><code class="descname">compare_with_func</code><span class="sig-paren">(</span><em>dataset1, dataset2, fns=[‘rval’, ‘avg_pct_chg’], indicators=None, key=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.qa.compare_with_func" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.qa.</code><code class="descname">compare_with_func</code><span class="sig-paren">(</span><em>dataset1, dataset2, fns=['rval', 'avg_pct_chg'], indicators=None, key=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.qa.compare_with_func" title="Permalink to this definition">¶</a></dt>
 <dd><p>compare 2 datasets with functions</p>
 </dd></dl>
 
@@ -395,7 +420,7 @@ e.g. fix_time_range(‘1980-90’) = 1985</p>
 
 <dl class="function">
 <dt id="ddf_utils.str.to_concept_id">
-<code class="descclassname">ddf_utils.str.</code><code class="descname">to_concept_id</code><span class="sig-paren">(</span><em>s</em>, <em>sep=’_’</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.str.to_concept_id" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.str.</code><code class="descname">to_concept_id</code><span class="sig-paren">(</span><em>s</em>, <em>sep='_'</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.str.to_concept_id" title="Permalink to this definition">¶</a></dt>
 <dd><p>convert a string to alphanumeric format.</p>
 </dd></dl>
 
@@ -405,7 +430,7 @@ e.g. fix_time_range(‘1980-90’) = 1985</p>
 <p>functions for common tasks on ddf datasets</p>
 <dl class="function">
 <dt id="ddf_utils.transformer.extract_concepts">
-<code class="descclassname">ddf_utils.transformer.</code><code class="descname">extract_concepts</code><span class="sig-paren">(</span><em>dfs</em>, <em>base=None</em>, <em>join=’full_outer’</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.transformer.extract_concepts" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.transformer.</code><code class="descname">extract_concepts</code><span class="sig-paren">(</span><em>dfs</em>, <em>base=None</em>, <em>join='full_outer'</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.transformer.extract_concepts" title="Permalink to this definition">¶</a></dt>
 <dd><p>extract concepts from a list of dataframes.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -434,19 +459,19 @@ e.g. fix_time_range(‘1980-90’) = 1985</p>
 
 <dl class="function">
 <dt id="ddf_utils.transformer.merge_keys">
-<code class="descclassname">ddf_utils.transformer.</code><code class="descname">merge_keys</code><span class="sig-paren">(</span><em>df</em>, <em>dictionary</em>, <em>target_column=None</em>, <em>merged=’drop’</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.transformer.merge_keys" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.transformer.</code><code class="descname">merge_keys</code><span class="sig-paren">(</span><em>df</em>, <em>dictionary</em>, <em>target_column=None</em>, <em>merged='drop'</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.transformer.merge_keys" title="Permalink to this definition">¶</a></dt>
 <dd><p>merge keys</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.transformer.split_keys">
-<code class="descclassname">ddf_utils.transformer.</code><code class="descname">split_keys</code><span class="sig-paren">(</span><em>df</em>, <em>target_column</em>, <em>dictionary</em>, <em>splited=’drop’</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.transformer.split_keys" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.transformer.</code><code class="descname">split_keys</code><span class="sig-paren">(</span><em>df</em>, <em>target_column</em>, <em>dictionary</em>, <em>splited='drop'</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.transformer.split_keys" title="Permalink to this definition">¶</a></dt>
 <dd><p>split entities</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.transformer.translate_column">
-<code class="descclassname">ddf_utils.transformer.</code><code class="descname">translate_column</code><span class="sig-paren">(</span><em>df</em>, <em>column</em>, <em>dictionary_type</em>, <em>dictionary</em>, <em>target_column=None</em>, <em>base_df=None</em>, <em>not_found=’drop’</em>, <em>ambiguity=’prompt’</em>, <em>ignore_case=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.transformer.translate_column" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.transformer.</code><code class="descname">translate_column</code><span class="sig-paren">(</span><em>df</em>, <em>column</em>, <em>dictionary_type</em>, <em>dictionary</em>, <em>target_column=None</em>, <em>base_df=None</em>, <em>not_found='drop'</em>, <em>ambiguity='prompt'</em>, <em>ignore_case=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.transformer.translate_column" title="Permalink to this definition">¶</a></dt>
 <dd><p>change values in a column base on a mapping dictionary.</p>
 <p>The dictionary can be provided as a python dictionary, pandas dataframe or read from file.</p>
 <div class="admonition note">
@@ -509,7 +534,7 @@ avaliable options are <cite>drop</cite>, <cite>error</cite>, <cite>include</cite
 
 <dl class="function">
 <dt id="ddf_utils.transformer.translate_header">
-<code class="descclassname">ddf_utils.transformer.</code><code class="descname">translate_header</code><span class="sig-paren">(</span><em>df</em>, <em>dictionary</em>, <em>dictionary_type=’inline’</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.transformer.translate_header" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.transformer.</code><code class="descname">translate_header</code><span class="sig-paren">(</span><em>df</em>, <em>dictionary</em>, <em>dictionary_type='inline'</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.transformer.translate_header" title="Permalink to this definition">¶</a></dt>
 <dd><p>change the headers of a dataframe base on a mapping dictionary.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -528,7 +553,7 @@ avaliable options are <cite>drop</cite>, <cite>error</cite>, <cite>include</cite
 
 <dl class="function">
 <dt id="ddf_utils.transformer.trend_bridge">
-<code class="descclassname">ddf_utils.transformer.</code><code class="descname">trend_bridge</code><span class="sig-paren">(</span><em>old_data: &lt;Mock name=’mock.Series’ id=‘4563131584’&gt;</em>, <em>new_data: &lt;Mock name=’mock.Series’ id=‘4563131584’&gt;</em>, <em>bridge_length: int</em><span class="sig-paren">)</span> &#x2192; &lt;Mock name=’mock.Series’ id=‘4563131584’&gt;<a class="headerlink" href="#ddf_utils.transformer.trend_bridge" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.transformer.</code><code class="descname">trend_bridge</code><span class="sig-paren">(</span><em>old_data: &lt;Mock name='mock.Series' id='4382542984'&gt;</em>, <em>new_data: &lt;Mock name='mock.Series' id='4382542984'&gt;</em>, <em>bridge_length: int</em><span class="sig-paren">)</span> &#x2192; &lt;Mock name='mock.Series' id='4382542984'&gt;<a class="headerlink" href="#ddf_utils.transformer.trend_bridge" title="Permalink to this definition">¶</a></dt>
 <dd><p>smoothing data between series.</p>
 <p>To avoid getting artificial stairs in the data, we smooth between to
 series. Sometime one source is systematically higher than another source,
@@ -560,15 +585,18 @@ actual change in the data.</p>
 
 
            </div>
+           <div class="articleComments">
+            
+           </div>
           </div>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="ddf_utils.chef.html" class="btn btn-neutral float-right" title="ddf_utils.chef package" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="ddf_utils.chef.html" class="btn btn-neutral float-right" title="ddf_utils.chef package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="modules.html" class="btn btn-neutral" title="API References" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="modules.html" class="btn btn-neutral" title="API References" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -602,7 +630,8 @@ actual change in the data.</p>
             VERSION:'0.1dev',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
         };
     </script>
       <script type="text/javascript" src="_static/jquery.js"></script>

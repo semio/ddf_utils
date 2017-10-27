@@ -13,6 +13,8 @@
 
   
   
+  
+  
 
   
 
@@ -45,6 +47,7 @@
 
 <body class="wy-body-for-nav" role="document">
 
+   
   <div class="wy-grid-for-nav">
 
     
@@ -85,7 +88,10 @@
           
             
             
-                <ul class="current">
+              
+            
+            
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="recipe.html">Recipe Cookbook (draft)</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">API References</a><ul class="current">
@@ -120,8 +126,10 @@
 
       
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="index.html">ddf_utils</a>
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">ddf_utils</a>
+        
       </nav>
 
 
@@ -130,27 +138,44 @@
         <div class="rst-content">
           
 
- 
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="index.html">Docs</a> &raquo;</li>
-      
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
           <li><a href="modules.html">API References</a> &raquo;</li>
-      
+        
           <li><a href="ddf_utils.html">ddf_utils package</a> &raquo;</li>
-      
-    <li>ddf_utils.chef package</li>
+        
+      <li>ddf_utils.chef package</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
         
-          
+            
             <a href="_sources/ddf_utils.chef.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -176,21 +201,37 @@
 <dl class="method">
 <dt id="ddf_utils.chef.cook.Chef.add_config">
 <code class="descname">add_config</code><span class="sig-paren">(</span><em>**config</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.cook.Chef.add_config" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>add configs, all keyword args will be added/replace existing in config dictionary</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="ddf_utils.chef.cook.Chef.add_ingredient">
 <code class="descname">add_ingredient</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.cook.Chef.add_ingredient" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>add a new ingredient in DAG.</p>
+<p>keyword arguments will send as a dictionary to the <code class="docutils literal"><span class="pre">dictionary</span></code> keyword of
+<a class="reference internal" href="#ddf_utils.chef.ingredient.Ingredient.from_dict" title="ddf_utils.chef.ingredient.Ingredient.from_dict"><code class="xref py py-meth docutils literal"><span class="pre">ddf_utils.chef.ingredient.Ingredient.from_dict()</span></code></a> method. Check <code class="docutils literal"><span class="pre">from_dict()</span></code>
+doc for available keywords</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="ddf_utils.chef.cook.Chef.add_metadata">
 <code class="descname">add_metadata</code><span class="sig-paren">(</span><em>**metadata</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.cook.Chef.add_metadata" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>add metadata, all keyword args will be added/replace existing in metadata dictionary</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="ddf_utils.chef.cook.Chef.add_procedure">
 <code class="descname">add_procedure</code><span class="sig-paren">(</span><em>collection</em>, <em>procedure</em>, <em>ingredients</em>, <em>result=None</em>, <em>options=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.cook.Chef.add_procedure" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ddf_utils.chef.cook.Chef.config">
+<code class="descname">config</code><a class="headerlink" href="#ddf_utils.chef.cook.Chef.config" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ddf_utils.chef.cook.Chef.copy">
+<code class="descname">copy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.cook.Chef.copy" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="classmethod">
@@ -231,7 +272,14 @@
 <dl class="method">
 <dt id="ddf_utils.chef.cook.Chef.validate">
 <code class="descname">validate</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.cook.Chef.validate" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>validate if the chef is good to run.</p>
+<p>The following will be tested:</p>
+<ol class="arabic simple">
+<li>check if datasets required by ingredients are available</li>
+<li>check if procedures are available</li>
+<li>check if the DAG is valid. i.e no dependency cycle, no missing dependency.</li>
+</ol>
+</dd></dl>
 
 </dd></dl>
 
@@ -241,7 +289,7 @@
 <p>commonly used calculation methods</p>
 <dl class="function">
 <dt id="ddf_utils.chef.ops.aagr">
-<code class="descclassname">ddf_utils.chef.ops.</code><code class="descname">aagr</code><span class="sig-paren">(</span><em>df: &lt;Mock name=’mock.DataFrame’ id=‘4460400712’&gt;</em>, <em>window: int = 10</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.ops.aagr" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.chef.ops.</code><code class="descname">aagr</code><span class="sig-paren">(</span><em>df: &lt;Mock name='mock.DataFrame' id='4365312408'&gt;</em>, <em>window: int = 10</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.ops.aagr" title="Permalink to this definition">¶</a></dt>
 <dd><p>average annual growth rate</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -259,17 +307,17 @@
 
 <dl class="function">
 <dt id="ddf_utils.chef.ops.between">
-<code class="descclassname">ddf_utils.chef.ops.</code><code class="descname">between</code><span class="sig-paren">(</span><em>x</em>, <em>upper</em>, <em>lower</em>, <em>how=’all’</em>, <em>include_upper=False</em>, <em>include_lower=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.ops.between" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.chef.ops.</code><code class="descname">between</code><span class="sig-paren">(</span><em>x</em>, <em>upper</em>, <em>lower</em>, <em>how='all'</em>, <em>include_upper=False</em>, <em>include_lower=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.ops.between" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.chef.ops.gt">
-<code class="descclassname">ddf_utils.chef.ops.</code><code class="descname">gt</code><span class="sig-paren">(</span><em>x</em>, <em>val</em>, <em>how=’all’</em>, <em>include_eq=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.ops.gt" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.chef.ops.</code><code class="descname">gt</code><span class="sig-paren">(</span><em>x</em>, <em>val</em>, <em>how='all'</em>, <em>include_eq=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.ops.gt" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.chef.ops.lt">
-<code class="descclassname">ddf_utils.chef.ops.</code><code class="descname">lt</code><span class="sig-paren">(</span><em>x</em>, <em>val</em>, <em>how=’all’</em>, <em>include_eq=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.ops.lt" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.chef.ops.</code><code class="descname">lt</code><span class="sig-paren">(</span><em>x</em>, <em>val</em>, <em>how='all'</em>, <em>include_eq=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.ops.lt" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
@@ -806,7 +854,7 @@ if true, overwrite is on the row level. If values
 
 <dl class="function">
 <dt id="ddf_utils.chef.procedure.merge_entity">
-<code class="descclassname">ddf_utils.chef.procedure.</code><code class="descname">merge_entity</code><span class="sig-paren">(</span><em>chef: ddf_utils.chef.cook.Chef, ingredients: typing.List[str], dictionary, target_column, result, merged=’drop’</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.procedure.merge_entity" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.chef.procedure.</code><code class="descname">merge_entity</code><span class="sig-paren">(</span><em>chef: ddf_utils.chef.cook.Chef, ingredients: typing.List[str], dictionary, target_column, result, merged='drop'</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.procedure.merge_entity" title="Permalink to this definition">¶</a></dt>
 <dd><p>merge entities</p>
 </dd></dl>
 
@@ -848,13 +896,13 @@ write</p>
 
 <dl class="function">
 <dt id="ddf_utils.chef.procedure.split_entity">
-<code class="descclassname">ddf_utils.chef.procedure.</code><code class="descname">split_entity</code><span class="sig-paren">(</span><em>chef: ddf_utils.chef.cook.Chef, ingredients: typing.List[str], dictionary, target_column, result, splitted=’drop’</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.procedure.split_entity" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.chef.procedure.</code><code class="descname">split_entity</code><span class="sig-paren">(</span><em>chef: ddf_utils.chef.cook.Chef, ingredients: typing.List[str], dictionary, target_column, result, splitted='drop'</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.procedure.split_entity" title="Permalink to this definition">¶</a></dt>
 <dd><p>split entities</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.chef.procedure.translate_column">
-<code class="descclassname">ddf_utils.chef.procedure.</code><code class="descname">translate_column</code><span class="sig-paren">(</span><em>chef: ddf_utils.chef.cook.Chef, ingredients: typing.List[str], result, dictionary, column, *, target_column=None, not_found=’drop’, ambiguity=’prompt’, ignore_case=False</em><span class="sig-paren">)</span> &#x2192; ddf_utils.chef.ingredient.ProcedureResult<a class="headerlink" href="#ddf_utils.chef.procedure.translate_column" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.chef.procedure.</code><code class="descname">translate_column</code><span class="sig-paren">(</span><em>chef: ddf_utils.chef.cook.Chef, ingredients: typing.List[str], result, dictionary, column, *, target_column=None, not_found='drop', ambiguity='prompt', ignore_case=False</em><span class="sig-paren">)</span> &#x2192; ddf_utils.chef.ingredient.ProcedureResult<a class="headerlink" href="#ddf_utils.chef.procedure.translate_column" title="Permalink to this definition">¶</a></dt>
 <dd><p>Translate column values.</p>
 <p>Procedure format:</p>
 <div class="highlight-yaml"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">procedure</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">translate_column</span>
@@ -1148,6 +1196,11 @@ already have been added to the DAG using add_node()</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="ddf_utils.chef.dag.DAG.copy">
+<code class="descname">copy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.dag.DAG.copy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
 <dt id="ddf_utils.chef.dag.DAG.get_node">
 <code class="descname">get_node</code><span class="sig-paren">(</span><em>node_id</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.dag.DAG.get_node" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -1339,15 +1392,18 @@ from numpy or <code class="xref py py-mod docutils literal"><span class="pre">dd
 
 
            </div>
+           <div class="articleComments">
+            
+           </div>
           </div>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="ddf_utils.model.html" class="btn btn-neutral float-right" title="ddf_utils.model package" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="ddf_utils.model.html" class="btn btn-neutral float-right" title="ddf_utils.model package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="ddf_utils.html" class="btn btn-neutral" title="ddf_utils package" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="ddf_utils.html" class="btn btn-neutral" title="ddf_utils package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -1381,7 +1437,8 @@ from numpy or <code class="xref py py-mod docutils literal"><span class="pre">dd
             VERSION:'0.1dev',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
         };
     </script>
       <script type="text/javascript" src="_static/jquery.js"></script>
