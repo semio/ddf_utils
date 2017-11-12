@@ -174,35 +174,6 @@ def query(df, conditions, available_scopes=None):
         return df
     return df.query(q)
 
-
-# below functions are not used in ddf_utils yet, but may be useful.
-def log_shape(func):
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        result = func(*args, **kwargs)
-        logging.info("%s,%s" % (func.__name__, result.shape))
-        return result
-    return wrapper
-
-
-def log_dtypes(func):
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        result = func(*args, **kwargs)
-        logging.info("%s,%s" % (func.__name__, result.dtypes))
-        return result
-    return wrapper
-
-
-def log_procedure(func):
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        logging.info("running %s" % (func.__name__))
-        result = func(*args, **kwargs)
-        return result
-    return wrapper
-
-
 def debuggable(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
