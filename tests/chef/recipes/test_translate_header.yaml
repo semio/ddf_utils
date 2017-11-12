@@ -9,6 +9,9 @@ ingredients:
       dataset: ddf--cme
       key: "country,year"
       value: "*"
+    - id: geo-country
+      dataset: ddf--gapminder--geo_entity_domain
+      key: country
 
 cooking:
     datapoints:
@@ -26,3 +29,12 @@ cooking:
           result: res
           options:
               dictionary: indicators_cme_to_sg.json
+    entities:
+        - procedure: translate_header
+          ingredients:
+              - geo-country
+          options:
+              dictionary:
+                  country: city
+          result: res_entity
+

@@ -8,8 +8,6 @@ ingredients:
       key: "country,sex,year"
       value: "*"
 
-
-
 cooking:
     datapoints:
         - procedure: filter

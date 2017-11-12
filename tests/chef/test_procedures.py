@@ -129,7 +129,7 @@ def test_serving():
     assert len(res) == 2
 
     chef2 = chef_fn('test_serving_section.yaml')
-    tmpdir = tempfile.gettempdir()
+    tmpdir = tempfile.mkdtemp()
     res = chef2.run(serve=True, outpath=tmpdir)
     assert len(res) == 2
     assert os.path.exists(os.path.join(tmpdir, 'test_serving'))

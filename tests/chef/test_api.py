@@ -5,12 +5,18 @@ import os
 import ruamel.yaml as yaml
 from ddf_utils.chef.api import Chef
 from ddf_utils.chef.ingredient import Ingredient
-from ddf_utils.chef.exceptions import IngredientError
+from ddf_utils.chef.exceptions import IngredientError, ChefRuntimeError
 
 wd = os.path.dirname(__file__)
 
 
 def test_chef_api_call():
+    from ddf_utils.chef.dag import DAG
+    # create empty chef
+    dag = DAG()
+    Chef(dag=dag, metadata={}, config={}, cooking={}, serving=[])
+
+    # create chef and add config
     chef = Chef()
 
     (chef.add_config(ddf_dir=os.path.join(wd, 'datasets'))
@@ -43,8 +49,10 @@ def test_chef_api_call():
                        ingredients=['bp-datapoints-translate'],
                        result='res')
 
-    g = chef.to_graph()
-    r = chef.to_recipe()
+    chef.to_graph()
+    chef.to_graph(node='res')
+    chef.to_recipe()
+    chef.dag.tree_view()
     chef.validate()
     res = chef.run()
 
@@ -53,8 +61,11 @@ def test_chef_api_call():
 
 def test_chef_load_recipe():
     recipe_file = os.path.join(wd, 'recipes/test_flatten.yml')
-    chef = Chef.from_recipe(recipe_file, ddf_dir=os.path.join(wd, 'datasets'))
-    res = chef.run()
+    chef = Chef.from_recipe(recipe_file)
+    try:
+        chef.validate()
+    except ChefRuntimeError:
+        pass
     assert 1
 
 
