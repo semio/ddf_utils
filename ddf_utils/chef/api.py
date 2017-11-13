@@ -3,7 +3,7 @@
 from ddf_utils.chef.cook import Chef
 
 
-def run_recipe(fn, out_dir):
+def run_recipe(fn, ddf_dir, out_dir):
     """run the recipe file and serve result"""
     from ddf_utils.io import cleanup
     import os
@@ -13,5 +13,7 @@ def run_recipe(fn, out_dir):
         os.mkdir(out_dir)
 
     chef = Chef.from_recipe(fn)
-    chef.run(serve=True, out_dir=out_dir)
+    if ddf_dir is not None:
+        chef.add_config(ddf_dir=ddf_dir)
+    chef.run(serve=True, outpath=out_dir)
     return
