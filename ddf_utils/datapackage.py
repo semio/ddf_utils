@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
 """functions for datapackage.json"""
 
+import csv
+import json
+import logging
 import os
 import re
-import json
-import csv
-import logging
-from datetime import datetime
-from .model.package import Datapackage
 from collections import OrderedDict
+from datetime import datetime
+
+from .model.package import Datapackage
 
 
 def get_datapackage(path, use_existing=True, update=False):
@@ -110,11 +111,13 @@ def create_datapackage(path, gen_schema=True, **kwargs):
 
     datapackage['name'] = name
     datapackage['language'] = lang
-    datapackage['last_updated'] = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
 
     # add all optional settings
     for k in sorted(kwargs.keys()):
         datapackage[k] = kwargs[k]
+
+    # update the last updated time
+    datapackage['last_updated'] = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
 
     # generate resources
     resources = []
