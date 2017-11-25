@@ -30,7 +30,7 @@ requirements = [
     'coloredlogs',
     'pytz',
     'requests',
-    'gitpython'
+    'gitpython',
     'hy'
 ]
 
