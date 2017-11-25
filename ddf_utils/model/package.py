@@ -294,6 +294,9 @@ class Datapackage:
                 # logging.debug("adding kvo {}".format(str(kvo)))
                 _add_to_schema(kvo)
 
+        if logger.getEffectiveLevel() != 10:
+            pbar.close()
+
         for sch in hash_table.values():
             sch['resources'] = list(sch['resources'])
             if len(sch['primaryKey']) == 1:
