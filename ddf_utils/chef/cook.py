@@ -1,21 +1,22 @@
 # -*- coding: utf-8 -*-
 """recipe cooking"""
 
-import os
-import sys
-import logging
-import re
-from time import time
-from ddf_utils.chef.dag import DAG, ProcedureNode, IngredientNode
-from ddf_utils.chef.ingredient import Ingredient
-from ddf_utils.chef.helpers import get_procedure
-from ddf_utils.chef.exceptions import ChefRuntimeError
-from copy import deepcopy
 import json
-import ruamel.yaml as yaml
+import logging
+import os
+import re
+import sys
 from collections import Mapping
+from copy import deepcopy
+from time import time
+
+import ruamel.yaml as yaml
 from graphviz import Digraph
 
+from ddf_utils.chef.dag import DAG, IngredientNode, ProcedureNode
+from ddf_utils.chef.exceptions import ChefRuntimeError
+from ddf_utils.chef.helpers import get_procedure
+from ddf_utils.chef.ingredient import Ingredient
 
 logger = logging.getLogger('Chef')
 
@@ -177,8 +178,8 @@ class Chef:
     def add_procedure(self, collection, procedure, ingredients, result=None, options=None):
 
         if procedure == 'serve':
-            [self.serving.append({'id': x,
-                                  'options': options}) for x in ingredients]
+            [self._serving.append({'id': x,
+                                   'options': options}) for x in ingredients]
             return self
 
         # check if procedure is supported
@@ -257,6 +258,7 @@ class Chef:
         recipe['config'] = self.config
         recipe['ingredients'] = list()
         recipe['cooking'] = dict()
+        recipe['serving'] = self.serving
 
         for ingredient in self.ingredients:
             info = {'id': ingredient.ingred_id,
@@ -467,4 +469,3 @@ class Chef:
                 dishes.append({'id': p['result'], 'options': dict()})
 
         return dishes
-
