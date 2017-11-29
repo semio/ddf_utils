@@ -1,3 +1,8 @@
+## version 0.3.3 2017-11-29
+
+- new support Hy mode
+- bug fixes and improvements
+
 ## version 0.3.2 2017-09-28
 
 - add support for reading mutiple indicators in one DDF datapoints file (#76)
@@ -18,11 +23,11 @@
 
 ## version 0.3.0 2017-07-18
 
-- totally rewrite the ddf reader, make separated models for dataset and datapackage in 
+- totally rewrite the ddf reader, make separated models for dataset and datapackage in
   `ddf_utils.models`.
 - add Chef class, which can create or load recipes interactively. Now all recipe related
   tasks should run under a Chef instance.
-- all procedures takes a chef instance as first arguments now. Also we support writing 
+- all procedures takes a chef instance as first arguments now. Also we support writing
   custom procedures now.
 - removed `indentity` and `copy` procedure, updated `filter_row` and `groupby` procedure
 - added new `flatten` procedure
