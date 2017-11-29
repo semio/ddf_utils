@@ -1,0 +1,27 @@
+ingredients:
+  - id: bp-concept
+    dataset: ddf--bp--energy
+    key: concept
+    value: '*'
+  - id: bp-datapoints
+    dataset: ddf--bp--energy
+    key: geo, year
+    value: '*'
+  - id: bp-geo
+    dataset: ddf--bp--energy
+    key: geo
+    value: "*"
+
+cooking:
+    concepts:
+        - procedure: serve
+          ingredients:
+              - bp-concept
+    datapoints:
+        - procedure: serve
+          ingredients:
+              - bp-datapoints
+    entities:
+        - procedure: serve
+          ingredients:
+              - bp-geo

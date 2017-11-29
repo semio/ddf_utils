@@ -3,10 +3,11 @@
 
 """script for ddf dataset management tasks"""
 
-import click
+import logging
 import os
 import shutil
-import logging
+
+import click
 import coloredlogs
 
 LOG_LEVEL = logging.INFO
@@ -98,9 +99,11 @@ def create_datapackage(path, update, overwrite):
 @click.option('--update', 'update', flag_value=False, help="Don't use. Not implemented yet")
 @click.option('--dry_run', '-d', 'dry_run', flag_value=True, default=False,
               help="don't save output to disk")
+@click.option('--gen_dp', '-p', 'gen_dp', flag_value=True, default=False,
+              help="generate datapackage.json after recipe run")
 @click.option('--show-tree', 'show_tree', flag_value=True, default=False,
               help='show the dependency tree')
-def run_recipe(recipe, outdir, ddf_dir, update, dry_run, show_tree):
+def run_recipe(recipe, outdir, ddf_dir, update, dry_run, gen_dp, show_tree):
     """generate new ddf dataset with recipe"""
     from ddf_utils.chef.api import Chef
     from ddf_utils.datapackage import create_datapackage, dump_json
@@ -122,7 +125,7 @@ def run_recipe(recipe, outdir, ddf_dir, update, dry_run, show_tree):
         pass
     serve = not dry_run
     chef.run(serve=serve, outpath=outdir)
-    if serve:
+    if serve and gen_dp:
         click.echo('creating datapackage file...')
         datapackage_path = os.path.join(outdir, 'datapackage.json')
         if os.path.exists(datapackage_path):

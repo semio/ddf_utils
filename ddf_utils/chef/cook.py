@@ -1,21 +1,22 @@
 # -*- coding: utf-8 -*-
 """recipe cooking"""
 
-import os
-import sys
-import logging
-import re
-from time import time
-from ddf_utils.chef.dag import DAG, ProcedureNode, IngredientNode
-from ddf_utils.chef.ingredient import Ingredient
-from ddf_utils.chef.helpers import get_procedure
-from ddf_utils.chef.exceptions import ChefRuntimeError
-from copy import deepcopy
 import json
-import ruamel.yaml as yaml
+import logging
+import os
+import re
+import sys
 from collections import Mapping
+from copy import deepcopy
+from time import time
+
+import ruamel.yaml as yaml
 from graphviz import Digraph
 
+from ddf_utils.chef.dag import DAG, IngredientNode, ProcedureNode
+from ddf_utils.chef.exceptions import ChefRuntimeError
+from ddf_utils.chef.helpers import get_procedure
+from ddf_utils.chef.ingredient import Ingredient
 
 logger = logging.getLogger('Chef')
 
@@ -107,7 +108,20 @@ class Chef:
     def ingredients(self):
         return [x.evaluate() for x in self.dag.nodes if isinstance(x, IngredientNode)]
 
+    def copy(self):
+        return Chef(dag=self.dag.copy(), metadata=deepcopy(self.metadata),
+                    config=deepcopy(self._config), cooking=deepcopy(self.cooking),
+                    serving=deepcopy(self._serving), recipe=deepcopy(self._recipe))
+
     def validate(self):
+        """validate if the chef is good to run.
+
+        The following will be tested:
+
+        1. check if datasets required by ingredients are available
+        2. check if procedures are available
+        3. check if the DAG is valid. i.e no dependency cycle, no missing dependency.
+        """
         # 1. check dataset availability
         ddf_dir = self.config['ddf_dir']
         datasets = set()
@@ -139,16 +153,24 @@ class Chef:
             self.dag.get_node(ing['id']).detect_missing_dependency()
 
     def add_config(self, **config):
+        """add configs, all keyword args will be added/replace existing in config dictionary"""
         for k, v in config.items():
             self._config[k] = v
         return self
 
     def add_metadata(self, **metadata):
+        """add metadata, all keyword args will be added/replace existing in metadata dictionary"""
         for k, v in metadata.items():
             self.metadata[k] = v
         return self
 
     def add_ingredient(self, **kwargs):
+        """add a new ingredient in DAG.
+
+        keyword arguments will send as a dictionary to the ``dictionary`` keyword of
+        :py:meth:`ddf_utils.chef.ingredient.Ingredient.from_dict` method. Check ``from_dict()``
+        doc for available keywords
+        """
         ingredient = Ingredient.from_dict(chef=self, dictionary=kwargs)
         self.dag.add_node(IngredientNode(ingredient.ingred_id, ingredient, self))
         return self
@@ -156,8 +178,8 @@ class Chef:
     def add_procedure(self, collection, procedure, ingredients, result=None, options=None):
 
         if procedure == 'serve':
-            [self.serving.append({'id': x,
-                                  'options': options}) for x in ingredients]
+            [self._serving.append({'id': x,
+                                   'options': options}) for x in ingredients]
             return self
 
         # check if procedure is supported
@@ -236,6 +258,7 @@ class Chef:
         recipe['config'] = self.config
         recipe['ingredients'] = list()
         recipe['cooking'] = dict()
+        recipe['serving'] = self.serving
 
         for ingredient in self.ingredients:
             info = {'id': ingredient.ingred_id,
@@ -446,4 +469,3 @@ class Chef:
                 dishes.append({'id': p['result'], 'options': dict()})
 
         return dishes
-

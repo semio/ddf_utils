@@ -2,18 +2,20 @@
 
 """main ingredient class"""
 
-import os
-import logging
 import fnmatch
+import logging
+import os
+from collections import Mapping, Sequence
+
 import numpy as np
 import pandas as pd
-from ..str import format_float_digits
-from .helpers import read_opt, gen_sym, query
-from collections import Sequence, Mapping
 
 from ddf_utils.model.package import Datapackage
-from ddf_utils.model.repo import is_url, Repo
+from ddf_utils.model.repo import Repo, is_url
+
+from ..str import format_float_digits
 from .exceptions import IngredientError
+from .helpers import gen_sym, query, read_opt
 
 
 class BaseIngredient(object):
@@ -80,7 +82,7 @@ class BaseIngredient(object):
         assert isinstance(data, dict)
         assert len(data) == 1
         sets = []
-        no_keep_sets = options.get('no_keep_sets', False)
+        no_keep_sets = options.get('no_keep_sets', False)  # serve as entity domain
         for k, df in data.items():
             # change boolean into string
             for c in df.columns:
@@ -101,7 +103,21 @@ class BaseIngredient(object):
                     for s in sets:
                         path = os.path.join(outpath, 'ddf--entities--{}--{}.csv'.format(k, s))
                         col = 'is--'+s
-                        df[df[col]=='TRUE'].dropna(axis=1, how='all').to_csv(path, index=False, encoding='utf8')
+                        df_ = df[df[col]=='TRUE'].dropna(axis=1, how='all')
+                        df_ = df_.loc[:, lambda x: ~x.columns.str.startswith('is--')].copy()
+                        df_[col] = 'TRUE'
+                        df_.to_csv(path, index=False, encoding='utf8')
+                    # serve entities not in any sets
+                    is_headers = list(map(lambda x: 'is--'+x, sets))
+                    noset = []
+                    for i, row in df.iterrows():
+                        # import pdb; pdb.set_trace()
+                        if (row[is_headers].fillna('FALSE') == 'FALSE').all():
+                            noset.append(i)
+                    if len(noset) > 0:
+                        df_noset = df.loc[noset].drop(is_headers, axis=1).dropna(axis=1, how='all')
+                        path = os.path.join(outpath, 'ddf--entities--{}.csv'.format(k))
+                        df_noset.to_csv(path, index=False)
             else:
                 path = os.path.join(outpath, 'ddf--entities--{}--{}.csv'.format(domain, k))
                 df.to_csv(path, index=False, encoding='utf8')

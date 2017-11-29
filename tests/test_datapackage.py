@@ -8,7 +8,7 @@ def test_create_datapackage_1():
     from ddf_utils.model.package import Datapackage
 
     dataset_path = os.path.join(os.path.dirname(__file__),
-                                'datasets/ddf--gapminder--dummy_companies')
+                                'chef/datasets/ddf--gapminder--dummy_companies')
 
     dp1 = get_datapackage(dataset_path, use_existing=True)
     assert dp1['license'] == 'foo'
@@ -36,7 +36,7 @@ def test_create_datapackage_2():
     from ddf_utils.model.package import Datapackage
 
     dataset_path = os.path.join(os.path.dirname(__file__),
-                                'datasets/ddf--datapackage--testing')
+                                'chef/datasets/ddf--datapackage--testing')
 
     dp = Datapackage(dataset_path)
     dp.generate_ddfschema()

@@ -2,21 +2,22 @@
 
 """all procedures for recipes"""
 
-import warnings
-import pandas as pd
-import numpy as np
-from . dag import DAG
-from ddf_utils.chef.cook import Chef
-from .ingredient import BaseIngredient, ProcedureResult
-from .helpers import read_opt, mkfunc, debuggable
-from .exceptions import ProcedureError
-import time
-from typing import List, Union, Dict, Optional
-from collections import Sequence, Mapping
 import fnmatch
-from .helpers import query
-
 import logging
+import time
+import warnings
+from collections import Mapping, Sequence
+from typing import Dict, List, Optional, Union
+
+import numpy as np
+import pandas as pd
+
+from ddf_utils.chef.cook import Chef
+
+from .dag import DAG
+from .exceptions import ProcedureError
+from .helpers import debuggable, mkfunc, query, read_opt
+from .ingredient import BaseIngredient, ProcedureResult
 
 logger = logging.getLogger('Chef')
 
@@ -1006,13 +1007,20 @@ def extract_concepts(chef: Chef, ingredients: List[str], result,
                     concepts.loc[col, 'concept_type'] = 'measure'
                 else:
                     concepts.loc[col, 'concept_type'] = 'string'
-        # add name column if there isn't one
-        if 'name' not in concepts.columns:
-            concepts['name'] = np.nan
 
     if join_type == 'ingredients_outer':
         # ingredients_outer join: only keep concepts appears in ingredients
         concepts = concepts.ix[new_concepts]
+
+    # add name column if there isn't one
+    if 'name' not in concepts.columns:
+        concepts['name'] = np.nan
+    if 'name' not in concepts.index.values:
+        concepts.loc['name', 'concept_type'] = 'string'
+        concepts.loc['name', 'name'] = 'Name'
+    concepts['name'] = concepts['name'].fillna(
+        concepts.index.to_series().map(lambda x: str(x).replace('_', ' ').title()))
+
     # overwrite some of the types
     if overwrite:
         for k, v in overwrite.items():

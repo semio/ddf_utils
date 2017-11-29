@@ -163,6 +163,11 @@ class DAG:
         else:
             self._node_dict = node_dict
 
+    def copy(self):
+        from copy import deepcopy
+        # TODO: I think we should add copy() for Nodes
+        return DAG(node_dict=deepcopy(self._node_dict))
+
     @property
     def roots(self):
         """return the roots of the DAG"""

@@ -21,3 +21,4 @@ coloredlogs
 pytz
 requests
 gitpython
+hy

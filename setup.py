@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 
-import sys
 import os
-from setuptools import setup, find_packages
+import sys
+
+from setuptools import find_packages, setup
 
 version = "0.3.2"
 
@@ -29,7 +30,8 @@ requirements = [
     'coloredlogs',
     'pytz',
     'requests',
-    'gitpython'
+    'gitpython',
+    'hy'
 ]
 
 setup(

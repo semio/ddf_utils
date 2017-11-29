@@ -11,23 +11,23 @@ from click.testing import CliRunner
 import pandas as pd
 
 
-def test_prompt_select():
+# def test_prompt_select():
 
-    @click.command()
-    def test():
-        options = ['foo', 'baz']
-        res = chef.helpers.prompt_select(options, 'testing prompt')
-        click.echo(str(res))
+#     @click.command()
+#     def test():
+#         options = ['foo', 'baz']
+#         res = chef.helpers.prompt_select(options, 'testing prompt')
+#         click.echo(str(res))
 
-    runner = CliRunner()
-    result = runner.invoke(test, input='1')
-    assert result.output.split('\n')[-2] == 'foo'
-    result = runner.invoke(test, input='2')
-    assert result.output.split('\n')[-2] == 'baz'
-    result = runner.invoke(test, input='n')
-    assert result.output.split('\n')[-2] == '-1'
-    result = runner.invoke(test, input='q')
-    assert result.exit_code == 130
+#     runner = CliRunner()
+#     result = runner.invoke(test, input='1')
+#     assert result.output.split('\n')[-2] == 'foo'
+#     result = runner.invoke(test, input='2')
+#     assert result.output.split('\n')[-2] == 'baz'
+#     result = runner.invoke(test, input='n')
+#     assert result.output.split('\n')[-2] == '-1'
+#     result = runner.invoke(test, input='q')
+#     assert result.exit_code == 130
 
 
 def test_translate_column():
@@ -52,3 +52,27 @@ def test_translate_column():
     result = runner.invoke(test, input='2')
     assert not result.exception
     assert result.output.split('\n')[-2] == 'cog'
+
+
+def test_ddf_cli():
+    import os
+    import tempfile
+    from ddf_utils.cli import ddf
+
+    base_path = os.path.dirname(__file__)
+
+    runner = CliRunner()
+    result = runner.invoke(ddf, args=['build_recipe',
+                                      os.path.join(base_path, 'chef/recipes/test_flatten.yml')])
+    # click.echo(result.output)
+    assert result.exit_code == 0
+
+    tmpdir = tempfile.mkdtemp()
+    result = runner.invoke(ddf, args=['run_recipe',
+                                      '--recipe',
+                                      os.path.join(base_path, 'chef/recipes/test_cli.yaml'),
+                                      '--outdir', tmpdir,
+                                      '--ddf_dir',
+                                      os.path.join(base_path, 'chef/datasets/')])
+    # click.echo(result.output)
+    assert result.exit_code == 0

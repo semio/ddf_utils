@@ -1,0 +1,57 @@
+info:
+    id: test-flatten
+
+
+ingredients:
+    - id: kilm-datapoints
+      dataset: ddf--ilo--kilm_employment_sector
+      key: "country,sex,year"
+      value: "*"
+
+cooking:
+    datapoints:
+        - procedure: filter
+          ingredients:
+              - kilm-datapoints
+          result: filtered_0
+          options:
+              item:
+                - agriculture_thousands
+              row:
+                country: arg
+                year:
+                  - 1993
+                  - 1994
+        - procedure: filter
+          ingredients:
+              - kilm-datapoints
+          result: filtered_1
+          options:
+              item:
+                - agriculture_percentage
+              row:
+                country:
+                  - usa
+                  - swe
+                year:
+                  - 1990
+                  - 1991
+                  - 1992
+                  - 1993
+                  - 1994
+                  - 1995
+                  - 1996
+        - procedure: merge
+          ingredients:
+            - filtered_0
+            - filtered_1
+          result: filtered
+        - procedure: flatten
+          ingredients:
+              - filtered
+          options:
+              dictionary:
+                  "agriculture*": "{concept}_{sex}"
+              flatten_dimensions:
+                  - sex
+          result: res

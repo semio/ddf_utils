@@ -1,0 +1,57 @@
+info:
+    id: ddf--pcbs--census 
+    base: &url https://github.com/Gapminder/ddf--pcbs--census
+
+ingredients:
+  - id: datapoints-housing_units
+    dataset: *url
+    key: geo, year
+    value:
+      - housing_units
+  - id: datapoints-connection_to_electricity
+    dataset: *url
+    key: geo, year
+    value:
+      - connection_to_electricity
+  - id: datapoints-housing_units-by-tenure
+    dataset: *url
+    key: tenure, geo, year
+    value:
+      - housing_units
+
+cooking:
+  datapoints:
+    - procedure: flatten
+      ingredients:
+        - datapoints-housing_units-by-tenure 
+      options:
+        flatten_dimensions:
+          - tenure
+        dictionary:
+          "housing_units": "housing_units_{tenure}"
+      result: dps-housing_units-flatten
+    - procedure: merge
+      ingredients:
+        - dps-housing_units-flatten
+        - datapoints-housing_units
+        - datapoints-connection_to_electricity
+      result: dps-housing_unit_merged
+    - procedure: run_op
+      ingredients:
+        - dps-housing_unit_merged
+      options:
+        op:
+          housing_units_owned_percentage: housing_units_owned / housing_units * 100
+          housing_units_rented_un_furnished_percentage: housing_units_rented_un_furnished / housing_units * 100
+          housing_units_rented_furnished_percentage: housing_units_rented_furnished / housing_units * 100
+          housing_units_without_payment_percentage: housing_units_without_payment / housing_units * 100
+          housing_units_for_work_percentage: housing_units_for_work / housing_units * 100
+          housing_units_others_percentage: housing_units_others / housing_units * 100
+          housing_units_not_stated_percentage: housing_units_not_stated / housing_units * 100
+          connection_to_electricity_percentage: connection_to_electricity / housing_units * 100
+      result: dps-housing_unit_rates
+    - procedure: serve
+      ingredients:
+        - dps-housing_unit_rates
+        - dps-housing_units-flatten
+        - datapoints-housing_units

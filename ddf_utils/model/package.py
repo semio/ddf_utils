@@ -2,18 +2,19 @@
 
 """datapackage model"""
 
+import json
+import logging
 import os
 import os.path as osp
-import json
-import pandas as pd
-import dask.dataframe as dd
-from .ddf import Dataset
-from itertools import product
-from .utils import load_datapackage_json
-from tqdm import tqdm
 from collections import Mapping
+from itertools import product
 
-import logging
+import dask.dataframe as dd
+import pandas as pd
+from tqdm import tqdm
+
+from .ddf import Dataset
+from .utils import load_datapackage_json
 
 logger = logging.getLogger('root')
 
@@ -151,6 +152,9 @@ class Datapackage:
                     v[k] = dd.multi.concat(l)
 
         # entities
+        # TODO: check if concept_type match the type inferred from file.
+        # i.e. it's wrong when concept file says a concept is domain but
+        # the ddf file indicates it's entity set.
         if 'entity_set' not in concepts.concept_type.values:  # only domains
             for e in entities_:
                 entities[e['key']] = [e['data']]
@@ -164,7 +168,11 @@ class Datapackage:
                         e['data'] = e['data'].rename(columns={e['key']: domain})
                         entities[domain].append(e['data'])
         for e, l in entities.items():
-            df = l[0]
+            try:
+                df = l[0]
+            except IndexError:
+                logging.critical('no entity file found for {}!'.format(e))
+                raise
             for df_ in l[1:]:
                 df = pd.merge(df, df_, on=e, how='outer')
                 for c in list(df.columns):
@@ -174,8 +182,12 @@ class Datapackage:
                         for i in df.index:
                             if not pd.isnull(df.loc[i, c]):
                                 if not pd.isnull(df.loc[i, c_orig+'_y']):
-                                    assert df.loc[i, c] == df.loc[i, c_orig+'_y'], \
-                                        "different values for same cell:{}, {}".format(i, c)
+                                    # assert df.loc[i, c] == df.loc[i, c_orig+'_y'], \
+                                    #     "different values for same cell:{}, {}".format(i, c)
+                                    logger.debug('different values for same cell: '
+                                                 '{}: {}, {}'.format(c_orig,
+                                                                     df.at[i, c_orig],
+                                                                     df.at[i, c_orig+'_y']))
                                     df.loc[i, c_orig] = df.loc[i, c]
                                 else:
                                     df.loc[i, c_orig] = df.loc[i, c]
@@ -281,6 +293,9 @@ class Datapackage:
             for kvo in g:
                 # logging.debug("adding kvo {}".format(str(kvo)))
                 _add_to_schema(kvo)
+
+        if logger.getEffectiveLevel() != 10:
+            pbar.close()
 
         for sch in hash_table.values():
             sch['resources'] = list(sch['resources'])

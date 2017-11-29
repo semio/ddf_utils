@@ -4,12 +4,14 @@
 model for dataset repositories.
 """
 
+import logging
 import os.path as osp
 import tempfile
-from git import Repo as GRepo
 from urllib.parse import urlparse
+
+from git import Repo as GRepo
+
 from .package import Datapackage
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +26,6 @@ def is_url(r):
 class Repo:
     def __init__(self, uri, base_path=None):
         if is_url(uri):
-            print('checking out repo...')
             if base_path is None:
                 base_path = tempfile.mkdtemp()
             sub_path = osp.splitext(urlparse(uri).path)[0][1:]
@@ -36,6 +37,7 @@ class Repo:
                 # TODO: maybe give error?
                 self.__repo = GRepo(self._local_path)
             else:
+                print('checking out repo {} to {}'.format(sub_path, base_path))
                 self.__repo = GRepo.clone_from(uri, to_path=self._local_path)
 
         else:
@@ -65,4 +67,3 @@ class Repo:
             self.__repo.git.checkout(ref)
 
         return Datapackage(self.local_path)
-
