@@ -268,7 +268,8 @@ keyword arguments to this function</p>
 <dl class="function">
 <dt id="ddf_utils.datapackage.dump_json">
 <code class="descclassname">ddf_utils.datapackage.</code><code class="descname">dump_json</code><span class="sig-paren">(</span><em>path</em>, <em>obj</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.datapackage.dump_json" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>convenient function to dump a dictionary object to json</p>
+</dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.datapackage.get_datapackage">
@@ -296,7 +297,20 @@ datapackage.json</li>
 <dl class="function">
 <dt id="ddf_utils.datapackage.get_ddf_files">
 <code class="descclassname">ddf_utils.datapackage.</code><code class="descname">get_ddf_files</code><span class="sig-paren">(</span><em>path</em>, <em>root=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.datapackage.get_ddf_files" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>yield all csv files which are named following the DDF model standard.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>path</strong> (<cite>str</cite>) – the path to check</li>
+<li><strong>root</strong> (<cite>str</cite>, optional) – if path is relative, append the root to all files.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 </div>
 <div class="section" id="module-ddf_utils.io">
@@ -553,7 +567,7 @@ avaliable options are <cite>drop</cite>, <cite>error</cite>, <cite>include</cite
 
 <dl class="function">
 <dt id="ddf_utils.transformer.trend_bridge">
-<code class="descclassname">ddf_utils.transformer.</code><code class="descname">trend_bridge</code><span class="sig-paren">(</span><em>old_data: &lt;Mock name='mock.Series' id='4382542984'&gt;</em>, <em>new_data: &lt;Mock name='mock.Series' id='4382542984'&gt;</em>, <em>bridge_length: int</em><span class="sig-paren">)</span> &#x2192; &lt;Mock name='mock.Series' id='4382542984'&gt;<a class="headerlink" href="#ddf_utils.transformer.trend_bridge" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.transformer.</code><code class="descname">trend_bridge</code><span class="sig-paren">(</span><em>old_data: &lt;Mock name='mock.Series' id='4385919048'&gt;</em>, <em>new_data: &lt;Mock name='mock.Series' id='4385919048'&gt;</em>, <em>bridge_length: int</em><span class="sig-paren">)</span> &#x2192; &lt;Mock name='mock.Series' id='4385919048'&gt;<a class="headerlink" href="#ddf_utils.transformer.trend_bridge" title="Permalink to this definition">¶</a></dt>
 <dd><p>smoothing data between series.</p>
 <p>To avoid getting artificial stairs in the data, we smooth between to
 series. Sometime one source is systematically higher than another source,
