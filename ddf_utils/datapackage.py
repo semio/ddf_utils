@@ -54,6 +54,15 @@ def get_datapackage(path, use_existing=True, update=False):
 
 
 def get_ddf_files(path, root=None):
+    """yield all csv files which are named following the DDF model standard.
+
+    Parameters
+    -----------
+    path : `str`
+        the path to check
+    root : `str`, optional
+        if path is relative, append the root to all files.
+    """
     info = next(os.walk(path))
 
     # don't include hidden and lang/etl dir.
@@ -227,6 +236,7 @@ def create_datapackage(path, gen_schema=True, **kwargs):
 
 # helper for dumping datapackage json
 def dump_json(path, obj):
+    """convenient function to dump a dictionary object to json"""
     with open(path, 'w+') as f:
         json.dump(obj, f, ensure_ascii=False, indent=4)
         f.close()

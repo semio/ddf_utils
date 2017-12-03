@@ -77,6 +77,7 @@ commands are:
 ::
 
   $ ddf --help
+
   Usage: ddf [OPTIONS] COMMAND [ARGS]...
 
   Options:
