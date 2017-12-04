@@ -46,6 +46,7 @@ def make_age_group_dps(ingredient, age_group, indicator_name):
                                 {"population": "sum"}})
     chef.add_procedure(collection,
                        result=translated_result,
+                       ingredients=[groupby_result],
                        procedure='translate_header',
                        options={"dictionary":
                                 {"country_code": "geo"}})
@@ -62,7 +63,7 @@ chef.add_procedure(collection,
                    result='merged_result',
                    ingredients=results)
 
-# TODO: add serving() for Chef
-# chef.add_serving(ingredients=['merged-result], options={})
+chef.add_dish(ingredients=['merged-result'], options={})
 
-print(chef.to_recipe())
+if __name__ == '__main__':
+    print(chef.to_recipe())

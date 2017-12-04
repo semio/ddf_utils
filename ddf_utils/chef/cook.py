@@ -227,6 +227,13 @@ class Chef:
                         add_dependency(self.dag, options[opt][ingredient_key], pnode)
         return self
 
+    def add_dish(self, ingredients, options=None):
+        existing_dish = [x['id'] for x in self._serving]
+        for ing in ingredients:
+            if ing in existing_dish:
+                logger.warning('dish already exist: {}, skipping...'.forman(ing))
+            self._serving.append({'id': ing, 'options': options})
+
     @staticmethod
     def register_procedure(func):
         from ddf_utils.chef import procedure as pc
