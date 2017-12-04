@@ -257,12 +257,12 @@ For concepts, we need to extract concepts from the ingredients:
 
 After all these procedure, we have cook the dishes and it's time to serve it! In
 recipe we can set which ingredients are we going to serve(save to disk) in the
-``serve`` section. Note that this section is optional, and if you don't specify
+``serving`` section. Note that this section is optional, and if you don't specify
 then the last procedure of each sub-section of ``cooking`` will be served.
 
 .. code-block:: yaml
 
-   serve:
+   serving:
        - id: concepts-final
        - id: gapminder-country-entities
        - id: datapoints-final
@@ -334,6 +334,8 @@ currently we can set below path:
    Must set this variable if we have json file in the options of
    procedures. (translation will be discussed later). If relative path
    is provided, the path will be related to the path of the recipe.
+- ``procedures_dir``: when you want to use `custom procedures`_, you should set
+  this option to tell which dir the procedures are in.
 
 include section
 ~~~~~~~~~~~~~~~
@@ -452,8 +454,12 @@ following format:
 
 **available options**
 
-``digits`` : *int*, controls how many decimal should be kept at most in
-a numeric ingredient.
+- ``digits`` : *int*, controls how many decimal should be kept at most in a
+  numeric ingredient.
+- ``no_keep_sets`` : *bool*, by default chef will serve the entities by
+  entity_sets, i.e. each entity set will have one file. Enabling this will make
+  chef serve entire domain in one file, no separated files
+
 
 Recipe execution
 ----------------
@@ -976,6 +982,38 @@ merge_entity
 
 (WIP) merge several entities into one new entity
 
+
+custom procedures
+~~~~~~~~~~~~~~~~~
+
+You can also load your own procedures. The procedure name should be
+``module.function``, where ``module`` should be in the ``procedures_dir`` or
+other paths in ``sys.path``.
+
+The procedure should be defined as following structure:
+
+.. code-block:: python
+
+   from ddf_utils.chef.cook import Chef
+   from ddf_utils.chef.ingredient import ProcedureResult
+   from ddf_utils.chef.helpers import debuggable
+
+   @debuggable  # adding debug option to the procedure
+   def custom_procedure(chef, ingredients, result, **options):
+       # you must have chef(a Chef object), ingredients (a list of string),
+       # result (a string) as parameters
+       #
+
+       # procedures...
+
+       # and finally return a ProcedureResult object
+       return ProcedureResult(chef, result, primarykey, data)
+   
+Check our `predefined procedures`_ for examples.
+
+.. _`predefined procedures`: https://github.com/semio/ddf_utils/blob/master/ddf_utils/chef/procedure.py
+
+
 Checking Intermediate Results
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -983,6 +1021,23 @@ Most of the procedures supports ``debug`` option, which will save the result
 ingredient to ``_debug/<ingredient_id>/`` folder of your working directory. So
 if you want to check the intermediate results, just add ``debug: true`` to the
 ``options`` dictionary.
+
+
+Validate the Result with ddf-validation
+---------------------------------------
+
+After generating the dataset, it would be good to check if the output dataset is
+valid against the DDF CSV model. There is a tool `ddf-validation`_ for that,
+which is written in nodejs.
+
+.. _ddf-validation: https://github.com/Gapminder/ddf-validation
+
+to check if a dataset is valid, install ddf-validation and run:
+
+.. code-block:: shell
+
+   cd path_to_your_dataset
+   validate-ddf
 
 Validate Recipe with Schema
 ---------------------------
@@ -1039,8 +1094,8 @@ For a pretty printed output of the invalid path, try using json processors like
     "result": "unpop-datapoints-pop-by-age-country"
   }
 
-General guideline for writing recipes
--------------------------------------
+General guidelines for writing recipes
+--------------------------------------
 
 - if you need to use ``translate_header`` / ``translate_column`` in your recipe,
   place them at the beginning of recipe. This can improve the performance of
@@ -1048,3 +1103,70 @@ General guideline for writing recipes
 - run recipe with ``ddf --debug run_recipe`` will enable debug output when
   running recipes. use it with the ``debug`` option will help you in the
   development of recipes.
+
+
+The Hy Mode
+-----------
+
+From `Hy's home page`_:
+
+    Hy is a wonderful dialect of Lisp that's embedded in Python.
+
+    Since Hy transforms its Lisp code into the Python Abstract Syntax Tree, you
+    have the whole beautiful world of Python at your fingertips, in Lisp form!
+
+.. _`Hy's home page`: http://docs.hylang.org/en/stable/index.html
+
+Okay, if you're still with me, then let's dive into the world of Hy recipe!
+
+We provided some macros for writing recipes. They are similar to the sections in
+YAML:
+
+.. code-block:: clojure
+
+   ;; import all macros
+   (require [ddf_utils.chef.hy_mod.macros [*]])
+
+   ;; you should call init macro at the beginning.
+   ;; This will initial a global variable *chef*
+   (init)
+
+   ;; info macro, just like the info section in YAML
+   (info :id "my_fancy_dataset"
+         :date "2017-12-01")
+
+   ;; config macro, just like the config section in YAML
+   (config :ddf_dir "path_to_ddf_dir"
+           :dictionary_dir "path_to_dict_dir")
+
+   ;; ingredient macro, each one defines an ingredient. Just like a
+   ;; list element in ingredients section in YAML
+   (ingredient :id "datapoints-source"
+               :dataset "source_dataset"
+               :key "geo, year")
+
+   ;; procedure macro, each one defines a procedure. Just like an element
+   ;; in the cooking blocks. First 2 parameters are the result id and the
+   ;; collection it's in.
+   (procedure "result-ingredient" "datapoints"
+              :procedure "translate_header"
+              :ingredients ["datapoints-source"]
+              :options {:dictionary
+                        {"geo" "country"}})  ;; it doesn't matter if you use keyword or plain string
+                                             ;; for the options dictionary's key
+
+    ;; serve macro
+    (serve :ingredients ["result-ingredient"]
+           :options {"digits" 2})
+
+    ;; run the recipe
+    (run)
+
+    ;; you can do anything to the global chef element
+    (print (*chef*.to_recipe))
+
+
+
+There are more examples in the `example folder`_.
+
+ .. _`example folder`: https://github.com/semio/ddf_utils/tree/master/examples

@@ -99,7 +99,7 @@ def create_datapackage(path, update, overwrite):
 @click.option('--update', 'update', flag_value=False, help="Don't use. Not implemented yet")
 @click.option('--dry_run', '-d', 'dry_run', flag_value=True, default=False,
               help="don't save output to disk")
-@click.option('--gen_dp', '-p', 'gen_dp', flag_value=True, default=False,
+@click.option('--no-gen-dp', '-p', 'gen_dp', flag_value=False, default=True,
               help="generate datapackage.json after recipe run")
 @click.option('--show-tree', 'show_tree', flag_value=True, default=False,
               help='show the dependency tree')
