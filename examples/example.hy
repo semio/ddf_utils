@@ -7,7 +7,6 @@
 ;; The source is population by age dataset.
 
 (require [ddf_utils.chef.hy_mod.macros [*]])
-(import [ddf_utils.chef.helpers [gen_sym]])
 (import [datetime [datetime]])
 
 (init)
@@ -55,12 +54,12 @@
                              :age {"$in" age_group}}})
   (procedure groupby_result collection
              :procedure "groupby"
-             :ingredients [ingredient]
+             :ingredients [filtered_result]
              :options {:groupby ["country_code" "year"]
                        :aggregate {:population "sum"}})
   (procedure translated_result collection
              :procedure "translate_header"
-             :ingredients [ingredient]
+             :ingredients [groupby_result]
              :options {:dictionary {"country_code" "geo"}})
   ;; finally return the last result id
   translated_result)
