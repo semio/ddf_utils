@@ -60,7 +60,7 @@ def translate_header(chef: Chef, ingredients: List[str], result, dictionary) -> 
     rm = dictionary
 
     for k in list(data.keys()):
-        df_new = data[k].rename(columns=rm).copy()
+        df_new = data[k].rename(columns=rm)
         if ingredient.dtype == 'entities':  # also rename the `is--` headers
             rm_ = {}
             for c in df_new.columns:
@@ -161,6 +161,7 @@ def translate_column(chef: Chef, ingredients: List[str], result, dictionary,
     logger.info("translate_column: " + ingredients[0])
 
     di = ingredient.get_data()
+    new_data = dict()
 
     # find out the type of dictionary.
     if isinstance(dictionary, str):
@@ -170,22 +171,22 @@ def translate_column(chef: Chef, ingredients: List[str], result, dictionary,
         if 'base' in dictionary.keys():
             dict_type = 'dataframe'
             base = chef.dag.get_node(dictionary.pop('base')).evaluate()
-            base_data = base.copy_data()
+            base_data = base.get_data()
             if len(base_data) > 1:
                 raise ProcedureError('only support ingredient with 1 item')
-            base_df = list(base_data.values())[0]
+            base_df = list(base_data.values())[0].copy()
         else:
             dict_type = 'inline'
             base_df = None
 
     for k, df in di.items():
         logger.debug("running on: " + k)
-        di[k] = tc(df, column, dict_type, dictionary, target_column, base_df,
-                   not_found, ambiguity, ignore_case)
+        new_data[k] = tc(df, column, dict_type, dictionary, target_column, base_df,
+                         not_found, ambiguity, ignore_case)
 
     if not result:
         result = ingredient.ingred_id + '-translated'
-    return ProcedureResult(chef, result, ingredient.key, data=di)
+    return ProcedureResult(chef, result, ingredient.key, data=new_data)
 
 
 @debuggable
@@ -701,7 +702,7 @@ def groupby(chef: Chef, ingredients: List[str], result, **options) -> ProcedureR
     logger.info("groupby: " + ingredients[0])
 
     ingredient = chef.dag.get_node(ingredients[0]).evaluate()
-    data = ingredient.copy_data()
+    data = ingredient.get_data()
     by = options.pop('groupby')
     if 'insert_key' in options:
         insert_key = options.pop('insert_key')
