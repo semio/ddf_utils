@@ -375,7 +375,7 @@ def filter(chef: Chef, ingredients: List[str], result, **options) -> ProcedureRe
     ingredient = chef.dag.get_node(ingredients[0]).evaluate()
     logger.info("filter_row: " + ingredients[0])
 
-    data = ingredient.copy_data()
+    data = ingredient.get_data()
     row_filters = read_opt(options, 'row', False, None)
     items = read_opt(options, 'item', False, None)
 
