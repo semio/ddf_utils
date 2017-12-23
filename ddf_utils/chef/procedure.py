@@ -983,7 +983,7 @@ def extract_concepts(chef: Chef, ingredients: List[str], result,
             join_type = join['type']
         except KeyError:
             join_type = 'full_outer'
-        concepts = base.copy_data()['concept'].set_index('concept')
+        concepts = base.get_data()['concept'].set_index('concept')
     else:
         concepts = pd.DataFrame([], columns=['concept', 'concept_type']).set_index('concept')
         join_type = 'full_outer'
@@ -991,7 +991,7 @@ def extract_concepts(chef: Chef, ingredients: List[str], result,
     new_concepts = set()
 
     for i in ingredients:
-        data = i.copy_data()
+        data = i.get_data()
         pks = i.key_to_list()
         for k, df in data.items():
             if include_keys:
@@ -1120,8 +1120,8 @@ def trend_bridge(chef: Chef, ingredients: List[str], bridge_start, bridge_end, b
     keys = start.key_to_list()
     keys.remove(bridge_on)
 
-    start_group = start.copy_data()[bridge_start['column']].set_index(bridge_on).groupby(keys)
-    end_group = end.copy_data()[bridge_end['column']].set_index(bridge_on).groupby(keys)
+    start_group = start.get_data()[bridge_start['column']].set_index(bridge_on).groupby(keys)
+    end_group = end.get_data()[bridge_end['column']].set_index(bridge_on).groupby(keys)
 
     # calculate trend bridge on each group
     res_grouped = []
@@ -1169,7 +1169,7 @@ def merge_entity(chef: Chef, ingredients: List[str], dictionary,
     assert len(ingredients) == 1, "procedure only support 1 ingredient for now."
     ingredient = chef.dag.get_node(ingredients[0]).evaluate()
 
-    data = ingredient.copy_data()
+    data = ingredient.get_data()
 
     res_data = dict()
     for k, df in data.items():
@@ -1188,7 +1188,7 @@ def split_entity(chef: Chef, ingredients: List[str], dictionary,
     assert len(ingredients) == 1, "procedure only support 1 ingredient for now."
     ingredient = chef.dag.get_node(ingredients[0]).evaluate()
 
-    data = ingredient.copy_data()
+    data = ingredient.get_data()
 
     res_data = dict()
     for k, df in data.items():
