@@ -77,23 +77,16 @@ class Datapackage:
         entities = dict()
         datapoints = dict()
 
-        def _update_datapoints(df_, keys_, indicator_name_):
+        def _update_datapoints(fn_, keys_, indicator_name_):
             """helper function to make datapoints dictionary"""
-            if not no_datapoints:
-                if indicator_name_ in datapoints.keys():
-                    if keys in datapoints[indicator_name_]:
-                        datapoints[indicator_name_][keys_].append(df_)
-                    else:
-                        datapoints[indicator_name_][keys_] = [df_]
+            if indicator_name_ in datapoints.keys():
+                if keys in datapoints[indicator_name_]:
+                    datapoints[indicator_name_][keys_].append(fn_)
                 else:
-                    datapoints[indicator_name_] = dict()
-                    datapoints[indicator_name_][keys_] = [df_]
-            else:  # no datapoints needed, just create an empty dataframe with columns
-                try:
-                    datapoints.get(indicator_name_, {})[keys_]
-                except KeyError:
-                    datapoints[indicator_name_] = {}
-                    datapoints[indicator_name_][keys_] = df_
+                    datapoints[indicator_name_][keys_] = [fn_]
+            else:
+                datapoints[indicator_name_] = dict()
+                datapoints[indicator_name_][keys_] = [fn_]
 
         no_datapoints = kwargs.get('no_datapoints', False)
 
@@ -122,15 +115,10 @@ class Datapackage:
                         "key": pkey
                     })
             else:  # datapoints
-                dtypes = dict([(x, 'str') for x in pkey])
-                for tc in time_concepts:
-                    dtypes[tc] = int  # TODO: maybe there are other time format?
-                if not no_datapoints:
-                    df = dd.read_csv(os.path.join(base_dir, r['path']), dtype=dtypes)
-                else:
-                    df = next(pd.read_csv(os.path.join(base_dir, r['path']), dtype=dtypes, chunksize=3))
-
+                fn = os.path.join(base_dir, r['path'])
+                df = next(pd.read_csv(fn, chunksize=1))
                 indicator_names = list(set(df.columns) - set(pkey))
+
                 if len(indicator_names) == 0:
                     raise ValueError('No indicator in {}'.format(r['path']))
 
@@ -138,18 +126,25 @@ class Datapackage:
 
                 if len(indicator_names) == 1:
                     indicator_name = indicator_names[0]
-                    _update_datapoints(df, keys, indicator_name)
+                    _update_datapoints(fn, keys, indicator_name)
                 else:
                     for indicator_name in indicator_names:
-                        cols = list(keys + tuple([indicator_name]))
-                        df_ = df[cols].copy()
-                        _update_datapoints(df_, keys, indicator_name)
+                        _update_datapoints(fn, keys, indicator_name)
 
         # datapoints
-        if not no_datapoints:
-            for i, v in datapoints.items():
-                for k, l in v.items():
-                    v[k] = dd.multi.concat(l)
+        for i, kvs in datapoints.items():
+            for k, l in kvs.items():
+                dtypes = dict([x, 'str'] for x in k)
+                for tc in time_concepts:
+                    dtypes[tc] = int  # TODO: maybe there are other time format?
+                cols = list(k + tuple([i]))
+
+                if not no_datapoints:
+                    df = dd.read_csv(l, dtype=dtypes)[cols]
+                else:
+                    df = pd.DataFrame([], columns=cols)
+
+                kvs[k] = df
 
         # entities
         # TODO: check if concept_type match the type inferred from file.
