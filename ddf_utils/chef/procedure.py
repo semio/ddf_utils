@@ -160,7 +160,7 @@ def translate_column(chef: Chef, ingredients: List[str], result, dictionary,
     ingredient = chef.dag.get_node(ingredients[0]).evaluate()
     logger.info("translate_column: " + ingredients[0])
 
-    di = ingredient.copy_data()
+    di = ingredient.get_data()
 
     # find out the type of dictionary.
     if isinstance(dictionary, str):
