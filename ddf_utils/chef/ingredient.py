@@ -10,6 +10,7 @@ from collections import Mapping, Sequence
 import numpy as np
 import pandas as pd
 
+import dask.dataframe as dd
 from ddf_utils.model.package import Datapackage
 from ddf_utils.model.repo import Repo, is_url
 
@@ -46,24 +47,26 @@ class BaseIngredient(object):
         """helper function: make a list that contains primaryKey of this ingredient"""
         return [x.strip() for x in self.key.split(',')]
 
-    def get_data(self):
-        return self.data
-
-    def copy_data(self):
-        """this function makes copy of self.data.
-        """
+    def compute(self):
+        res = dict()
         if self.data is None:
             self.get_data()
-        # v: DataFrame. DataFrame.copy() is by default deep copy,
-        # but I just call it explicitly here.
-        return dict((k, v.copy(deep=True)) for k, v in self.data.items())
+        for k, v in self.data.items():
+            if isinstance(v, dd.DataFrame):
+                res[k] = v.compute()
+            else:
+                res[k] = v
+        return res
+
+    def get_data(self):
+        return self.data
 
     def reset_data(self):
         self.data = None
         return
 
     def _serve_concepts(self, outpath, **options):
-        data = self.copy_data()
+        data = self.compute()
         assert isinstance(data, dict)
         assert len(data) == 1
         for _, df in data.items():
@@ -78,7 +81,7 @@ class BaseIngredient(object):
             df.to_csv(path, index=False, encoding='utf8')
 
     def _serve_entities(self, outpath, **options):
-        data = self.copy_data()
+        data = self.compute()
         assert isinstance(data, dict)
         assert len(data) == 1
         sets = []
@@ -123,7 +126,7 @@ class BaseIngredient(object):
                 df.to_csv(path, index=False, encoding='utf8')
 
     def _serve_datapoints(self, outpath, **options):
-        data = self.copy_data()
+        data = self.compute()
         assert isinstance(data, dict)
         digits = read_opt(options, 'digits', default=5)
 
@@ -487,9 +490,10 @@ class Ingredient(BaseIngredient):
         """read in and return the ingredient data
         """
         if self._ddf_id:
-            return self._get_data_ddf(copy, key_as_index)
+            self.data = self._get_data_ddf(copy, key_as_index)
         else:
-            return self._get_data_external(copy, key_as_index)
+            self.data = self._get_data_external(copy, key_as_index)
+        return self.data
 
     def _get_data_external(self, copy=False, key_as_index=False):
         """read data from csv or on-the-fly"""

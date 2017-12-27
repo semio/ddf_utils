@@ -56,7 +56,7 @@ def translate_header(chef: Chef, ingredients: List[str], result, dictionary) -> 
     ingredient = chef.dag.get_node(ingredients[0]).evaluate()
     logger.info("translate_header: " + ingredients[0])
 
-    data = ingredient.copy_data()
+    data = ingredient.get_data()
     rm = dictionary
 
     for k in list(data.keys()):
@@ -262,7 +262,7 @@ def merge(chef: Chef, ingredients: List[str], result, deep=False) -> ProcedureRe
     res_all = {}
 
     for i in ingredients:
-        res_all = _merge_two(res_all, i.copy_data(), index_col, dtype, deep)
+        res_all = _merge_two(res_all, i.get_data(), index_col, dtype, deep)
 
     if not result:
         result = 'all_data_merged_'+str(int(time.time() * 1000))
@@ -494,7 +494,7 @@ def filter_row(chef: Chef, ingredients: List[str], result, **options) -> Procedu
     ingredient = chef.dag.get_node(ingredients[0]).evaluate()
     logger.info("filter_row: " + ingredients[0])
 
-    data = ingredient.copy_data()
+    data = ingredient.get_data()
     filters = read_opt(options, 'filters', True)
 
     res = {}
@@ -566,7 +566,7 @@ def flatten(chef: Chef, ingredients: List[str], result, **options) -> ProcedureR
     assert len(ingredients) == 1, "procedure only support 1 ingredient for now."
 
     ingredient = chef.dag.get_node(ingredients[0]).evaluate()
-    data = ingredient.copy_data()
+    data = ingredient.get_data()
 
     logger.info("flatten: " + ingredients[0])
 
@@ -625,7 +625,7 @@ def filter_item(chef: Chef, ingredients: List[str], result, items: list) -> Proc
     ingredient = chef.dag.get_node(ingredients[0]).evaluate()
     logger.info("filter_item: " + ingredients[0])
 
-    data = ingredient.copy_data()
+    data = ingredient.get_data()
 
     try:
         data = dict([(k, data[k]) for k in items])
@@ -830,7 +830,7 @@ def window(chef: Chef, ingredients: List[str], result, **options) -> ProcedureRe
     min_periods = read_opt(window, 'min_periods', default=0)
     center = read_opt(window, 'center', default=False)
 
-    data = ingredient.copy_data()
+    data = ingredient.get_data()
     newdata = dict()
 
     for k, func in aggregate.items():
@@ -900,7 +900,7 @@ def run_op(chef: Chef, ingredients: List[str], result, op) -> ProcedureResult:
     assert ingredient.dtype == 'datapoints'
     logger.info("run_op: " + ingredient.ingred_id)
 
-    data = ingredient.copy_data()
+    data = ingredient.get_data()
     keys = ingredient.key_to_list()
 
     # concat all the datapoint dataframe first, and eval the ops
@@ -1153,7 +1153,7 @@ def trend_bridge(chef: Chef, ingredients: List[str], bridge_start, bridge_end, b
     result_data = pd.concat(res, ignore_index=True)
 
     if ingredient is not None:
-        merged = _merge_two(ingredient.copy_data(), {target_column: result_data},
+        merged = _merge_two(ingredient.get_data(), {target_column: result_data},
                             start.key_to_list(), 'datapoints')
         return ProcedureResult(chef, result, start.key, merged)
     else:
