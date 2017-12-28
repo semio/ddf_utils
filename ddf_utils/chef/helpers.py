@@ -1,15 +1,27 @@
 # -*- coding: utf-8 -*-
 
-import hashlib
-import logging
 import os
 import sys
+import hashlib
+import logging
 from functools import wraps, partial
 from collections import Sequence, Mapping
 from time import time
-from . import ops
+
 import click
 import numpy as np
+import pandas as pd
+import dask.dataframe as dd
+
+from . import ops
+
+
+def create_dsk(data, parts=10):
+    # TODO: check the best parts to use
+    for k, v in data.items():
+        if isinstance(v, pd.DataFrame):
+            data[k] = dd.from_pandas(v, npartitions=parts)
+    return data
 
 
 def prompt_select(selects, text_before=None):

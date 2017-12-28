@@ -16,7 +16,7 @@ from ddf_utils.chef.cook import Chef
 
 from .dag import DAG
 from .exceptions import ProcedureError
-from .helpers import debuggable, mkfunc, query, read_opt
+from .helpers import debuggable, mkfunc, query, read_opt, create_dsk
 from .ingredient import BaseIngredient, ProcedureResult
 
 logger = logging.getLogger('Chef')
@@ -53,8 +53,8 @@ def translate_header(chef: Chef, ingredients: List[str], result, dictionary) -> 
     :py:func:`ddf_utils.transformer.translate_header` : Related function in transformer module
     """
     assert len(ingredients) == 1, "procedure only support 1 ingredient for now."
-    ingredient = chef.dag.get_node(ingredients[0]).evaluate()
-    logger.info("translate_header: " + ingredients[0])
+    ingredient = ingredients[0]
+    logger.info("translate_header: " + ingredient.ingred_id)
 
     data = ingredient.get_data()
     rm = dictionary
@@ -157,8 +157,9 @@ def translate_column(chef: Chef, ingredients: List[str], result, dictionary,
     from ..transformer import translate_column as tc
     assert len(ingredients) == 1, "procedure only support 1 ingredient for now."
 
-    ingredient = chef.dag.get_node(ingredients[0]).evaluate()
-    logger.info("translate_column: " + ingredients[0])
+    # ingredient = chef.dag.get_node(ingredients[0]).evaluate()
+    ingredient = ingredients[0]
+    logger.info("translate_column: " + ingredient.ingred_id)
 
     di = ingredient.get_data()
     new_data = dict()
@@ -230,7 +231,7 @@ def merge(chef: Chef, ingredients: List[str], result, deep=False) -> ProcedureRe
     if true, overwrite is on the row level. If values
     (e.g. afr,2015-population_total) exists, it gets overwritten, if it doesn't it stays
     """
-    ingredients = [chef.dag.get_node(x).evaluate() for x in ingredients]
+    # ingredients = [chef.dag.get_node(x).evaluate() for x in ingredients]
     logger.info("merge: " + str([i.ingred_id for i in ingredients]))
 
     # assert that dtype and key are same in all dataframe
@@ -262,12 +263,12 @@ def merge(chef: Chef, ingredients: List[str], result, deep=False) -> ProcedureRe
     res_all = {}
 
     for i in ingredients:
-        res_all = _merge_two(res_all, i.get_data(), index_col, dtype, deep)
+        res_all = _merge_two(res_all, i.compute(), index_col, dtype, deep)
 
     if not result:
         result = 'all_data_merged_'+str(int(time.time() * 1000))
 
-    return ProcedureResult(chef, result, newkey, data=res_all)
+    return ProcedureResult(chef, result, newkey, data=create_dsk(res_all))
 
 
 def __get_last_item(ser):
@@ -373,8 +374,9 @@ def filter(chef: Chef, ingredients: List[str], result, **options) -> ProcedureRe
     """
 
     assert len(ingredients) == 1, "procedure only support 1 ingredient for now."
-    ingredient = chef.dag.get_node(ingredients[0]).evaluate()
-    logger.info("filter_row: " + ingredients[0])
+    # ingredient = chef.dag.get_node(ingredients[0]).evaluate()
+    ingredient = ingredients[0]
+    logger.info("filter_row: " + ingredient.ingred_id)
 
     data = ingredient.get_data()
     row_filters = read_opt(options, 'row', False, None)
@@ -491,8 +493,9 @@ def filter_row(chef: Chef, ingredients: List[str], result, **options) -> Procedu
     warnings.simplefilter('default', DeprecationWarning)
 
     assert len(ingredients) == 1, "procedure only support 1 ingredient for now."
-    ingredient = chef.dag.get_node(ingredients[0]).evaluate()
-    logger.info("filter_row: " + ingredients[0])
+    # ingredient = chef.dag.get_node(ingredients[0]).evaluate()
+    ingredient = ingredients[0]
+    logger.info("filter_row: " + ingredient.ingred_id)
 
     data = ingredient.get_data()
     filters = read_opt(options, 'filters', True)
@@ -565,10 +568,11 @@ def flatten(chef: Chef, ingredients: List[str], result, **options) -> ProcedureR
     """
     assert len(ingredients) == 1, "procedure only support 1 ingredient for now."
 
-    ingredient = chef.dag.get_node(ingredients[0]).evaluate()
-    data = ingredient.get_data()
+    # ingredient = chef.dag.get_node(ingredients[0]).evaluate()
+    ingredient = ingredients[0]
+    data = ingredient.compute()
 
-    logger.info("flatten: " + ingredients[0])
+    logger.info("flatten: " + ingredient.ingred_id)
 
     flatten_dimensions = options['flatten_dimensions']
     if not isinstance(flatten_dimensions, list):
@@ -594,7 +598,7 @@ def flatten(chef: Chef, ingredients: List[str], result, **options) -> ProcedureR
                     raise ProcedureError("{} already created! check your name template please.".format(new_name))
                 res[new_name] = df_.rename(columns={from_name: new_name}).drop(flatten_dimensions, axis=1)
 
-    return ProcedureResult(chef, result, newkey, data=res)
+    return ProcedureResult(chef, result, newkey, data=create_dsk(res))
 
 
 @debuggable
@@ -622,8 +626,9 @@ def filter_item(chef: Chef, ingredients: List[str], result, items: list) -> Proc
     warnings.simplefilter('default', DeprecationWarning)
 
     assert len(ingredients) == 1, "procedure only support 1 ingredient for now."
-    ingredient = chef.dag.get_node(ingredients[0]).evaluate()
-    logger.info("filter_item: " + ingredients[0])
+    # ingredient = chef.dag.get_node(ingredients[0]).evaluate()
+    ingredient = ingredients[0]
+    logger.info("filter_item: " + ingredient.ingred_id)
 
     data = ingredient.get_data()
 
@@ -699,10 +704,11 @@ def groupby(chef: Chef, ingredients: List[str], result, **options) -> ProcedureR
     - Any columns not mentioned in groupby or functions are dropped.
     """
     assert len(ingredients) == 1, "procedure only support 1 ingredient for now."
-    logger.info("groupby: " + ingredients[0])
 
-    ingredient = chef.dag.get_node(ingredients[0]).evaluate()
-    data = ingredient.get_data()
+    # ingredient = chef.dag.get_node(ingredients[0]).evaluate()
+    ingredient = ingredients[0]
+    logger.info("groupby: " + ingredient.ingred_id)
+    data = ingredient.compute()
     by = options.pop('groupby')
     if 'insert_key' in options:
         insert_key = options.pop('insert_key')
@@ -748,6 +754,7 @@ def groupby(chef: Chef, ingredients: List[str], result, **options) -> ProcedureR
                 newdata[k][col] = val
                 newkey = newkey+','+col
 
+    newdata = create_dsk(newdata)
     return ProcedureResult(chef, result, newkey, data=newdata)
 
 
@@ -818,8 +825,9 @@ def window(chef: Chef, ingredients: List[str], result, **options) -> ProcedureRe
     Any column not mentioned in the `aggregate` block will be dropped in the returned ingredient.
     """
     assert len(ingredients) == 1, "procedure only support 1 ingredient for now."
-    ingredient = chef.dag.get_node(ingredients[0]).evaluate()
-    logger.info('window: ' + ingredients[0])
+    # ingredient = chef.dag.get_node(ingredients[0]).evaluate()
+    ingredient = ingredients[0]
+    logger.info('window: ' + ingredient.ingred_id)
 
     # reading options
     window = options.pop('window')
@@ -830,7 +838,7 @@ def window(chef: Chef, ingredients: List[str], result, **options) -> ProcedureRe
     min_periods = read_opt(window, 'min_periods', default=0)
     center = read_opt(window, 'center', default=False)
 
-    data = ingredient.get_data()
+    data = ingredient.compute()
     newdata = dict()
 
     for k, func in aggregate.items():
@@ -854,6 +862,8 @@ def window(chef: Chef, ingredients: List[str], result, **options) -> ProcedureRe
             newdata[k] = (df.groupby(level=levels, group_keys=False)
                           .rolling(window=size, min_periods=min_periods, center=center)
                           .agg(f).reset_index().dropna())
+
+    newdata = create_dsk(newdata)
     return ProcedureResult(chef, result, ingredient.key, newdata)
 
 
@@ -896,11 +906,12 @@ def run_op(chef: Chef, ingredients: List[str], result, op) -> ProcedureResult:
     """
 
     assert len(ingredients) == 1, "procedure only support 1 ingredient for now."
-    ingredient = chef.dag.get_node(ingredients[0]).evaluate()
+    # ingredient = chef.dag.get_node(ingredients[0]).evaluate()
+    ingredient = ingredients[0]
     assert ingredient.dtype == 'datapoints'
     logger.info("run_op: " + ingredient.ingred_id)
 
-    data = ingredient.get_data()
+    data = ingredient.compute()
     keys = ingredient.key_to_list()
 
     # concat all the datapoint dataframe first, and eval the ops
@@ -914,9 +925,10 @@ def run_op(chef: Chef, ingredients: List[str], result, op) -> ProcedureResult:
             df[k] = res
         data[k] = res.reset_index()
 
+    newdata = create_dsk(data)
     if not result:
         result = ingredient.ingred_id + '-op'
-    return ProcedureResult(chef, result, ingredient.key, data=data)
+    return ProcedureResult(chef, result, ingredient.key, data=newdata)
 
 
 @debuggable
@@ -974,7 +986,7 @@ def extract_concepts(chef: Chef, ingredients: List[str], result,
 
     """
 
-    ingredients = [chef.dag.get_node(x).evaluate() for x in ingredients]
+    # ingredients = [chef.dag.get_node(x).evaluate() for x in ingredients]
     logger.info("extract concepts: {}".format([x.ingred_id for x in ingredients]))
 
     if join:
@@ -1093,7 +1105,8 @@ def trend_bridge(chef: Chef, ingredients: List[str], bridge_start, bridge_end, b
         ingredient = None
     else:
         assert len(ingredients) == 1, "procedure only support 1 ingredient for now."
-        ingredient = chef.dag.get_node(ingredients[0]).evaluate()
+        # ingredient = chef.dag.get_node(ingredients[0]).evaluate()
+        ingredient = ingredients[0]
 
     # get data for start and end
     if 'ingredient' in bridge_start.keys():
@@ -1120,8 +1133,10 @@ def trend_bridge(chef: Chef, ingredients: List[str], bridge_start, bridge_end, b
     keys = start.key_to_list()
     keys.remove(bridge_on)
 
-    start_group = start.get_data()[bridge_start['column']].set_index(bridge_on).groupby(keys)
-    end_group = end.get_data()[bridge_end['column']].set_index(bridge_on).groupby(keys)
+    # start_group = start.get_data()[bridge_start['column']].set_index(bridge_on).groupby(keys)
+    # end_group = end.get_data()[bridge_end['column']].set_index(bridge_on).groupby(keys)
+    start_group = start.compute()[bridge_start['column']].set_index(bridge_on).groupby(keys)
+    end_group = end.compute()[bridge_end['column']].set_index(bridge_on).groupby(keys)
 
     # calculate trend bridge on each group
     res_grouped = []
@@ -1155,9 +1170,10 @@ def trend_bridge(chef: Chef, ingredients: List[str], bridge_start, bridge_end, b
     if ingredient is not None:
         merged = _merge_two(ingredient.get_data(), {target_column: result_data},
                             start.key_to_list(), 'datapoints')
-        return ProcedureResult(chef, result, start.key, merged)
+        return ProcedureResult(chef, result, start.key, create_dsk(merged))
     else:
-        return ProcedureResult(chef, result, start.key, {target_column: result_data})
+        return ProcedureResult(chef, result, start.key,
+                               create_dsk({target_column: result_data}))
 
 
 @debuggable
@@ -1167,16 +1183,17 @@ def merge_entity(chef: Chef, ingredients: List[str], dictionary,
     from ..transformer import merge_keys
 
     assert len(ingredients) == 1, "procedure only support 1 ingredient for now."
-    ingredient = chef.dag.get_node(ingredients[0]).evaluate()
+    # ingredient = chef.dag.get_node(ingredients[0]).evaluate()
+    ingredient = ingredients[0]
 
-    data = ingredient.get_data()
+    data = ingredient.compute()
 
     res_data = dict()
     for k, df in data.items():
         res_data[k] = merge_keys(df.set_index(ingredient.key_to_list()),
                                  dictionary, target_column=target_column, merged=merged).reset_index()
 
-    return ProcedureResult(chef, result, ingredient.key, res_data)
+    return ProcedureResult(chef, result, ingredient.key, create_dsk(res_data))
 
 
 @debuggable
@@ -1186,13 +1203,14 @@ def split_entity(chef: Chef, ingredients: List[str], dictionary,
     from ..transformer import split_keys
 
     assert len(ingredients) == 1, "procedure only support 1 ingredient for now."
-    ingredient = chef.dag.get_node(ingredients[0]).evaluate()
+    # ingredient = chef.dag.get_node(ingredients[0]).evaluate()
+    ingredient = ingredients[0]
 
-    data = ingredient.get_data()
+    data = ingredient.compute()
 
     res_data = dict()
     for k, df in data.items():
         res_data[k] = split_keys(df.set_index(ingredient.key_to_list()),
                                  target_column, dictionary, splitted).reset_index()
 
-    return ProcedureResult(chef, result, ingredient.key, res_data)
+    return ProcedureResult(chef, result, ingredient.key, create_dsk(res_data))
