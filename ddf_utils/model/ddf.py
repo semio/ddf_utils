@@ -60,7 +60,7 @@ class Dataset:
                                                     ' ' * indent * 2,
                                                     maybe_truncate(vals, 50)))
                 else:
-                    docs.append('{}{}:'.format(' ' * indent, domain))
+                    docs.append('{}- {}:'.format(' ' * indent, domain))
                     sets = concs[concs.domain == domain]
                     for i in sets.index:
                         vals = self.get_entity(i)[i].head(20).values
@@ -78,9 +78,9 @@ class Dataset:
 
         docs.append('indicators:')
         for i, data in self.datapoints.items():
-            docs.append('{}{}, by:'.format(' ' * indent, maybe_truncate(i)))
-            for keys in data.keys():
-                docs.append('{}{}'.format(' ' * indent * 2, keys))
+            docs.append('{}by {}:'.format(' ' * indent, maybe_truncate(i, 50)))
+            for var in data.keys():
+                docs.append('{}- {}'.format(' ' * indent * 2, maybe_truncate(var)))
 
         return '\n'.join(docs)
 
@@ -109,15 +109,13 @@ class Dataset:
 
     def indicators(self, by=None):
         if not by:
-            return list(self._datapoints.keys())
+            from functools import reduce
+            res = reduce(lambda a, b: [*a, *list(b.keys())], self._datapoints.values(), [])
+            return list(set(res))
 
-        res = list()
-        by = set(by)
-        for i, kvs in self._datapoints.items():
-            for k, v in kvs.items():
-                if by == set(k):
-                    res.append(i)
-        return res
+        by = tuple(sorted(by))
+        assert by in self._datapoints.keys(), "key pair {} not in dataset".format(by)
+        return list(self._datapoints[by].keys())
 
     def get_entity(self, ent):
         conc = self.concepts.set_index('concept')
@@ -133,16 +131,16 @@ class Dataset:
     def get_datapoint_df(self, indicator, primary_key=None):
         if primary_key:
             key = tuple(sorted(list(primary_key)))
-            if isinstance(self.datapoints[indicator][key], dd.DataFrame):
-                self.datapoints[indicator][key] = self.datapoints[indicator][key].compute()
-            return self.datapoints[indicator][key]
+            # if isinstance(self.datapoints[indicator][key], dd.DataFrame):
+            #     self.datapoints[indicator][key] = self.datapoints[indicator][key].compute()
+            return self.datapoints[key][indicator]
         else:
             res = {}
-            for k, df in list(self.datapoints[indicator].items()):
-                if isinstance(df, dd.DataFrame):
-                    df = df.compute()
-                res[k] = df
-            self.datapoints[indicator] = res
+            for k, v in self.datapoints.items():
+                # if isinstance(df, dd.DataFrame):
+                #     df = df.compute()
+                if indicator in v:
+                    res[k] = v[indicator]
             return res
 
     def validate(self, **options):
@@ -181,6 +179,7 @@ class Dataset:
                     entities[v] = df
 
         # translate datapoints
+        # FIXME: datapoints structure is changed
         if self.datapoints is not None:
             indicators_orig = list(datapoints.keys())
 
@@ -232,6 +231,7 @@ class Dataset:
             df.to_csv(fn, index=False)
 
         # datapoints. If it's dask dataframe, we should compute it before save to disk
+        # FIXME: datapoints structure is changed
         for indicator, kvs in self.datapoints.items():
             for keys, df in kvs.items():
                 keys_str = '--'.join(keys)

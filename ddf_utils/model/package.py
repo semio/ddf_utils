@@ -10,6 +10,8 @@ from collections import Mapping
 from itertools import product
 
 import dask.dataframe as dd
+from dask import delayed
+
 import pandas as pd
 from tqdm import tqdm
 
@@ -79,14 +81,14 @@ class Datapackage:
 
         def _update_datapoints(fn_, keys_, indicator_name_):
             """helper function to make datapoints dictionary"""
-            if indicator_name_ in datapoints.keys():
-                if keys in datapoints[indicator_name_]:
-                    datapoints[indicator_name_][keys_].append(fn_)
+            if keys_ in datapoints.keys():
+                if indicator_name_ in datapoints[keys_]:
+                    datapoints[keys_][indicator_name_].append(fn_)
                 else:
-                    datapoints[indicator_name_][keys_] = [fn_]
+                    datapoints[keys_][indicator_name_] = [fn_]
             else:
-                datapoints[indicator_name_] = dict()
-                datapoints[indicator_name_][keys_] = [fn_]
+                datapoints[keys_] = dict()
+                datapoints[keys_][indicator_name_] = [fn_]
 
         no_datapoints = kwargs.get('no_datapoints', False)
 
@@ -134,10 +136,10 @@ class Datapackage:
         # datapoints
         for i, kvs in datapoints.items():
             for k, l in kvs.items():
-                dtypes = dict([x, 'str'] for x in k)
+                dtypes = dict([x, 'str'] for x in i)
                 for tc in time_concepts:
                     dtypes[tc] = int  # TODO: maybe there are other time format?
-                cols = list(k + tuple([i]))
+                cols = list(i + tuple([k]))
 
                 if not no_datapoints:
                     df = dd.read_csv(l, dtype=dtypes)[cols]
