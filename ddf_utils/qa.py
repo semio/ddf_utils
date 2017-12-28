@@ -15,7 +15,7 @@ this = sys.modules[__name__]
 def _gen_indicator_key_list(d):
     for k, v in d.items():
         for i in v:
-            yield (k, i)
+            yield (i, k)
 
 
 def compare_with_func(dataset1, dataset2, fns=['rval', 'avg_pct_chg'],
@@ -53,11 +53,11 @@ def compare_with_func(dataset1, dataset2, fns=['rval', 'avg_pct_chg'],
         # FIXME: support multiple indicator in one file
         # like the indicators in ddf--sodertorn--stockholm_lan_basomrade
         try:
-            i1 = dataset1.get_datapoint_df(indicator, k).set_index(list(k))
+            i1 = dataset1.get_datapoint_df(indicator, k).compute().set_index(list(k))
         except KeyError:
             raise
         try:
-            i2 = dataset2.get_datapoint_df(indicator, k).set_index(list(k))
+            i2 = dataset2.get_datapoint_df(indicator, k).compute().set_index(list(k))
         except KeyError:
             raise
         # i1 = i1.rename(columns={indicator: 'old'})

@@ -31,7 +31,7 @@ def test_debug_option():
 def test_extract_concepts():
     chef = chef_fn('test_extract_concepts.yaml')
     res = chef.run()
-    res = res[0].get_data()['concept']
+    res = res[0].compute()['concept']
 
     assert 'geo' in res.concept.values
     assert 'year' in res.concept.values
@@ -44,8 +44,8 @@ def test_filter():
     res_ent = list(filter(lambda x: True if x.dtype == 'entities' else False, res))[0]
     res_dps = list(filter(lambda x: True if x.dtype == 'datapoints' else False, res))[0]
 
-    country = res_ent.get_data()['country']
-    dps = res_dps.get_data()
+    country = res_ent.compute()['country']
+    dps = res_dps.compute()
 
     assert set(dps.keys()) == {'imr_upper', 'imr_lower'}
     for dp in dps.values():
@@ -61,9 +61,9 @@ def test_flatten():
     res = chef.run()
 
     for r in res:
-        print(r.get_data().keys())
+        print(r.compute().keys())
 
-    assert set(res[0].get_data().keys()) == {
+    assert set(res[0].compute().keys()) == {
         'agriculture_thousands_f', 'agriculture_thousands_m',
         'agriculture_thousands_mf', 'agriculture_percentage_f',
         'agriculture_percentage_m', 'agriculture_percentage_mf'}
@@ -73,8 +73,8 @@ def test_groupby():
     chef = chef_fn('test_groupby.yaml')
     chef.run()
 
-    dp1 = chef.dag.get_node('grouped-datapoints-1').evaluate().get_data()
-    dp2 = chef.dag.get_node('grouped-datapoints-2').evaluate().get_data()
+    dp1 = chef.dag.get_node('grouped-datapoints-1').evaluate().compute()
+    dp2 = chef.dag.get_node('grouped-datapoints-2').evaluate().compute()
 
     assert len(dp1.keys()) == 1
     assert len(dp2.keys()) == 1
@@ -105,7 +105,7 @@ def test_translate_header():
     res = chef.run()
 
     indicators = ['infant_mortality_upper', 'infant_mortality_median', 'infant_mortality_lower']
-    data = res[0].get_data()
+    data = res[0].compute()
 
     assert set(data.keys()) == set(indicators)
     for i in indicators:
@@ -139,7 +139,7 @@ def test_merge():
     chef = chef_fn('test_merge.yaml')
     res = chef.run()
 
-    data = res[0].get_data()
+    data = res[0].compute()
     indicators = ['imr_lower', 'imr_median', 'imr_upper',
                   'biofuels_production_kboed', 'biofuels_production_ktoe']
     assert set(data.keys()) == set(indicators)

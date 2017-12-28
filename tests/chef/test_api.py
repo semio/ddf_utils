@@ -33,8 +33,8 @@ def test_chef_api_call():
                            options={'dictionary': {'geo': 'country'}}))
 
     def multiply_1000(chef, ingredients, result, **options):
-        ingredients = [chef.dag.get_node(x) for x in ingredients]
-        ingredient = ingredients[0].evaluate()
+        # ingredients = [chef.dag.get_node(x) for x in ingredients]
+        ingredient = ingredients[0]
 
         new_data = dict()
         for k, df in ingredient.get_data().items():
