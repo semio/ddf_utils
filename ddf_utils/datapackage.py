@@ -126,7 +126,7 @@ def create_datapackage(path, gen_schema=True, **kwargs):
         datapackage[k] = kwargs[k]
 
     # update the last updated time
-    datapackage['created'] = datetime.utcnow().astimezone(timezone.utc).isoformat()
+    datapackage['created'] = datetime.utcnow().replace(tzinfo=timezone.utc).isoformat()
 
     # generate resources
     resources = []
