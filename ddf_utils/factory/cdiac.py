@@ -8,7 +8,6 @@ import os.path as osp
 import requests
 import pandas as pd
 
-from io import BytesIO
 from urllib.parse import urljoin
 
 
@@ -58,8 +57,7 @@ def bulk_download(out_dir):
 
     with open(osp.expanduser(nation_fs_path), 'wb') as f:
         r = requests.get(nation_url)
-        s = BytesIO(r.content)
-        f.write(s.read())
+        f.write(r.content)
         f.close()
 
     global_url = urljoin(url, global_fn)
@@ -67,8 +65,7 @@ def bulk_download(out_dir):
 
     with open(osp.expanduser(global_fs_path), 'wb') as f:
         r = requests.get(global_url)
-        s = BytesIO(r.content)
-        f.write(s.read())
+        f.write(r.content)
         f.close()
 
     return out_dir

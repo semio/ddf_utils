@@ -72,12 +72,13 @@ def bulk_download(dataset, out_dir):
         load_metadata()
     s = metadata.loc[metadata.acronym == dataset, 'bulkdownload'].values[0]
     url = s.split(';')[1].split('=')[1]
-    res = requests.get(url)
+    res = requests.get(url, stream=True)
 
     fs_path = osp.join(out_dir, osp.basename(urlsplit(url).path))
 
     with open(fs_path, 'wb') as f:
-        f.write(BytesIO(res.content).read())
+        for c in res.iter_content(chunk_size=1024):
+            f.write(c)
         f.close()
 
     return out_dir
