@@ -10,7 +10,6 @@ import re
 import requests
 import pandas as pd
 
-from io import BytesIO
 from lxml import html
 from urllib.parse import urlsplit, urljoin
 
@@ -67,6 +66,5 @@ def bulk_download(out_dir, name=None):
         out_path = osp.join(out_dir, osp.basename(link))
 
         with open(osp.expanduser(out_path), 'wb') as f:
-            b = BytesIO(res.content)
-            f.write(b.read())
+            f.write(res.content)
             f.close()
