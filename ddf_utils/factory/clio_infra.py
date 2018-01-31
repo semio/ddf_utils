@@ -23,6 +23,11 @@ def _get_home_page(url):
     return tree
 
 
+def has_newer_source(ver):
+    print('there is no version info in this site.')
+    raise NotImplementedError
+
+
 def load_metadata():
     tree = _get_home_page(url)
     elem = tree.xpath('//div[@class="col-sm-4"]/div[@class="list-group"]/p[@class="list-group-item"]')

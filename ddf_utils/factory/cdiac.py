@@ -33,8 +33,13 @@ def load_metadata():
     return data
 
 
-def has_newer_data():
-    raise NotImplementedError
+def has_newer_source(date):
+    if metadata is None:
+        load_metadata()
+    newer = metadata[metadata['Last modified'] > date].values
+    if len(newer) > 0:
+        return True
+    return False
 
 
 def bulk_download(out_dir):
