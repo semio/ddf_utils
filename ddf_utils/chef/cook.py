@@ -233,7 +233,7 @@ class Chef:
         existing_dish = [x['id'] for x in self._serving]
         for ing in ingredients:
             if ing in existing_dish:
-                logger.warning('dish already exist: {}, skipping...'.forman(ing))
+                logger.warning('dish already exist: {}, skipping...'.format(ing))
             self._serving.append({'id': ing, 'options': options})
 
     @staticmethod
@@ -256,7 +256,7 @@ class Chef:
                 for dish in dishes:
                     dish_result = self.dag.get_node(dish['id']).evaluate()
 
-                    if 'options' in dish:
+                    if 'options' in dish and dish['options'] is not None:
                         dish_result.serve(outpath, **dish['options'])
                     else:
                         dish_result.serve(outpath)
