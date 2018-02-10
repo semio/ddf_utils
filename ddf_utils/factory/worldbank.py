@@ -52,8 +52,8 @@ def load_metadata():
             # print(d)
             metadata.append(d)
 
-    return pd.DataFrame.from_records(metadata)
-
+    metadata = pd.DataFrame.from_records(metadata)
+    return metadata
 
 def has_newer_source(dataset, date):
     if metadata is None:

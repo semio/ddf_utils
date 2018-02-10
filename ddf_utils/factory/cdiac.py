@@ -50,15 +50,15 @@ def bulk_download(out_dir):
     # latest nation/global file names
     lm = 'Last modified'
     nation_fn = (metadata[metadata['Name'].str.startswith('nation')]
-                 .sort_values(by=lm, ascending=False)['Name']
+                 .sort_values(by=[lm, 'Name'], ascending=False)['Name']
                  .values[0])
     global_fn = (metadata[metadata['Name'].str.startswith('global')]
-                 .sort_values(by=lm, ascending=False)['Name']
+                 .sort_values(by=[lm, 'Name'], ascending=False)['Name']
                  .values[0])
 
     # download files
     nation_url = urljoin(url, nation_fn)
-    nation_fs_path = osp.join(out_dir, nation_fn)
+    nation_fs_path = osp.join(out_dir, 'nation.csv')
 
     with open(osp.expanduser(nation_fs_path), 'wb') as f:
         r = requests.get(nation_url)
@@ -66,7 +66,7 @@ def bulk_download(out_dir):
         f.close()
 
     global_url = urljoin(url, global_fn)
-    global_fs_path = osp.join(out_dir, global_fn)
+    global_fs_path = osp.join(out_dir, 'global.csv')
 
     with open(osp.expanduser(global_fs_path), 'wb') as f:
         r = requests.get(global_url)
