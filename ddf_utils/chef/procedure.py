@@ -545,6 +545,9 @@ def flatten(chef: Chef, ingredients: List[str], result, **options) -> ProcedureR
                - entity_2
            dictionary:
                "concept_name_wildcard": "new_concept_name_template"
+	   skip_totals_among_entities:
+	       - entity_1
+	       - entity_2
 
     The ``dictionary`` can have multiple entries, for each entry the concepts that matches the key in wildcard
     matching will be flatten to the value, which should be a template string. The variables for the templates
@@ -558,6 +561,8 @@ def flatten(chef: Chef, ingredients: List[str], result, **options) -> ProcedureR
         a list of ingredients
     result : `str`
         id of result ingredient
+    skip_totals_among_entities : list
+	a list of total among entities, which we don't add to new indicator names
 
     Keyword Args
     ------------
@@ -594,6 +599,11 @@ def flatten(chef: Chef, ingredients: List[str], result, **options) -> ProcedureR
                 tmpl_dict = dict(zip(flatten_dimensions, g))
                 tmpl_dict['concept'] = from_name
                 new_name = new_name_tmpl.format(**tmpl_dict)
+		# remove totals among entities from name
+		if skip_totals_among_entities is not None:
+		    for e in skip_totals_among_entities:
+			new_name = new_name.replace('_'+e, '')
+		    logger.info(f'new name w/o total among entities is {new_name}')
                 if new_name in res.keys():
                     raise ProcedureError("{} already created! check your name template please.".format(new_name))
                 res[new_name] = df_.rename(columns={from_name: new_name}).drop(flatten_dimensions, axis=1)
