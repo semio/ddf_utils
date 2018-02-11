@@ -545,9 +545,9 @@ def flatten(chef: Chef, ingredients: List[str], result, **options) -> ProcedureR
                - entity_2
            dictionary:
                "concept_name_wildcard": "new_concept_name_template"
-	   skip_totals_among_entities:
-	       - entity_1
-	       - entity_2
+           skip_totals_among_entities:
+               - entity_1
+               - entity_2
 
     The ``dictionary`` can have multiple entries, for each entry the concepts that matches the key in wildcard
     matching will be flatten to the value, which should be a template string. The variables for the templates
@@ -562,7 +562,7 @@ def flatten(chef: Chef, ingredients: List[str], result, **options) -> ProcedureR
     result : `str`
         id of result ingredient
     skip_totals_among_entities : list
-	a list of total among entities, which we don't add to new indicator names
+        a list of total among entities, which we don't add to new indicator names
 
     Keyword Args
     ------------
@@ -583,6 +583,7 @@ def flatten(chef: Chef, ingredients: List[str], result, **options) -> ProcedureR
     if not isinstance(flatten_dimensions, list):
         flatten_dimensions = [flatten_dimensions]
     dictionary = options['dictionary']
+    skip_totals_among_entities = read_opt(options, 'skip_totals_among_entities')
 
     newkey = [x for x in ingredient.key_to_list() if x not in flatten_dimensions]
     newkey = ','.join(newkey)
@@ -599,11 +600,11 @@ def flatten(chef: Chef, ingredients: List[str], result, **options) -> ProcedureR
                 tmpl_dict = dict(zip(flatten_dimensions, g))
                 tmpl_dict['concept'] = from_name
                 new_name = new_name_tmpl.format(**tmpl_dict)
-		# remove totals among entities from name
-		if skip_totals_among_entities is not None:
-		    for e in skip_totals_among_entities:
-			new_name = new_name.replace('_'+e, '')
-		    logger.info(f'new name w/o total among entities is {new_name}')
+                # remove totals among entities from name
+                if skip_totals_among_entities is not None:
+                    for e in skip_totals_among_entities:
+                        new_name = new_name.replace('_'+e, '')
+                    logger.info(f'new name w/o total among entities is {new_name}')
                 if new_name in res.keys():
                     raise ProcedureError("{} already created! check your name template please.".format(new_name))
                 res[new_name] = df_.rename(columns={from_name: new_name}).drop(flatten_dimensions, axis=1)
@@ -1153,7 +1154,7 @@ def trend_bridge(chef: Chef, ingredients: List[str], bridge_start, bridge_end, b
     for g, df in start_group:
         gstart = df.copy()
         try:
-            gend = end_group.get_group(g)
+            gend = end_group.get_group(g).copy()
         except KeyError:  # no new data available for this group
             logger.warning("no data for bridge end: " + g)
             bridged = gstart[bridge_start['column']]
@@ -1178,8 +1179,8 @@ def trend_bridge(chef: Chef, ingredients: List[str], bridge_start, bridge_end, b
     result_data = pd.concat(res, ignore_index=True)
 
     if ingredient is not None:
-        merged = _merge_two(ingredient.get_data(), {target_column: result_data},
-                            start.key_to_list(), 'datapoints')
+        merged = _merge_two(ingredient.compute(), {target_column: result_data},
+                            start.key_to_list(), 'datapoints', deep=True)
         return ProcedureResult(chef, result, start.key, create_dsk(merged))
     else:
         return ProcedureResult(chef, result, start.key,
