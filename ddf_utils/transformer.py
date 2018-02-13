@@ -47,7 +47,7 @@ def _translate_column_inline(df, column, target_column, dictionary,
         else:  # if a key not in the mappings, use the original value
             for i, x in df_new[column].iteritems():
                 if x in dictionary.keys():
-                    df_new.ix[i, target_column] = dictionary[x]
+                    df_new.loc[i, target_column] = dictionary[x]
 
     return df_new
 
@@ -321,15 +321,15 @@ def extract_concepts(dfs, base=None, join='full_outer'):
                 ent = c[4:]
                 new_concepts.add(ent)
                 # concept in the is--header should be entity_set
-                concepts.ix[c[4:], 'concept_type'] = 'entity_set'
+                concepts.loc[c[4:], 'concept_type'] = 'entity_set'
                 continue
             if np.issubdtype(df[c].dtype, np.number):
-                concepts.ix[c, 'concept_type'] = 'measure'
+                concepts.loc[c, 'concept_type'] = 'measure'
             else:
-                concepts.ix[c, 'concept_type'] = 'string'
+                concepts.loc[c, 'concept_type'] = 'string'
     if join == 'ingredients_outer':
         # ingredients_outer join: only keep concepts appears in ingredients
-        concepts = concepts.ix[new_concepts]
+        concepts = concepts.loc[new_concepts]
     return concepts.reset_index()
 
 
@@ -371,7 +371,7 @@ def split_keys(df, target_column, dictionary, splited='drop'):
             if spl not in df_[target_column].values:
                 raise ValueError('entity not in data: ' + spl)
             tdf = df_[df_[target_column] == spl].set_index(keys).sort_index()
-            last = pd.DataFrame(tdf.ix[tdf.index[0], tdf.columns]).T
+            last = pd.DataFrame(tdf.loc[tdf.index[0], tdf.columns]).T
             last.index.names = keys
             logging.debug("using {} for first valid index".format(tdf.index[0]))
             last = last.reset_index()

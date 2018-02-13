@@ -1034,7 +1034,7 @@ def extract_concepts(chef: Chef, ingredients: List[str], result,
 
     if join_type == 'ingredients_outer':
         # ingredients_outer join: only keep concepts appears in ingredients
-        concepts = concepts.ix[new_concepts]
+        concepts = concepts.loc[new_concepts]
 
     # add name column if there isn't one
     if 'name' not in concepts.columns:
@@ -1048,7 +1048,7 @@ def extract_concepts(chef: Chef, ingredients: List[str], result,
     # overwrite some of the types
     if overwrite:
         for k, v in overwrite.items():
-            concepts.ix[k, 'concept_type'] = v
+            concepts.loc[k, 'concept_type'] = v
     if not result:
         result = 'concepts_extracted'
     return ProcedureResult(chef, result, 'concept', data={'concept': concepts.reset_index()})
