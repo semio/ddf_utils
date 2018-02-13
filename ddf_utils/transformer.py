@@ -50,6 +50,10 @@ def _translate_column_inline(df, column, target_column, dictionary,
             # import ipdb; ipdb.set_trace()
             update = pd.DataFrame.from_dict(dictionary, orient='index')
             update.columns = [target_column]
+            try:
+                df_new.compute()
+            except:
+                pass
             df_new = df_new.set_index(column)
             df_new.update(update)
             df_new = df_new.reset_index()
