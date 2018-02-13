@@ -44,10 +44,10 @@ def _translate_column_inline(df, column, target_column, dictionary,
             # create a new column: if a key not in the mappings, return NaN
             df_new[target_column] = df_new[column].map(
                 lambda x: dictionary[x] if x in dictionary.keys() else np.nan)
-        else:  # if a key not in the mappings, use the original value
-            for i, x in df_new[column].iteritems():
-                if x in dictionary.keys():
-                    df_new.loc[i, target_column] = dictionary[x]
+        else:
+            # update existing column: if a key not in the mappings, use the original value
+            df_new[column] = df_new[column].map(
+                lambda x: dictionary[x] if x in dictionary.keys() else x)
 
     return df_new
 
