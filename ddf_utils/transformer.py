@@ -32,6 +32,7 @@ def _translate_column_inline(df, column, target_column, dictionary,
                 else:
                     dictionary.pop(k)
 
+    # TODO: refactor this block
     if not_found == 'drop':
         df_new[target_column] = df_new[column].map(
             lambda x: dictionary[x] if x in dictionary.keys() else None)
@@ -45,9 +46,16 @@ def _translate_column_inline(df, column, target_column, dictionary,
             df_new[target_column] = df_new[column].map(
                 lambda x: dictionary[x] if x in dictionary.keys() else np.nan)
         else:
-            # update existing column: if a key not in the mappings, use the original value
-            df_new[target_column] = df_new[column].map(
-                lambda x: dictionary[x] if x in dictionary.keys() else x)
+            # update existing column: if a key not in the mappings, use the original val
+            # import ipdb; ipdb.set_trace()
+            if target_column == column:
+                df_new[target_column] = df_new[column].replace(dictionary)
+            else:
+                update = pd.DataFrame.from_dict(dictionary, orient='index')
+                update.columns = [target_column]
+                df_new = df_new.set_index(column)
+                df_new.update(update)
+                df_new = df_new.reset_index()
 
     return df_new
 
