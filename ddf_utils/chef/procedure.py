@@ -429,13 +429,12 @@ def filter(chef: Chef, ingredients: List[str], result, **options) -> ProcedureRe
                                 logger.warning("concept {} not found in ingredient {}".format(i, ingredient.ingred_id))
                         res[k] = v[item_list].copy()
                 else:
-                    items_ = item_list.copy()
                     for k, v in data.items():
-                        for i in items_:
+                        for i in item_list:
                             if i not in v.columns:
-                                items_.remove(i)
                                 logger.warning("concept {} not found in ingredient {}".format(i, ingredient.ingred_id))
-                        res[k] = v[v.columns.drop(item_list)].copy()
+                        keep_cols = list(set(v.columns.values) - set(item_list))
+                        res[k] = v[keep_cols].copy()
     else:
         for k, df in data.items():
             res[k] = df.copy()
