@@ -92,6 +92,7 @@ def bulk_download(out_dir, version, context, query=None):
         while res_json['state'] not in success_results:
             print('download is not ready yet, retrying download in 10 seconds...')
             sleep(10)
+            res_json = requests.get(url).json()
 
         if res_json['state'] == success_results[0]:
             continue

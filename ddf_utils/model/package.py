@@ -117,6 +117,7 @@ class Datapackage:
                         "key": pkey
                     })
             else:  # datapoints
+                assert not isinstance(pkey, str)
                 fn = os.path.join(base_dir, r['path'])
                 df = next(pd.read_csv(fn, chunksize=1))
                 indicator_names = list(set(df.columns) - set(pkey))
@@ -125,7 +126,7 @@ class Datapackage:
                     raise ValueError('No indicator in {}'.format(r['path']))
 
                 keys = tuple(sorted(pkey))
-
+                # TODO: if something went wrong, such as there is a typo in pkey, give better message
                 if len(indicator_names) == 1:
                     indicator_name = indicator_names[0]
                     _update_datapoints(fn, keys, indicator_name)
