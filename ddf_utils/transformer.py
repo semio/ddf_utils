@@ -51,7 +51,7 @@ def _translate_column_inline(df, column, target_column, dictionary,
             update = pd.DataFrame.from_dict(dictionary, orient='index')
             update.columns = [target_column]
             try:
-                df_new.compute()
+                df_new = df_new.compute()
             except:
                 pass
             df_new = df_new.set_index(column)
