@@ -109,6 +109,7 @@ class BaseIngredient(object):
                         df_ = df[df[col]=='TRUE'].dropna(axis=1, how='all')
                         df_ = df_.loc[:, lambda x: ~x.columns.str.startswith('is--')].copy()
                         df_[col] = 'TRUE'
+                        df_ = df_.rename({k: s}, axis=1)  # use set name as primary key column name
                         df_.to_csv(path, index=False, encoding='utf8')
                     # serve entities not in any sets
                     is_headers = list(map(lambda x: 'is--'+x, sets))
@@ -122,6 +123,7 @@ class BaseIngredient(object):
                         path = os.path.join(outpath, 'ddf--entities--{}.csv'.format(k))
                         df_noset.to_csv(path, index=False)
             else:
+                # FIXME: is it even possible that self.key(domain) is not same as k?
                 path = os.path.join(outpath, 'ddf--entities--{}--{}.csv'.format(domain, k))
                 df.to_csv(path, index=False, encoding='utf8')
 
