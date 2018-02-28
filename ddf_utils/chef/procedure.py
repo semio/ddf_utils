@@ -273,10 +273,11 @@ def merge(chef: Chef, ingredients: List[str], result, deep=False) -> ProcedureRe
 
 def __get_last_item(ser):
     """get the last valid item of a Series, or Nan."""
-    if ser.last_valid_index() is None:
+    ser_ = ser.dropna()
+    if ser_.last_valid_index() is None:
         return np.nan
     else:
-        return ser[ser.last_valid_index()]
+        return ser_[ser_.last_valid_index()]
 
 
 def _merge_two(left: Dict[str, pd.DataFrame],

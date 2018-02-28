@@ -48,15 +48,11 @@ def _translate_column_inline(df, column, target_column, dictionary,
         else:
             # update existing column: if a key not in the mappings, use the original val
             # import ipdb; ipdb.set_trace()
-            update = pd.DataFrame.from_dict(dictionary, orient='index')
-            update.columns = [target_column]
-            try:
-                df_new = df_new.compute()
-            except:
-                pass
-            df_new = df_new.set_index(column)
-            df_new.update(update)
-            df_new = df_new.reset_index()
+            df_new['__new_col'] = df_new[column].map(
+                lambda x: dictionary[x] if x in dictionary.keys() else np.nan)
+            df_new['__new_col'] = df_new['__new_col'].fillna(df_new[target_column])
+            df_new[target_column] = df_new['__new_col']
+            df_new = df_new.drop('__new_col', axis=1)
 
     return df_new
 
