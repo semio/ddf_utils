@@ -16,7 +16,7 @@ from ddf_utils.model.repo import Repo, is_url
 
 from ..str import format_float_digits
 from .exceptions import IngredientError
-from .helpers import gen_sym, query, read_opt
+from .helpers import gen_sym, query, read_opt, sort_df
 
 
 class BaseIngredient(object):
@@ -78,6 +78,7 @@ class BaseIngredient(object):
                 if v == 'object':
                     df[i] = df[i].str.strip()
             path = os.path.join(outpath, 'ddf--concepts.csv')
+            df = sort_df(df, key='concept')
             df.to_csv(path, index=False, encoding='utf8')
 
     def _serve_entities(self, outpath, **options):
@@ -101,6 +102,7 @@ class BaseIngredient(object):
             if k == domain:
                 if len(sets) == 0:
                     path = os.path.join(outpath, 'ddf--entities--{}.csv'.format(k))
+                    df = sort_df(df, key=domain)
                     df.to_csv(path, index=False, encoding='utf8')
                 else:
                     for s in sets:
@@ -110,6 +112,7 @@ class BaseIngredient(object):
                         df_ = df_.loc[:, lambda x: ~x.columns.str.startswith('is--')].copy()
                         df_[col] = 'TRUE'
                         df_ = df_.rename({k: s}, axis=1)  # use set name as primary key column name
+                        df_ = sort_df(df_, key=s)
                         df_.to_csv(path, index=False, encoding='utf8')
                     # serve entities not in any sets
                     is_headers = list(map(lambda x: 'is--'+x, sets))
@@ -121,10 +124,12 @@ class BaseIngredient(object):
                     if len(noset) > 0:
                         df_noset = df.loc[noset].drop(is_headers, axis=1).dropna(axis=1, how='all')
                         path = os.path.join(outpath, 'ddf--entities--{}.csv'.format(k))
+                        df_noset = sort_df(df_noset, key=domain)
                         df_noset.to_csv(path, index=False)
             else:
                 # FIXME: is it even possible that self.key(domain) is not same as k?
                 path = os.path.join(outpath, 'ddf--entities--{}--{}.csv'.format(domain, k))
+                df = sort_df(df, key=k)
                 df.to_csv(path, index=False, encoding='utf8')
 
     def _serve_datapoints(self, outpath, **options):
@@ -147,6 +152,7 @@ class BaseIngredient(object):
         for k, df in data.items():
             split_by = read_opt(options, 'split_datapoints_by', default=False)
             by = self.key_to_list()
+            df = sort_df(df, key=by)
             if not split_by:
                 columns = [*by, k]
                 path = os.path.join(

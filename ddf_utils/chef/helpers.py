@@ -51,6 +51,20 @@ def prompt_select(selects, text_before=None):
     return selects[val-1]
 
 
+def sort_df(df, key):
+    if isinstance(key, str):
+        key = [key]
+
+    cols_minus_key = df.head().set_index(key).columns.values.tolist()
+
+    cols_minus_key.sort()
+    key.sort()
+    cols_new = [*key, *cols_minus_key]
+    df = df.sort_values(by=key)
+
+    return df[cols_new]
+
+
 def read_opt(options, key, required=False, default=None):
     """utility to read an attribute from an options dictionary
 
@@ -186,6 +200,7 @@ def query(df, conditions, available_scopes=None):
         return df
     return df.query(q)
 
+
 def debuggable(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
@@ -206,6 +221,10 @@ def debuggable(func):
                     os.mkdir(outpath)
                 result.serve(outpath)
         else:
+            if 'breakpoint' in kwargs.keys():
+                bk = kwargs.pop('breakpoint')
+                if bk:
+                    import ipdb; ipdb.set_trace()
             result = func(*args, **kwargs)
         return result
     return wrapper
