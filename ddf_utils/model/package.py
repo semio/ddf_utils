@@ -113,7 +113,7 @@ class Datapackage:
                 entities_.append(
                     {
                         # "data": pd.read_csv(osp.join(base_dir, r['path']), dtype={pkey: str}),
-                        "data": pd.read_csv(osp.join(base_dir, r['path']), dtype=str),  # read all as string
+                        "data": pd.read_csv(osp.join(base_dir, r['path']), dtype=str, encoding='utf8'),  # read all as string
                         "key": pkey
                     })
             else:  # datapoints
