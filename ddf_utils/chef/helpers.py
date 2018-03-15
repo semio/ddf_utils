@@ -60,6 +60,10 @@ def sort_df(df, key):
     cols_minus_key.sort()
     key.sort()
     cols_new = [*key, *cols_minus_key]
+
+    for c in key:
+        df[c] = df[c].astype('str')
+
     df = df.sort_values(by=key)
 
     return df[cols_new]
