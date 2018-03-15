@@ -137,9 +137,9 @@ class Datapackage:
         # datapoints
         for i, kvs in datapoints.items():
             for k, l in kvs.items():
-                dtypes = dict([x, 'str'] for x in i)
+                dtypes = dict([x, 'category'] for x in i)
                 for tc in time_concepts:
-                    dtypes[tc] = int  # TODO: maybe there are other time format?
+                    dtypes[tc] = 'uint16'  # TODO: maybe there are other time format?
                 cols = list(i + tuple([k]))
 
                 if not no_datapoints:
@@ -217,7 +217,7 @@ class Datapackage:
                 entity_value_cache[domain][row[domain]] = tuple(sets)
 
         all_entity_concepts = cdf[cdf.concept_type.isin(['entity_set', 'entity_domain'])].index
-        dtypes = dict([(c, 'str') for c in all_entity_concepts])  # set all entity column to string type
+        dtypes = dict([(c, 'category') for c in all_entity_concepts])  # set all entity column to string type
 
         def _which_sets(entity_, domain_):
             try:
