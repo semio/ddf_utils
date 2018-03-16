@@ -604,7 +604,7 @@ def flatten(chef: Chef, ingredients: List[str], result, **options) -> ProcedureR
                 if skip_totals_among_entities is not None:
                     for e in skip_totals_among_entities:
                         new_name = new_name.replace('_'+e, '')
-                    logger.info(f'new name w/o total among entities is {new_name}')
+                    logger.info('new name w/o total among entities is {}'.format(new_name))
                 if new_name in res.keys():
                     raise ProcedureError("{} already created! check your name template please.".format(new_name))
                 res[new_name] = df_.rename(columns={from_name: new_name}).drop(flatten_dimensions, axis=1)
