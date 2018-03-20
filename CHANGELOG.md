@@ -1,3 +1,11 @@
+## version 0.4.0 2018-03-20
+
+- use dask and categorical types to improve memory usage (#90)
+- sorting column/row order before serving result in Chef
+- add `breakpoint` option to chef procedures to stop and debug chef
+- add data/metadata downloading functions to various data sources
+- minor changes and improvments
+
 ## version 0.3.3 2017-11-29
 
 - new support Hy mode
