@@ -1,6 +1,14 @@
 """APIs for chef"""
 
+import logging
+
+import coloredlogs
+
 from ddf_utils.chef.cook import Chef
+
+# logger = logging.getLogger('Chef')
+
+coloredlogs.install(level=None, fmt='%(asctime)s %(levelname)s %(message)s')
 
 
 def run_recipe(fn, ddf_dir, out_dir):

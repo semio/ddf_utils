@@ -2,16 +2,19 @@
 
 
 import os
+
 import ruamel.yaml as yaml
+
 from ddf_utils.chef.api import Chef
+from ddf_utils.chef.exceptions import ChefRuntimeError, IngredientError
 from ddf_utils.chef.ingredient import Ingredient
-from ddf_utils.chef.exceptions import IngredientError, ChefRuntimeError
 
 wd = os.path.dirname(__file__)
 
 
 def test_chef_api_call():
     from ddf_utils.chef.dag import DAG
+    from ddf_utils.chef.ingredient import ProcedureResult
     # create empty chef
     dag = DAG()
     Chef(dag=dag, metadata={}, config={}, cooking={}, serving=[])
@@ -29,11 +32,9 @@ def test_chef_api_call():
                            result='bp-datapoints-translate',
                            options={'dictionary': {'geo': 'country'}}))
 
-    from ddf_utils.chef.ingredient import ProcedureResult
-
     def multiply_1000(chef, ingredients, result, **options):
-        ingredients = [chef.dag.get_node(x) for x in ingredients]
-        ingredient = ingredients[0].evaluate()
+        # ingredients = [chef.dag.get_node(x) for x in ingredients]
+        ingredient = ingredients[0]
 
         new_data = dict()
         for k, df in ingredient.get_data().items():
@@ -49,6 +50,8 @@ def test_chef_api_call():
                        ingredients=['bp-datapoints-translate'],
                        result='res')
 
+    chef.serving
+    chef.add_dish(['bp-datapoints-translate'], options={})
     chef.to_graph()
     chef.to_graph(node='res')
     chef.to_recipe()

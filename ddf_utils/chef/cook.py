@@ -10,6 +10,8 @@ from collections import Mapping
 from copy import deepcopy
 from time import time
 
+from dask import delayed
+
 import ruamel.yaml as yaml
 from graphviz import Digraph
 
@@ -227,6 +229,13 @@ class Chef:
                         add_dependency(self.dag, options[opt][ingredient_key], pnode)
         return self
 
+    def add_dish(self, ingredients, options=None):
+        existing_dish = [x['id'] for x in self._serving]
+        for ing in ingredients:
+            if ing in existing_dish:
+                logger.warning('dish already exist: {}, skipping...'.format(ing))
+            self._serving.append({'id': ing, 'options': options})
+
     @staticmethod
     def register_procedure(func):
         from ddf_utils.chef import procedure as pc
@@ -236,18 +245,24 @@ class Chef:
     def run(self, serve=False, outpath=None):
         self.validate()
 
-        results = list()
+        results = [self.dag.get_node(x['id']).evaluate() for x in self.serving]
 
-        for dish in self.serving:
-            dish_result = self.dag.get_node(dish['id']).evaluate()
-            results.append(dish_result)
-            if serve:
-                if not outpath:
-                    outpath = self.config.get('out_dir', './')
-                if 'options' in dish:
-                    dish_result.serve(outpath, **dish['options'])
-                else:
-                    dish_result.serve(outpath)
+        if serve:
+            if not outpath:
+                outpath = self.config.get('out_dir', './')
+
+            @delayed
+            def _serve_all(dishes):
+                for dish in dishes:
+                    dish_result = self.dag.get_node(dish['id']).evaluate()
+
+                    if 'options' in dish and dish['options'] is not None:
+                        dish_result.serve(outpath, **dish['options'])
+                    else:
+                        dish_result.serve(outpath)
+
+            _serve_all(self.serving).compute()
+
         return results
 
     def to_recipe(self, fp=None):

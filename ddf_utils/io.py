@@ -40,7 +40,11 @@ def cleanup(path, how='ddf'):
     if how == 'ddf':
         for f in os.listdir(path):
             if f.startswith("ddf--"):
-                os.remove(os.path.join(path, f))
+                p = os.path.join(path, f)
+                if os.path.isdir(p):
+                    shutil.rmtree(p)
+                else:
+                    os.remove(p)
         # TODO: think a best way to handle metadata in datapackage.json
         # if os.path.exists(os.path.join(path, 'datapackage.json')):
         #     os.remove(os.path.join(path, 'datapackage.json'))

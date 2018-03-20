@@ -1,15 +1,27 @@
 # -*- coding: utf-8 -*-
 
-import hashlib
-import logging
 import os
 import sys
+import hashlib
+import logging
 from functools import wraps, partial
 from collections import Sequence, Mapping
 from time import time
-from . import ops
+
 import click
 import numpy as np
+import pandas as pd
+import dask.dataframe as dd
+
+from . import ops
+
+
+def create_dsk(data, parts=10):
+    # TODO: check the best parts to use
+    for k, v in data.items():
+        if isinstance(v, pd.DataFrame):
+            data[k] = dd.from_pandas(v, npartitions=parts)
+    return data
 
 
 def prompt_select(selects, text_before=None):
@@ -37,6 +49,24 @@ def prompt_select(selects, text_before=None):
     if val == -1:
         return -1
     return selects[val-1]
+
+
+def sort_df(df, key):
+    if isinstance(key, str):
+        key = [key]
+
+    cols_minus_key = df.head().set_index(key).columns.values.tolist()
+
+    cols_minus_key.sort()
+    key.sort()
+    cols_new = [*key, *cols_minus_key]
+
+    for c in key:
+        df[c] = df[c].astype('str')
+
+    df = df.sort_values(by=key)
+
+    return df[cols_new]
 
 
 def read_opt(options, key, required=False, default=None):
@@ -174,6 +204,7 @@ def query(df, conditions, available_scopes=None):
         return df
     return df.query(q)
 
+
 def debuggable(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
@@ -194,6 +225,10 @@ def debuggable(func):
                     os.mkdir(outpath)
                 result.serve(outpath)
         else:
+            if 'breakpoint' in kwargs.keys():
+                bk = kwargs.pop('breakpoint')
+                if bk:
+                    import ipdb; ipdb.set_trace()
             result = func(*args, **kwargs)
         return result
     return wrapper

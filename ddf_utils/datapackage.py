@@ -7,7 +7,7 @@ import logging
 import os
 import re
 from collections import OrderedDict
-from datetime import datetime
+from datetime import datetime, timezone
 
 from .model.package import Datapackage
 
@@ -126,7 +126,7 @@ def create_datapackage(path, gen_schema=True, **kwargs):
         datapackage[k] = kwargs[k]
 
     # update the last updated time
-    datapackage['last_updated'] = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+    datapackage['created'] = datetime.utcnow().replace(tzinfo=timezone.utc).isoformat()
 
     # generate resources
     resources = []

@@ -15,10 +15,10 @@ this = sys.modules[__name__]
 def _gen_indicator_key_list(d):
     for k, v in d.items():
         for i in v:
-            yield (k, i)
+            yield (i, k)
 
 
-def compare_with_func(dataset1, dataset2, fns=['rval', 'avg_pct_chg'],
+def compare_with_func(dataset1, dataset2, fns=['rmse', 'nrmse'],
                       indicators=None, key=None):
     """compare 2 datasets with functions"""
 
@@ -53,17 +53,17 @@ def compare_with_func(dataset1, dataset2, fns=['rval', 'avg_pct_chg'],
         # FIXME: support multiple indicator in one file
         # like the indicators in ddf--sodertorn--stockholm_lan_basomrade
         try:
-            i1 = dataset1.get_datapoint_df(indicator, k).set_index(list(k))
+            i1 = dataset1.get_datapoint_df(indicator, k).compute().set_index(list(k))
         except KeyError:
             raise
         try:
-            i2 = dataset2.get_datapoint_df(indicator, k).set_index(list(k))
+            i2 = dataset2.get_datapoint_df(indicator, k).compute().set_index(list(k))
         except KeyError:
             raise
         # i1 = i1.rename(columns={indicator: 'old'})
         # i2 = i2.rename(columns={indicator: 'new'})
         # comp = pd.concat([i1, i2], axis=1)
-        comp = i1.join(i2, lsuffix='_old', rsuffix='_new')
+        comp = i1.join(i2, how='outer', lsuffix='_old', rsuffix='_new')
 
         return comp
 
@@ -99,21 +99,43 @@ def compare_with_func(dataset1, dataset2, fns=['rval', 'avg_pct_chg'],
     return result.reset_index()
 
 
-def rval(comp_df, indicator):
+def rval(comp_df, indicator, on='geo'):
     """return r-value between old and new data"""
     old_name = indicator+'_old'
     new_name = indicator+'_new'
     # logger.warning("{}".format(old_name, new_name))
     # logger.warning("{}".format(comp_df.columns))
-    return comp_df.corr().ix[old_name, new_name]
+
+    def f(df):
+        df_ = df - df.shift(1)
+        r = df_.corr().ix[old_name, new_name]
+        return r
+
+    level = comp_df.index.names.index(on)
+    res = comp_df.groupby(level=level).apply(f)
+
+    return res.mean()
 
 
-def avg_pct_chg(comp_df, indicator):
+def avg_pct_chg(comp_df, indicator, on='geo'):
     """return average precentage changes between old and new data"""
     old_name = indicator+'_old'
     new_name = indicator+'_new'
-    res = (comp_df[new_name] - comp_df[old_name]) / comp_df[old_name] * 100
-    return res.replace([np.inf, -np.inf], np.nan).mean()
+    level = comp_df.index.names.index(on)
+
+    def f(df):
+        new = df[new_name]
+        old = df[old_name]
+        chg = (new - old) / old * 100
+
+        return chg.replace([np.inf, -np.inf], np.nan).mean()
+
+    # if indicator == 'births_attended_by_skilled_health_staff_percent_of_total':
+    #     import ipdb; ipdb.set_trace()
+
+    res = comp_df.groupby(level=level).apply(f)
+
+    return res.abs().mean()
 
 
 def max_pct_chg(comp_df, indicator):
@@ -122,16 +144,16 @@ def max_pct_chg(comp_df, indicator):
     new_name = indicator+'_new'
     res = (comp_df[new_name] - comp_df[old_name]) / comp_df[old_name] * 100
     res = res.replace([np.inf, -np.inf], np.nan)
-    return res.max()
+    return res.abs().max()
 
 
-def min_pct_chg(comp_df, indicator):
-    """return average precentage changes between old and new data"""
-    old_name = indicator+'_old'
-    new_name = indicator+'_new'
-    res = (comp_df[new_name] - comp_df[old_name]) / comp_df[old_name] * 100
-    res = res.replace([np.inf, -np.inf], np.nan)
-    return res.min()
+# def min_pct_chg(comp_df, indicator):
+#     """return average precentage changes between old and new data"""
+#     old_name = indicator+'_old'
+#     new_name = indicator+'_new'
+#     res = (comp_df[new_name] - comp_df[old_name]) / comp_df[old_name] * 100
+#     res = res.replace([np.inf, -np.inf], np.nan)
+#     return res.min()
 
 
 def max_change_index(comp_df, indicator):
@@ -146,3 +168,38 @@ def max_change_index(comp_df, indicator):
         return ''
     idx = diff[diff == diff.max()].index.values[0]
     return str(idx)
+
+
+def rmse(comp_df, indicator):
+    old_name = indicator+'_old'
+    new_name = indicator+'_new'
+    diff_2 = np.power(comp_df[new_name] - comp_df[old_name], 2)
+    rmse_val = np.sqrt(np.sum(diff_2) / len(diff_2))
+
+    return rmse_val
+
+
+def nrmse(comp_df, indicator):
+    old_name = indicator+'_old'
+    new_name = indicator+'_new'
+
+    rmse_val = rmse(comp_df, indicator)
+    nrmse_val = rmse_val / (comp_df[old_name].max() - comp_df[new_name].min())
+
+    return nrmse_val
+
+
+def new_datapoints(comp_df, indicator):
+    old_name = indicator+'_old'
+    new_name = indicator+'_new'
+
+    count = comp_df[new_name].isnull().sum()
+    return count
+
+
+def dropped_datapoints(comp_df, indicator):
+    old_name = indicator+'_old'
+    new_name = indicator+'_new'
+
+    count = comp_df[old_name].isnull().sum()
+    return count

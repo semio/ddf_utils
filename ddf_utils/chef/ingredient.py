@@ -10,12 +10,13 @@ from collections import Mapping, Sequence
 import numpy as np
 import pandas as pd
 
+import dask.dataframe as dd
 from ddf_utils.model.package import Datapackage
 from ddf_utils.model.repo import Repo, is_url
 
 from ..str import format_float_digits
 from .exceptions import IngredientError
-from .helpers import gen_sym, query, read_opt
+from .helpers import gen_sym, query, read_opt, sort_df
 
 
 class BaseIngredient(object):
@@ -46,24 +47,26 @@ class BaseIngredient(object):
         """helper function: make a list that contains primaryKey of this ingredient"""
         return [x.strip() for x in self.key.split(',')]
 
-    def get_data(self):
-        return self.data
-
-    def copy_data(self):
-        """this function makes copy of self.data.
-        """
+    def compute(self):
+        res = dict()
         if self.data is None:
             self.get_data()
-        # v: DataFrame. DataFrame.copy() is by default deep copy,
-        # but I just call it explicitly here.
-        return dict((k, v.copy(deep=True)) for k, v in self.data.items())
+        for k, v in self.data.items():
+            if isinstance(v, dd.DataFrame):
+                res[k] = v.compute()
+            else:
+                res[k] = v
+        return res
+
+    def get_data(self):
+        return self.data
 
     def reset_data(self):
         self.data = None
         return
 
     def _serve_concepts(self, outpath, **options):
-        data = self.copy_data()
+        data = self.compute()
         assert isinstance(data, dict)
         assert len(data) == 1
         for _, df in data.items():
@@ -75,10 +78,11 @@ class BaseIngredient(object):
                 if v == 'object':
                     df[i] = df[i].str.strip()
             path = os.path.join(outpath, 'ddf--concepts.csv')
+            df = sort_df(df, key='concept')
             df.to_csv(path, index=False, encoding='utf8')
 
     def _serve_entities(self, outpath, **options):
-        data = self.copy_data()
+        data = self.compute()
         assert isinstance(data, dict)
         assert len(data) == 1
         sets = []
@@ -98,6 +102,7 @@ class BaseIngredient(object):
             if k == domain:
                 if len(sets) == 0:
                     path = os.path.join(outpath, 'ddf--entities--{}.csv'.format(k))
+                    df = sort_df(df, key=domain)
                     df.to_csv(path, index=False, encoding='utf8')
                 else:
                     for s in sets:
@@ -106,6 +111,8 @@ class BaseIngredient(object):
                         df_ = df[df[col]=='TRUE'].dropna(axis=1, how='all')
                         df_ = df_.loc[:, lambda x: ~x.columns.str.startswith('is--')].copy()
                         df_[col] = 'TRUE'
+                        df_ = df_.rename({k: s}, axis=1)  # use set name as primary key column name
+                        df_ = sort_df(df_, key=s)
                         df_.to_csv(path, index=False, encoding='utf8')
                     # serve entities not in any sets
                     is_headers = list(map(lambda x: 'is--'+x, sets))
@@ -117,13 +124,16 @@ class BaseIngredient(object):
                     if len(noset) > 0:
                         df_noset = df.loc[noset].drop(is_headers, axis=1).dropna(axis=1, how='all')
                         path = os.path.join(outpath, 'ddf--entities--{}.csv'.format(k))
+                        df_noset = sort_df(df_noset, key=domain)
                         df_noset.to_csv(path, index=False)
             else:
+                # FIXME: is it even possible that self.key(domain) is not same as k?
                 path = os.path.join(outpath, 'ddf--entities--{}--{}.csv'.format(domain, k))
+                df = sort_df(df, key=k)
                 df.to_csv(path, index=False, encoding='utf8')
 
     def _serve_datapoints(self, outpath, **options):
-        data = self.copy_data()
+        data = self.compute()
         assert isinstance(data, dict)
         digits = read_opt(options, 'digits', default=5)
 
@@ -142,6 +152,7 @@ class BaseIngredient(object):
         for k, df in data.items():
             split_by = read_opt(options, 'split_datapoints_by', default=False)
             by = self.key_to_list()
+            df = sort_df(df, key=by)
             if not split_by:
                 columns = [*by, k]
                 path = os.path.join(
@@ -487,9 +498,10 @@ class Ingredient(BaseIngredient):
         """read in and return the ingredient data
         """
         if self._ddf_id:
-            return self._get_data_ddf(copy, key_as_index)
+            self.data = self._get_data_ddf(copy, key_as_index)
         else:
-            return self._get_data_external(copy, key_as_index)
+            self.data = self._get_data_external(copy, key_as_index)
+        return self.data
 
     def _get_data_external(self, copy=False, key_as_index=False):
         """read data from csv or on-the-fly"""

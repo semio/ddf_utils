@@ -254,7 +254,7 @@ def diff(dataset1, dataset2, git, checkout_path, diff_only):
 
     if git:
         from subprocess import check_output
-        assert is_dataset('./')
+        assert is_dataset('./'), 'please run this command in a dataset dir.'
 
         c1 = check_output(['git', 'rev-parse', dataset1])
         p1 = c1.strip().decode('utf8')
@@ -265,14 +265,16 @@ def diff(dataset1, dataset2, git, checkout_path, diff_only):
         try:
             os.makedirs(join(checkout_path, p1))
             logging.info('checkout git rev {} into {}'.format(dataset1, join(checkout_path, p1)))
-            os.system('git --work-tree={} checkout {} -- .'.format(join(checkout_path, p1), p1))
+            os.system('git checkout {}'.format(p1))
+            os.system('git checkout-index -a -f --prefix={}/'.format(join(checkout_path, p1)))
         except FileExistsError:
             pass
 
         try:
             os.makedirs(join(checkout_path, p2))
             logging.info('checkout git rev {} into {}'.format(dataset2, join(checkout_path, p2)))
-            os.system('git --work-tree={} checkout {} -- .'.format(join(checkout_path, p2), p2))
+            os.system('git checkout {}'.format(p2))
+            os.system('git checkout-index -a -f --prefix={}/'.format(join(checkout_path, p2)))
         except FileExistsError:
             pass
 
@@ -290,10 +292,11 @@ def diff(dataset1, dataset2, git, checkout_path, diff_only):
     cols = result.columns
 
     # sort it
-    result = result.sort_values(by='rval', ascending=False).set_index('indicator')
+    result = result.sort_values(by='indicator', ascending=True).set_index('indicator')
 
-    click.echo(tabulate.tabulate(result,
-                                 headers=cols, tablefmt='psql'))
+    # click.echo(tabulate.tabulate(result,
+    #                              headers=cols, tablefmt='psql'))
+    click.echo(result.to_csv())
 
 
 # csv to ddfcsv

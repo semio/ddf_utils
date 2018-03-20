@@ -140,7 +140,7 @@ class ProcedureNode(BaseNode):
         except TypeError:
             raise ProcedureError("Procedure Error: " + str(self.node_id))
 
-        ingredients = self.procedure['ingredients']
+        ingredients = [self.dag.get_node(x).evaluate() for x in self.procedure['ingredients']]
         if 'options' in self.procedure.keys():
             options = self.procedure['options']
             self.result_ingredient = func(self.chef, ingredients, result=self.procedure['result'], **options)
