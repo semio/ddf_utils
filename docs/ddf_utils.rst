@@ -9,6 +9,7 @@ Subpackages
 
    ddf_utils.chef
    ddf_utils.model
+   ddf_utils.factory
 
 Submodules
 ----------
@@ -77,4 +78,3 @@ ddf_utils.transformer module
     :members:
     :undoc-members:
     :show-inheritance:
-
