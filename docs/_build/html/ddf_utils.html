@@ -99,6 +99,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#subpackages">Subpackages</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="ddf_utils.chef.html">ddf_utils.chef package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="ddf_utils.model.html">ddf_utils.model package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ddf_utils.factory.html">ddf_utils.factory package</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#submodules">Submodules</a></li>
@@ -114,6 +115,7 @@
 </li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="utils.html">Use ddf_utils for ETL tasks</a></li>
 </ul>
 
             
@@ -200,6 +202,18 @@
 <li class="toctree-l2"><a class="reference internal" href="ddf_utils.model.html#submodules">Submodules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ddf_utils.model.html#module-ddf_utils.model.ddf">ddf_utils.model.ddf module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ddf_utils.model.html#module-ddf_utils.model.package">ddf_utils.model.package module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ddf_utils.factory.html">ddf_utils.factory package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ddf_utils.factory.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ddf_utils.factory.html#module-ddf_utils.factory.cdiac">ddf_utils.factory.cdiac module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ddf_utils.factory.html#module-ddf_utils.factory.clio_infra">ddf_utils.factory.clio_infra module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ddf_utils.factory.html#module-ddf_utils.factory.igme">ddf_utils.factory.igme module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ddf_utils.factory.html#id1">ddf_utils.factory.igme module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ddf_utils.factory.html#module-ddf_utils.factory.ihme">ddf_utils.factory.ihme module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ddf_utils.factory.html#module-ddf_utils.factory.ilo">ddf_utils.factory.ilo module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ddf_utils.factory.html#module-ddf_utils.factory.oecd">ddf_utils.factory.oecd module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ddf_utils.factory.html#module-ddf_utils.factory.worldbank">ddf_utils.factory.worldbank module</a></li>
 </ul>
 </li>
 </ul>
@@ -376,15 +390,20 @@ more on the diff format, see: <a class="reference external" href="http://specs.f
 <p>QA functioins.</p>
 <dl class="function">
 <dt id="ddf_utils.qa.avg_pct_chg">
-<code class="descclassname">ddf_utils.qa.</code><code class="descname">avg_pct_chg</code><span class="sig-paren">(</span><em>comp_df</em>, <em>indicator</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.qa.avg_pct_chg" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.qa.</code><code class="descname">avg_pct_chg</code><span class="sig-paren">(</span><em>comp_df</em>, <em>indicator</em>, <em>on='geo'</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.qa.avg_pct_chg" title="Permalink to this definition">¶</a></dt>
 <dd><p>return average precentage changes between old and new data</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.qa.compare_with_func">
-<code class="descclassname">ddf_utils.qa.</code><code class="descname">compare_with_func</code><span class="sig-paren">(</span><em>dataset1, dataset2, fns=['rval', 'avg_pct_chg'], indicators=None, key=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.qa.compare_with_func" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.qa.</code><code class="descname">compare_with_func</code><span class="sig-paren">(</span><em>dataset1, dataset2, fns=['rmse', 'nrmse'], indicators=None, key=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.qa.compare_with_func" title="Permalink to this definition">¶</a></dt>
 <dd><p>compare 2 datasets with functions</p>
 </dd></dl>
+
+<dl class="function">
+<dt id="ddf_utils.qa.dropped_datapoints">
+<code class="descclassname">ddf_utils.qa.</code><code class="descname">dropped_datapoints</code><span class="sig-paren">(</span><em>comp_df</em>, <em>indicator</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.qa.dropped_datapoints" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.qa.max_change_index">
@@ -398,14 +417,23 @@ more on the diff format, see: <a class="reference external" href="http://specs.f
 </dd></dl>
 
 <dl class="function">
-<dt id="ddf_utils.qa.min_pct_chg">
-<code class="descclassname">ddf_utils.qa.</code><code class="descname">min_pct_chg</code><span class="sig-paren">(</span><em>comp_df</em>, <em>indicator</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.qa.min_pct_chg" title="Permalink to this definition">¶</a></dt>
-<dd><p>return average precentage changes between old and new data</p>
-</dd></dl>
+<dt id="ddf_utils.qa.new_datapoints">
+<code class="descclassname">ddf_utils.qa.</code><code class="descname">new_datapoints</code><span class="sig-paren">(</span><em>comp_df</em>, <em>indicator</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.qa.new_datapoints" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ddf_utils.qa.nrmse">
+<code class="descclassname">ddf_utils.qa.</code><code class="descname">nrmse</code><span class="sig-paren">(</span><em>comp_df</em>, <em>indicator</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.qa.nrmse" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ddf_utils.qa.rmse">
+<code class="descclassname">ddf_utils.qa.</code><code class="descname">rmse</code><span class="sig-paren">(</span><em>comp_df</em>, <em>indicator</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.qa.rmse" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.qa.rval">
-<code class="descclassname">ddf_utils.qa.</code><code class="descname">rval</code><span class="sig-paren">(</span><em>comp_df</em>, <em>indicator</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.qa.rval" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.qa.</code><code class="descname">rval</code><span class="sig-paren">(</span><em>comp_df</em>, <em>indicator</em>, <em>on='geo'</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.qa.rval" title="Permalink to this definition">¶</a></dt>
 <dd><p>return r-value between old and new data</p>
 </dd></dl>
 
@@ -567,7 +595,7 @@ avaliable options are <cite>drop</cite>, <cite>error</cite>, <cite>include</cite
 
 <dl class="function">
 <dt id="ddf_utils.transformer.trend_bridge">
-<code class="descclassname">ddf_utils.transformer.</code><code class="descname">trend_bridge</code><span class="sig-paren">(</span><em>old_data: &lt;Mock name='mock.Series' id='4385919048'&gt;</em>, <em>new_data: &lt;Mock name='mock.Series' id='4385919048'&gt;</em>, <em>bridge_length: int</em><span class="sig-paren">)</span> &#x2192; &lt;Mock name='mock.Series' id='4385919048'&gt;<a class="headerlink" href="#ddf_utils.transformer.trend_bridge" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.transformer.</code><code class="descname">trend_bridge</code><span class="sig-paren">(</span><em>old_data: &lt;Mock name='mock.Series' id='4497766832'&gt;</em>, <em>new_data: &lt;Mock name='mock.Series' id='4497766832'&gt;</em>, <em>bridge_length: int</em><span class="sig-paren">)</span> &#x2192; &lt;Mock name='mock.Series' id='4497766832'&gt;<a class="headerlink" href="#ddf_utils.transformer.trend_bridge" title="Permalink to this definition">¶</a></dt>
 <dd><p>smoothing data between series.</p>
 <p>To avoid getting artificial stairs in the data, we smooth between to
 series. Sometime one source is systematically higher than another source,

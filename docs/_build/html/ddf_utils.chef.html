@@ -211,6 +211,11 @@
 </dd></dl>
 
 <dl class="method">
+<dt id="ddf_utils.chef.cook.Chef.add_dish">
+<code class="descname">add_dish</code><span class="sig-paren">(</span><em>ingredients</em>, <em>options=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.cook.Chef.add_dish" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
 <dt id="ddf_utils.chef.cook.Chef.add_ingredient">
 <code class="descname">add_ingredient</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.cook.Chef.add_ingredient" title="Permalink to this definition">¶</a></dt>
 <dd><p>add a new ingredient in DAG.</p>
@@ -295,7 +300,7 @@ doc for available keywords</p>
 <p>commonly used calculation methods</p>
 <dl class="function">
 <dt id="ddf_utils.chef.ops.aagr">
-<code class="descclassname">ddf_utils.chef.ops.</code><code class="descname">aagr</code><span class="sig-paren">(</span><em>df: &lt;Mock name='mock.DataFrame' id='4563052528'&gt;</em>, <em>window: int = 10</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.ops.aagr" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.chef.ops.</code><code class="descname">aagr</code><span class="sig-paren">(</span><em>df: &lt;Mock name='mock.DataFrame' id='4570443224'&gt;</em>, <em>window: int = 10</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.ops.aagr" title="Permalink to this definition">¶</a></dt>
 <dd><p>average annual growth rate</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -340,10 +345,9 @@ doc for available keywords</p>
 <em class="property">class </em><code class="descclassname">ddf_utils.chef.ingredient.</code><code class="descname">BaseIngredient</code><span class="sig-paren">(</span><em>chef</em>, <em>ingred_id</em>, <em>key</em>, <em>data=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.ingredient.BaseIngredient" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <dl class="method">
-<dt id="ddf_utils.chef.ingredient.BaseIngredient.copy_data">
-<code class="descname">copy_data</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.ingredient.BaseIngredient.copy_data" title="Permalink to this definition">¶</a></dt>
-<dd><p>this function makes copy of self.data.</p>
-</dd></dl>
+<dt id="ddf_utils.chef.ingredient.BaseIngredient.compute">
+<code class="descname">compute</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.ingredient.BaseIngredient.compute" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="attribute">
 <dt id="ddf_utils.chef.ingredient.BaseIngredient.dtype">
@@ -730,6 +734,9 @@ the result as new ingredient.</p>
         <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">entity_2</span>
     <span class="l l-Scalar l-Scalar-Plain">dictionary</span><span class="p p-Indicator">:</span>
         <span class="s">&quot;concept_name_wildcard&quot;</span><span class="p p-Indicator">:</span> <span class="s">&quot;new_concept_name_template&quot;</span>
+    <span class="l l-Scalar l-Scalar-Plain">skip_totals_among_entities</span><span class="p p-Indicator">:</span>
+        <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">entity_1</span>
+        <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">entity_2</span>
 </pre></div>
 </div>
 <p>The <code class="docutils literal"><span class="pre">dictionary</span></code> can have multiple entries, for each entry the concepts that matches the key in wildcard
@@ -743,6 +750,7 @@ will be provided with a dictionary contains <code class="docutils literal"><span
 <li><strong>chef</strong> (<a class="reference internal" href="#ddf_utils.chef.cook.Chef" title="ddf_utils.chef.cook.Chef"><em>Chef</em></a>) – the Chef instance</li>
 <li><strong>ingredients</strong> (<em>list</em>) – a list of ingredients</li>
 <li><strong>result</strong> (<cite>str</cite>) – id of result ingredient</li>
+<li><strong>skip_totals_among_entities</strong> (<em>list</em>) – a list of total among entities, which we don’t add to new indicator names</li>
 </ul>
 </td>
 </tr>
@@ -1288,6 +1296,11 @@ other nodes’ data. Other nodes will be evaluated if when necessary.</p>
 <div class="section" id="module-ddf_utils.chef.helpers">
 <span id="ddf-utils-chef-helpers-module"></span><h2>ddf_utils.chef.helpers module<a class="headerlink" href="#module-ddf_utils.chef.helpers" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
+<dt id="ddf_utils.chef.helpers.create_dsk">
+<code class="descclassname">ddf_utils.chef.helpers.</code><code class="descname">create_dsk</code><span class="sig-paren">(</span><em>data</em>, <em>parts=10</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.helpers.create_dsk" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
 <dt id="ddf_utils.chef.helpers.debuggable">
 <code class="descclassname">ddf_utils.chef.helpers.</code><code class="descname">debuggable</code><span class="sig-paren">(</span><em>func</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.helpers.debuggable" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -1377,6 +1390,11 @@ from numpy or <code class="xref py py-mod docutils literal"><span class="pre">dd
 </tbody>
 </table>
 </dd></dl>
+
+<dl class="function">
+<dt id="ddf_utils.chef.helpers.sort_df">
+<code class="descclassname">ddf_utils.chef.helpers.</code><code class="descname">sort_df</code><span class="sig-paren">(</span><em>df</em>, <em>key</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.helpers.sort_df" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 </div>
 </div>

@@ -93,6 +93,7 @@
 <li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="recipe.html">Recipe Cookbook (draft)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="modules.html">API References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="utils.html">Use ddf_utils for ETL tasks</a></li>
 </ul>
 
             
@@ -137,7 +138,7 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-      <li>Index</li>
+      <li></li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -191,6 +192,8 @@
 </li>
       <li><a href="ddf_utils.chef.html#ddf_utils.chef.dag.DAG.add_dependency">add_dependency() (ddf_utils.chef.dag.DAG method)</a>
 </li>
+      <li><a href="ddf_utils.chef.html#ddf_utils.chef.cook.Chef.add_dish">add_dish() (ddf_utils.chef.cook.Chef method)</a>
+</li>
       <li><a href="ddf_utils.chef.html#ddf_utils.chef.dag.BaseNode.add_downstream">add_downstream() (ddf_utils.chef.dag.BaseNode method)</a>
 </li>
       <li><a href="ddf_utils.chef.html#ddf_utils.chef.cook.Chef.add_ingredient">add_ingredient() (ddf_utils.chef.cook.Chef method)</a>
@@ -217,12 +220,26 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="ddf_utils.chef.html#ddf_utils.chef.ingredient.BaseIngredient">BaseIngredient (class in ddf_utils.chef.ingredient)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="ddf_utils.chef.html#ddf_utils.chef.dag.BaseNode">BaseNode (class in ddf_utils.chef.dag)</a>
 </li>
       <li><a href="ddf_utils.chef.html#ddf_utils.chef.ops.between">between() (in module ddf_utils.chef.ops)</a>
 </li>
+      <li><a href="ddf_utils.factory.html#ddf_utils.factory.cdiac.bulk_download">bulk_download() (in module ddf_utils.factory.cdiac)</a>
+
+      <ul>
+        <li><a href="ddf_utils.factory.html#ddf_utils.factory.clio_infra.bulk_download">(in module ddf_utils.factory.clio_infra)</a>
+</li>
+        <li><a href="ddf_utils.factory.html#ddf_utils.factory.igme.bulk_download">(in module ddf_utils.factory.igme)</a>, <a href="ddf_utils.factory.html#ddf_utils.factory.igme.bulk_download">[1]</a>
+</li>
+        <li><a href="ddf_utils.factory.html#ddf_utils.factory.ihme.bulk_download">(in module ddf_utils.factory.ihme)</a>
+</li>
+        <li><a href="ddf_utils.factory.html#ddf_utils.factory.ilo.bulk_download">(in module ddf_utils.factory.ilo)</a>
+</li>
+        <li><a href="ddf_utils.factory.html#ddf_utils.factory.oecd.bulk_download">(in module ddf_utils.factory.oecd)</a>
+</li>
+        <li><a href="ddf_utils.factory.html#ddf_utils.factory.worldbank.bulk_download">(in module ddf_utils.factory.worldbank)</a>
+</li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
@@ -234,6 +251,8 @@
       <li><a href="ddf_utils.html#ddf_utils.io.cleanup">cleanup() (in module ddf_utils.io)</a>
 </li>
       <li><a href="ddf_utils.html#ddf_utils.qa.compare_with_func">compare_with_func() (in module ddf_utils.qa)</a>
+</li>
+      <li><a href="ddf_utils.chef.html#ddf_utils.chef.ingredient.BaseIngredient.compute">compute() (ddf_utils.chef.ingredient.BaseIngredient method)</a>
 </li>
       <li><a href="ddf_utils.model.html#ddf_utils.model.ddf.Dataset.concepts">concepts (ddf_utils.model.ddf.Dataset attribute)</a>
 </li>
@@ -249,9 +268,9 @@
         <li><a href="ddf_utils.chef.html#ddf_utils.chef.dag.DAG.copy">(ddf_utils.chef.dag.DAG method)</a>
 </li>
       </ul></li>
-      <li><a href="ddf_utils.chef.html#ddf_utils.chef.ingredient.BaseIngredient.copy_data">copy_data() (ddf_utils.chef.ingredient.BaseIngredient method)</a>
-</li>
       <li><a href="ddf_utils.html#ddf_utils.datapackage.create_datapackage">create_datapackage() (in module ddf_utils.datapackage)</a>
+</li>
+      <li><a href="ddf_utils.chef.html#ddf_utils.chef.helpers.create_dsk">create_dsk() (in module ddf_utils.chef.helpers)</a>
 </li>
       <li><a href="ddf_utils.html#ddf_utils.io.csvs_to_ddf">csvs_to_ddf() (in module ddf_utils.io)</a>
 </li>
@@ -297,9 +316,23 @@
 </li>
       <li><a href="ddf_utils.html#module-ddf_utils.cli">ddf_utils.cli (module)</a>
 </li>
+      <li><a href="ddf_utils.html#module-ddf_utils.datapackage">ddf_utils.datapackage (module)</a>
+</li>
+      <li><a href="ddf_utils.factory.html#module-ddf_utils.factory.cdiac">ddf_utils.factory.cdiac (module)</a>
+</li>
+      <li><a href="ddf_utils.factory.html#module-ddf_utils.factory.clio_infra">ddf_utils.factory.clio_infra (module)</a>
+</li>
+      <li><a href="ddf_utils.factory.html#module-ddf_utils.factory.igme">ddf_utils.factory.igme (module)</a>, <a href="ddf_utils.factory.html#module-ddf_utils.factory.igme">[1]</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="ddf_utils.html#module-ddf_utils.datapackage">ddf_utils.datapackage (module)</a>
+      <li><a href="ddf_utils.factory.html#module-ddf_utils.factory.ihme">ddf_utils.factory.ihme (module)</a>
+</li>
+      <li><a href="ddf_utils.factory.html#module-ddf_utils.factory.ilo">ddf_utils.factory.ilo (module)</a>
+</li>
+      <li><a href="ddf_utils.factory.html#module-ddf_utils.factory.oecd">ddf_utils.factory.oecd (module)</a>
+</li>
+      <li><a href="ddf_utils.factory.html#module-ddf_utils.factory.worldbank">ddf_utils.factory.worldbank (module)</a>
 </li>
       <li><a href="ddf_utils.html#module-ddf_utils.i18n">ddf_utils.i18n (module)</a>
 </li>
@@ -328,6 +361,8 @@
       <li><a href="ddf_utils.html#ddf_utils.io.download_csv">download_csv() (in module ddf_utils.io)</a>
 </li>
       <li><a href="ddf_utils.chef.html#ddf_utils.chef.dag.BaseNode.downstream_list">downstream_list (ddf_utils.chef.dag.BaseNode attribute)</a>
+</li>
+      <li><a href="ddf_utils.html#ddf_utils.qa.dropped_datapoints">dropped_datapoints() (in module ddf_utils.qa)</a>
 </li>
       <li><a href="ddf_utils.chef.html#ddf_utils.chef.ingredient.BaseIngredient.dtype">dtype (ddf_utils.chef.ingredient.BaseIngredient attribute)</a>
 </li>
@@ -433,6 +468,24 @@
 <h2 id="H">H</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="ddf_utils.factory.html#ddf_utils.factory.cdiac.has_newer_source">has_newer_source() (in module ddf_utils.factory.cdiac)</a>
+
+      <ul>
+        <li><a href="ddf_utils.factory.html#ddf_utils.factory.clio_infra.has_newer_source">(in module ddf_utils.factory.clio_infra)</a>
+</li>
+        <li><a href="ddf_utils.factory.html#ddf_utils.factory.igme.has_newer_source">(in module ddf_utils.factory.igme)</a>, <a href="ddf_utils.factory.html#ddf_utils.factory.igme.has_newer_source">[1]</a>
+</li>
+        <li><a href="ddf_utils.factory.html#ddf_utils.factory.ihme.has_newer_source">(in module ddf_utils.factory.ihme)</a>
+</li>
+        <li><a href="ddf_utils.factory.html#ddf_utils.factory.ilo.has_newer_source">(in module ddf_utils.factory.ilo)</a>
+</li>
+        <li><a href="ddf_utils.factory.html#ddf_utils.factory.oecd.has_newer_source">(in module ddf_utils.factory.oecd)</a>
+</li>
+        <li><a href="ddf_utils.factory.html#ddf_utils.factory.worldbank.has_newer_source">(in module ddf_utils.factory.worldbank)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="ddf_utils.chef.html#ddf_utils.chef.dag.DAG.has_node">has_node() (ddf_utils.chef.dag.DAG method)</a>
 </li>
   </ul></td>
@@ -475,10 +528,26 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="ddf_utils.model.html#ddf_utils.model.package.Datapackage.load">load() (ddf_utils.model.package.Datapackage method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="ddf_utils.html#ddf_utils.io.load_google_xls">load_google_xls() (in module ddf_utils.io)</a>
 </li>
+      <li><a href="ddf_utils.factory.html#ddf_utils.factory.cdiac.load_metadata">load_metadata() (in module ddf_utils.factory.cdiac)</a>
+
+      <ul>
+        <li><a href="ddf_utils.factory.html#ddf_utils.factory.clio_infra.load_metadata">(in module ddf_utils.factory.clio_infra)</a>
+</li>
+        <li><a href="ddf_utils.factory.html#ddf_utils.factory.igme.load_metadata">(in module ddf_utils.factory.igme)</a>, <a href="ddf_utils.factory.html#ddf_utils.factory.igme.load_metadata">[1]</a>
+</li>
+        <li><a href="ddf_utils.factory.html#ddf_utils.factory.ihme.load_metadata">(in module ddf_utils.factory.ihme)</a>
+</li>
+        <li><a href="ddf_utils.factory.html#ddf_utils.factory.ilo.load_metadata">(in module ddf_utils.factory.ilo)</a>
+</li>
+        <li><a href="ddf_utils.factory.html#ddf_utils.factory.oecd.load_metadata">(in module ddf_utils.factory.oecd)</a>
+</li>
+        <li><a href="ddf_utils.factory.html#ddf_utils.factory.worldbank.load_metadata">(in module ddf_utils.factory.worldbank)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="ddf_utils.chef.html#ddf_utils.chef.ops.lt">lt() (in module ddf_utils.chef.ops)</a>
 </li>
   </ul></td>
@@ -503,8 +572,6 @@
 </li>
       <li><a href="ddf_utils.html#ddf_utils.i18n.merge_translations_json">merge_translations_json() (in module ddf_utils.i18n)</a>
 </li>
-      <li><a href="ddf_utils.html#ddf_utils.qa.min_pct_chg">min_pct_chg() (in module ddf_utils.qa)</a>
-</li>
       <li><a href="ddf_utils.chef.html#ddf_utils.chef.helpers.mkfunc">mkfunc() (in module ddf_utils.chef.helpers)</a>
 </li>
   </ul></td>
@@ -515,11 +582,15 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="ddf_utils.model.html#ddf_utils.model.package.Datapackage.name">name (ddf_utils.model.package.Datapackage attribute)</a>
 </li>
+      <li><a href="ddf_utils.html#ddf_utils.qa.new_datapoints">new_datapoints() (in module ddf_utils.qa)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="ddf_utils.chef.html#ddf_utils.chef.dag.DAG.node_dict">node_dict (ddf_utils.chef.dag.DAG attribute)</a>
 </li>
       <li><a href="ddf_utils.chef.html#ddf_utils.chef.dag.DAG.nodes">nodes (ddf_utils.chef.dag.DAG attribute)</a>
+</li>
+      <li><a href="ddf_utils.html#ddf_utils.qa.nrmse">nrmse() (in module ddf_utils.qa)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -559,6 +630,8 @@
 </li>
       <li><a href="ddf_utils.model.html#ddf_utils.model.package.Datapackage.resources">resources (ddf_utils.model.package.Datapackage attribute)</a>
 </li>
+      <li><a href="ddf_utils.html#ddf_utils.qa.rmse">rmse() (in module ddf_utils.qa)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="ddf_utils.chef.html#ddf_utils.chef.dag.DAG.roots">roots (ddf_utils.chef.dag.DAG attribute)</a>
@@ -583,10 +656,12 @@
 </li>
       <li><a href="ddf_utils.chef.html#ddf_utils.chef.cook.Chef.serving">serving (ddf_utils.chef.cook.Chef attribute)</a>
 </li>
-      <li><a href="ddf_utils.chef.html#ddf_utils.chef.procedure.split_entity">split_entity() (in module ddf_utils.chef.procedure)</a>
+      <li><a href="ddf_utils.chef.html#ddf_utils.chef.helpers.sort_df">sort_df() (in module ddf_utils.chef.helpers)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="ddf_utils.chef.html#ddf_utils.chef.procedure.split_entity">split_entity() (in module ddf_utils.chef.procedure)</a>
+</li>
       <li><a href="ddf_utils.html#ddf_utils.transformer.split_keys">split_keys() (in module ddf_utils.transformer)</a>
 </li>
       <li><a href="ddf_utils.html#ddf_utils.i18n.split_translations_csv">split_translations_csv() (in module ddf_utils.i18n)</a>
