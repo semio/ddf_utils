@@ -61,7 +61,11 @@ def sort_df(df, key):
     key.sort()
     cols_new = [*key, *cols_minus_key]
 
-    for c in key:
+    # change categorical type to string.
+    # we need to do this because we didn't define order for category
+    # when we read the data
+    cat_cols = df.select_dtypes(include=['category']).columns.values.tolist()
+    for c in cat_cols:
         df[c] = df[c].astype('str')
 
     df = df.sort_values(by=key)
