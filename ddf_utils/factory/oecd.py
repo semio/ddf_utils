@@ -1,6 +1,11 @@
 # -*- coding: utf-8 -*-
 
-"""Functions for scraping OECD website
+"""Functions for scraping OECD website using their SDMX API
+
+source link `OECD website`_
+
+.. _OECD website: http://stats.oecd.org
+
 """
 
 from io import BytesIO
@@ -10,8 +15,6 @@ import json
 import requests
 from lxml import etree
 import pandas as pd
-
-__doc__ = """T.B.D"""
 
 
 # TODO: there is 1 000 000 row limitation. handle it

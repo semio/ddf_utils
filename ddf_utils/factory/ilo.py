@@ -13,7 +13,6 @@ from urllib.parse import urljoin
 import pandas as pd
 import requests
 
-__doc__ = """T.B.D"""
 
 main_url = 'http://www.ilo.org/ilostat-files/WEB_bulk_download/'
 indicator_meta_url_tmpl = urljoin(main_url, 'indicator/table_of_contents_{lang}.csv')

@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
 
-"""download sources from CME info portal"""
+"""download sources from CME info portal
 
-__doc__ = """T.B.D"""
+source link: `CME data portal`_
+
+.. _`CME data portal`: http://www.childmortality.org
+"""
+
 
 import os.path as osp
 
@@ -12,6 +16,7 @@ import pandas as pd
 
 from lxml import html
 from urllib.parse import urlsplit, urljoin
+
 
 
 url = 'http://www.childmortality.org/'

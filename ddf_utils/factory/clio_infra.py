@@ -1,6 +1,11 @@
 # -*- coding: utf-8 -*-
 
-"""functions for scraping data from clio infra website."""
+"""functions for scraping data from clio infra website.
+
+Source link: `Clio-infra website`_
+
+.. _`Clio-infra website`: https://www.clio-infra.eu/index.html
+"""
 
 import os.path as osp
 import pandas as pd
@@ -8,8 +13,6 @@ from lxml import etree
 import requests
 from urllib.parse import urljoin
 
-
-__doc__ = """T.B.D"""
 
 url = 'https://www.clio-infra.eu/index.html'
 metadata = None

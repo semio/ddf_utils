@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 
 """Functions to load data from cdiac co2 website
+
+source link: The `CDIAC ftp site`_
+
+.. _`CDIAC ftp site`: http://cdiac.ess-dive.lbl.gov/ftp/ndp030/CSV-FILES/
 """
 
 import os.path as osp
@@ -16,6 +20,7 @@ metadata = None
 
 
 def load_metadata():
+    """load the file info listed in the CDIAC website."""
     r = requests.get(url)
     assert r.status_code == 200, 'load cdiac website failed!'
 
