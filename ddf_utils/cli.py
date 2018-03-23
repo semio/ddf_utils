@@ -243,8 +243,9 @@ def merge_translation(path, split_path, lang_path, dtype, overwrite):
 @click.argument('dataset2')
 @click.option('--git', '-g', is_flag=True)
 @click.option('--checkout-path', '-o', type=click.Path(), default='./etl/diff')
-@click.option('--diff-only', is_flag=True)
-def diff(dataset1, dataset2, git, checkout_path, diff_only):
+#  @click.option('--diff-only', is_flag=True)  # buggy
+@click.option('--indicator', '-i', multiple=True)
+def diff(dataset1, dataset2, git, checkout_path, indicator):
     """give a report on the statistical differences for datapoints between 2 datasets."""
     from ddf_utils.model.package import Datapackage
     from ddf_utils.model.utils import is_dataset
@@ -285,9 +286,9 @@ def diff(dataset1, dataset2, git, checkout_path, diff_only):
         d1 = Datapackage(join(checkout_path, dataset1)).dataset
         d2 = Datapackage(join(checkout_path, dataset2)).dataset
 
-    result = compare_with_func(d1, d2)
-    if diff_only:
-        result = result[result.rval != 1]
+    result = compare_with_func(d1, d2, fns=indicator)
+    # if diff_only:
+        # result = result[result.rval != 1]
 
     cols = result.columns
 
