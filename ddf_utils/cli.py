@@ -242,7 +242,7 @@ def merge_translation(path, split_path, lang_path, dtype, overwrite):
 @click.argument('dataset1')
 @click.argument('dataset2')
 @click.option('--git', '-g', is_flag=True)
-@click.option('--checkout-path', type=click.Path(), default='./etl/diff')
+@click.option('--checkout-path', '-o', type=click.Path(), default='./etl/diff')
 @click.option('--diff-only', is_flag=True)
 def diff(dataset1, dataset2, git, checkout_path, diff_only):
     """give a report on the statistical differences for datapoints between 2 datasets."""
@@ -294,6 +294,7 @@ def diff(dataset1, dataset2, git, checkout_path, diff_only):
     # sort it
     result = result.sort_values(by='indicator', ascending=True).set_index('indicator')
 
+    # TODO: add an output type parameter, to choose between csv and tabulate.
     # click.echo(tabulate.tabulate(result,
     #                              headers=cols, tablefmt='psql'))
     click.echo(result.to_csv())
@@ -301,7 +302,7 @@ def diff(dataset1, dataset2, git, checkout_path, diff_only):
 
 # csv to ddfcsv
 @ddf.command()
-@click.option('-i', 'input', type=click.Path(exists=True))
+@click.option('-i', 'input', type=click.Path(exists=True), default='./')
 @click.option('-o', 'out_path', type=click.Path(exists=True))
 def from_csv(input, out_path):
     """create ddfcsv dataset from a set of csv files"""
