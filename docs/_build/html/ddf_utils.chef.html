@@ -94,6 +94,7 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="recipe.html">Recipe Cookbook (draft)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="utils.html">Use ddf_utils for ETL tasks</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">API References</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="ddf_utils.html">ddf_utils package</a><ul class="current">
 <li class="toctree-l3 current"><a class="reference internal" href="ddf_utils.html#subpackages">Subpackages</a><ul class="current">
@@ -115,7 +116,6 @@
 </li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="utils.html">Use ddf_utils for ETL tasks</a></li>
 </ul>
 
             
@@ -302,7 +302,7 @@ doc for available keywords</p>
 <p>commonly used calculation methods</p>
 <dl class="function">
 <dt id="ddf_utils.chef.ops.aagr">
-<code class="descclassname">ddf_utils.chef.ops.</code><code class="descname">aagr</code><span class="sig-paren">(</span><em>df: &lt;Mock name='mock.DataFrame' id='4361979104'&gt;</em>, <em>window: int = 10</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.ops.aagr" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.chef.ops.</code><code class="descname">aagr</code><span class="sig-paren">(</span><em>df: &lt;Mock name='mock.DataFrame' id='4559678096'&gt;</em>, <em>window: int = 10</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.ops.aagr" title="Permalink to this definition">¶</a></dt>
 <dd><p>average annual growth rate</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -402,8 +402,9 @@ doc for available keywords</p>
 <dt id="ddf_utils.chef.ingredient.Ingredient">
 <em class="property">class </em><code class="descclassname">ddf_utils.chef.ingredient.</code><code class="descname">Ingredient</code><span class="sig-paren">(</span><em>chef=None</em>, <em>ingred_id=None</em>, <em>ddf_id=None</em>, <em>data_def=None</em>, <em>key=None</em>, <em>values=None</em>, <em>row_filter=None</em>, <em>data=None</em>, <em>dry_run=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.ingredient.Ingredient" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#ddf_utils.chef.ingredient.BaseIngredient" title="ddf_utils.chef.ingredient.BaseIngredient"><code class="xref py py-class docutils literal"><span class="pre">ddf_utils.chef.ingredient.BaseIngredient</span></code></a></p>
-<p>ingredient class: represents an ingredient object in recipe file.
-see the implement of <cite>Ingredient.from_dict()</cite> method for how the object is constructed.</p>
+<p>ingredient class: represents an ingredient object in recipe file.</p>
+<p>see the implement of <cite>Ingredient.from_dict()</cite> method for how the
+object is constructed.</p>
 <p>Here is an example ingredient object in recipe:</p>
 <div class="highlight-yaml"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">id</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">example-ingredient</span>
 <span class="l l-Scalar l-Scalar-Plain">dataset</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">ddf--example--dataset</span>
@@ -418,7 +419,8 @@ see the implement of <cite>Ingredient.from_dict()</cite> method for how the obje
     <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">chn</span>
 </pre></div>
 </div>
-<p><code class="docutils literal"><span class="pre">value</span></code> and <code class="docutils literal"><span class="pre">filter</span></code> can accept mongo like queries to make more complex statements, for example:</p>
+<p><code class="docutils literal"><span class="pre">value</span></code> and <code class="docutils literal"><span class="pre">filter</span></code> can accept mongo like queries to make
+more complex statements, for example:</p>
 <div class="highlight-yaml"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">id</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">example-ingredient</span>
 <span class="l l-Scalar l-Scalar-Plain">dataset</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">ddf--example--dataset</span>
 <span class="l l-Scalar l-Scalar-Plain">key</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">geo, time</span>
@@ -438,11 +440,14 @@ see the implement of <cite>Ingredient.from_dict()</cite> method for how the obje
             <span class="l l-Scalar l-Scalar-Plain">$lt</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">2015</span>
 </pre></div>
 </div>
-<p>for now, value accepts <code class="docutils literal"><span class="pre">$in</span></code> and <code class="docutils literal"><span class="pre">$nin</span></code> keywords, but only one of them can be in the value option;
-filter supports logical keywords: <code class="docutils literal"><span class="pre">$and</span></code>, <code class="docutils literal"><span class="pre">$or</span></code>, <code class="docutils literal"><span class="pre">$not</span></code>, <code class="docutils literal"><span class="pre">$nor</span></code>, and comparision keywords:
-<code class="docutils literal"><span class="pre">$eq</span></code>, <code class="docutils literal"><span class="pre">$gt</span></code>, <code class="docutils literal"><span class="pre">$gte</span></code>, <code class="docutils literal"><span class="pre">$lt</span></code>, <code class="docutils literal"><span class="pre">$lte</span></code>, <code class="docutils literal"><span class="pre">$ne</span></code>, <code class="docutils literal"><span class="pre">$in</span></code>, <code class="docutils literal"><span class="pre">$nin</span></code>.</p>
-<p>The other way to define the ingredient data is using the <code class="docutils literal"><span class="pre">data</span></code> keyword to include external csv file, or
-inline the data in the ingredient definition. Example:</p>
+<p>for now, value accepts <code class="docutils literal"><span class="pre">$in</span></code> and <code class="docutils literal"><span class="pre">$nin</span></code> keywords, but only one
+of them can be in the value option; filter supports logical
+keywords: <code class="docutils literal"><span class="pre">$and</span></code>, <code class="docutils literal"><span class="pre">$or</span></code>, <code class="docutils literal"><span class="pre">$not</span></code>, <code class="docutils literal"><span class="pre">$nor</span></code>, and comparision
+keywords: <code class="docutils literal"><span class="pre">$eq</span></code>, <code class="docutils literal"><span class="pre">$gt</span></code>, <code class="docutils literal"><span class="pre">$gte</span></code>, <code class="docutils literal"><span class="pre">$lt</span></code>, <code class="docutils literal"><span class="pre">$lte</span></code>, <code class="docutils literal"><span class="pre">$ne</span></code>,
+<code class="docutils literal"><span class="pre">$in</span></code>, <code class="docutils literal"><span class="pre">$nin</span></code>.</p>
+<p>The other way to define the ingredient data is using the <code class="docutils literal"><span class="pre">data</span></code>
+keyword to include external csv file, or inline the data in the
+ingredient definition. Example:</p>
 <div class="highlight-yaml"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">id</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">example-ingredient</span>
 <span class="l l-Scalar l-Scalar-Plain">key</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">concept</span>
 <span class="l l-Scalar l-Scalar-Plain">data</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">external_concepts.csv</span>
@@ -534,8 +539,9 @@ the dataset will be in the ingredient</p>
 <li>value (optional)</li>
 <li>filter (optional)</li>
 </ul>
-<p>if dataset is provided, data will be read from ddf dataset; if data is provided, then either data will be read
-from a local csv file or be created on-the-fly base on the description.</p>
+<p>if dataset is provided, data will be read from ddf dataset; if
+data is provided, then either data will be read from a local
+csv file or be created on-the-fly base on the description.</p>
 </dd></dl>
 
 <dl class="method">

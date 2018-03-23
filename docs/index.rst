@@ -13,8 +13,8 @@ Contents:
 
    intro
    recipe
-   modules
    utils
+   modules
 
 
 Indices and tables

@@ -20,7 +20,7 @@ provider and you have access to 2 DDF datasets, `ddf--gapminder--population`_
 and `ddf--bp--energy`_. Now you want to make a new dataset, which contains **oil
 consumption per person** data for each country. Let's do it with Recipe!
 
-.. _ddf--gapminder--population: https://github.com/open-numbers/ddf--gapminder--population 
+.. _ddf--gapminder--population: https://github.com/open-numbers/ddf--gapminder--population
 .. _ddf--bp--energy: https://github.com/semio/ddf--bp--energy
 
 0. Prologue
@@ -36,7 +36,7 @@ YAML_ format. Chef support recipes in both YAML and JSON format, but we
 recommend YAML because it's easier to write and read. In this document we will
 use YAML recipes.
 
-.. _YAML: https://en.wikipedia.org/wiki/YAML 
+.. _YAML: https://en.wikipedia.org/wiki/YAML
 
 1. Add basic info
 ~~~~~~~~~~~~~~~~~
@@ -92,11 +92,12 @@ reads data from a data package should be defined with following parameters:
 -  ``dataset``: the dataset where the ingredient is from
 - ``key``: the primary keys to filter from datapackage, should be comma
   seperated strings
-- ``value``: a list of concept names to filter from the result of filtering
-  keys, or pass "*" to select all.
-- ``row_filter``: optional, only select rows match the filter. The
+- ``value``: a list of concept names to filter from the result of
+  filtering keys, or pass "*" to select all. Alternatively a
+  mongodb-like query can be used.
+- ``filter``: optional, only select rows match the filter. The
   filter is a dictionary where keys are colunm names and values are
-  values to filter
+  values to filter. Alternatively a mongodb-like query can be used.
 
 There are more parameters for ingredient definition, see the `ingredients
 section`_ document.
@@ -104,7 +105,7 @@ section`_ document.
 In our example, we need datapoints from both gapminder population dataset and
 oil consumption datapoints from bp dataset. Noticing the bp is using lower case
 short names for its geo and gapminder is using 3 letter iso for its country
-entities, we shoule align them to use one system too. So we end up with below
+entities, we should align them to use one system too. So we end up with below
 ingredients:
 
 .. code-block:: yaml
@@ -148,7 +149,7 @@ corresponding sub-sections, and in each section will be a list of
            # procedures for entities here
        datapoints:
            # procedures for datapoints here
-           
+
 Procedures are like functions. They take ingredients as input, operate with
 options, and return new ingredients as result. For a complete list of supported
 procedures, see `Available Procedures`_. With this in mind, we can start writing
@@ -266,7 +267,7 @@ then the last procedure of each sub-section of ``cooking`` will be served.
        - id: concepts-final
        - id: gapminder-country-entities
        - id: datapoints-final
-           
+
 Now we have finished the recipe. For the complete recipe, please check this
 `gist`_.
 
@@ -367,33 +368,83 @@ ingredient should be defined with following parameters:
 - ``value``: optional, a list of concept names to filter from the result of
   filtering keys, or pass "\*" to select all. Mongo-like queries are also
   supported, see examples below. If omitted, assume "\*".
-- ``row_filter``: optional, only select rows match the filter. The filter is a
+- ``filter``: optional, only select rows match the filter. The filter is a
   dictionary where keys are colunm names and values are values to filter.
   Mongo-like queries are also supported, see examples below and examples in
   ``filter`` procedure.
 
-Here is an example of ``ingredient`` section:
+
+Here is an example ingredient object in recipe:
+
+ .. code-block:: yaml
+
+    id: example-ingredient
+    dataset: ddf--example--dataset
+    key: "geo,time"  # key columns of ingredient
+    value:  # only include concepts listed here
+      - concept_1
+      - concept_2
+    filter:  # select rows by column values
+      geo:  # only keep datapoint where `geo` is in [swe, usa, chn]
+        - swe
+        - usa
+        - chn
+
+``value`` and ``filter`` can accept mongo like queries to make more
+complex statements, for example:
 
 .. code-block:: yaml
 
-    ingredients:
-      - id: example-concepts
-        dataset: ddf_example_dataset
-        key: concept
-        value: "*"
-        row_filter:
-          concept:
-            - geo
-            - time
-            - some_measure_concept
-      - id: example-datapoints
-        dataset: ddf_example_dataset
-        key: geo, time
-        value: some_measure_concept
-      - id: example-entities
-        dataset: ddf_example_dataset
-        key: geo
-        value: "*"
+   id: example-ingredient
+   dataset: ddf--example--dataset
+   key: geo, time
+   value:
+       $nin:  # exclude following indicators
+           - concept1
+           - concept2
+   filter:
+       geo:
+           $in:
+               - swe
+               - usa
+               - chn
+       year:
+           $and:
+               $gt: 2000
+               $lt: 2015
+
+for now, value accepts ``$in`` and ``$nin`` keywords, but only one of
+them can be in the value option; filter supports logical keywords:
+``$and``, ``$or``, ``$not``, ``$nor``, and comparision keywords:
+``$eq``, ``$gt``, ``$gte``, ``$lt``, ``$lte``, ``$ne``, ``$in``,
+``$nin``.
+
+The other way to define the ingredient data is using the ``data``
+keyword to include external csv file, or inline the data in the
+ingredient definition. Example:
+
+.. code-block:: yaml
+
+   id: example-ingredient
+   key: concept
+   data: external_concepts.csv
+
+You can also create On-the-fly ingredient:
+
+.. code-block:: yaml
+
+   id: example-ingredient
+   key: concept
+   data:
+       - concept: concept_1
+         name: concept_name_1
+         concept_type: string
+         description: concept_description_1
+       - concept: concept_2
+         name: concept_name_2
+         concept_type: measure
+         description: concept_description_2
+
 
 cooking section
 ~~~~~~~~~~~~~~~
@@ -1008,7 +1059,7 @@ The procedure should be defined as following structure:
 
        # and finally return a ProcedureResult object
        return ProcedureResult(chef, result, primarykey, data)
-   
+
 Check our `predefined procedures`_ for examples.
 
 .. _`predefined procedures`: https://github.com/semio/ddf_utils/blob/master/ddf_utils/chef/procedure.py
