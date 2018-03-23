@@ -1,3 +1,8 @@
+## version 0.4.1 2018-03-23
+
+- update commandline options for `ddf` sub-commands
+- update documents
+
 ## version 0.4.0 2018-03-20
 
 - use dask and categorical types to improve memory usage (#90)
