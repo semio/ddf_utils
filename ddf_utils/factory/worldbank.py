@@ -1,6 +1,13 @@
 # -*- coding: utf-8 -*-
 
-"""Functions to load data from Workbank API.
+"""Functions to load data from Worldbank API.
+
+We use its bulkdownload utilities.
+
+Source link: `WorldBank website`_
+
+.. _WorldBank website: http://data.worldbank.org
+
 """
 
 import os.path as osp
@@ -13,6 +20,8 @@ from io import BytesIO
 from urllib.parse import urlsplit
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
+
+__doc__ = """T.B.D"""
 
 url = 'http://api.worldbank.org/v2/datacatalog?format=json'
 metadata = None

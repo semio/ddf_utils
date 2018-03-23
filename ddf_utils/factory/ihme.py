@@ -1,6 +1,14 @@
 # -*- coding: utf-8 -*-
 
 """Functions for IHME
+
+The `GBD result tool`_ at IHME contains all data for GBD results, but
+they don't have an open API to query the data. However the website
+uses a json endpoint and it doesn't need authorization. So we also
+make use of it.
+
+.. _`GBD result tool`: http://ghdx.healthdata.org/gbd-results-tool
+
 """
 
 import os.path as osp

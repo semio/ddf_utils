@@ -242,9 +242,10 @@ class BaseIngredient(object):
 
 
 class Ingredient(BaseIngredient):
-    """
-    ingredient class: represents an ingredient object in recipe file.
-    see the implement of `Ingredient.from_dict()` method for how the object is constructed.
+    """ingredient class: represents an ingredient object in recipe file.
+
+    see the implement of `Ingredient.from_dict()` method for how the
+    object is constructed.
 
     Here is an example ingredient object in recipe:
 
@@ -262,7 +263,8 @@ class Ingredient(BaseIngredient):
             - usa
             - chn
 
-    ``value`` and ``filter`` can accept mongo like queries to make more complex statements, for example:
+    ``value`` and ``filter`` can accept mongo like queries to make
+    more complex statements, for example:
 
     .. code-block:: yaml
 
@@ -284,12 +286,15 @@ class Ingredient(BaseIngredient):
                    $gt: 2000
                    $lt: 2015
 
-    for now, value accepts ``$in`` and ``$nin`` keywords, but only one of them can be in the value option;
-    filter supports logical keywords: ``$and``, ``$or``, ``$not``, ``$nor``, and comparision keywords:
-    ``$eq``, ``$gt``, ``$gte``, ``$lt``, ``$lte``, ``$ne``, ``$in``, ``$nin``.
+    for now, value accepts ``$in`` and ``$nin`` keywords, but only one
+    of them can be in the value option; filter supports logical
+    keywords: ``$and``, ``$or``, ``$not``, ``$nor``, and comparision
+    keywords: ``$eq``, ``$gt``, ``$gte``, ``$lt``, ``$lte``, ``$ne``,
+    ``$in``, ``$nin``.
 
-    The other way to define the ingredient data is using the ``data`` keyword to include external csv file, or
-    inline the data in the ingredient definition. Example:
+    The other way to define the ingredient data is using the ``data``
+    keyword to include external csv file, or inline the data in the
+    ingredient definition. Example:
 
     .. code-block:: yaml
 
@@ -357,8 +362,10 @@ class Ingredient(BaseIngredient):
         - value (optional)
         - filter (optional)
 
-        if dataset is provided, data will be read from ddf dataset; if data is provided, then either data will be read
-        from a local csv file or be created on-the-fly base on the description.
+        if dataset is provided, data will be read from ddf dataset; if
+        data is provided, then either data will be read from a local
+        csv file or be created on-the-fly base on the description.
+
         """
         ingred_id = read_opt(dictionary, 'id', default=None)
         dataset = read_opt(dictionary, 'dataset', default=None)

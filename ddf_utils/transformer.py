@@ -347,12 +347,10 @@ def merge_keys(df, dictionary, target_column=None, merged='drop'):
     # TODO: limit the rename inside target_column
     # after pandas 0.20.0 there will be a level option for df.rename
     df_new = df.rename(index=rename_dict).groupby(level=list(range(len(df.index.levels)))).sum()
-
     if merged == 'drop':
         return df_new
     elif merged == 'keep':
-        df_ = df.copy()
-        df_ = pd.concat([df_, df_new])
+        df_ = pd.concat([df, df_new])
         return df_[~df_.index.duplicated()]  # remove all duplicated indies
     else:
         raise ValueError('only "drop", "keep" is allowed')

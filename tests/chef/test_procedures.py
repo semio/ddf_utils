@@ -49,6 +49,7 @@ def test_filter():
 
     assert set(dps.keys()) == {'imr_upper', 'imr_lower'}
     for dp in dps.values():
+        assert dp.year.dtype == np.int16
         assert np.all(dp.year > 2000)
         assert set(dp.country.unique()) == {'usa', 'swe'}
 
@@ -68,6 +69,8 @@ def test_flatten():
         'agriculture_thousands_mf', 'agriculture_percentage_f',
         'agriculture_percentage_m', 'agriculture_percentage_mf'}
 
+    assert res[0].compute()['agriculture_percentage_m'].dtypes['year'] == np.int16
+
 
 def test_groupby():
     chef = chef_fn('test_groupby.yaml')
@@ -82,6 +85,8 @@ def test_groupby():
                                                               'agriculture_percentage'])
     assert set(dp2['agriculture_thousands'].columns) == set(['country', 'year',
                                                              'agriculture_thousands'])
+    # assert dp1['agriculture_percentage'].dtypes['year'] == np.int16
+    # assert dp2['agriculture_thousands'].dtypes['year'] == np.int16
 
 
 def test_custom_procedure():
@@ -99,6 +104,9 @@ def test_translate_column():
     chef = chef_fn('test_translate_column.yaml')
     chef.run()
 
+    res = chef.dag.get_node('bp-datapoints-aligned').evaluate().compute()
+    assert res['biofuels_production_kboed'].dtypes['year'] == np.int16
+
 
 def test_translate_header():
     chef = chef_fn('test_translate_header.yaml')
@@ -110,17 +118,26 @@ def test_translate_header():
     assert set(data.keys()) == set(indicators)
     for i in indicators:
         assert set(data[i].columns) == set(['geo', 'time', i])
+        assert data[i].dtypes['time'] == np.int16
 
 
 def test_trend_bridge():
     chef = chef_fn('test_trend_bridge.yml')
     chef.run()
 
+    res = chef.dag.get_node('res').evaluate().compute()
+    assert res['imr_lower'].dtypes['year'] == np.int16
+
 
 def test_window():
     chef = chef_fn('test_window.yaml')
     chef.run()
-    # TODO: check result?
+
+    dp1 = chef.dag.get_node('rolling_datapoints_1').evaluate().compute()
+    dp2 = chef.dag.get_node('rolling_datapoints_2').evaluate().compute()
+
+    #assert dp2['biofuels_production_ktoe'].dtypes['year'] == np.int16
+    #assert dp1['biofuels_production_kboed'].dtypes['year'] == np.int16
 
 
 def test_serving():
@@ -143,11 +160,15 @@ def test_merge():
     indicators = ['imr_lower', 'imr_median', 'imr_upper',
                   'biofuels_production_kboed', 'biofuels_production_ktoe']
     assert set(data.keys()) == set(indicators)
+    assert data['imr_lower'].dtypes['year'] == np.int16
 
 
 def test_run_op():
     chef = chef_fn('test_run_op.yaml')
     chef.run()
+
+    res = chef.dag.get_node('res').evaluate().compute()
+    # assert res['mean_imr'].dtypes['year'] == np.int16
 
 
 def test_import_procedure_fail():

@@ -1021,16 +1021,19 @@ def extract_concepts(chef: Chef, ingredients: List[str], result,
                 cols = df.columns
             else:
                 cols = [x for x in df.columns if x not in pks]
+
+            cat_cols = df.select_dtypes(include=['category']).columns
             for col in cols:
                 if col.startswith('is--'):
                     continue
                 new_concepts.add(col)
                 if col in concepts.index:
                     continue
-                if np.issubdtype(df[col].dtype, np.number):
-                    concepts.loc[col, 'concept_type'] = 'measure'
-                else:
+                # if df.dtypes[col] == 'category':  # doesn't work
+                if col in cat_cols:
                     concepts.loc[col, 'concept_type'] = 'string'
+                else:
+                    concepts.loc[col, 'concept_type'] = 'measure'
 
     if join_type == 'ingredients_outer':
         # ingredients_outer join: only keep concepts appears in ingredients

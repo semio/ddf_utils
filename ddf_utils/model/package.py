@@ -139,7 +139,8 @@ class Datapackage:
             for k, l in kvs.items():
                 dtypes = dict([x, 'category'] for x in i)
                 for tc in time_concepts:
-                    dtypes[tc] = 'uint16'  # TODO: maybe there are other time format?
+                    # dtypes[tc] = 'uint16'  # not using this because of bug #96
+                    dtypes[tc] = 'int16'  # TODO: maybe there are other time format?
                 cols = list(i + tuple([k]))
 
                 if not no_datapoints:
@@ -148,7 +149,6 @@ class Datapackage:
                     df = pd.DataFrame([], columns=cols)
 
                 kvs[k] = df
-
         # entities
         # TODO: check if concept_type match the type inferred from file.
         # i.e. it's wrong when concept file says a concept is domain but
