@@ -101,6 +101,7 @@ def compare_with_func(dataset1, dataset2, fns=['rmse', 'nrmse'],
 
 def rval(comp_df, indicator, on='geo'):
     """return r-value between old and new data"""
+    # FIXME: how to set the on parameter from cli?
     old_name = indicator+'_old'
     new_name = indicator+'_new'
     # logger.warning("{}".format(old_name, new_name))
@@ -119,6 +120,7 @@ def rval(comp_df, indicator, on='geo'):
 
 def avg_pct_chg(comp_df, indicator, on='geo'):
     """return average precentage changes between old and new data"""
+    # FIXME: how to set the on parameter from cli?
     old_name = indicator+'_old'
     new_name = indicator+'_new'
     level = comp_df.index.names.index(on)

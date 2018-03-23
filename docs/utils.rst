@@ -26,6 +26,12 @@ For now this command supports following statistics:
 If no indicator specified in the command, ``rmse`` and ``nrmse`` will
 be calculated.
 
+.. note::
+
+   Please note that rval and avg_pct_chg assumes there is a ``geo``
+   column in datapoints, which is not very useful for now. We will
+   improve this later.
+
 You can also compare 2 commits for a git folder too. In this case you
 should run
 
