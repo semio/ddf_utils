@@ -57,6 +57,7 @@ def translate_header(chef: Chef, ingredients: List[str], result, dictionary) -> 
     logger.info("translate_header: " + ingredient.ingred_id)
 
     data = ingredient.get_data()
+    new_data = dict()
     rm = dictionary
 
     for k in list(data.keys()):
@@ -69,10 +70,10 @@ def translate_header(chef: Chef, ingredients: List[str], result, dictionary) -> 
             if len(rm_) > 0:
                 df_new = df_new.rename(columns=rm_)
         if k in rm.keys():  # if we need to rename the concept name
-            data[rm[k]] = df_new
-            del(data[k])
+            new_data[rm[k]] = df_new
+            # del(data[k])
         else:  # we only rename index/properties columns
-            data[k] = df_new
+            new_data[k] = df_new
 
     # also rename the key
     newkey = ingredient.key
@@ -90,7 +91,7 @@ def translate_header(chef: Chef, ingredients: List[str], result, dictionary) -> 
 
     if not result:
         result = ingredient.ingred_id + '-translated'
-    return ProcedureResult(chef, result, newkey, data=data)
+    return ProcedureResult(chef, result, newkey, data=new_data)
 
 
 @debuggable
