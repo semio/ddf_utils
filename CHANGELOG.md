@@ -1,3 +1,8 @@
+## version 0.4.2 2018-04-21
+
+- bug fix for various procedures
+- improvment the running time for recipes (#98)
+
 ## version 0.4.1 2018-03-23
 
 - update commandline options for `ddf` sub-commands
