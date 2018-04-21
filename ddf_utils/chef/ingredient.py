@@ -109,6 +109,9 @@ class BaseIngredient(object):
                         path = os.path.join(outpath, 'ddf--entities--{}--{}.csv'.format(k, s))
                         col = 'is--'+s
                         df_ = df[df[col]=='TRUE'].dropna(axis=1, how='all')
+                        if df_.empty:
+                            logging.warning("empty dataframe for {}, not serving".format(s))
+                            continue
                         df_ = df_.loc[:, lambda x: ~x.columns.str.startswith('is--')].copy()
                         df_[col] = 'TRUE'
                         df_ = df_.rename({k: s}, axis=1)  # use set name as primary key column name
@@ -405,7 +408,7 @@ class Ingredient(BaseIngredient):
             if self._ddf_id:
                 if self._ddf_id not in self.chef.ddf_object_cache.keys():
                     self._ddf = Datapackage(
-                        os.path.join(self.chef.config['ddf_dir'], self._ddf_id)).load(no_datapoints=self.is_dry_run)
+                        os.path.join(self.chef.config['ddf_dir'], self._ddf_id))
                     self.chef.ddf_object_cache[self._ddf_id] = self._ddf
                 else:
                     self._ddf = self.chef.ddf_object_cache[self._ddf_id]
@@ -470,7 +473,14 @@ class Ingredient(BaseIngredient):
     # because concept ingerdient and entity ingerdient only have one key in the
     # data dictionary, so they don't need to support the column filter
     def _get_data_entities(self):
-        df = self.ddf.get_entity(self.key)
+        cdf = self.ddf.concepts.set_index('concept')
+        if cdf.at[self.key, 'concept_type'] == 'entity_domain':
+            domain = self.key
+            eset = None
+        else:
+            domain = cdf.at[self.key, 'domain']
+            eset = self.key
+        df = self.ddf.get_entity(domain, eset)
         if self.values != '*':
             if isinstance(self.values, Mapping):
                 assert len(self.values) == 1

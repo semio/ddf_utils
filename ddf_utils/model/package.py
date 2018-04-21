@@ -6,7 +6,9 @@ import json
 import logging
 import os
 import os.path as osp
-from collections import Mapping
+from pathlib import Path
+
+from collections import Mapping, Sequence
 from itertools import product
 
 import dask.dataframe as dd
@@ -20,19 +22,67 @@ from .utils import load_datapackage_json
 
 logger = logging.getLogger('root')
 
+
+class Resource:
+    """A base class for all resources in a CSV datapackage.
+
+    We assume all recources are CSV files here.
+    """
+    def __init__(self, path, name, fields, primaryKey, base_dir='./'):
+        # TODO: find out all possible keys
+        self.path = path
+        self.name = name
+        self.fields = fields
+        self.primaryKey = primaryKey
+        self.base_dir = base_dir
+
+    def __repr__(self):
+        return "name: {}, key: {}".format(self.name, self.primaryKey)
+
+    @classmethod
+    def from_datapackage_record(cls, r, base_dir=None):
+        path = r['path']
+        name = r['name']
+        fields = r['schema']['fields']
+        primaryKey = r['schema']['primaryKey']
+
+        if base_dir is None:
+            return Resource(path, name, fields, primaryKey, './')
+        else:
+            return Resource(path, name, fields, primaryKey, base_dir)
+
+    def to_datapackage_record(self):
+        rec = dict()
+        rec['path'] = self.path
+        rec['name'] = self.name
+        rec['schema'] = {'primaryKey': self.primaryKey, 'fields': self.fields}
+        return rec
+
+    @property
+    def full_path(self):
+        # return Path(self.base_dir, self.path)
+        # dask don't support Path object yet so we return a path string.
+        return osp.join(self.base_dir, self.path)
+
+
 class Datapackage:
-    def __init__(self, datapackage, base_dir='./', dataset=None):
+    def __init__(self, datapackage, base_dir='./'):
         """create datapackage object from datapackage descriptor.
 
         datapackage: can be a path to datapackage file or dictioinary in datapackage format
         """
+        # TODO: change this to `from_datapackage_json`
         if isinstance(datapackage, Mapping):
             self.base_dir = base_dir
             self.datapackage = datapackage
         elif isinstance(datapackage, str):
             self.base_dir, self.datapackage = load_datapackage_json(datapackage)
 
-        self._dataset = dataset
+        # for caching
+        self._resources = None
+        self._concepts = None
+        self._entities = None
+        self._dataset = None
 
     @property
     def name(self):
@@ -40,28 +90,152 @@ class Datapackage:
 
     @property
     def resources(self):
-        return self.datapackage['resources']
+        if self._resources is None:
+            self._resources = [Resource.from_datapackage_record(r, base_dir=self.base_dir)
+                               for r in self.datapackage['resources']]
+        return self._resources
 
     @property
     def concepts_resources(self):
-        return [r for r in self.resources if r['schema']['primaryKey'] == 'concept']
+        return [r for r in self.resources if r.primaryKey == 'concept']
 
     @property
     def entities_resources(self):
         return [r for r in self.resources if
-                (r['schema']['primaryKey'] != 'concept') and (isinstance(r['schema']['primaryKey'], str))]
+                (r.primaryKey != 'concept') and (isinstance(r.primaryKey, str))]
 
     @property
     def datapoints_resources(self):
-        return [r for r in self.resources if isinstance(r['schema']['primaryKey'], list)]
+        # TODO: it might not be true that primaryKey is always a list for datapoints
+        # sometimes it could be string?
+        return [r for r in self.resources if isinstance(r.primaryKey, list)]
+
+    @property
+    def index_table(self):
+        rows = list()
+
+        for r in self.resources:
+            pkey = r.primaryKey
+            if not isinstance(pkey, list):
+                pkey = [pkey]
+            pkey = sorted(pkey)
+            columns = [x['name'] for x in r.fields]
+
+            if len(columns) == len(pkey):  # there is only the primary column.
+                row = dict()
+                row['pkey'] = ','.join(pkey)
+                row['column'] = None
+                row['path'] = r.full_path
+                row['name'] = r.name
+                rows.append(row)
+                continue
+
+            for c in columns:
+                if c in pkey:
+                    continue
+                row = dict()
+                row['pkey'] = ','.join(pkey)
+                row['column'] = c
+                row['path'] = r.full_path
+                row['name'] = r.name
+                rows.append(row)
+        return pd.DataFrame.from_records(rows)
 
     @property
     def dataset(self):
         if self._dataset is None:
             self._dataset = self.load()
-
         return self._dataset
 
+    @property
+    def concepts(self):
+        if self._concepts is None:
+            fs = (self.index_table[self.index_table.pkey == 'concept']['path']
+                  .unique().tolist())
+            concepts = [pd.read_csv(f) for f in fs]
+            self._concepts = pd.concat(concepts, ignore_index=True)
+        return self._concepts
+
+    @property
+    def entities(self):
+        if self._entities is None:
+            cdf = self.concepts
+            idx_table = self.index_table
+            entities = dict()
+            for domain in cdf[cdf['concept_type'] == 'entity_domain']['concept']:
+                entities[domain] = list()
+                if 'domain' in cdf.columns:
+                    esets = cdf[(cdf['concept_type'] == 'entity_set') &
+                                (cdf['domain'] == domain)]['concept']
+                    if not esets.empty:
+                        for s in esets:
+                            rows = (idx_table[(idx_table.pkey == domain) |
+                                              (idx_table.pkey == s)]
+                                    .drop_duplicates(subset='path'))
+                            # filter ambiougus names where domain is different but set name
+                            # is same.
+                            for _, r in rows.iterrows():
+                                if domain not in r['name']:
+                                    continue
+                                df = pd.read_csv(r.path, dtype=str)
+                                if r.pkey != domain:
+                                    df = df.rename(columns={r.pkey: domain})
+                                entities[domain].append(df)
+                        entities[domain] = pd.concat(entities[domain], ignore_index=True)
+                    else:  # no sets for this domain
+                        paths = (idx_table[idx_table.pkey == domain]['path']
+                                 .unique().tolist())
+                        entities[domain] = dd.read_csv(paths, dtype=str).compute()
+                else:  # no domain column
+                    paths = (idx_table[idx_table.pkey == domain]['path']
+                             .unique().tolist())
+                    entities[domain] = dd.read_csv(paths, dtype=str).compute()
+
+            self._entities = entities
+        return self._entities
+
+    def indicators(self, by=None):
+        res = set()
+        for r in self.datapoints_resources:
+            if by is not None and set(by) != set(r.primaryKey):
+                continue
+            for f in r.fields:
+                if f['name'] not in r.primaryKey:
+                    res.add(f['name'])
+        return list(res)
+
+    def get_datapoint_df(self, i, primary_key):
+        if isinstance(primary_key, Sequence):
+            pkey = ','.join(sorted(primary_key))
+            dtypes = dict([x, 'category'] for x in primary_key)
+        else:
+            pkey = primary_key
+            dtypes = {primary_key: 'category'}
+
+        paths = (self.index_table[(self.index_table.pkey == pkey) &
+                                  (self.index_table.column == i)]['path']
+                 .unique().tolist())
+        if len(paths) == 0:
+            raise ValueError('no datapoint find for {} by {}'.format(i, pkey))
+
+        cdf = self.concepts
+        time_concepts = cdf[cdf['concept_type'] == 'time']['concept'].values
+
+        for tc in time_concepts:
+            dtypes[tc] = 'int16'
+
+        return dd.read_csv(paths, dtype=dtypes)
+
+    def get_entity(self, entity_domain, entity_set=None):
+        df = self.entities[entity_domain]
+        if entity_set is not None:
+            col = 'is--{}'.format(entity_set)
+            df = (df[df[col] == 'TRUE'].dropna(axis=1, how='all'))
+            # rename the primaryKey column to match the entity set name
+            df = df.rename(columns={entity_domain: entity_set})
+        return df
+
+    # TODO: refactor this method
     def load(self, **kwargs):
         """read from local DDF csv dataset.
 
@@ -92,38 +266,38 @@ class Datapackage:
 
         no_datapoints = kwargs.get('no_datapoints', False)
 
-        base_dir, dp = self.base_dir, self.datapackage
+        dp = self.datapackage
 
         # concepts
-        for r in dp['resources']:
-            pkey = r['schema']['primaryKey']
+        for r in self.resources:
+            pkey = r.primaryKey
             if pkey == 'concept':
-                concepts.append(pd.read_csv(osp.join(base_dir, r['path'])))
+                concepts.append(pd.read_csv(r.full_path))
 
         concepts = pd.concat(concepts)
 
         time_concepts = concepts[concepts['concept_type'] == 'time'].concept.values
 
         # others
-        for r in dp['resources']:
-            pkey = r['schema']['primaryKey']
+        for r in self.resources:
+            pkey = r.primaryKey
             if pkey == 'concept':
                 continue
             elif isinstance(pkey, str):  # entities
                 entities_.append(
                     {
                         # "data": pd.read_csv(osp.join(base_dir, r['path']), dtype={pkey: str}),
-                        "data": pd.read_csv(osp.join(base_dir, r['path']), dtype=str, encoding='utf8'),  # read all as string
+                        "data": pd.read_csv(r.full_path, dtype=str, encoding='utf8'),  # read all as string
                         "key": pkey
                     })
             else:  # datapoints
                 assert not isinstance(pkey, str)
-                fn = os.path.join(base_dir, r['path'])
+                fn = r.full_path
                 df = next(pd.read_csv(fn, chunksize=1))
                 indicator_names = list(set(df.columns) - set(pkey))
 
                 if len(indicator_names) == 0:
-                    raise ValueError('No indicator in {}'.format(r['path']))
+                    raise ValueError('No indicator in {}'.format(r.path))
 
                 keys = tuple(sorted(pkey))
                 # TODO: if something went wrong, such as there is a typo in pkey, give better message
@@ -227,18 +401,17 @@ class Datapackage:
                 raise
 
         def _gen_key_value_object(resource):
-            logging.debug('working on: {}'.format(resource['path']))
-            base_dir = self.base_dir
-            data = pd.read_csv(os.path.join(base_dir, resource['path']), dtype=dtypes)
-            if isinstance(resource['schema']['primaryKey'], str):
-                pkeys = [resource['schema']['primaryKey']]
+            logging.debug('working on: {}'.format(resource.path))
+            data = pd.read_csv(resource.full_path, dtype=dtypes)
+            if isinstance(resource.primaryKey, str):
+                pkeys = [resource.primaryKey]
             else:
-                pkeys = resource['schema']['primaryKey']
+                pkeys = resource.primaryKey
 
             entity_cols = [x for x in pkeys if
                            (x in cdf.index) and
                            (cdf.loc[x, 'concept_type'] in ['entity_set', 'entity_domain'])]
-            value_cols = list(set([x['name'] for x in resource['schema']['fields']]) - set(pkeys))
+            value_cols = list(set([x['name'] for x in resource.fields]) - set(pkeys))
             # only consider all permutations on entity columns
             if len(entity_cols) > 0:
                 data = data[pkeys].drop_duplicates(subset=entity_cols)
@@ -263,9 +436,9 @@ class Datapackage:
                 for perm in product(*row):
                     if len(value_cols) > 0:
                         for c in value_cols:
-                            yield {'primaryKey': list(perm), 'value': c, 'resource': resource['name']}
+                            yield {'primaryKey': list(perm), 'value': c, 'resource': resource.name}
                     else:
-                        yield {'primaryKey': list(perm), 'value': None, 'resource': resource['name']}
+                        yield {'primaryKey': list(perm), 'value': None, 'resource': resource.name}
 
         def _add_to_schema(resource_schema):
             key = '-'.join(sorted(resource_schema['primaryKey']))
