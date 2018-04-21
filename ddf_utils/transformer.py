@@ -3,6 +3,7 @@
 """functions for common tasks on ddf datasets"""
 
 import pandas as pd
+import dask.dataframe as dd
 import numpy as np
 import json
 import logging
@@ -62,15 +63,32 @@ def _generate_mapping_dict1(df, column, dictionary, base_df, not_found):
     search_col = dictionary['key']
     idx_col = dictionary['value']
 
-    if base_df.set_index(idx_col).index.has_duplicates:
+    # Note: don't find mappings for n/a
+    base_df_ = base_df.dropna(subset=[idx_col]).dropna(subset=[search_col])
+
+    if base_df_.set_index(idx_col).index.has_duplicates:
         logging.warning('there are duplicated keys in the base dataframe:')
-        m = base_df.set_index(idx_col).index.duplicated()
-        logging.warning(base_df.set_index(idx_col).index[m].unique())
+        m = base_df_.set_index(idx_col).index.duplicated()
+        logging.warning(base_df_.set_index(idx_col).index[m].unique())
 
     if search_col == idx_col:
-        mapping_all = dict([(x, x) for x in base_df[idx_col].values])
+        mapping_all = dict([(x, x) for x in base_df_[idx_col].values])
     else:
-        mapping_all = base_df.set_index(search_col)[idx_col].to_dict()
+        mapping_all = base_df_.set_index(search_col)[idx_col].to_dict()
+    # add logging for no match
+    no_match = set()
+
+    # need to compute the actual dataframe now if it's a dask dataframe.
+    # otherwise it will raise error.
+    if isinstance(df, dd.DataFrame):
+        uvs = df[column].compute().unique()
+    else:
+        uvs = df[column].unique()
+    for v in uvs:
+        if v not in mapping_all.keys():
+            no_match.add(v)
+    if len(no_match) > 0:
+        logging.warning('no match found: ' + str(no_match))
     return mapping_all
 
 
@@ -85,6 +103,9 @@ def _generate_mapping_dict2(df, column, dictionary, base_df, not_found, ignore_c
     assert isinstance(idx_col, str)
 
     for f in df[column].unique():
+        if pd.isnull(f):
+            logging.warning('skipping n/a values in column {}'.format(column))
+            continue
         bools = []
         for sc in search_cols:
             if ignore_case:
@@ -97,13 +118,15 @@ def _generate_mapping_dict2(df, column, dictionary, base_df, not_found, ignore_c
             mask = mask | m
         filtered = base_df[mask]
 
+        if len(filtered) == 0 or np.all(pd.isnull(filtered[idx_col])):
+            no_match.add(f)
+            continue
+
         if len(filtered) == 1:
             mapping[f] = filtered[idx_col].iloc[0]
         elif len(filtered) > 1:
             logging.warning("multiple match found: "+f)
             mapping[f] = filtered[idx_col].values.tolist()
-        else:
-            no_match.add(f)
 
     if len(no_match) > 0:
         logging.warning('no match found: ' + str(no_match))

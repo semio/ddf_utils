@@ -57,6 +57,7 @@ def translate_header(chef: Chef, ingredients: List[str], result, dictionary) -> 
     logger.info("translate_header: " + ingredient.ingred_id)
 
     data = ingredient.get_data()
+    new_data = dict()
     rm = dictionary
 
     for k in list(data.keys()):
@@ -69,10 +70,10 @@ def translate_header(chef: Chef, ingredients: List[str], result, dictionary) -> 
             if len(rm_) > 0:
                 df_new = df_new.rename(columns=rm_)
         if k in rm.keys():  # if we need to rename the concept name
-            data[rm[k]] = df_new
-            del(data[k])
+            new_data[rm[k]] = df_new
+            # del(data[k])
         else:  # we only rename index/properties columns
-            data[k] = df_new
+            new_data[k] = df_new
 
     # also rename the key
     newkey = ingredient.key
@@ -90,7 +91,7 @@ def translate_header(chef: Chef, ingredients: List[str], result, dictionary) -> 
 
     if not result:
         result = ingredient.ingred_id + '-translated'
-    return ProcedureResult(chef, result, newkey, data=data)
+    return ProcedureResult(chef, result, newkey, data=new_data)
 
 
 @debuggable
@@ -594,6 +595,12 @@ def flatten(chef: Chef, ingredients: List[str], result, **options) -> ProcedureR
         for from_name, df in dfs.items():
             groups = df.groupby(flatten_dimensions).groups
             for g, idx in groups.items():
+                # logger.warn(g)
+                # FIXME: There is an issue for pandas grouper for categorical data
+                # where it will return all categories even if it's already filtered
+                # it's WIP and refer to pull request #20583 for pandas.
+                if len(idx) == 0:
+                    continue
                 if not isinstance(g, tuple):
                     g = [g]
                 df_ = df.loc[idx].copy()
@@ -606,7 +613,8 @@ def flatten(chef: Chef, ingredients: List[str], result, **options) -> ProcedureR
                         new_name = new_name.replace('_'+e, '')
                     logger.info('new name w/o total among entities is {}'.format(new_name))
                 if new_name in res.keys():
-                    raise ProcedureError("{} already created! check your name template please.".format(new_name))
+                    # raise ProcedureError("{} already created! check your name template please.".format(new_name))
+                    logger.warning("{} already exists! It will be overwritten.".format(new_name))
                 res[new_name] = df_.rename(columns={from_name: new_name}).drop(flatten_dimensions, axis=1)
 
     return ProcedureResult(chef, result, newkey, data=create_dsk(res))
