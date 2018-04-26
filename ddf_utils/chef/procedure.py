@@ -23,7 +23,8 @@ logger = logging.getLogger('Chef')
 
 
 @debuggable
-def translate_header(chef: Chef, ingredients: List[str], result, dictionary) -> ProcedureResult:
+def translate_header(chef: Chef, ingredients: List[str],
+                     result, dictionary, duplicated='error') -> ProcedureResult:
     """Translate column headers
 
     Procedure format:
@@ -45,6 +46,9 @@ def translate_header(chef: Chef, ingredients: List[str], result, dictionary) -> 
         A list of ingredient id in the dag to translate
     dictionary : dict
         A dictionary for name mapping
+    duplicated : `str`
+       What to do when there are duplicated columns after renaming. Avaliable options
+       are `error`, `replace`
     result : `str`
         The result ingredient id
 
@@ -61,7 +65,22 @@ def translate_header(chef: Chef, ingredients: List[str], result, dictionary) -> 
     rm = dictionary
 
     for k in list(data.keys()):
-        df_new = data[k].rename(columns=rm)
+        # df_new = data[k].rename(columns=rm)
+        df_new = data[k].copy()
+        for old_name, new_name in rm.items():
+            if new_name in df_new.columns:
+                if duplicated == 'error':
+                    raise ValueError(
+                        'can not rename column {} to {} '
+                        'because {} already exists!'.format(old_name, new_name, new_name))
+                elif duplicated == 'replace':
+                    df_new[new_name] = df_new[old_name]
+                    df_new = df_new.drop(old_name, axis=1)
+                else:
+                    raise ValueError('unknown option to `duplicated`: {}'.format(duplicated))
+            else:
+                df_new[new_name] = df_new[old_name]
+                df_new = df_new.drop(old_name, axis=1)
         if ingredient.dtype == 'entities':  # also rename the `is--` headers
             rm_ = {}
             for c in df_new.columns:
