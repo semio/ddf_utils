@@ -69,15 +69,17 @@ class BaseIngredient(object):
         data = self.compute()
         assert isinstance(data, dict)
         assert len(data) == 1
-        for _, df in data.items():
+        filename = read_opt(options, 'file_name', default='ddf--concepts.csv')
+        for _, df_ in data.items():
             # change boolean into string
             # and remove tailing spaces
+            df = df_.copy()
             for i, v in df.dtypes.iteritems():
                 if v == 'bool':
                     df[i] = df[i].map(lambda x: str(x).upper())
                 if v == 'object':
                     df[i] = df[i].str.strip()
-            path = os.path.join(outpath, 'ddf--concepts.csv')
+            path = os.path.join(outpath, filename)
             df = sort_df(df, key='concept')
             df.to_csv(path, index=False, encoding='utf8')
 
