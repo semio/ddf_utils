@@ -254,6 +254,8 @@ def _sort_dp(dp):
             if isinstance(d[k], (list, tuple)):
                 for v in d[k]:
                     res.append(v)
+            elif d[k] is None:
+                res.append('')
             else:
                 res.append(d[k])
         return res
