@@ -168,19 +168,18 @@ class Datapackage:
                     esets = cdf[(cdf['concept_type'] == 'entity_set') &
                                 (cdf['domain'] == domain)]['concept']
                     if not esets.empty:
-                        for s in esets:
-                            rows = (idx_table[(idx_table.pkey == domain) |
-                                              (idx_table.pkey == s)]
-                                    .drop_duplicates(subset='path'))
-                            # filter ambiougus names where domain is different but set name
-                            # is same.
-                            for _, r in rows.iterrows():
-                                if domain not in r['name']:
-                                    continue
-                                df = pd.read_csv(r.path, dtype=str)
-                                if r.pkey != domain:
-                                    df = df.rename(columns={r.pkey: domain})
-                                entities[domain].append(df)
+                        rows = (idx_table[(idx_table.pkey == domain) |
+                                          (idx_table.pkey.isin(esets.tolist()))]
+                                .drop_duplicates(subset='path'))
+                        # filter ambiougus names where domain is different but set name
+                        # is same.
+                        for _, r in rows.iterrows():
+                            if domain not in r['name']:
+                                continue
+                            df = pd.read_csv(r.path, dtype=str)
+                            if r.pkey != domain:
+                                df = df.rename(columns={r.pkey: domain})
+                            entities[domain].append(df)
                         entities[domain] = pd.concat(entities[domain], ignore_index=True)
                     else:  # no sets for this domain
                         paths = (idx_table[idx_table.pkey == domain]['path']

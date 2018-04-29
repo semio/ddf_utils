@@ -78,9 +78,11 @@ def translate_header(chef: Chef, ingredients: List[str],
                     df_new = df_new.drop(old_name, axis=1)
                 else:
                     raise ValueError('unknown option to `duplicated`: {}'.format(duplicated))
-            else:
+            elif old_name in df_new.columns:
                 df_new[new_name] = df_new[old_name]
                 df_new = df_new.drop(old_name, axis=1)
+            else:
+                continue
         if ingredient.dtype == 'entities':  # also rename the `is--` headers
             rm_ = {}
             for c in df_new.columns:
