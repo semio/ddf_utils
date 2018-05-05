@@ -320,5 +320,34 @@ def from_csv(input, out_path):
     click.echo('Done.')
 
 
+# detect etl script type for a dataset
+@ddf.command()
+@click.option('-d', 'script_dir', type=click.Path(), default='etl/scripts')
+def etl_type(script_dir):
+    import sys
+
+    script_dir = os.path.expanduser(script_dir)
+
+    if not os.path.isabs(script_dir):
+        script_dir = os.path.join('./', script_dir)
+
+    if not os.path.exists(script_dir):
+        raise FileNotFoundError('{} not exists!'.format(script_dir))
+
+    sys.path.insert(0, script_dir)
+    try:
+        import etl
+        fn = etl.recipe_file
+        tp = 'recipe'
+    except AttributeError:
+        fn = ''
+        tp = 'python'
+    except ModuleNotFoundError:
+        fn = ''
+        tp = 'manual'
+    print ('{},{}'.format(tp, fn))
+    return
+
+
 if __name__ == '__main__':
     ddf()
