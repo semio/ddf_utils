@@ -401,7 +401,6 @@ class Datapackage:
 
         def _gen_key_value_object(resource):
             logging.debug('working on: {}'.format(resource.path))
-            data = pd.read_csv(resource.full_path, dtype=dtypes)
             if isinstance(resource.primaryKey, str):
                 pkeys = [resource.primaryKey]
             else:
@@ -411,24 +410,37 @@ class Datapackage:
                            (x in cdf.index) and
                            (cdf.loc[x, 'concept_type'] in ['entity_set', 'entity_domain'])]
             value_cols = list(set([x['name'] for x in resource.fields]) - set(pkeys))
-            # only consider all permutations on entity columns
+
+            data = pd.read_csv(resource.full_path, dtype=dtypes)
+
+            # for resources that have entity_columns: only consider all permutations on entity columns
             if len(entity_cols) > 0:
-                data = data[pkeys].drop_duplicates(subset=entity_cols)
+                data = data[entity_cols].drop_duplicates()
+
+            pkeys_prop = dict()
+            for c in pkeys:
+                if c not in cdf.index:
+                    pkeys_prop[c] = {'type': 'non_concept'}
+                elif cdf.at[c, 'concept_type'] == 'entity_set':
+                    pkeys_prop[c] = {'type': 'entity_set',
+                                     'domain': cdf.at[c, 'domain']}
+                elif cdf.at[c, 'concept_type'] == 'entity_domain':
+                    pkeys_prop[c] = {'type': 'entity_domain'}
+                else:
+                    pkeys_prop[c] = {'type': 'others'}
 
             all_permutations = set()
-            for i, r in data.iterrows():
+            for _, r in data.iterrows():
                 perm = list()
                 for c in pkeys:
-                    if c not in cdf.index:
-                        perm.append(tuple([c]))
-                        continue
-                    if cdf.loc[c, 'concept_type'] == 'entity_set':
-                        domain = cdf.loc[c, 'domain']
+                    if pkeys_prop[c]['type'] == 'entity_set':
+                        domain = pkeys_prop[c]['domain']
                         perm.append(_which_sets(r[c], domain))
-                    elif cdf.loc[c, 'concept_type'] == 'entity_domain':
+                    elif pkeys_prop[c]['type'] == 'entity_domain':
                         perm.append(_which_sets(r[c], c))
                     else:
                         perm.append(tuple([c]))
+
                 all_permutations.add(tuple(perm))
 
             for row in all_permutations:
@@ -461,7 +473,7 @@ class Datapackage:
             if logger.getEffectiveLevel() != 10:
                 pbar.update(1)
             for kvo in g:
-                # logging.debug("adding kvo {}".format(str(kvo)))
+                logging.debug("adding kvo {}".format(str(kvo)))
                 _add_to_schema(kvo)
 
         if logger.getEffectiveLevel() != 10:
