@@ -40,6 +40,8 @@ class BaseIngredient(object):
                 return 'concepts'
             else:
                 return 'entities'
+        elif 'synonym' in keys:
+            return 'synonyms'
         else:
             return 'datapoints'
 
@@ -242,6 +244,8 @@ class BaseIngredient(object):
             self._serve_concepts(outpath, **options)
         elif t == 'entities':
             self._serve_entities(outpath, **options)
+        elif t == 'synonyms':
+            raise NotImplementedError('can not serve synonyms now.')
         else:
             raise IngredientError('Not a correct collection: ' + t)
 
@@ -513,6 +517,11 @@ class Ingredient(BaseIngredient):
         else:
             return {'concept': df}
 
+    def _get_data_synonyms(self):
+        ks = self.key_to_list()
+        ks.remove('synonym')
+        return {ks[0]: self.ddf.synonyms[ks[0]]}
+
     def get_data(self, copy=False, key_as_index=False):
         """read in and return the ingredient data
         """
@@ -550,7 +559,8 @@ class Ingredient(BaseIngredient):
         funcs = {
             'datapoints': self._get_data_datapoint,
             'entities': self._get_data_entities,
-            'concepts': self._get_data_concepts
+            'concepts': self._get_data_concepts,
+            'synonyms': self._get_data_synonyms
         }
 
         def filter_row(df, avaliable_scopes):

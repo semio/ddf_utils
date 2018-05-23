@@ -82,6 +82,7 @@ class Datapackage:
         self._resources = None
         self._concepts = None
         self._entities = None
+        self._synonyms = None
         self._dataset = None
 
     @property
@@ -107,8 +108,14 @@ class Datapackage:
     @property
     def datapoints_resources(self):
         # TODO: it might not be true that primaryKey is always a list for datapoints
-        # sometimes it could be string?
-        return [r for r in self.resources if isinstance(r.primaryKey, list)]
+        # sometimes it could be just one string?
+        return [r for r in self.resources
+                if isinstance(r.primaryKey, list) and 'synonym' not in r.primaryKey]
+
+    @property
+    def synonyms_resources(self):
+        return [r for r in self.resources
+                if isinstance(r.primaryKey, list) and 'synonym' in r.primaryKey]
 
     @property
     def index_table(self):
@@ -149,6 +156,7 @@ class Datapackage:
 
     @property
     def concepts(self):
+        """return a DataFrame for concepts"""
         if self._concepts is None:
             fs = (self.index_table[self.index_table.pkey == 'concept']['path']
                   .unique().tolist())
@@ -158,6 +166,7 @@ class Datapackage:
 
     @property
     def entities(self):
+        """return dictionary, which keys are domains and values are DataFrames"""
         if self._entities is None:
             cdf = self.concepts
             idx_table = self.index_table
@@ -193,7 +202,23 @@ class Datapackage:
             self._entities = entities
         return self._entities
 
+    @property
+    def synonyms(self):
+        """return a dictonary, where keys are domains or `concept` and values are DataFrames"""
+        if self._synonyms is not None:
+            return self._synonyms
+
+        syms = dict()
+        for r in self.synonyms_resources:
+            pks = r.primaryKey
+            key_for_sym = [x for x in pks if x != 'synonym']
+            assert len(key_for_sym) == 1, "synonyms resource can only have two primary keys"
+            syms[key_for_sym[0]] = pd.read_csv(r.full_path)
+        self._synonyms = syms
+        return self._synonyms
+
     def indicators(self, by=None):
+        """return a list of indicator names, filtered by the primaryKeys"""
         res = set()
         for r in self.datapoints_resources:
             if by is not None and set(by) != set(r.primaryKey):
@@ -233,6 +258,14 @@ class Datapackage:
             # rename the primaryKey column to match the entity set name
             df = df.rename(columns={entity_domain: entity_set})
         return df
+
+    def get_synonym_dict(self, concept):
+        """return a synonym dictionary for a concept"""
+        try:
+            df = self.synonyms[concept]
+        except KeyError:  # no synonyms for this concept
+            return None
+        return df.set_index('synonym')[concept].to_dict()
 
     # TODO: refactor this method
     def load(self, **kwargs):
@@ -289,7 +322,7 @@ class Datapackage:
                         "data": pd.read_csv(r.full_path, dtype=str, encoding='utf8'),  # read all as string
                         "key": pkey
                     })
-            else:  # datapoints
+            elif 'synonym' not in r.primaryKey:  # datapoints
                 assert not isinstance(pkey, str)
                 fn = r.full_path
                 df = next(pd.read_csv(fn, chunksize=1))
@@ -306,6 +339,8 @@ class Datapackage:
                 else:
                     for indicator_name in indicator_names:
                         _update_datapoints(fn, keys, indicator_name)
+            else:  # synonyms/other types.
+                continue
 
         # datapoints
         for i, kvs in datapoints.items():
@@ -374,7 +409,7 @@ class Datapackage:
         ds = self.dataset
         cdf = ds.concepts.set_index('concept')
         hash_table = {}
-        ddf_schema = {'concepts': [], 'entities': [], 'datapoints': []}
+        ddf_schema = {'concepts': [], 'entities': [], 'datapoints': [], 'synonym': []}
         entity_value_cache = dict()
 
         # generate set-membership details for every single entity in dataset
@@ -487,7 +522,10 @@ class Datapackage:
                 else:
                     ddf_schema['entities'].append(sch)
             else:
-                ddf_schema['datapoints'].append(sch)
+                if 'synonym' in sch['primaryKey']:
+                    ddf_schema['synonym'].append(sch)
+                else:
+                    ddf_schema['datapoints'].append(sch)
 
         self.datapackage['ddfSchema'] = ddf_schema
 

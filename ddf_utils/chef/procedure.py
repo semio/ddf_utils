@@ -16,7 +16,7 @@ from ddf_utils.chef.cook import Chef
 
 from .dag import DAG
 from .exceptions import ProcedureError
-from .helpers import debuggable, mkfunc, query, read_opt, create_dsk
+from .helpers import debuggable, mkfunc, query, read_opt, create_dsk, build_dictionary
 from .ingredient import BaseIngredient, ProcedureResult
 
 logger = logging.getLogger('Chef')
@@ -44,8 +44,8 @@ def translate_header(chef: Chef, ingredients: List[str],
         The Chef the procedure will run on
     ingredients : list
         A list of ingredient id in the dag to translate
-    dictionary : dict
-        A dictionary for name mapping
+    dictionary : dict or `str`
+        A dictionary for name mapping, or filepath to the dictionary
     duplicated : `str`
        What to do when there are duplicated columns after renaming. Avaliable options
        are `error`, `replace`
@@ -62,7 +62,7 @@ def translate_header(chef: Chef, ingredients: List[str],
 
     data = ingredient.get_data()
     new_data = dict()
-    rm = dictionary
+    rm = build_dictionary(chef.dag, dictionary)
 
     for k in list(data.keys()):
         # df_new = data[k].rename(columns=rm)
@@ -183,28 +183,20 @@ def translate_column(chef: Chef, ingredients: List[str], result, dictionary,
     ingredient = ingredients[0]
     logger.info("translate_column: " + ingredient.ingred_id)
 
+    if target_column is None:
+        target_column = column
+
     di = ingredient.get_data()
     new_data = dict()
 
-    # find out the type of dictionary.
-    if isinstance(dictionary, str):
-        dict_type = 'file'
-        base_df = None
-    else:
-        if 'base' in dictionary.keys():
-            dict_type = 'dataframe'
-            base = chef.dag.get_node(dictionary.pop('base')).evaluate()
-            base_data = base.get_data()
-            if len(base_data) > 1:
-                raise ProcedureError('only support ingredient with 1 item')
-            base_df = list(base_data.values())[0].copy()
-        else:
-            dict_type = 'inline'
-            base_df = None
+    # build the dictionary
+    dictionary_ = build_dictionary(chef, dictionary)
+    dict_type = 'inline'
+    base_df = None
 
     for k, df in di.items():
         logger.debug("running on: " + k)
-        new_data[k] = tc(df, column, dict_type, dictionary, target_column, base_df,
+        new_data[k] = tc(df, column, dict_type, dictionary_, target_column, base_df,
                          not_found, ambiguity, ignore_case)
 
     if not result:
