@@ -51,10 +51,10 @@ def test_merge_keys():
     di = {'nc': ['c1', 'c2', 'c3']}
 
     res1 = merge_keys(df.set_index(['geo', 'time']), di)
-    assert res1.get_value(('nc', 1992), 'val') == 6
+    assert res1.at[('nc', 1992), 'val'] == 6
 
     res2 = merge_keys(df.set_index(['geo', 'time']), di, merged='keep')
-    assert res2.get_value(('c1', 1992), 'val') == 1
+    assert res2.at[('c1', 1992), 'val'] == 1
 
 
 def test_split_keys():
@@ -65,7 +65,7 @@ def test_split_keys():
     di = {'n0': ['c1', 'c2', 'c3']}
 
     res1 = split_keys(df.set_index(['geo', 'time']), 'geo', di)
-    assert res1.get_value(('c1', 1991), 'val') == 1
+    assert res1.at[('c1', 1991), 'val'] == 1
 
 
 def test_extract_concepts():
@@ -96,3 +96,28 @@ def test_extract_concepts():
     assert 'country' in concepts.index
     assert 'time' in concepts.index
     assert concepts.loc['country', 'concept_type'] == 'entity_set'
+
+
+def test_translate_column():
+    # from `translate_column`'s heredoc
+    from ddf_utils.transformer import translate_column
+
+    df = pd.DataFrame([['geo', 'Geographical places'], ['time', 'Year']],
+                      columns=['concept', 'name'])
+
+    r1 = translate_column(df, 'concept', 'inline', {'geo': 'country', 'time': 'year'})
+
+    base_df = pd.DataFrame([['geo', 'country'], ['time', 'year']],
+                           columns=['concept', 'alternative_name'])
+    r2 = translate_column(df, 'concept', 'dataframe',
+                          {'key': 'concept', 'value': 'alternative_name'},
+                          target_column='new_name', base_df=base_df)
+
+    df2 = pd.DataFrame([['China', 1], ['United State', 2]], columns=['geo', 'value'])
+    base_df2 = pd.DataFrame([['chn', 'China', 'PRC'],
+                             ['usa', 'USA', 'United State']],
+                            columns=['geo', 'alt1', 'alt2'])
+    r3 = translate_column(df2, 'geo', 'dataframe',
+                          {'key': ['alt1', 'alt2'], 'value': 'geo'},
+                          target_column='new_geo', base_df=base_df2)
+    print(r3)

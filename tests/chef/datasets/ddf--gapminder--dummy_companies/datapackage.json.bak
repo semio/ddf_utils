@@ -5,7 +5,7 @@
         "name": "English"
     },
     "author": "Jasper Heeffer <jasper@gapminder.org> (http://gapminder.org)",
-    "created": "2018-05-24T02:12:54.656692+00:00",
+    "created": "2018-05-22T01:48:08.685850+00:00",
     "description": "A dummy dataset for showing the DDF dataformat",
     "license": "foo",
     "title": "Gapminder's Dummy Company dataset",
@@ -80,30 +80,6 @@
                 ],
                 "primaryKey": [
                     "company",
-                    "anno"
-                ]
-            }
-        },
-        {
-            "path": "ddf--datapoints--indicators--by--project--anno.csv",
-            "name": "ddf--datapoints--indicators--by--project--anno",
-            "schema": {
-                "fields": [
-                    {
-                        "name": "project"
-                    },
-                    {
-                        "name": "anno"
-                    },
-                    {
-                        "name": "indicator2"
-                    },
-                    {
-                        "name": "indicator1"
-                    }
-                ],
-                "primaryKey": [
-                    "project",
                     "anno"
                 ]
             }
@@ -607,26 +583,6 @@
             {
                 "primaryKey": [
                     "anno",
-                    "project"
-                ],
-                "value": "indicator1",
-                "resources": [
-                    "ddf--datapoints--indicators--by--project--anno"
-                ]
-            },
-            {
-                "primaryKey": [
-                    "anno",
-                    "project"
-                ],
-                "value": "indicator2",
-                "resources": [
-                    "ddf--datapoints--indicators--by--project--anno"
-                ]
-            },
-            {
-                "primaryKey": [
-                    "anno",
                     "company"
                 ],
                 "value": "lines_of_code",
@@ -721,7 +677,7 @@
         "synonym": [
             {
                 "primaryKey": [
-                    "english_speaking_company",
+                    "foundation",
                     "synonym"
                 ],
                 "value": "source",
@@ -741,7 +697,7 @@
             },
             {
                 "primaryKey": [
-                    "foundation",
+                    "english_speaking_company",
                     "synonym"
                 ],
                 "value": "source",
