@@ -52,7 +52,7 @@ def build_dictionary(chef, dict_def):
 
 
 def build_dictionary_from_file(file_path):
-    d = json.load(file_path)
+    d = json.load(open(file_path, 'r'))
     assert isinstance(d, dict)
     return d
 
