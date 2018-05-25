@@ -12,8 +12,12 @@ from ddf_utils.chef.helpers import prompt_select
 
 
 def _translate_column_inline(df, column, target_column, dictionary,
-                             not_found, ambiguity):
+                             not_found, ambiguity, ignore_case=False):
     df_new = df.copy()
+
+    if ignore_case:
+        df_new[column] = df_new[column].map(
+            lambda x: str(x).lower() if x is not None else x)
 
     # check for ambiguities
     dict_ = dictionary.copy()
@@ -236,7 +240,7 @@ def translate_column(df, column, dictionary_type, dictionary,
 
     if dictionary_type == 'inline':
         df_new = _translate_column_inline(df, column, target_column, dictionary,
-                                          not_found, ambiguity)
+                                          not_found, ambiguity, ignore_case)
     if dictionary_type == 'file':
         with open(dictionary) as f:
             d = json.load(f)

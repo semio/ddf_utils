@@ -25,7 +25,7 @@ def create_dsk(data, parts=10):
     return data
 
 
-def build_dictionary(chef, dict_def):
+def build_dictionary(chef, dict_def, ignore_case=False):
     """build a dictionary from a dictionary definition"""
     if (len(dict_def) == 3 and
         'base' in dict_def and 'key' in dict_def and 'value' in dict_def):
@@ -42,7 +42,7 @@ def build_dictionary(chef, dict_def):
             df = ingredient.get_data()[ingredient.key]
         else:
             raise NotImplementedError('unsupported data type {}'.format(ingredient.dtype))
-        return build_dictionary_from_dataframe(df, keys, value)
+        return build_dictionary_from_dataframe(df, keys, value, ignore_case)
     elif isinstance(dict_def, str):
         base_path = chef.config['dictionaries_dir']
         path = os.path.join(base_path, dict_def)

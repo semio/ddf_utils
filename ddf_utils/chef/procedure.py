@@ -190,7 +190,7 @@ def translate_column(chef: Chef, ingredients: List[str], result, dictionary,
     new_data = dict()
 
     # build the dictionary
-    dictionary_ = build_dictionary(chef, dictionary)
+    dictionary_ = build_dictionary(chef, dictionary, ignore_case)
     dict_type = 'inline'
     base_df = None
 
