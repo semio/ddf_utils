@@ -409,7 +409,7 @@ class Datapackage:
         ds = self.dataset
         cdf = ds.concepts.set_index('concept')
         hash_table = {}
-        ddf_schema = {'concepts': [], 'entities': [], 'datapoints': [], 'synonym': []}
+        ddf_schema = {'concepts': [], 'entities': [], 'datapoints': [], 'synonyms': []}
         entity_value_cache = dict()
 
         # generate set-membership details for every single entity in dataset
@@ -523,7 +523,7 @@ class Datapackage:
                     ddf_schema['entities'].append(sch)
             else:
                 if 'synonym' in sch['primaryKey']:
-                    ddf_schema['synonym'].append(sch)
+                    ddf_schema['synonyms'].append(sch)
                 else:
                     ddf_schema['datapoints'].append(sch)
 
