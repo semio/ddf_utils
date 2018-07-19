@@ -39,9 +39,19 @@ def _translate_column_inline(df, column, target_column, dictionary,
 
     # TODO: refactor this block
     if not_found == 'drop':
-        df_new[target_column] = df_new[column].map(
-            lambda x: dictionary[x] if x in dictionary.keys() else None)
-        df_new = df_new.dropna(subset=[target_column])
+        nf = []
+        def process_val(v):
+            if v in dictionary.keys():
+                return dictionary[v]
+            else:
+                if v not in nf:
+                    # logging.warning('key not found: {}'.format(v))
+                    nf.append(v)
+                return np.nan
+        df_new[target_column] = df_new[column].map(process_val)
+        if len(nf) > 0:
+            logging.warning('key not found:')
+            logging.warning(nf)
     if not_found == 'error':
         df_new[target_column] = df_new[column].map(
             lambda x: dictionary[x])

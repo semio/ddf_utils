@@ -606,17 +606,17 @@ def flatten(chef: Chef, ingredients: List[str], result, **options) -> ProcedureR
     for from_name_tmpl, new_name_tmpl in dictionary.items():
         dfs = dict([(x, data[x]) for x in fnmatch.filter(data.keys(), from_name_tmpl)])
         for from_name, df in dfs.items():
-            groups = df.groupby(flatten_dimensions).groups
-            for g, idx in groups.items():
+            grouper = df.groupby(flatten_dimensions)
+            for g, _ in grouper.groups.items():
                 # logger.warn(g)
                 # FIXME: There is an issue for pandas grouper for categorical data
                 # where it will return all categories even if it's already filtered
                 # it's WIP and refer to pull request #20583 for pandas.
-                if len(idx) == 0:
+                df_ = grouper.get_group(g)
+                if df_.empty:
                     continue
                 if not isinstance(g, tuple):
                     g = [g]
-                df_ = df.loc[idx].copy()
                 tmpl_dict = dict(zip(flatten_dimensions, g))
                 tmpl_dict['concept'] = from_name
                 new_name = new_name_tmpl.format(**tmpl_dict)
@@ -719,7 +719,7 @@ def groupby(chef: Chef, ingredients: List[str], result, **options) -> ProcedureR
 
     Keyword Args
     ------------
-    groubby : `str` or `list`
+    groupby : `str` or `list`
         the column(s) to group, can be a list or a string
     insert_key : `dict`
         manually insert keys in to result. This is useful when we want to add back the
@@ -947,8 +947,12 @@ def run_op(chef: Chef, ingredients: List[str], result, op) -> ProcedureResult:
     keys = ingredient.key_to_list()
 
     # concat all the datapoint dataframe first, and eval the ops
-    to_concat = [v.set_index(keys) for v in data.values()]
-    df = pd.concat(to_concat, axis=1)
+    to_concat = [v for v in data.values()]
+
+    df = pd.merge(to_concat[0], to_concat[1], on=keys, how='outer')
+    for _df in to_concat[2:]:
+        df = pd.merge(df, _df, on=keys, how='outer')
+    df = df.set_index(keys)
 
     for k, v in op.items():
         res = df.eval(v).dropna()  # type(res) is Series
