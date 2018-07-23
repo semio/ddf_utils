@@ -15,7 +15,6 @@ import os.path as osp
 from time import sleep
 
 import requests
-from lxml import html
 
 import pandas as pd
 from ddf_utils.chef.helpers import read_opt
@@ -54,10 +53,7 @@ def has_newer_source(ver):
 
     versions = metadata['version']
     newer = versions[versions['vesrion_id'] > ver].values
-    if len(newer) > 0:
-        return True
-    else:
-        return False
+    return bool(len(newer) > 0)
 
 
 def bulk_download(out_dir, version, context, query=None, **kwargs):
@@ -65,7 +61,7 @@ def bulk_download(out_dir, version, context, query=None, **kwargs):
         load_metadata()
 
     if query is None:
-        query = _make_query(context, version)
+        query = _make_query(context, version, **kwargs)
     else:
         if not isinstance(query, list):
             query = [query]
@@ -139,8 +135,8 @@ def _make_query(context, version, **kwargs):
     # ^ Note: user guide[1] says it's 500000 row. But actually we can set this to 10000000
     # [1]: http://ghdx.healthdata.org/sites/default/files/ihme_query_tool/GBD_Data_Tool_User_Guide_(2016).pdf
     email = read_opt(kwargs, 'email', default='downloader@gapminder.org')
-    idsOrNames = read_opts(kwargs, 'idsOrNames', default='ids')           # ids / names / both
-    singleOrMult = read_opts(kwargs, 'singleOrMult', default='multiple')  # single / multiple
+    idsOrNames = read_opt(kwargs, 'idsOrNames', default='ids')           # ids / names / both
+    singleOrMult = read_opt(kwargs, 'singleOrMult', default='multiple')  # single / multiple
     base = read_opt(kwargs, 'base', default='single')
 
     # metadata
