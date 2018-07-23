@@ -18,6 +18,7 @@ import requests
 from lxml import html
 
 import pandas as pd
+from ddf_utils.chef.helpers import read_opt
 
 
 url_hir = 'http://ghdx.healthdata.org/sites/all/modules/custom/ihme_query_tool/gbd-search/php/hierarchy/'
@@ -32,6 +33,7 @@ metadata = None
 
 
 def load_metadata():
+    """load all codes used in GBD in a dictionary."""
     meta = requests.get(url_metadata).json()
     versions = requests.get(url_version).json()
 
@@ -58,7 +60,7 @@ def has_newer_source(ver):
         return False
 
 
-def bulk_download(out_dir, version, context, query=None):
+def bulk_download(out_dir, version, context, query=None, **kwargs):
     if not metadata:
         load_metadata()
 
@@ -78,6 +80,7 @@ def bulk_download(out_dir, version, context, query=None):
     # make a series of queries, the server will response a series of task ids.
     for q in query:
         res_data = requests.post(url_data, data=q)
+        # print(res_data.json())
         if isinstance(res_data.json()['taskID'], list):
             for taskID in res_data.json()['taskID']:
                 taskIDs.add(taskID)
@@ -110,28 +113,35 @@ def bulk_download(out_dir, version, context, query=None):
         download_urls = res_json['urls']
 
         for u in download_urls:
-            download_file = requests.get(u, stream=True)
-            fn = osp.join(out_dir, osp.basename(u))
-
-            with open(fn, 'wb') as f:
-                for c in download_file.iter_content(chunk_size=1024):
-                    f.write(c)
-                f.close()
+            _run_download(u, out_dir)
     if successed == 0:
         return False
     return True
 
 
-def _make_query(context, version):
+def _run_download(u, out_dir):
+    '''accept an URL and download it to out_dir'''
+    download_file = requests.get(u, stream=True)
+    fn = osp.join(out_dir, osp.basename(u))
+    print('downloading {} to {}'.format(u, fn))
+    with open(fn, 'wb') as f:
+        for c in download_file.iter_content(chunk_size=1024):
+            f.write(c)
+            f.close()
+
+
+def _make_query(context, version, **kwargs):
     if not metadata:
         load_metadata()
 
-    # fixed parameters
-    rows = 10000000  # the maximum records we can get
-    email = 'downloader@gapminder.org'
-    idsOrNames = 'ids'
-    singleOrMult = 'single'
-    base = 'single'
+    # read parameters
+    rows = read_opt(kwargs, 'rows', default=10000000)  # the maximum records we can get
+    # ^ Note: user guide[1] says it's 500000 row. But actually we can set this to 10000000
+    # [1]: http://ghdx.healthdata.org/sites/default/files/ihme_query_tool/GBD_Data_Tool_User_Guide_(2016).pdf
+    email = read_opt(kwargs, 'email', default='downloader@gapminder.org')
+    idsOrNames = read_opts(kwargs, 'idsOrNames', default='ids')           # ids / names / both
+    singleOrMult = read_opts(kwargs, 'singleOrMult', default='multiple')  # single / multiple
+    base = read_opt(kwargs, 'base', default='single')
 
     # metadata
     ages = metadata['age']['age_id'].values
@@ -143,19 +153,28 @@ def _make_query(context, version):
     measures = metadata['measure']['measure_id'].values
     causes = metadata['cause']['cause_id'].values
 
-    # others metadata filed not incluede:
+    # others metadata filed not include:
     # - rei
     # - groups
     # - year_range
 
     queries = []
 
+    # TODO: improve here.
+    # 1. maybe we can make measure/metric parameters users can set
+    # 2. set `singleOrMult` to multiple when necessary
+    # for now all records can fit in one request
+    # but might not true for later.
     if context == 'le':
-        # TODO: improve here.
-        # for now all records can fit in one request
-        # but might not true for later.
         measure = 26
         metric = 5
+        queries.append({
+            'measure[]': measure,
+            'metric[]': metric
+        })
+    elif context == 'cause':
+        measure = measures
+        metric = metrics
         queries.append({
             'measure[]': measure,
             'metric[]': metric
