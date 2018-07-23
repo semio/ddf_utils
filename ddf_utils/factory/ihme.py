@@ -123,7 +123,7 @@ def _run_download(u, out_dir):
     with open(fn, 'wb') as f:
         for c in download_file.iter_content(chunk_size=1024):
             f.write(c)
-            f.close()
+        f.close()
 
 
 def _make_query(context, version, **kwargs):
