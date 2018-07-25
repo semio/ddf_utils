@@ -11,6 +11,7 @@ make use of it.
 
 """
 
+import os
 import os.path as osp
 from time import sleep
 
@@ -56,12 +57,25 @@ def has_newer_source(ver):
     return bool(len(newer) > 0)
 
 
-def bulk_download(out_dir, version, context, query=None, **kwargs):
+def bulk_download(out_dir, version, context=None, query=None, **kwargs):
+    """download the selected contexts/queries from GBD result tools.
+
+    Either context or query should be supplied. If both are supplied,
+    query will be used.
+
+    `context` should be a list of string and `query` sould be a list
+    of dictionaries containing post requests data.
+    """
     if not metadata:
         load_metadata()
 
-    if query is None:
-        query = _make_query(context, version, **kwargs)
+    if query is None and context is None:
+        raise ValueError('one of context and query should be supplied!')
+    elif query is None:
+        if isinstance(context, list):
+            query = [_make_query(c, version, **kwargs) for c in context]
+        else:
+            query = [_make_query(context, version, **kwargs)]
     else:
         if not isinstance(query, list):
             query = [query]
@@ -109,16 +123,18 @@ def bulk_download(out_dir, version, context, query=None, **kwargs):
         download_urls = res_json['urls']
 
         for u in download_urls:
-            _run_download(u, out_dir)
+            _run_download(u, out_dir, taskID=i)
     if successed == 0:
         return False
     return True
 
 
-def _run_download(u, out_dir):
+def _run_download(u, out_dir, taskID):
     '''accept an URL and download it to out_dir'''
     download_file = requests.get(u, stream=True)
-    fn = osp.join(out_dir, osp.basename(u))
+    if not osp.exists(osp.join(out_dir, taskID[:8])):
+        os.mkdir(osp.join(out_dir, taskID[:8]))
+    fn = osp.join(out_dir, taskID[:8], osp.basename(u))
     print('downloading {} to {}'.format(u, fn))
     with open(fn, 'wb') as f:
         for c in download_file.iter_content(chunk_size=1024):
@@ -148,13 +164,21 @@ def _make_query(context, version, **kwargs):
     metrics = metadata['metric']['metric_id'].values
     measures = metadata['measure']['measure_id'].values
     causes = metadata['cause']['cause_id'].values
+    # risk/etiology/impairment
+    # There are actually 4 types data in this dictionary:
+    # risk, etiology, impairmen and injury n-codes.
+    # however injury n-codes is not enabled.
+    # we might need to take of it later.
+    rei = metadata['rei']
+    # risks = rei[rei['type'] == 'risk']['rei_id'].values
+    # etiologys = rei[rei['type'] == 'etiology']['rei_id'].values
+    # impairments = rei[rei['type'] == 'impairment']['rei_id'].values
 
     # others metadata filed not include:
-    # - rei
     # - groups
     # - year_range
 
-    queries = []
+    queries = {}
 
     # TODO: improve here.
     # 1. maybe we can make measure/metric parameters users can set
@@ -164,36 +188,46 @@ def _make_query(context, version, **kwargs):
     if context == 'le':
         measure = 26
         metric = 5
-        queries.append({
+        queries.update({
             'measure[]': measure,
             'metric[]': metric
         })
     elif context == 'cause':
         measure = measures
-        metric = metrics
-        queries.append({
+        metric = [1, 2, 3]
+        queries.update({
             'measure[]': measure,
             'metric[]': metric
         })
+    elif context in ['risk', 'etiology', 'impairment']:
+        measure = [1, 2, 3, 4]
+        metric = [1, 2, 3]
+        context_values = rei[rei['type'] == context]['rei_id'].values
+        queries.update({
+            'measure[]': measure,
+            'metric[]': metric,
+            context+'[]':context_values,
+            'rei[]': context_values
+        })
     else:
+        # SEV/HALE/haqi
         print('not supported context.')
         raise NotImplementedError
 
     # insert context and version
-    for q in queries:
-        q.setdefault('context', context)
-        q.setdefault('version', version)
-        q.setdefault('rows', rows)
-        q.setdefault('email', email)
-        q.setdefault('idsOrNames', idsOrNames)
-        q.setdefault('singleOrMult', singleOrMult)
-        q.setdefault('base', base)
-        q.setdefault('location[]', locations)
-        q.setdefault('age[]', ages)
-        q.setdefault('sex[]', sexs)
-        q.setdefault('year[]', years)
-        q.setdefault('metric[]', metrics)
-        q.setdefault('measure[]', measures)
-        q.setdefault('cause[]', causes)
+    queries.setdefault('context', context)
+    queries.setdefault('version', version)
+    queries.setdefault('rows', rows)
+    queries.setdefault('email', email)
+    queries.setdefault('idsOrNames', idsOrNames)
+    queries.setdefault('singleOrMult', singleOrMult)
+    queries.setdefault('base', base)
+    queries.setdefault('location[]', locations)
+    queries.setdefault('age[]', ages)
+    queries.setdefault('sex[]', sexs)
+    queries.setdefault('year[]', years)
+    queries.setdefault('metric[]', metrics)
+    queries.setdefault('measure[]', measures)
+    queries.setdefault('cause[]', causes)
 
     return queries
