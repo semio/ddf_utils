@@ -85,6 +85,9 @@ class Datapackage:
         self._synonyms = None
         self._dataset = None
 
+        # config for read_csv
+        self._default_reader_options = {'keep_default_na': False, 'na_values': ['']}
+
     @property
     def name(self):
         return self.datapackage['name']
@@ -160,7 +163,7 @@ class Datapackage:
         if self._concepts is None:
             fs = (self.index_table[self.index_table.pkey == 'concept']['path']
                   .unique().tolist())
-            concepts = [pd.read_csv(f) for f in fs]
+            concepts = [pd.read_csv(f, **self._default_reader_options) for f in fs]
             self._concepts = pd.concat(concepts, ignore_index=True)
         return self._concepts
 
@@ -185,7 +188,7 @@ class Datapackage:
                         for _, r in rows.iterrows():
                             if domain not in r['name']:
                                 continue
-                            df = pd.read_csv(r.path, dtype=str)
+                            df = pd.read_csv(r.path, dtype=str, **self._default_reader_options)
                             if r.pkey != domain:
                                 df = df.rename(columns={r.pkey: domain})
                             entities[domain].append(df)
@@ -193,11 +196,11 @@ class Datapackage:
                     else:  # no sets for this domain
                         paths = (idx_table[idx_table.pkey == domain]['path']
                                  .unique().tolist())
-                        entities[domain] = dd.read_csv(paths, dtype=str).compute()
+                        entities[domain] = dd.read_csv(paths, dtype=str, **self._default_reader_options).compute()
                 else:  # no domain column
                     paths = (idx_table[idx_table.pkey == domain]['path']
                              .unique().tolist())
-                    entities[domain] = dd.read_csv(paths, dtype=str).compute()
+                    entities[domain] = dd.read_csv(paths, dtype=str, **self._default_reader_options).compute()
 
             self._entities = entities
         return self._entities
@@ -213,7 +216,7 @@ class Datapackage:
             pks = r.primaryKey
             key_for_sym = [x for x in pks if x != 'synonym']
             assert len(key_for_sym) == 1, "synonyms resource can only have two primary keys"
-            syms[key_for_sym[0]] = pd.read_csv(r.full_path)
+            syms[key_for_sym[0]] = pd.read_csv(r.full_path, dtype=str, **self._default_reader_options)
         self._synonyms = syms
         return self._synonyms
 
@@ -248,7 +251,7 @@ class Datapackage:
         for tc in time_concepts:
             dtypes[tc] = 'int16'
 
-        return dd.read_csv(paths, dtype=dtypes)
+        return dd.read_csv(paths, dtype=dtypes, **self._default_reader_options)
 
     def get_entity(self, entity_domain, entity_set=None):
         df = self.entities[entity_domain]
@@ -304,7 +307,7 @@ class Datapackage:
         for r in self.resources:
             pkey = r.primaryKey
             if pkey == 'concept':
-                concepts.append(pd.read_csv(r.full_path))
+                concepts.append(pd.read_csv(r.full_path, **self._default_reader_options))
 
         concepts = pd.concat(concepts)
 
@@ -319,13 +322,14 @@ class Datapackage:
                 entities_.append(
                     {
                         # "data": pd.read_csv(osp.join(base_dir, r['path']), dtype={pkey: str}),
-                        "data": pd.read_csv(r.full_path, dtype=str, encoding='utf8'),  # read all as string
+                        "data": pd.read_csv(r.full_path, dtype=str, encoding='utf8',  # read all as string
+                                            **self._default_reader_options),
                         "key": pkey
                     })
             elif 'synonym' not in r.primaryKey:  # datapoints
                 assert not isinstance(pkey, str)
                 fn = r.full_path
-                df = next(pd.read_csv(fn, chunksize=1))
+                df = next(pd.read_csv(fn, chunksize=1, **self._default_reader_options))
                 indicator_names = list(set(df.columns) - set(pkey))
 
                 if len(indicator_names) == 0:
@@ -352,7 +356,7 @@ class Datapackage:
                 cols = list(i + tuple([k]))
 
                 if not no_datapoints:
-                    df = dd.read_csv(l, dtype=dtypes)[cols]
+                    df = dd.read_csv(l, dtype=dtypes, **self._default_reader_options)[cols]
                 else:
                     df = pd.DataFrame([], columns=cols)
 
@@ -446,7 +450,7 @@ class Datapackage:
                            (cdf.loc[x, 'concept_type'] in ['entity_set', 'entity_domain'])]
             value_cols = list(set([x['name'] for x in resource.fields]) - set(pkeys))
 
-            data = pd.read_csv(resource.full_path, dtype=dtypes)
+            data = pd.read_csv(resource.full_path, dtype=dtypes, **self._default_reader_options)
 
             # for resources that have entity_columns: only consider all permutations on entity columns
             if len(entity_cols) > 0:
