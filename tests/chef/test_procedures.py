@@ -143,7 +143,7 @@ def test_window():
 def test_serving():
     chef1 = chef_fn('test_serve_procedure.yaml')
     res = chef1.run()
-    assert len(res) == 2
+    assert len(res) == 3
 
     chef2 = chef_fn('test_serving_section.yaml')
     tmpdir = tempfile.mkdtemp()

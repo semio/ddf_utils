@@ -13,13 +13,14 @@ import pandas as pd
 import dask.dataframe as dd
 from ddf_utils.model.package import Datapackage
 from ddf_utils.model.repo import Repo, is_url
+from itertools import product
 
 from ..str import format_float_digits
 from .exceptions import IngredientError
 from .helpers import gen_sym, query, read_opt, sort_df
 
 
-class BaseIngredient(object):
+class BaseIngredient:
     def __init__(self, chef, ingred_id, key, data=None):
         self.chef = chef
         self.ingred_id = ingred_id
@@ -38,12 +39,12 @@ class BaseIngredient(object):
         if len(keys) == 1:
             if keys[0] == 'concept':
                 return 'concepts'
-            else:
-                return 'entities'
-        elif 'synonym' in keys:
+            return 'entities'
+
+        if 'synonym' in keys:
             return 'synonyms'
-        else:
-            return 'datapoints'
+
+        return 'datapoints'
 
     def key_to_list(self):
         """helper function: make a list that contains primaryKey of this ingredient"""
@@ -65,7 +66,6 @@ class BaseIngredient(object):
 
     def reset_data(self):
         self.data = None
-        return
 
     def _serve_concepts(self, outpath, **options):
         data = self.compute()
@@ -114,7 +114,7 @@ class BaseIngredient(object):
                         col = 'is--'+s
                         df_ = df[df[col]=='TRUE'].dropna(axis=1, how='all')
                         if df_.empty:
-                            logging.warning("empty dataframe for {}, not serving".format(s))
+                            logging.warning("empty dataframe for %s, not serving", str(s))
                             continue
                         df_ = df_.loc[:, lambda x: ~x.columns.str.startswith('is--')].copy()
                         df_[col] = 'TRUE'
@@ -143,6 +143,8 @@ class BaseIngredient(object):
         data = self.compute()
         assert isinstance(data, dict)
         digits = read_opt(options, 'digits', default=5)
+        serve_empty = read_opt(options, 'drop_empty_datapoints', default=True)
+        split_by = read_opt(options, 'split_datapoints_by', default=False)
 
         def to_disk(df_input, k, path):
             df = df_input.copy()
@@ -157,7 +159,8 @@ class BaseIngredient(object):
             df.to_csv(path, encoding='utf8', index=False)
 
         for k, df in data.items():
-            split_by = read_opt(options, 'split_datapoints_by', default=False)
+            if not serve_empty and df.empty:
+                continue
             by = self.key_to_list()
             df = sort_df(df, key=by)
             if not split_by:
@@ -170,7 +173,6 @@ class BaseIngredient(object):
                 # split datapoints by entities. Firstly we calculate all possible
                 # combinations of entities, and then filter the dataframe, create
                 # file names and save them into disk.
-                from itertools import product
                 values = list()
                 [values.append(df[col].unique()) for col in split_by]
                 all_combinations = product(*values)
@@ -214,7 +216,7 @@ class BaseIngredient(object):
                     to_disk(df_part[columns], k, path)
 
     def serve(self, outpath, **options):
-        """save the ingledient to disk.
+        """save the ingredient to disk.
 
         Parameters
         ----------
@@ -227,13 +229,16 @@ class BaseIngredient(object):
             how many digits to keep at most.
         path : `str`
             which sub-folder under the outpath to save the output files
-
+        split_datapoints_by: `str` or `list`
+            split datapoints by a dimension or a list of dimensions.
+        drop_empty_datapoints: bool
+            whether serve measures with no datapoints.
         """
         logging.info('serving ingredient: ' + self.ingred_id)
         # create outpath if not exists
         if 'path' in options:
             sub_folder = options.pop('path')
-            assert not os.path.isabs(sub_folder)  # sub folder should not be abspath
+            assert not os.path.isabs(sub_folder), "`path` in serve section should not be absolute"
             outpath = os.path.join(outpath, sub_folder)
         os.makedirs(outpath, exist_ok=True)
 
@@ -510,12 +515,9 @@ class Ingredient(BaseIngredient):
                 kw = list(self.values.keys())[0]
                 if kw == ['$in']:
                     return {'concept': df[self.values[kw]]}
-                else:
-                    return {'concept': df[df.columns.drop(self.values[kw])]}
-            else:
-                return {'concept': df[self.values]}
-        else:
-            return {'concept': df}
+                return {'concept': df[df.columns.drop(self.values[kw])]}
+            return {'concept': df[self.values]}
+        return {'concept': df}
 
     def _get_data_synonyms(self):
         ks = self.key_to_list()
