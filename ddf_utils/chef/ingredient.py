@@ -188,11 +188,12 @@ class BaseIngredient:
                     query = ''
                     entity_strings = list()
                     for entity, value in zip(split_by, comb):
-                        entity_strings.append(entity + '-' + value)
+                        value_ = str(value)
+                        entity_strings.append(entity + '-' + value_)
                         if len(query) > 0:
-                            query = query + " and " + "{} == '{}'".format(entity, value)
+                            query = query + " and " + "{} == '{}'".format(entity, value_)
                         else:
-                            query = "{} == '{}'".format(entity, value)
+                            query = "{} == '{}'".format(entity, value_)
 
                     if by:
                         path = os.path.join(
