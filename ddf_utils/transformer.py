@@ -38,6 +38,7 @@ def _translate_column_inline(df, column, target_column, dictionary,
                     dictionary.pop(k)
 
     # TODO: refactor this block
+    # handling values not found in the dictionary
     if not_found == 'drop':
         nf = []
         def process_val(v):
@@ -45,10 +46,10 @@ def _translate_column_inline(df, column, target_column, dictionary,
                 return dictionary[v]
             else:
                 if v not in nf:
-                    # logging.warning('key not found: {}'.format(v))
                     nf.append(v)
                 return np.nan
         df_new[target_column] = df_new[column].map(process_val)
+        df_new = df_new.dropna(subset=[target_column])
         if len(nf) > 0:
             logging.warning('key not found:')
             logging.warning(nf)
@@ -62,7 +63,6 @@ def _translate_column_inline(df, column, target_column, dictionary,
                 lambda x: dictionary[x] if x in dictionary.keys() else np.nan)
         else:
             # update existing column: if a key not in the mappings, use the original val
-            # import ipdb; ipdb.set_trace()
             df_new['__new_col'] = df_new[column].map(
                 lambda x: dictionary[x] if x in dictionary.keys() else np.nan)
             df_new['__new_col'] = df_new['__new_col'].fillna(df_new[target_column])
