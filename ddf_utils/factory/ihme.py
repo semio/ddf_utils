@@ -107,13 +107,25 @@ def bulk_download(out_dir, version, context=None, query=None, **kwargs):
     for i in taskIDs:
         url = url_task.format(hash=i)
         print('working on {}'.format(url))
+        print('check status as http://ghdx.healthdata.org/gbd-results-tool/result/{}'.format(i))
+        print('available downloads:')
 
-        res_json = requests.get(url).json()
+        download_urls = []
 
-        while res_json['state'] not in success_results:
-            print('download is not ready yet, retrying download in 10 seconds...')
-            sleep(10)
+        while True:
             res_json = requests.get(url).json()
+
+            dus = res_json['urls']
+            for du in dus:
+                if du in download_urls:
+                    continue
+                else:
+                    download_urls.append(du)
+                    print(du)
+
+            if res_json['state'] in success_results:
+                break
+            sleep(10)
 
         if res_json['state'] == success_results[0]:
             continue
@@ -143,19 +155,10 @@ def _run_download(u, out_dir, taskID):
 
 
 def _make_query(context, version, **kwargs):
+    # metadata
     if not metadata:
         load_metadata()
 
-    # read parameters
-    rows = read_opt(kwargs, 'rows', default=10000000)  # the maximum records we can get
-    # ^ Note: user guide[1] says it's 500000 row. But actually we can set this to 10000000
-    # [1]: http://ghdx.healthdata.org/sites/default/files/ihme_query_tool/GBD_Data_Tool_User_Guide_(2016).pdf
-    email = read_opt(kwargs, 'email', default='downloader@gapminder.org')
-    idsOrNames = read_opt(kwargs, 'idsOrNames', default='ids')           # ids / names / both
-    singleOrMult = read_opt(kwargs, 'singleOrMult', default='multiple')  # single / multiple
-    base = read_opt(kwargs, 'base', default='single')
-
-    # metadata
     ages = metadata['age']['age_id'].values
     # location: there is a `custom` location. don't include that one.
     locations = [x for x in metadata['location']['location_id'].values if x != 'custom']
@@ -180,41 +183,57 @@ def _make_query(context, version, **kwargs):
 
     queries = {}
 
-    # TODO: improve here.
-    # 1. maybe we can make measure/metric parameters users can set
-    # 2. set `singleOrMult` to multiple when necessary
-    # for now all records can fit in one request
-    # but might not true for later.
+    # create query base on context and user input
     if context == 'le':
-        measure = 26
-        metric = 5
+        measure = read_opt(kwargs, 'measure', default=26)
+        metric = read_opt(kwargs, 'metric', default=5)
+        cause = read_opt(kwargs, 'cause', default=causes)
         queries.update({
             'measure[]': measure,
-            'metric[]': metric
+            'metric[]': metric,
+            'cause[]': cause
         })
     elif context == 'cause':
-        measure = measures
-        metric = [1, 2, 3]
+        measure = read_opt(kwargs, 'measure', default=measures)
+        metric = read_opt(kwargs, 'metric', default=[1, 2, 3])
+        cause = read_opt(kwargs, 'cause', default=causes)
         queries.update({
             'measure[]': measure,
-            'metric[]': metric
+            'metric[]': metric,
+            'cause[]': cause
         })
     elif context in ['risk', 'etiology', 'impairment']:
-        measure = [1, 2, 3, 4]
-        metric = [1, 2, 3]
+        # TODO: should be split, don't combine these context here.
+        measure = read_opt(kwargs, 'measure', default=measures)
+        metric = read_opt(kwargs, 'metric', default=[1, 2, 3])
         context_values = rei[rei['type'] == context]['rei_id'].values
+        cause = read_opt(kwargs, 'cause', default=causes)
         queries.update({
             'measure[]': measure,
             'metric[]': metric,
             context+'[]':context_values,
-            'rei[]': context_values
+            'rei[]': context_values,
+            'cause[]':  cause
         })
     else:
         # SEV/HALE/haqi
         print('not supported context.')
         raise NotImplementedError
 
-    # insert context and version
+    # insert context and version and other configs
+    rows = read_opt(kwargs, 'rows', default=10000000)  # the maximum records we can get
+    # ^ Note: user guide[1] says it's 500000 row. But actually we can set this to 10000000
+    # [1]: http://ghdx.healthdata.org/sites/default/files/ihme_query_tool/GBD_Data_Tool_User_Guide_(2016).pdf
+    email = read_opt(kwargs, 'email', default='downloader@gapminder.org')
+    idsOrNames = read_opt(kwargs, 'idsOrNames', default='ids')           # ids / names / both
+    singleOrMult = read_opt(kwargs, 'singleOrMult', default='multiple')  # single / multiple
+    base = read_opt(kwargs, 'base', default='single')
+
+    location = read_opt(kwargs, 'location', default=locations)
+    age = read_opt(kwargs, 'age', default=ages)
+    sex = read_opt(kwargs, 'sex', default=sexs)
+    year = read_opt(kwargs, 'year', default=years)
+
     queries.setdefault('context', context)
     queries.setdefault('version', version)
     queries.setdefault('rows', rows)
@@ -222,12 +241,9 @@ def _make_query(context, version, **kwargs):
     queries.setdefault('idsOrNames', idsOrNames)
     queries.setdefault('singleOrMult', singleOrMult)
     queries.setdefault('base', base)
-    queries.setdefault('location[]', locations)
-    queries.setdefault('age[]', ages)
-    queries.setdefault('sex[]', sexs)
-    queries.setdefault('year[]', years)
-    queries.setdefault('metric[]', metrics)
-    queries.setdefault('measure[]', measures)
-    queries.setdefault('cause[]', causes)
+    queries.setdefault('location[]', location)
+    queries.setdefault('age[]', age)
+    queries.setdefault('sex[]', sex)
+    queries.setdefault('year[]', year)
 
     return queries
