@@ -277,12 +277,12 @@ def merge(chef: Chef, ingredients: List[str], result, deep=False) -> ProcedureRe
     res_all = {}
 
     for i in ingredients:
-        res_all = _merge_two(res_all, i.compute(), index_col, dtype, deep)
+        res_all = _merge_two(res_all, i.get_data(), index_col, dtype, deep)
 
     if not result:
         result = 'all_data_merged_'+str(int(time.time() * 1000))
 
-    return ProcedureResult(chef, result, newkey, data=create_dsk(res_all))
+    return ProcedureResult(chef, result, newkey, data=res_all)
 
 
 def __get_last_item(ser):
@@ -820,8 +820,8 @@ def window(chef: Chef, ingredients: List[str], result, **options) -> ProcedureRe
          col1: sum  # run rolling sum to col1
          col2: mean  # run rolling mean to col2
          col3:  # run foo to col3 with param1=baz
-       function: foo
-       param1: baz
+           function: foo
+           param1: baz
 
     Keyword Args
     ------------
@@ -907,12 +907,12 @@ def run_op(chef: Chef, ingredients: List[str], result, op) -> ProcedureResult:
 
     .. code-block:: yaml
 
-       procedure: filter_item
+       procedure: run_op
        ingredients:  # list of ingredient id
          - ingredient_id
        result: str  # new ingredient id
        options:
-         items: list  # a list of items should be in the result ingredient
+         op: dict  # a dictionary describing calculation for each columns.
 
     Keyword Args
     ------------
