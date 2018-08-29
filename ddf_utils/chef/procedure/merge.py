@@ -11,6 +11,7 @@ from typing import Dict, List, Optional, Union
 
 import numpy as np
 import pandas as pd
+import dask.dataframe as dd
 
 from ddf_utils.chef.cook import Chef
 
@@ -112,7 +113,7 @@ def __get_last_item(ser):
         return ser_[ser_.last_valid_index()]
 
 
-def _merge_two(left: Dict[str, pd.DataFrame],
+def _merge_two(left: Dict[str, pd.DataFrame],  # FIXME: signature is wrong
                right: Dict[str, pd.DataFrame],
                index_col: Union[List, str],
                dtype: str, deep=False) -> Dict[str, pd.DataFrame]:
@@ -120,44 +121,51 @@ def _merge_two(left: Dict[str, pd.DataFrame],
     if len(left) == 0:
         return right
 
+    res_data = {}
+
+    # for datapoints we use dask to help performance.
     if dtype == 'datapoints':
+        res_data = dict([(k, v) for k, v in left.items()])
         if deep:
             for k, df in right.items():
                 if k in left.keys():
-                    left[k] = left[k].append(df, ignore_index=True)
-                    left[k] = left[k].drop_duplicates(subset=index_col, keep='last')
-                    left[k] = left[k].sort_values(by=index_col)
+                    columns = left[k].columns.values
+                    res_data[k] = left[k].append(df[columns])
+                    res_data[k] = res_data[k].drop_duplicates(subset=index_col, keep='last')
+                    # res_data[k] = res_data[k].sort_values(by=index_col)
                 else:
-                    left[k] = df
+                    res_data[k] = df
         else:
             for k, df in right.items():
-                left[k] = df
+                res_data[k] = df
 
-        res_data = left
-
+    # for concepts/entities, we don't need to use dask.
     elif dtype == 'concepts':
 
-        left_df = pd.concat(left.values())
-        right_df = pd.concat(right.values())
+        left_df = pd.concat([x for x in left.values()])
+        right_df = pd.concat([x for x in right.values()])
 
         if deep:
-            merged = left_df.append(right_df, ignore_index=True)
+            merged = left_df.append(right_df)
             res = merged.groupby(index_col).agg(__get_last_item)
             res_data = {'concept': res.reset_index()}
         else:
-            res_data = {'concept': right_df.drop_duplicates(subset='concept', keep='last')}
+            res_data = {'concept':
+                        right_df.drop_duplicates(subset='concept',
+                                                 keep='last')}
+        res_data = create_dsk(res_data)
+
     else:  # entities
         if deep:
             for k, df in right.items():
                 if k in left.keys():
-                    left[k] = left[k].append(df, ignore_index=True)
+                    left[k] = left[k].append(df.compute(), ignore_index=True)
                     left[k] = left[k].groupby(index_col).agg(__get_last_item).reset_index()
                 else:
                     left[k] = df
         else:
             for k, df in right.items():
                 left[k] = df
-        res_data = left
-        # raise NotImplementedError('entity data do not support merging yet.')
+        res_data = create_dsk(left)
 
     return res_data

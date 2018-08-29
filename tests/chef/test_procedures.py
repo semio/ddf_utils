@@ -160,7 +160,11 @@ def test_merge():
     indicators = ['imr_lower', 'imr_median', 'imr_upper',
                   'biofuels_production_kboed', 'biofuels_production_ktoe']
     assert set(data.keys()) == set(indicators)
-    assert data['imr_lower'].dtypes['year'] == np.int16
+    assert data['imr_median'].dtypes['year'] == np.int16
+
+    imr_lower = data['imr_lower'].set_index(['geo', 'year'])
+    assert imr_lower.loc[('afg', 1961), 'imr_lower'] == 2055
+
 
 
 def test_run_op():

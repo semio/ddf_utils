@@ -10,6 +10,14 @@ ingredients:
       dataset: ddf--bp--energy
       key: "geo,year"
       value: "*"
+    - id: cme-concepts
+      dataset: ddf--cme
+      key: "concept"
+      value: "*"
+    - id: bp-concepts
+      dataset: ddf--bp--energy
+      key: concept
+      value: "*"
 
 cooking:
     datapoints:
@@ -25,4 +33,35 @@ cooking:
           ingredients:
               - cme-datapoints-translated
               - bp-datapoints
+          result: res-0
+
+        - procedure: run_op
+          ingredients:
+              - res-0
+          options:
+              op:
+                  imr_lower: imr_lower * 10
+          result: res-1
+
+        - procedure: merge
+          ingredients:
+              - res-0
+              - res-1
+          options:
+              deep: true
           result: res
+        - procedure: serve
+          ingredients:
+              - res
+
+    concepts:
+        - procedure: merge
+          ingredients:
+              - cme-concepts
+              - bp-concepts
+          options:
+              deep: true
+          result: res-concepts
+        - procedure: serve
+          ingredients:
+              - res-concepts
