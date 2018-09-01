@@ -79,7 +79,7 @@ def filter(chef: Chef, ingredients: List[str], result, **options) -> ProcedureRe
     if row_filters is None and items is None:
         raise ProcedureError('filter procedure: at least one of `row` and `item` should be set in the options!')
 
-    if items is not None:
+    if items is not None and len(items) != 0:
         if isinstance(items, Sequence):
             if ingredient.dtype == 'datapoints':
                 for i in items:
@@ -95,8 +95,7 @@ def filter(chef: Chef, ingredients: List[str], result, **options) -> ProcedureRe
                             items_.remove(i)
                             logger.warning("concept {} not found in ingredient {}".format(i, ingredient.ingred_id))
                     res[k] = v[items_].copy()
-        else:
-            assert len(items) == 1
+        elif isinstance(items, dict) and len(items) == 1:
             assert list(items.keys())[0] in ['$in', '$nin']
             selector = list(items.keys())[0]
             item_list = list(items.values())[0]
@@ -127,6 +126,8 @@ def filter(chef: Chef, ingredients: List[str], result, **options) -> ProcedureRe
                                 logger.warning("concept {} not found in ingredient {}".format(i, ingredient.ingred_id))
                         keep_cols = list(set(v.columns.values) - set(item_list))
                         res[k] = v[keep_cols].copy()
+        else:
+            raise ValueError("item filter not supported: " + str(items))
     else:
         for k, df in data.items():
             res[k] = df.copy()

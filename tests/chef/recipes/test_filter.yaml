@@ -24,9 +24,7 @@ cooking:
       ingredients:
         - cme-datapoints
       options:
-        item:
-          - imr_upper
-          - imr_lower
+        item: {}
         row:
           country:
               $in:
@@ -34,6 +32,14 @@ cooking:
                 - swe
           year:
               $gt: 2000
+      result: final_datapoints-0
+    - procedure: filter
+      ingredients:
+        - final_datapoints-0
+      options:
+        item:
+          - imr_upper
+          - imr_lower
       result: final_datapoints
   concepts:
     - procedure: serve
