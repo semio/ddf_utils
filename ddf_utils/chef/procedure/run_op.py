@@ -23,7 +23,7 @@ logger = logging.getLogger('Chef')
 
 
 @debuggable
-def run_op(chef: Chef, ingredients: List[str], result, op) -> ProcedureResult:
+def run_op(chef: Chef, ingredients: List[BaseIngredient], result, op) -> ProcedureResult:
     """run math operation on each row of ingredient data.
 
     Procedure format:
@@ -73,7 +73,7 @@ def run_op(chef: Chef, ingredients: List[str], result, op) -> ProcedureResult:
     to_concat = [v for v in data.values()]
 
     # preserve the dtypes
-    dtypes = to_concat[0].dtypes
+    dtypes = to_concat[0].dtypes[keys]
 
     if len(to_concat) == 1:
         df = to_concat[0]
@@ -81,7 +81,9 @@ def run_op(chef: Chef, ingredients: List[str], result, op) -> ProcedureResult:
         df = pd.merge(to_concat[0], to_concat[1], on=keys, how='outer')
         for _df in to_concat[2:]:
             df = pd.merge(df, _df, on=keys, how='outer')
-        df = df.astype(dtypes)
+        # reset the types
+        for c in keys:
+            df[c] = df[c].astype(dtypes[c])
     df = df.set_index(keys)
 
     for k, v in op.items():
@@ -94,4 +96,4 @@ def run_op(chef: Chef, ingredients: List[str], result, op) -> ProcedureResult:
     newdata = create_dsk(data)
     if not result:
         result = ingredient.ingred_id + '-op'
-    return ProcedureResult(chef, result, ingredient.key, data=newdata)
+    return ProcedureResult(chef, result, ingredient.key, data=create_dsk(newdata))
