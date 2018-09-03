@@ -101,7 +101,7 @@ def merge(chef: Chef, ingredients: List[str], result, deep=False) -> ProcedureRe
     if not result:
         result = 'all_data_merged_'+str(int(time.time() * 1000))
 
-    return ProcedureResult(chef, result, newkey, data=res_all)
+    return ProcedureResult(chef, result, newkey, data=create_dsk(res_all))
 
 
 def __get_last_item(ser):
