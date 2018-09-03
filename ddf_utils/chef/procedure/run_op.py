@@ -72,18 +72,13 @@ def run_op(chef: Chef, ingredients: List[BaseIngredient], result, op) -> Procedu
     # concat all the datapoint dataframe first, and eval the ops
     to_concat = [v for v in data.values()]
 
-    # preserve the dtypes
-    dtypes = to_concat[0].dtypes[keys]
-
     if len(to_concat) == 1:
         df = to_concat[0]
     else:
         df = pd.merge(to_concat[0], to_concat[1], on=keys, how='outer')
         for _df in to_concat[2:]:
             df = pd.merge(df, _df, on=keys, how='outer')
-        # reset the types
-        for c in keys:
-            df[c] = df[c].astype(dtypes[c])
+
     df = df.set_index(keys)
 
     for k, v in op.items():
