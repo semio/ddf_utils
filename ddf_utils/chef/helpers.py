@@ -25,10 +25,20 @@ def create_dsk(data, parts=10):
     return data
 
 
+def dsk_to_pandas(data):
+    """The reverse for create_dsk function"""
+    for k, v in data.items():
+        if isinstance(v, dd.DataFrame):
+            data[k] = v.compute()
+    return data
+
+
 def build_dictionary(chef, dict_def, ignore_case=False):
     """build a dictionary from a dictionary definition"""
     if (len(dict_def) == 3 and
-        'base' in dict_def and 'key' in dict_def and 'value' in dict_def):
+            'base' in dict_def and
+            'key' in dict_def and
+            'value' in dict_def):
         value = dict_def['value']
         key = dict_def['key']
         if isinstance(key, str):

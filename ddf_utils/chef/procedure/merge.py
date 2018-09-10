@@ -17,7 +17,7 @@ from ddf_utils.chef.cook import Chef
 
 from .. dag import DAG
 from .. exceptions import ProcedureError
-from .. helpers import debuggable, mkfunc, query, read_opt, create_dsk, build_dictionary
+from .. helpers import debuggable, mkfunc, query, read_opt, create_dsk, build_dictionary, dsk_to_pandas
 from .. ingredient import BaseIngredient, ProcedureResult
 
 logger = logging.getLogger('Chef')
@@ -143,8 +143,8 @@ def _merge_two(left: Dict[str, pd.DataFrame],  # FIXME: signature is wrong
     # for concepts/entities, we don't need to use dask.
     elif dtype == 'concepts':
 
-        left_df = pd.concat([x for x in left.values()])
-        right_df = pd.concat([x for x in right.values()])
+        left_df = pd.concat([x for x in dsk_to_pandas(left).values()])
+        right_df = pd.concat([x for x in dsk_to_pandas(right).values()])
 
         if deep:
             merged = left_df.append(right_df)
