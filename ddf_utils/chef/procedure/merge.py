@@ -75,7 +75,7 @@ def merge(chef: Chef, ingredients: List[str], result, deep=False) -> ProcedureRe
     except (AssertionError, TypeError):
         log1 = "multiple dtype/key detected: \n"
         log2 = "\n".join(["{}: {}, {}".format(x.ingred_id, x.dtype, x.key) for x in ingredients])
-        logger.warning(log1+log2)
+        logger.warning(log1 + log2)
         raise ProcedureError("can't merge data with multiple dtype/key!")
 
     # get the dtype and index
@@ -99,7 +99,7 @@ def merge(chef: Chef, ingredients: List[str], result, deep=False) -> ProcedureRe
         res_all = _merge_two(res_all, i.get_data(), index_col, dtype, deep)
 
     if not result:
-        result = 'all_data_merged_'+str(int(time.time() * 1000))
+        result = 'all_data_merged_' + str(int(time.time() * 1000))
 
     return ProcedureResult(chef, result, newkey, data=create_dsk(res_all))
 
