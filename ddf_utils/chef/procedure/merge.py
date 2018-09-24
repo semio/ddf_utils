@@ -110,7 +110,7 @@ def __get_last_item(ser):
     if ser_.last_valid_index() is None:
         return np.nan
     else:
-        return ser_[ser_.last_valid_index()]
+        return ser_.values[-1]
 
 
 def _merge_two(left: Dict[str, pd.DataFrame],  # FIXME: signature is wrong
@@ -148,7 +148,7 @@ def _merge_two(left: Dict[str, pd.DataFrame],  # FIXME: signature is wrong
 
         if deep:
             merged = left_df.append(right_df)
-            res = merged.groupby(index_col).agg(__get_last_item)
+            res = merged.groupby(by=index_col).agg(__get_last_item)
             res_data = {'concept': res.reset_index()}
         else:
             res_data = {'concept':

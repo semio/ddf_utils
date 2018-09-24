@@ -166,6 +166,17 @@ def test_merge():
     assert imr_lower.loc[('afg', 1961), 'imr_lower'] == 2055
 
 
+def test_merge_2():
+    chef = chef_fn('test_merge_2.yaml')
+    res = chef.run()
+
+    data = res[0].compute()
+    data = data['concept'].set_index('concept')
+    assert data.loc['col1', 'col1'] == 'testing1'
+    assert data.loc['col2', 'col2'] == 'testing2'
+    assert data.loc['col1', 'col2'] == 'bar'
+    assert data.loc['col2', 'col1'] is np.nan
+
 
 def test_run_op():
     chef = chef_fn('test_run_op.yaml')
