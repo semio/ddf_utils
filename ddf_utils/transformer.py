@@ -294,6 +294,8 @@ def trend_bridge(old_data: pd.Series, new_data: pd.Series, bridge_length: int) -
     and if we jump from one to another in a single year, this looks like an
     actual change in the data.
 
+    We assumed the series are sorted, and index are int or datetime.
+
     Parameters
     ----------
     old_data : Series
@@ -306,10 +308,29 @@ def trend_bridge(old_data: pd.Series, new_data: pd.Series, bridge_length: int) -
     bridge_data : the bridged data
 
     """
+    # TODO: maybe sort index before starting
     bridge_end = new_data.index[0]
-    bridge_start = bridge_end - bridge_length
 
-    assert not pd.isnull(old_data.loc[bridge_start]), 'no data for bridge start'
+    if old_data.index[0] > bridge_end:  # not bridging in this case
+        return new_data
+
+    if old_data.index[-1] < bridge_end:
+        return pd.concat([old_data, new_data], sort=False)
+
+    # recifying bridge_end, if old_data do not have data at this point
+    if bridge_end not in old_data.index:
+        intersection = old_data.loc[old_data.index.isin(new_data.index)]
+        if intersection.empty:
+            raise ValueError("can't bridge because there is no intersection time point")
+        bridge_end = intersection.index[0]
+
+    # now recify bridge_length/bridge_start, because in some case old_data just don't have enough data
+    s1 = old_data.loc[:bridge_end]
+    if s1.shape[0] < bridge_length:
+        bridge_length = s1.shape[0]
+        bridge_start = old_data.index[0]
+    else:
+        bridge_start = s1.index.values[-bridge_length:][0]
 
     bridge_height = new_data.loc[bridge_end] - old_data.loc[bridge_end]
     fraction = bridge_height / bridge_length
@@ -317,8 +338,6 @@ def trend_bridge(old_data: pd.Series, new_data: pd.Series, bridge_length: int) -
     bridge_data = old_data.copy()
 
     for i, row in bridge_data.loc[bridge_start:bridge_end].iteritems():
-        if i == bridge_end:
-            break
         bridge_data.loc[i:bridge_end] = bridge_data.loc[i:bridge_end] + fraction
 
     # combine old/new/bridged data
