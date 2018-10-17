@@ -1,3 +1,10 @@
+## version 0.5.0 2018-10-17
+
+- split `procedure.py` into seperated files for each procedure
+- bug fix, improvments for procedures
+- bug fix, improvments for datapackage loading and creation of datapackage.json
+- more factory methods for data sources
+
 ## version 0.4.2 2018-04-21
 
 - bug fix for various procedures
