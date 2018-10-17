@@ -19,7 +19,7 @@ cooking:
               aggregate:
                   agriculture_thousands: sum
                   agriculture_percentage: sum
-          result: datapoints-by-country-year 
+          result: datapoints-by-country-year
         - procedure: groupby
           ingredients:
               - datapoints-by-country-year
@@ -40,6 +40,14 @@ cooking:
                   agriculture_thousands:
                       function: zcore
           result: grouped-datapoints-2
+        - procedure: filter
+          ingredients:
+              - datapoints-by-country-year
+          options:
+              row:
+                  year:
+                      "$eq": 9999
+          result: datapoints-without-data
         - procedure: serve
           ingredients:
               - grouped-datapoints-1
@@ -51,4 +59,9 @@ cooking:
               - grouped-datapoints-2
           options:
               digits: 1
-
+        - procedure: serve
+          ingredients:
+              - datapoints-without-data
+          options:
+              path: subfolder
+              drop_empty_datapoints: true

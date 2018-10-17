@@ -138,3 +138,10 @@ def test_ingredients():
         i.get_data()
     except IngredientError:
         pass
+
+    i = Ingredient.from_dict(chef, {
+        'id': 'ddf--dummy',
+        'dataset': 'ddf--gapminder--dummy_companies',
+        'key': 'synonym, region'
+    })
+    assert set(list(i.get_data().keys())) == set(['region'])

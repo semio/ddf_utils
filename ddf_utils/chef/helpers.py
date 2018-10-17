@@ -4,6 +4,7 @@ import os
 import sys
 import hashlib
 import logging
+import json
 from functools import wraps, partial
 from collections import Sequence, Mapping
 from time import time
@@ -22,6 +23,69 @@ def create_dsk(data, parts=10):
         if isinstance(v, pd.DataFrame):
             data[k] = dd.from_pandas(v, npartitions=parts)
     return data
+
+
+def dsk_to_pandas(data):
+    """The reverse for create_dsk function"""
+    for k, v in data.items():
+        if isinstance(v, dd.DataFrame):
+            data[k] = v.compute()
+    return data
+
+
+def build_dictionary(chef, dict_def, ignore_case=False):
+    """build a dictionary from a dictionary definition"""
+    if (len(dict_def) == 3 and
+            'base' in dict_def and
+            'key' in dict_def and
+            'value' in dict_def):
+        value = dict_def['value']
+        key = dict_def['key']
+        if isinstance(key, str):
+            keys = [key]
+        else:
+            keys = key
+        ingredient = chef.dag.node_dict[dict_def['base']].evaluate()
+        if ingredient.dtype == 'synonyms':
+            df = ingredient.get_data()[value]
+        elif ingredient.dtype == 'entities':
+            df = ingredient.get_data()[ingredient.key]
+        else:
+            raise NotImplementedError('unsupported data type {}'.format(ingredient.dtype))
+        return build_dictionary_from_dataframe(df, keys, value, ignore_case)
+    elif isinstance(dict_def, str):
+        base_path = chef.config['dictionaries_dir']
+        path = os.path.join(base_path, dict_def)
+        return build_dictionary_from_file(path)
+    else:
+        return dict_def
+
+
+def build_dictionary_from_file(file_path):
+    d = json.load(open(file_path, 'r'))
+    assert isinstance(d, dict)
+    return d
+
+
+def build_dictionary_from_dataframe(df, keys, value, ignore_case=False):
+    dic = dict()
+    for k in keys:
+        d = (df[[k, value]]
+             .dropna(how='any')
+             .set_index(k)[value]
+             .to_dict())
+        for i, v in d.items():
+            if ignore_case:
+                if isinstance(i, str):
+                    i = i.lower()
+            if i not in dic.keys():
+                dic[i] = v
+            elif dic[i] != v:
+                raise KeyError("ambiguous key: {} is mapped "
+                               "to both {} and {}".format(i, dic[i], v))
+            else:
+                continue
+    return dic
 
 
 def prompt_select(selects, text_before=None):

@@ -12,8 +12,12 @@ from ddf_utils.chef.helpers import prompt_select
 
 
 def _translate_column_inline(df, column, target_column, dictionary,
-                             not_found, ambiguity):
+                             not_found, ambiguity, ignore_case=False):
     df_new = df.copy()
+
+    if ignore_case:
+        df_new[column] = df_new[column].map(
+            lambda x: str(x).lower() if x is not None else x)
 
     # check for ambiguities
     dict_ = dictionary.copy()
@@ -34,10 +38,21 @@ def _translate_column_inline(df, column, target_column, dictionary,
                     dictionary.pop(k)
 
     # TODO: refactor this block
+    # handling values not found in the dictionary
     if not_found == 'drop':
-        df_new[target_column] = df_new[column].map(
-            lambda x: dictionary[x] if x in dictionary.keys() else None)
+        nf = []
+        def process_val(v):
+            if v in dictionary.keys():
+                return dictionary[v]
+            else:
+                if v not in nf:
+                    nf.append(v)
+                return np.nan
+        df_new[target_column] = df_new[column].map(process_val)
         df_new = df_new.dropna(subset=[target_column])
+        if len(nf) > 0:
+            logging.warning('key not found:')
+            logging.warning(nf)
     if not_found == 'error':
         df_new[target_column] = df_new[column].map(
             lambda x: dictionary[x])
@@ -48,7 +63,6 @@ def _translate_column_inline(df, column, target_column, dictionary,
                 lambda x: dictionary[x] if x in dictionary.keys() else np.nan)
         else:
             # update existing column: if a key not in the mappings, use the original val
-            # import ipdb; ipdb.set_trace()
             df_new['__new_col'] = df_new[column].map(
                 lambda x: dictionary[x] if x in dictionary.keys() else np.nan)
             df_new['__new_col'] = df_new['__new_col'].fillna(df_new[target_column])
@@ -236,7 +250,7 @@ def translate_column(df, column, dictionary_type, dictionary,
 
     if dictionary_type == 'inline':
         df_new = _translate_column_inline(df, column, target_column, dictionary,
-                                          not_found, ambiguity)
+                                          not_found, ambiguity, ignore_case)
     if dictionary_type == 'file':
         with open(dictionary) as f:
             d = json.load(f)

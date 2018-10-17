@@ -82,7 +82,11 @@ class Datapackage:
         self._resources = None
         self._concepts = None
         self._entities = None
+        self._synonyms = None
         self._dataset = None
+
+        # config for read_csv
+        self._default_reader_options = {'keep_default_na': False, 'na_values': ['']}
 
     @property
     def name(self):
@@ -107,8 +111,14 @@ class Datapackage:
     @property
     def datapoints_resources(self):
         # TODO: it might not be true that primaryKey is always a list for datapoints
-        # sometimes it could be string?
-        return [r for r in self.resources if isinstance(r.primaryKey, list)]
+        # sometimes it could be just one string?
+        return [r for r in self.resources
+                if isinstance(r.primaryKey, list) and 'synonym' not in r.primaryKey]
+
+    @property
+    def synonyms_resources(self):
+        return [r for r in self.resources
+                if isinstance(r.primaryKey, list) and 'synonym' in r.primaryKey]
 
     @property
     def index_table(self):
@@ -149,15 +159,17 @@ class Datapackage:
 
     @property
     def concepts(self):
+        """return a DataFrame for concepts"""
         if self._concepts is None:
             fs = (self.index_table[self.index_table.pkey == 'concept']['path']
                   .unique().tolist())
-            concepts = [pd.read_csv(f) for f in fs]
+            concepts = [pd.read_csv(f, **self._default_reader_options) for f in fs]
             self._concepts = pd.concat(concepts, ignore_index=True)
         return self._concepts
 
     @property
     def entities(self):
+        """return dictionary, which keys are domains and values are DataFrames"""
         if self._entities is None:
             cdf = self.concepts
             idx_table = self.index_table
@@ -168,33 +180,48 @@ class Datapackage:
                     esets = cdf[(cdf['concept_type'] == 'entity_set') &
                                 (cdf['domain'] == domain)]['concept']
                     if not esets.empty:
-                        for s in esets:
-                            rows = (idx_table[(idx_table.pkey == domain) |
-                                              (idx_table.pkey == s)]
-                                    .drop_duplicates(subset='path'))
-                            # filter ambiougus names where domain is different but set name
-                            # is same.
-                            for _, r in rows.iterrows():
-                                if domain not in r['name']:
-                                    continue
-                                df = pd.read_csv(r.path, dtype=str)
-                                if r.pkey != domain:
-                                    df = df.rename(columns={r.pkey: domain})
-                                entities[domain].append(df)
+                        rows = (idx_table[(idx_table.pkey == domain) |
+                                          (idx_table.pkey.isin(esets.tolist()))]
+                                .drop_duplicates(subset='path'))
+                        # filter ambiougus names where domain is different but set name
+                        # is same.
+                        for _, r in rows.iterrows():
+                            if domain not in r['name']:
+                                continue
+                            df = pd.read_csv(r.path, dtype=str, **self._default_reader_options)
+                            if r.pkey != domain:
+                                df = df.rename(columns={r.pkey: domain})
+                            entities[domain].append(df)
                         entities[domain] = pd.concat(entities[domain], ignore_index=True)
                     else:  # no sets for this domain
                         paths = (idx_table[idx_table.pkey == domain]['path']
                                  .unique().tolist())
-                        entities[domain] = dd.read_csv(paths, dtype=str).compute()
+                        entities[domain] = dd.read_csv(paths, dtype=str, **self._default_reader_options).compute()
                 else:  # no domain column
                     paths = (idx_table[idx_table.pkey == domain]['path']
                              .unique().tolist())
-                    entities[domain] = dd.read_csv(paths, dtype=str).compute()
+                    entities[domain] = dd.read_csv(paths, dtype=str, **self._default_reader_options).compute()
 
             self._entities = entities
         return self._entities
 
+    @property
+    def synonyms(self):
+        """return a dictonary, where keys are domains or `concept` and values are DataFrames"""
+        if self._synonyms is not None:
+            return self._synonyms
+
+        syms = dict()
+        for r in self.synonyms_resources:
+            pks = r.primaryKey
+            key_for_sym = [x for x in pks if x != 'synonym']
+            assert len(key_for_sym) == 1, "synonyms resource can only have two primary keys"
+            syms[key_for_sym[0]] = pd.read_csv(r.full_path, dtype=str, **self._default_reader_options)
+        self._synonyms = syms
+        return self._synonyms
+
     def indicators(self, by=None):
+        """return a list of indicator names, filtered by the primaryKeys"""
         res = set()
         for r in self.datapoints_resources:
             if by is not None and set(by) != set(r.primaryKey):
@@ -224,7 +251,7 @@ class Datapackage:
         for tc in time_concepts:
             dtypes[tc] = 'int16'
 
-        return dd.read_csv(paths, dtype=dtypes)
+        return dd.read_csv(paths, dtype=dtypes, **self._default_reader_options)
 
     def get_entity(self, entity_domain, entity_set=None):
         df = self.entities[entity_domain]
@@ -234,6 +261,14 @@ class Datapackage:
             # rename the primaryKey column to match the entity set name
             df = df.rename(columns={entity_domain: entity_set})
         return df
+
+    def get_synonym_dict(self, concept):
+        """return a synonym dictionary for a concept"""
+        try:
+            df = self.synonyms[concept]
+        except KeyError:  # no synonyms for this concept
+            return None
+        return df.set_index('synonym')[concept].to_dict()
 
     # TODO: refactor this method
     def load(self, **kwargs):
@@ -272,7 +307,7 @@ class Datapackage:
         for r in self.resources:
             pkey = r.primaryKey
             if pkey == 'concept':
-                concepts.append(pd.read_csv(r.full_path))
+                concepts.append(pd.read_csv(r.full_path, **self._default_reader_options))
 
         concepts = pd.concat(concepts)
 
@@ -287,13 +322,14 @@ class Datapackage:
                 entities_.append(
                     {
                         # "data": pd.read_csv(osp.join(base_dir, r['path']), dtype={pkey: str}),
-                        "data": pd.read_csv(r.full_path, dtype=str, encoding='utf8'),  # read all as string
+                        "data": pd.read_csv(r.full_path, dtype=str, encoding='utf8',  # read all as string
+                                            **self._default_reader_options),
                         "key": pkey
                     })
-            else:  # datapoints
+            elif 'synonym' not in r.primaryKey:  # datapoints
                 assert not isinstance(pkey, str)
                 fn = r.full_path
-                df = next(pd.read_csv(fn, chunksize=1))
+                df = next(pd.read_csv(fn, chunksize=1, **self._default_reader_options))
                 indicator_names = list(set(df.columns) - set(pkey))
 
                 if len(indicator_names) == 0:
@@ -307,6 +343,8 @@ class Datapackage:
                 else:
                     for indicator_name in indicator_names:
                         _update_datapoints(fn, keys, indicator_name)
+            else:  # synonyms/other types.
+                continue
 
         # datapoints
         for i, kvs in datapoints.items():
@@ -318,7 +356,7 @@ class Datapackage:
                 cols = list(i + tuple([k]))
 
                 if not no_datapoints:
-                    df = dd.read_csv(l, dtype=dtypes)[cols]
+                    df = dd.read_csv(l, dtype=dtypes, **self._default_reader_options)[cols]
                 else:
                     df = pd.DataFrame([], columns=cols)
 
@@ -375,7 +413,7 @@ class Datapackage:
         ds = self.dataset
         cdf = ds.concepts.set_index('concept')
         hash_table = {}
-        ddf_schema = {'concepts': [], 'entities': [], 'datapoints': []}
+        ddf_schema = {'concepts': [], 'entities': [], 'datapoints': [], 'synonyms': []}
         entity_value_cache = dict()
 
         # generate set-membership details for every single entity in dataset
@@ -402,7 +440,6 @@ class Datapackage:
 
         def _gen_key_value_object(resource):
             logging.debug('working on: {}'.format(resource.path))
-            data = pd.read_csv(resource.full_path, dtype=dtypes)
             if isinstance(resource.primaryKey, str):
                 pkeys = [resource.primaryKey]
             else:
@@ -412,24 +449,37 @@ class Datapackage:
                            (x in cdf.index) and
                            (cdf.loc[x, 'concept_type'] in ['entity_set', 'entity_domain'])]
             value_cols = list(set([x['name'] for x in resource.fields]) - set(pkeys))
-            # only consider all permutations on entity columns
+
+            data = pd.read_csv(resource.full_path, dtype=dtypes, **self._default_reader_options)
+
+            # for resources that have entity_columns: only consider all permutations on entity columns
             if len(entity_cols) > 0:
-                data = data[pkeys].drop_duplicates(subset=entity_cols)
+                data = data[entity_cols].drop_duplicates()
+
+            pkeys_prop = dict()
+            for c in pkeys:
+                if c not in cdf.index:
+                    pkeys_prop[c] = {'type': 'non_concept'}
+                elif cdf.at[c, 'concept_type'] == 'entity_set':
+                    pkeys_prop[c] = {'type': 'entity_set',
+                                     'domain': cdf.at[c, 'domain']}
+                elif cdf.at[c, 'concept_type'] == 'entity_domain':
+                    pkeys_prop[c] = {'type': 'entity_domain'}
+                else:
+                    pkeys_prop[c] = {'type': 'others'}
 
             all_permutations = set()
-            for i, r in data.iterrows():
+            for _, r in data.iterrows():
                 perm = list()
                 for c in pkeys:
-                    if c not in cdf.index:
-                        perm.append(tuple([c]))
-                        continue
-                    if cdf.loc[c, 'concept_type'] == 'entity_set':
-                        domain = cdf.loc[c, 'domain']
+                    if pkeys_prop[c]['type'] == 'entity_set':
+                        domain = pkeys_prop[c]['domain']
                         perm.append(_which_sets(r[c], domain))
-                    elif cdf.loc[c, 'concept_type'] == 'entity_domain':
+                    elif pkeys_prop[c]['type'] == 'entity_domain':
                         perm.append(_which_sets(r[c], c))
                     else:
                         perm.append(tuple([c]))
+
                 all_permutations.add(tuple(perm))
 
             for row in all_permutations:
@@ -462,7 +512,7 @@ class Datapackage:
             if logger.getEffectiveLevel() != 10:
                 pbar.update(1)
             for kvo in g:
-                # logging.debug("adding kvo {}".format(str(kvo)))
+                logging.debug("adding kvo {}".format(str(kvo)))
                 _add_to_schema(kvo)
 
         if logger.getEffectiveLevel() != 10:
@@ -476,7 +526,10 @@ class Datapackage:
                 else:
                     ddf_schema['entities'].append(sch)
             else:
-                ddf_schema['datapoints'].append(sch)
+                if 'synonym' in sch['primaryKey']:
+                    ddf_schema['synonyms'].append(sch)
+                else:
+                    ddf_schema['datapoints'].append(sch)
 
         self.datapackage['ddfSchema'] = ddf_schema
 

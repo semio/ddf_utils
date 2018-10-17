@@ -11,13 +11,14 @@ make use of it.
 
 """
 
+import os
 import os.path as osp
 from time import sleep
 
 import requests
-from lxml import html
 
 import pandas as pd
+from ddf_utils.chef.helpers import read_opt
 
 
 url_hir = 'http://ghdx.healthdata.org/sites/all/modules/custom/ihme_query_tool/gbd-search/php/hierarchy/'
@@ -32,6 +33,7 @@ metadata = None
 
 
 def load_metadata():
+    """load all codes used in GBD in a dictionary."""
     meta = requests.get(url_metadata).json()
     versions = requests.get(url_version).json()
 
@@ -52,18 +54,28 @@ def has_newer_source(ver):
 
     versions = metadata['version']
     newer = versions[versions['vesrion_id'] > ver].values
-    if len(newer) > 0:
-        return True
-    else:
-        return False
+    return bool(len(newer) > 0)
 
 
-def bulk_download(out_dir, version, context, query=None):
+def bulk_download(out_dir, version, context=None, query=None, **kwargs):
+    """download the selected contexts/queries from GBD result tools.
+
+    Either context or query should be supplied. If both are supplied,
+    query will be used.
+
+    `context` should be a list of string and `query` sould be a list
+    of dictionaries containing post requests data.
+    """
     if not metadata:
         load_metadata()
 
-    if query is None:
-        query = _make_query(context, version)
+    if query is None and context is None:
+        raise ValueError('one of context and query should be supplied!')
+    elif query is None:
+        if isinstance(context, list):
+            query = [_make_query(c, version, **kwargs) for c in context]
+        else:
+            query = [_make_query(context, version, **kwargs)]
     else:
         if not isinstance(query, list):
             query = [query]
@@ -78,6 +90,7 @@ def bulk_download(out_dir, version, context, query=None):
     # make a series of queries, the server will response a series of task ids.
     for q in query:
         res_data = requests.post(url_data, data=q)
+        # print(res_data.json())
         if isinstance(res_data.json()['taskID'], list):
             for taskID in res_data.json()['taskID']:
                 taskIDs.add(taskID)
@@ -94,13 +107,25 @@ def bulk_download(out_dir, version, context, query=None):
     for i in taskIDs:
         url = url_task.format(hash=i)
         print('working on {}'.format(url))
+        print('check status as http://ghdx.healthdata.org/gbd-results-tool/result/{}'.format(i))
+        print('available downloads:')
 
-        res_json = requests.get(url).json()
+        download_urls = []
 
-        while res_json['state'] not in success_results:
-            print('download is not ready yet, retrying download in 10 seconds...')
-            sleep(10)
+        while True:
             res_json = requests.get(url).json()
+
+            dus = res_json['urls']
+            for du in dus:
+                if du in download_urls:
+                    continue
+                else:
+                    download_urls.append(du)
+                    print(du)
+
+            if res_json['state'] in success_results:
+                break
+            sleep(10)
 
         if res_json['state'] == success_results[0]:
             continue
@@ -110,30 +135,30 @@ def bulk_download(out_dir, version, context, query=None):
         download_urls = res_json['urls']
 
         for u in download_urls:
-            download_file = requests.get(u, stream=True)
-            fn = osp.join(out_dir, osp.basename(u))
-
-            with open(fn, 'wb') as f:
-                for c in download_file.iter_content(chunk_size=1024):
-                    f.write(c)
-                f.close()
+            _run_download(u, out_dir, taskID=i)
     if successed == 0:
         return False
     return True
 
 
-def _make_query(context, version):
+def _run_download(u, out_dir, taskID):
+    '''accept an URL and download it to out_dir'''
+    download_file = requests.get(u, stream=True)
+    if not osp.exists(osp.join(out_dir, taskID[:8])):
+        os.mkdir(osp.join(out_dir, taskID[:8]))
+    fn = osp.join(out_dir, taskID[:8], osp.basename(u))
+    print('downloading {} to {}'.format(u, fn))
+    with open(fn, 'wb') as f:
+        for c in download_file.iter_content(chunk_size=1024):
+            f.write(c)
+        f.close()
+
+
+def _make_query(context, version, **kwargs):
+    # metadata
     if not metadata:
         load_metadata()
 
-    # fixed parameters
-    rows = 10000000  # the maximum records we can get
-    email = 'downloader@gapminder.org'
-    idsOrNames = 'ids'
-    singleOrMult = 'single'
-    base = 'single'
-
-    # metadata
     ages = metadata['age']['age_id'].values
     # location: there is a `custom` location. don't include that one.
     locations = [x for x in metadata['location']['location_id'].values if x != 'custom']
@@ -142,43 +167,83 @@ def _make_query(context, version):
     metrics = metadata['metric']['metric_id'].values
     measures = metadata['measure']['measure_id'].values
     causes = metadata['cause']['cause_id'].values
+    # risk/etiology/impairment
+    # There are actually 4 types data in this dictionary:
+    # risk, etiology, impairmen and injury n-codes.
+    # however injury n-codes is not enabled.
+    # we might need to take of it later.
+    rei = metadata['rei']
+    # risks = rei[rei['type'] == 'risk']['rei_id'].values
+    # etiologys = rei[rei['type'] == 'etiology']['rei_id'].values
+    # impairments = rei[rei['type'] == 'impairment']['rei_id'].values
 
-    # others metadata filed not incluede:
-    # - rei
+    # others metadata filed not include:
     # - groups
     # - year_range
 
-    queries = []
+    queries = {}
 
+    # create query base on context and user input
     if context == 'le':
-        # TODO: improve here.
-        # for now all records can fit in one request
-        # but might not true for later.
-        measure = 26
-        metric = 5
-        queries.append({
+        measure = read_opt(kwargs, 'measure', default=26)
+        metric = read_opt(kwargs, 'metric', default=5)
+        cause = read_opt(kwargs, 'cause', default=causes)
+        queries.update({
             'measure[]': measure,
-            'metric[]': metric
+            'metric[]': metric,
+            'cause[]': cause
+        })
+    elif context == 'cause':
+        measure = read_opt(kwargs, 'measure', default=measures)
+        metric = read_opt(kwargs, 'metric', default=[1, 2, 3])
+        cause = read_opt(kwargs, 'cause', default=causes)
+        queries.update({
+            'measure[]': measure,
+            'metric[]': metric,
+            'cause[]': cause
+        })
+    elif context in ['risk', 'etiology', 'impairment']:
+        # TODO: should be split, don't combine these context here.
+        measure = read_opt(kwargs, 'measure', default=measures)
+        metric = read_opt(kwargs, 'metric', default=[1, 2, 3])
+        context_values = rei[rei['type'] == context]['rei_id'].values
+        cause = read_opt(kwargs, 'cause', default=causes)
+        queries.update({
+            'measure[]': measure,
+            'metric[]': metric,
+            context+'[]':context_values,
+            'rei[]': context_values,
+            'cause[]':  cause
         })
     else:
+        # SEV/HALE/haqi
         print('not supported context.')
         raise NotImplementedError
 
-    # insert context and version
-    for q in queries:
-        q.setdefault('context', context)
-        q.setdefault('version', version)
-        q.setdefault('rows', rows)
-        q.setdefault('email', email)
-        q.setdefault('idsOrNames', idsOrNames)
-        q.setdefault('singleOrMult', singleOrMult)
-        q.setdefault('base', base)
-        q.setdefault('location[]', locations)
-        q.setdefault('age[]', ages)
-        q.setdefault('sex[]', sexs)
-        q.setdefault('year[]', years)
-        q.setdefault('metric[]', metrics)
-        q.setdefault('measure[]', measures)
-        q.setdefault('cause[]', causes)
+    # insert context and version and other configs
+    rows = read_opt(kwargs, 'rows', default=10000000)  # the maximum records we can get
+    # ^ Note: user guide[1] says it's 500000 row. But actually we can set this to 10000000
+    # [1]: http://ghdx.healthdata.org/sites/default/files/ihme_query_tool/GBD_Data_Tool_User_Guide_(2016).pdf
+    email = read_opt(kwargs, 'email', default='downloader@gapminder.org')
+    idsOrNames = read_opt(kwargs, 'idsOrNames', default='ids')           # ids / names / both
+    singleOrMult = read_opt(kwargs, 'singleOrMult', default='multiple')  # single / multiple
+    base = read_opt(kwargs, 'base', default='single')
+
+    location = read_opt(kwargs, 'location', default=locations)
+    age = read_opt(kwargs, 'age', default=ages)
+    sex = read_opt(kwargs, 'sex', default=sexs)
+    year = read_opt(kwargs, 'year', default=years)
+
+    queries.setdefault('context', context)
+    queries.setdefault('version', version)
+    queries.setdefault('rows', rows)
+    queries.setdefault('email', email)
+    queries.setdefault('idsOrNames', idsOrNames)
+    queries.setdefault('singleOrMult', singleOrMult)
+    queries.setdefault('base', base)
+    queries.setdefault('location[]', location)
+    queries.setdefault('age[]', age)
+    queries.setdefault('sex[]', sex)
+    queries.setdefault('year[]', year)
 
     return queries

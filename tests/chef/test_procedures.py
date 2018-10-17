@@ -143,7 +143,7 @@ def test_window():
 def test_serving():
     chef1 = chef_fn('test_serve_procedure.yaml')
     res = chef1.run()
-    assert len(res) == 2
+    assert len(res) == 3
 
     chef2 = chef_fn('test_serving_section.yaml')
     tmpdir = tempfile.mkdtemp()
@@ -160,7 +160,22 @@ def test_merge():
     indicators = ['imr_lower', 'imr_median', 'imr_upper',
                   'biofuels_production_kboed', 'biofuels_production_ktoe']
     assert set(data.keys()) == set(indicators)
-    assert data['imr_lower'].dtypes['year'] == np.int16
+    assert data['imr_median'].dtypes['year'] == np.int16
+
+    imr_lower = data['imr_lower'].set_index(['geo', 'year'])
+    assert imr_lower.loc[('afg', 1961), 'imr_lower'] == 2055
+
+
+def test_merge_2():
+    chef = chef_fn('test_merge_2.yaml')
+    res = chef.run()
+
+    data = res[0].compute()
+    data = data['concept'].set_index('concept')
+    assert data.loc['col1', 'col1'] == 'testing1'
+    assert data.loc['col2', 'col2'] == 'testing2'
+    assert data.loc['col1', 'col2'] == 'bar'
+    assert data.loc['col2', 'col1'] is np.nan
 
 
 def test_run_op():

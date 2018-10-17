@@ -1,0 +1,36 @@
+info:
+    id: test-merge-2
+
+ingredients:
+    - id: concept-1
+      key: concept
+      data:
+          -
+              concept: col1
+              concept_type: string
+              col1: testing1
+              col2: foo
+          -
+              concept: col2
+              concept_type: string
+    - id: concept-2
+      key: concept
+      data:
+          -
+              concept: col1
+              concept_type: string
+              col2: bar
+          -
+              concept: col2
+              concept_type: string
+              col2: testing2
+
+cooking:
+    concepts:
+        - procedure: merge
+          ingredients:
+              - concept-1
+              - concept-2
+          options:
+              deep: true
+          result: res

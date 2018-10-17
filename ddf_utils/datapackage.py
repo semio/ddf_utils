@@ -7,6 +7,7 @@ import logging
 import os
 import re
 from collections import OrderedDict
+from functools import partial
 from datetime import datetime, timezone
 
 from .model.package import Datapackage
@@ -217,6 +218,17 @@ def create_datapackage(path, gen_schema=True, **kwargs):
                 schema['fields'].append({'name': h})
 
             resources[n].update({'schema': schema})
+        elif 'synonyms' in name_res:
+            with open(os.path.join(path, r['path'])) as f:
+                reader = csv.reader(f, delimiter=',', quotechar='"')
+                header = next(reader)
+            k1 = 'synonym'
+            k2 = r['name'].split('--')[-1]
+            schema['primaryKey'] = [k1, k2]
+            for h in header:
+                schema['fields'].append({'name': h})
+
+            resources[n].update({'schema': schema})
         else:  # not entity/concept/datapoint. it's not supported yet so we don't include them.
             print("not supported file: " + name_res)
             resources[n] = None
@@ -229,9 +241,11 @@ def create_datapackage(path, gen_schema=True, **kwargs):
         logging.info('generating ddf schema, may take some time...')
         dp.generate_ddfschema()
 
-        return dp.datapackage
+        result = dp.datapackage
     else:
-        return datapackage
+        result = datapackage
+
+    return _sort_dp(result)
 
 
 # helper for dumping datapackage json
@@ -240,3 +254,37 @@ def dump_json(path, obj):
     with open(path, 'w+') as f:
         json.dump(obj, f, ensure_ascii=False, indent=4)
         f.close()
+
+
+# helper for sorting the json object
+def _sort_dp(dp):
+
+    def get_sort_key(d, ks: list):
+        res = []
+        for k in ks:
+            if isinstance(d[k], (list, tuple)):
+                for v in d[k]:
+                    res.append(v)
+            elif d[k] is None:
+                res.append('')
+            else:
+                res.append(d[k])
+        return res
+
+    def proc(x, ks):
+        return sorted(x, key=partial(get_sort_key, ks=ks))
+
+    if 'resources' in dp.keys():
+        dp['resources'] = proc(dp['resources'], ['path'])
+
+    if 'ddfSchema' in dp.keys():
+        schema = dp['ddfSchema']
+        for t in ['concepts', 'entities', 'datapoints']:
+            if t in schema.keys():
+                for v in schema[t]:
+                    v['resources'] = sorted(v['resources'])
+                schema[t] = proc(schema[t], ['value', 'primaryKey'])
+
+        dp['ddfSchema'] = schema
+
+    return dp
