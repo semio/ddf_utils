@@ -34,12 +34,14 @@ cooking:
               - cme1
           options:
               bridge_start:
-                  column: imr_lower
+                  column:
+                      - imr_lower
               bridge_end:
                   ingredient: cme3_translated
-                  column: new_col
+                  column:
+                      - new_col
               bridge_length: 10
               bridge_on: year
-              target_column: bridged
+              target_column:
+                  - bridged
           result: res
-
