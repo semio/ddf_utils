@@ -286,15 +286,13 @@ def translate_header(df, dictionary, dictionary_type='inline'):
         raise ValueError('dictionary not supported: '+dictionary_type)
 
 
-def trend_bridge(old_data: pd.Series, new_data: pd.Series, bridge_length: int) -> pd.Series:
+def trend_bridge(old_ser: pd.Series, new_ser: pd.Series, bridge_length: int) -> pd.Series:
     """smoothing data between series.
 
     To avoid getting artificial stairs in the data, we smooth between to
     series. Sometime one source is systematically higher than another source,
     and if we jump from one to another in a single year, this looks like an
     actual change in the data.
-
-    We assumed the series are sorted, and index are int or datetime.
 
     Parameters
     ----------
@@ -308,7 +306,9 @@ def trend_bridge(old_data: pd.Series, new_data: pd.Series, bridge_length: int) -
     bridge_data : the bridged data
 
     """
-    # TODO: maybe sort index before starting
+    old_data = old_ser.sort_index()
+    new_data = new_ser.sort_index()
+
     bridge_end = new_data.index[0]
 
     if old_data.index[0] > bridge_end:  # not bridging in this case
@@ -337,11 +337,11 @@ def trend_bridge(old_data: pd.Series, new_data: pd.Series, bridge_length: int) -
 
     bridge_data = old_data.copy()
 
-    for i, row in bridge_data.loc[bridge_start:bridge_end].iteritems():
+    for i in bridge_data.loc[bridge_start:bridge_end].index:
         bridge_data.loc[i:bridge_end] = bridge_data.loc[i:bridge_end] + fraction
 
     # combine old/new/bridged data
-    result = pd.concat([bridge_data.loc[:bridge_end], new_data.iloc[1:]])
+    result = pd.concat([bridge_data.loc[:bridge_end], new_data.loc[bridge_end:].iloc[1:]], sort=False)
     return result
 
 

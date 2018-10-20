@@ -81,12 +81,12 @@ def trend_bridge(chef: Chef, ingredients: List[str], bridge_start, bridge_end, b
     from ... transformer import trend_bridge as tb
 
     # check parameters
-    if ingredients is None:
+    if ingredients is None or ingredients == []:
         assert 'ingredient' in bridge_start.keys()
         assert 'ingredient' in bridge_end.keys()
         ingredient = None
     else:
-        assert len(ingredients) == 1, "procedure only support 1 ingredient for now."
+        assert len(ingredients) <= 1, "procedure only support 1 ingredient for now."
         # ingredient = chef.dag.get_node(ingredients[0]).evaluate()
         ingredient = ingredients[0]
 
@@ -125,20 +125,31 @@ def trend_bridge(chef: Chef, ingredients: List[str], bridge_start, bridge_end, b
     end_computed = end.compute()
 
     for c1, c2, c3 in zip(bridge_start['column'], bridge_end['column'], target_column):
+        logger.info("bridge_start: {}, bridge_end: {}, target_column: {}".format(c1, c2, c3))
         start_group = start_computed[c1].set_index(bridge_on).groupby(keys)
         end_group = end_computed[c2].set_index(bridge_on).groupby(keys)
 
+        # get all groups
+        g1 = list(start_group.groups.keys())
+        g2 = list(end_group.groups.keys())
+        all_groups = g1.copy()
+        for g in g2:
+            if g not in all_groups:
+                all_groups.append(g)
+
         # calculate trend bridge on each group
         res_grouped = []
-        for g, df in start_group:
-            gstart = df.copy()
-            try:
-                gend = end_group.get_group(g).copy()
-            except KeyError:  # no new data available for this group
+        for g in all_groups:
+            if g not in g1:
+                logger.warning("no data for bridge start: " + g)
+                bridged = end_group.get_group(g)[c2].copy()
+            elif g not in g2:
                 logger.warning("no data for bridge end: " + g)
-                bridged = gstart[c1]
+                bridged = start_group.get_group(g)[c1].copy()
             else:
-                bridged = tb(gstart[c1], gend[c2], bridge_length)
+                gstart = start_group.get_group(g)[c1].copy()
+                gend = end_group.get_group(g)[c2].copy()
+                bridged = tb(gstart, gend, bridge_length)
 
             res_grouped.append((g, bridged))
 
