@@ -104,7 +104,7 @@ def trend_bridge(chef: Chef, ingredients: List[str], bridge_start, bridge_end, b
     assert end.dtype == 'datapoints'
 
     assert len(bridge_end['column']) == len(bridge_start['column']),\
-        "columns in bridge_start and bridge_end should be the same!"
+        "columns length in bridge_start and bridge_end should be the same!"
 
     logger.info("trend_bridge: {} and {}".format(start.ingred_id, end.ingred_id))
 
@@ -113,7 +113,11 @@ def trend_bridge(chef: Chef, ingredients: List[str], bridge_start, bridge_end, b
 
     # get the column to group. Because datapoints are multidimensional, but we only
     # bridge them in one column, so we should group other columns.
-    assert set(start.key_to_list()) == set(end.key_to_list())
+    try:
+        assert set(start.key_to_list()) == set(end.key_to_list())
+    except AssertionError:
+        logger.critical("start and end have different keys! {} and {}".format(start.key, end.key))
+        raise
 
     keys = start.key_to_list()
     keys.remove(bridge_on)
@@ -141,10 +145,10 @@ def trend_bridge(chef: Chef, ingredients: List[str], bridge_start, bridge_end, b
         res_grouped = []
         for g in all_groups:
             if g not in g1:
-                logger.warning("no data for bridge start: " + g)
+                logger.warning("no data for bridge start: " + str(g))
                 bridged = end_group.get_group(g)[c2].copy()
             elif g not in g2:
-                logger.warning("no data for bridge end: " + g)
+                logger.warning("no data for bridge end: " + str(g))
                 bridged = start_group.get_group(g)[c1].copy()
             else:
                 gstart = start_group.get_group(g)[c1].copy()
@@ -162,7 +166,7 @@ def trend_bridge(chef: Chef, ingredients: List[str], bridge_start, bridge_end, b
                 assert isinstance(g, str)
                 v[keys[0]] = g
             else:
-                assert isinstance(g, list)
+                assert isinstance(g, tuple)
                 for i, k in enumerate(keys):
                     v[k] = g[i]
             res.append(v)
