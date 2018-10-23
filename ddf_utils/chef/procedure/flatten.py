@@ -92,7 +92,10 @@ def flatten(chef: Chef, ingredients: List[str], result, **options) -> ProcedureR
                 # FIXME: There is an issue for pandas grouper for categorical data
                 # where it will return all categories even if it's already filtered
                 # it's WIP and refer to pull request #20583 for pandas.
-                df_ = grouper.get_group(g)
+                try:
+                    df_ = grouper.get_group(g)
+                except KeyError:
+                    continue
                 if df_.empty:
                     continue
                 if not isinstance(g, tuple):
