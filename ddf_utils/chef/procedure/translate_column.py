@@ -103,8 +103,17 @@ def translate_column(chef: Chef, ingredients: List[str], result, dictionary,
 
     for k, df in di.items():
         logger.debug("running on: " + k)
+        if df.dtypes[column].name == "category":
+            categorical_col = True
+        else:
+            categorical_col = False
+
+        if categorical_col:
+            df[column] = df[column].astype('str')
         new_data[k] = tc(df, column, dict_type, dictionary_, target_column, base_df,
                          not_found, ambiguity, ignore_case)
+        if categorical_col:
+            new_data[k][target_column] = new_data[k][target_column].astype("category")
 
     if not result:
         result = ingredient.ingred_id + '-translated'
