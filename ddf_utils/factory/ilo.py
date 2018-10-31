@@ -7,11 +7,14 @@ using the bulk downloader, see `its doc`_.
 .. _its doc: http://www.ilo.org/ilostat-files/WEB_bulk_download/ILOSTAT_BulkDownload_Guidelines.pdf
 """
 
+from . common import requests_retry_session
+
 from pathlib import Path
 from urllib.parse import urljoin
+from multiprocessing import Pool
+from functools import partial
 
 import pandas as pd
-import requests
 
 
 main_url = 'http://www.ilo.org/ilostat-files/WEB_bulk_download/'
@@ -51,12 +54,22 @@ def has_newer_source(indicator, date):
     return False
 
 
-def bulk_download(out_dir, indicators:list):
-    for i in indicators:
-        url = urljoin(main_url, f'indicator/{i}.csv.gz')
-        res = requests.get(url)
-        assert res.status_code == 200, f'can not download source file: {url}'
+def download(i, out_dir):
+    url = urljoin(main_url, f'indicator/{i}.csv.gz')
+    res = requests_retry_session().get(url, stream=True, timeout=60)
+    if res.status_code != 200:
+        print('can not download source file: {url}')
+        return
 
-        with Path(out_dir, f'{i}.csv.gz').expanduser().open('wb') as f:
-            f.write(res.content)
-            f.close()
+    with Path(out_dir, f'{i}.csv.gz').expanduser().open('wb') as f:
+        for chunk in res.iter_content(chunk_size=1024):
+            f.write(chunk)
+            f.flush()
+
+
+def bulk_download(out_dir, indicators: list):
+
+    download_ = partial(download, out_dir=out_dir)
+
+    with Pool(5) as p:
+        p.map(download_, indicators)
