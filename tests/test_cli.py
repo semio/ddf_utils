@@ -62,6 +62,10 @@ def test_ddf_cli():
     base_path = os.path.dirname(__file__)
 
     runner = CliRunner()
+
+    result = runner.invoke(ddf)
+    click.echo(result.output)
+
     result = runner.invoke(ddf, args=['build_recipe',
                                       os.path.join(base_path, 'chef/recipes/test_flatten.yml')])
     click.echo(result.output)
