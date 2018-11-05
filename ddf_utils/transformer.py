@@ -8,7 +8,56 @@ import numpy as np
 import json
 import logging
 
+from functools import partial
 from ddf_utils.chef.helpers import prompt_select
+
+
+def _check_ambiguities(dictionary, ambiguity):
+    # check for ambiguities
+    dict_ = dictionary.copy()
+    for k, v in dictionary.items():
+        if isinstance(v, list):  # there is ambiguity
+            if ambiguity == 'skip':
+                dict_.pop(k)
+            elif ambiguity == 'error':
+                raise ValueError("ambiguities found in dict_!")
+            elif ambiguity == 'prompt':
+                # prompt for value
+                text = 'Please choose the correct entity to align *{}* with ' \
+                       'for the rest of the execution of the recipe:'.format(k)
+                val = prompt_select(v, text_before=text)
+                if val != -1:
+                    dict_[k] = val
+                else:
+                    dict_.pop(k)
+    return dict_
+
+
+def __print_not_found(series, dictionary):
+    nf = set()
+    if type(series) is dd.Series:
+        uniques = series.unique().compute()
+    else:
+        uniques = series.unique()
+    for v in uniques:
+        if v not in dictionary.keys():
+            nf.add(v)
+    if len(nf) > 0:
+        logging.warning('key not found:')
+        logging.warning(list(nf))
+
+
+def __process_val(v, dictionary=None):
+    # check if a value is in the dictionary, if not, return nan
+    # and mark down the not found values
+    #
+    # There is an issue in dask, see dask issue #4127
+    # if v == 'foo':
+    #     import ipdb; ipdb.set_trace()
+    if v in dictionary.keys():
+        return dictionary[v]
+    else:
+        return np.nan
 
 
 def _translate_column_inline(df, column, target_column, dictionary,
@@ -19,40 +68,15 @@ def _translate_column_inline(df, column, target_column, dictionary,
         df_new[column] = df_new[column].map(
             lambda x: str(x).lower() if x is not None else x)
 
-    # check for ambiguities
-    dict_ = dictionary.copy()
-    for k, v in dict_.items():
-        if isinstance(v, list):  # there is ambiguity
-            if ambiguity == 'skip':
-                dictionary.pop(k)
-            elif ambiguity == 'error':
-                raise ValueError("ambiguities found in dictionary!")
-            elif ambiguity == 'prompt':
-                # prompt for value
-                text = 'Please choose the correct entity to align *{}* with ' \
-                       'for the rest of the execution of the recipe:'.format(k)
-                val = prompt_select(v, text_before=text)
-                if val != -1:
-                    dictionary[k] = val
-                else:
-                    dictionary.pop(k)
+    dictionary = _check_ambiguities(dictionary, ambiguity)
 
     # TODO: refactor this block
     # handling values not found in the dictionary
     if not_found == 'drop':
-        nf = []
-        def process_val(v):
-            if v in dictionary.keys():
-                return dictionary[v]
-            else:
-                if v not in nf:
-                    nf.append(v)
-                return np.nan
+        __print_not_found(df_new[column], dictionary)
+        process_val = partial(__process_val, dictionary=dictionary)
         df_new[target_column] = df_new[column].map(process_val)
         df_new = df_new.dropna(subset=[target_column])
-        if len(nf) > 0:
-            logging.warning('key not found:')
-            logging.warning(nf)
     if not_found == 'error':
         df_new[target_column] = df_new[column].map(
             lambda x: dictionary[x])
