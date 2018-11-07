@@ -64,6 +64,7 @@ def load_metadata():
     metadata = pd.DataFrame.from_records(metadata)
     return metadata
 
+
 def has_newer_source(dataset, date):
     if metadata is None:
         load_metadata()
