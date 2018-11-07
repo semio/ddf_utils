@@ -499,11 +499,14 @@ class Ingredient(BaseIngredient):
                 assert list(self.values.keys())[0] in ['$in', '$nin']
                 kw = list(self.values.keys())[0]
                 if kw == ['$in']:
-                    return {self.key: df[self.values[kw]]}
+                    cols = [self.key, *self.values[kw]]
+                    return {self.key: df[cols]}
                 else:
-                    return {self.key: df[df.columns.drop(self.values[kw])]}
+                    cols = [self.key, *df.columns.drop(self.values[kw])]
+                    return {self.key: df[cols]}
             else:
-                return {self.key: df[self.values]}
+                cols = [self.key, *self.values]
+                return {self.key: df[cols]}
         else:
             return {self.key: df}
 

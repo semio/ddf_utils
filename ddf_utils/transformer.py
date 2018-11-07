@@ -8,7 +8,56 @@ import numpy as np
 import json
 import logging
 
+from functools import partial
 from ddf_utils.chef.helpers import prompt_select
+
+
+def _check_ambiguities(dictionary, ambiguity):
+    # check for ambiguities
+    dict_ = dictionary.copy()
+    for k, v in dictionary.items():
+        if isinstance(v, list):  # there is ambiguity
+            if ambiguity == 'skip':
+                dict_.pop(k)
+            elif ambiguity == 'error':
+                raise ValueError("ambiguities found in dict_!")
+            elif ambiguity == 'prompt':
+                # prompt for value
+                text = 'Please choose the correct entity to align *{}* with ' \
+                       'for the rest of the execution of the recipe:'.format(k)
+                val = prompt_select(v, text_before=text)
+                if val != -1:
+                    dict_[k] = val
+                else:
+                    dict_.pop(k)
+    return dict_
+
+
+def __print_not_found(series, dictionary):
+    nf = set()
+    if type(series) is dd.Series:
+        uniques = series.unique().compute()
+    else:
+        uniques = series.unique()
+    for v in uniques:
+        if v not in dictionary.keys():
+            nf.add(v)
+    if len(nf) > 0:
+        logging.warning('key not found:')
+        logging.warning(list(nf))
+
+
+def __process_val(v, dictionary=None):
+    # check if a value is in the dictionary, if not, return nan
+    # and mark down the not found values
+    #
+    # There is an issue in dask, see dask issue #4127
+    # if v == 'foo':
+    #     import ipdb; ipdb.set_trace()
+    if v in dictionary.keys():
+        return dictionary[v]
+    else:
+        return np.nan
 
 
 def _translate_column_inline(df, column, target_column, dictionary,
@@ -19,40 +68,15 @@ def _translate_column_inline(df, column, target_column, dictionary,
         df_new[column] = df_new[column].map(
             lambda x: str(x).lower() if x is not None else x)
 
-    # check for ambiguities
-    dict_ = dictionary.copy()
-    for k, v in dict_.items():
-        if isinstance(v, list):  # there is ambiguity
-            if ambiguity == 'skip':
-                dictionary.pop(k)
-            elif ambiguity == 'error':
-                raise ValueError("ambiguities found in dictionary!")
-            elif ambiguity == 'prompt':
-                # prompt for value
-                text = 'Please choose the correct entity to align *{}* with ' \
-                       'for the rest of the execution of the recipe:'.format(k)
-                val = prompt_select(v, text_before=text)
-                if val != -1:
-                    dictionary[k] = val
-                else:
-                    dictionary.pop(k)
+    dictionary = _check_ambiguities(dictionary, ambiguity)
 
     # TODO: refactor this block
     # handling values not found in the dictionary
     if not_found == 'drop':
-        nf = []
-        def process_val(v):
-            if v in dictionary.keys():
-                return dictionary[v]
-            else:
-                if v not in nf:
-                    nf.append(v)
-                return np.nan
+        __print_not_found(df_new[column], dictionary)
+        process_val = partial(__process_val, dictionary=dictionary)
         df_new[target_column] = df_new[column].map(process_val)
         df_new = df_new.dropna(subset=[target_column])
-        if len(nf) > 0:
-            logging.warning('key not found:')
-            logging.warning(nf)
     if not_found == 'error':
         df_new[target_column] = df_new[column].map(
             lambda x: dictionary[x])
@@ -286,7 +310,7 @@ def translate_header(df, dictionary, dictionary_type='inline'):
         raise ValueError('dictionary not supported: '+dictionary_type)
 
 
-def trend_bridge(old_data: pd.Series, new_data: pd.Series, bridge_length: int) -> pd.Series:
+def trend_bridge(old_ser: pd.Series, new_ser: pd.Series, bridge_length: int) -> pd.Series:
     """smoothing data between series.
 
     To avoid getting artificial stairs in the data, we smooth between to
@@ -306,23 +330,42 @@ def trend_bridge(old_data: pd.Series, new_data: pd.Series, bridge_length: int) -
     bridge_data : the bridged data
 
     """
-    bridge_end = new_data.index[0]
-    bridge_start = bridge_end - bridge_length
+    old_data = old_ser.sort_index()
+    new_data = new_ser.sort_index()
 
-    assert not pd.isnull(old_data.loc[bridge_start]), 'no data for bridge start'
+    bridge_end = new_data.index[0]
+
+    if old_data.index[0] > bridge_end:  # not bridging in this case
+        return new_data
+
+    if old_data.index[-1] < bridge_end:
+        return pd.concat([old_data, new_data], sort=False)
+
+    # recifying bridge_end, if old_data do not have data at this point
+    if bridge_end not in old_data.index:
+        intersection = old_data.loc[old_data.index.isin(new_data.index)]
+        if intersection.empty:
+            raise ValueError("can't bridge because there is no intersection time point")
+        bridge_end = intersection.index[0]
+
+    # now recify bridge_length/bridge_start, because in some case old_data just don't have enough data
+    s1 = old_data.loc[:bridge_end]
+    if s1.shape[0] < bridge_length:
+        bridge_length = s1.shape[0]
+        bridge_start = old_data.index[0]
+    else:
+        bridge_start = s1.index.values[-bridge_length:][0]
 
     bridge_height = new_data.loc[bridge_end] - old_data.loc[bridge_end]
     fraction = bridge_height / bridge_length
 
     bridge_data = old_data.copy()
 
-    for i, row in bridge_data.loc[bridge_start:bridge_end].iteritems():
-        if i == bridge_end:
-            break
+    for i in bridge_data.loc[bridge_start:bridge_end].index:
         bridge_data.loc[i:bridge_end] = bridge_data.loc[i:bridge_end] + fraction
 
     # combine old/new/bridged data
-    result = pd.concat([bridge_data.loc[:bridge_end], new_data.iloc[1:]])
+    result = pd.concat([bridge_data.loc[:bridge_end], new_data.loc[bridge_end:].iloc[1:]], sort=False)
     return result
 
 

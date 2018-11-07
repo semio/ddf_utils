@@ -160,7 +160,7 @@ def _merge_two(left: Dict[str, pd.DataFrame],  # FIXME: signature is wrong
         if deep:
             for k, df in right.items():
                 if k in left.keys():
-                    left[k] = left[k].append(df.compute(), ignore_index=True)
+                    left[k] = left[k].append(df, ignore_index=True)
                     left[k] = left[k].groupby(index_col).agg(__get_last_item).reset_index()
                 else:
                     left[k] = df

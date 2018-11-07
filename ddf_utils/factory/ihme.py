@@ -27,7 +27,8 @@ url_version = 'http://ghdx.healthdata.org/sites/all/modules/custom/ihme_query_to
 # url for query data: http://ghdx.healthdata.org/sites/all/modules/custom/ihme_query_tool/gbd-search/php/data.php
 # below is url for download data as zip
 url_data = 'http://ghdx.healthdata.org/sites/all/modules/custom/ihme_query_tool/gbd-search/php/download.php'
-url_task = 'https://s3.healthdata.org/gbd-api-2016-production/{hash}'  # access to download link
+url_task = 'https://s3.healthdata.org/gbd-api-2016-public/{hash}'  # access to download link
+
 
 metadata = None
 

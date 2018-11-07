@@ -4,7 +4,7 @@ pyyaml
 orderedattrdict
 typing
 cookiecutter
-Click
+Click<7
 daff
 sphinx_rtd_theme
 sphinxcontrib-napoleon

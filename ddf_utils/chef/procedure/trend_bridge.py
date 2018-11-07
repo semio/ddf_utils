@@ -40,13 +40,16 @@ def trend_bridge(chef: Chef, ingredients: List[str], bridge_start, bridge_end, b
       options:
         bridge_start:
             ingredient: old_data_ingredient # optional, if not set then assume it's the input ingredient
-            column: concept_old_data
+            column:
+              - concept_old_data
         bridge_end:
             ingredient: new_data_ingredient # optional, if not set then assume it's the input ingredient
-            column: concept_new_data
+            column:
+              - concept_new_data
         bridge_length: 5                  # steps in time. If year, years, if days, days.
         bridge_on: time                   # the index column to build the bridge with
-        target_column: concept_in_result  # overwrites if exists. creates if not exists. default to bridge_end.column
+        target_column:
+              - concept_in_result  # overwrites if exists. creates if not exists. default to bridge_end.column
 
     Parameters
     ----------
@@ -68,7 +71,7 @@ def trend_bridge(chef: Chef, ingredients: List[str], bridge_start, bridge_end, b
 
     Keyword Args
     ------------
-    target_column : `str`, optional
+    target_column : `list`, optional
         The column name of the bridge result. default to `bridge_end.column`
 
     See Also
@@ -78,12 +81,12 @@ def trend_bridge(chef: Chef, ingredients: List[str], bridge_start, bridge_end, b
     from ... transformer import trend_bridge as tb
 
     # check parameters
-    if ingredients is None:
+    if ingredients is None or ingredients == []:
         assert 'ingredient' in bridge_start.keys()
         assert 'ingredient' in bridge_end.keys()
         ingredient = None
     else:
-        assert len(ingredients) == 1, "procedure only support 1 ingredient for now."
+        assert len(ingredients) <= 1, "procedure only support 1 ingredient for now."
         # ingredient = chef.dag.get_node(ingredients[0]).evaluate()
         ingredient = ingredients[0]
 
@@ -100,57 +103,81 @@ def trend_bridge(chef: Chef, ingredients: List[str], bridge_start, bridge_end, b
     assert start.dtype == 'datapoints'
     assert end.dtype == 'datapoints'
 
+    assert len(bridge_end['column']) == len(bridge_start['column']),\
+        "columns length in bridge_start and bridge_end should be the same!"
+
     logger.info("trend_bridge: {} and {}".format(start.ingred_id, end.ingred_id))
 
     if target_column is None:
-        target_column = bridge_start['column']
+        target_column = bridge_end['column']
 
     # get the column to group. Because datapoints are multidimensional, but we only
     # bridge them in one column, so we should group other columns.
-    assert set(start.key_to_list()) == set(end.key_to_list())
+    try:
+        assert set(start.key_to_list()) == set(end.key_to_list())
+    except AssertionError:
+        logger.critical("start and end have different keys! {} and {}".format(start.key, end.key))
+        raise
 
     keys = start.key_to_list()
     keys.remove(bridge_on)
 
-    # start_group = start.get_data()[bridge_start['column']].set_index(bridge_on).groupby(keys)
-    # end_group = end.get_data()[bridge_end['column']].set_index(bridge_on).groupby(keys)
-    start_group = start.compute()[bridge_start['column']].set_index(bridge_on).groupby(keys)
-    end_group = end.compute()[bridge_end['column']].set_index(bridge_on).groupby(keys)
+    # calculate for each column
+    new_data = dict()
 
-    # calculate trend bridge on each group
-    res_grouped = []
-    for g, df in start_group:
-        gstart = df.copy()
-        try:
-            gend = end_group.get_group(g).copy()
-        except KeyError:  # no new data available for this group
-            logger.warning("no data for bridge end: " + g)
-            bridged = gstart[bridge_start['column']]
-        else:
-            bridged = tb(gstart[bridge_start['column']], gend[bridge_end['column']], bridge_length)
+    start_computed = start.compute()
+    end_computed = end.compute()
 
-        res_grouped.append((g, bridged))
+    for c1, c2, c3 in zip(bridge_start['column'], bridge_end['column'], target_column):
+        logger.info("bridge_start: {}, bridge_end: {}, target_column: {}".format(c1, c2, c3))
+        start_group = start_computed[c1].set_index(bridge_on).groupby(keys)
+        end_group = end_computed[c2].set_index(bridge_on).groupby(keys)
 
-    # combine groups to dataframe
-    res = []
-    for g, v in res_grouped:
-        v.name = target_column
-        v = v.reset_index()
-        if len(keys) == 1:
-            assert isinstance(g, str)
-            v[keys[0]] = g
-        else:
-            assert isinstance(g, list)
-            for i, k in enumerate(keys):
-                v[k] = g[i]
-        res.append(v)
-    result_data = pd.concat(res, ignore_index=True)
+        # get all groups
+        g1 = list(start_group.groups.keys())
+        g2 = list(end_group.groups.keys())
+        all_groups = g1.copy()
+        for g in g2:
+            if g not in all_groups:
+                all_groups.append(g)
 
+        # calculate trend bridge on each group
+        res_grouped = []
+        for g in all_groups:
+            if g not in g1:
+                logger.warning("no data for bridge start: " + str(g))
+                bridged = end_group.get_group(g)[c2].copy()
+            elif g not in g2:
+                logger.warning("no data for bridge end: " + str(g))
+                bridged = start_group.get_group(g)[c1].copy()
+            else:
+                gstart = start_group.get_group(g)[c1].copy()
+                gend = end_group.get_group(g)[c2].copy()
+                bridged = tb(gstart, gend, bridge_length)
+
+            res_grouped.append((g, bridged))
+
+        # combine groups to dataframe
+        res = []
+        for g, v in res_grouped:
+            v.name = c3
+            v = v.reset_index()
+            if len(keys) == 1:
+                assert isinstance(g, str)
+                v[keys[0]] = g
+            else:
+                assert isinstance(g, tuple)
+                for i, k in enumerate(keys):
+                    v[k] = g[i]
+            res.append(v)
+        new_data[c3] = pd.concat(res, ignore_index=True)
+
+    # merge in to ingredient in `ingredients` parameter if needed
     if ingredient is not None:
         from . merge import _merge_two
-        merged = _merge_two(ingredient.compute(), {target_column: result_data},
-                            start.key_to_list(), 'datapoints', deep=True)
+        merged = _merge_two(ingredient.compute(), new_data,
+                            start.key_to_list(), 'datapoints', deep=False)
         return ProcedureResult(chef, result, start.key, create_dsk(merged))
     else:
         return ProcedureResult(chef, result, start.key,
-                               create_dsk({target_column: result_data}))
+                               create_dsk(new_data))

@@ -62,9 +62,13 @@ def test_ddf_cli():
     base_path = os.path.dirname(__file__)
 
     runner = CliRunner()
+
+    result = runner.invoke(ddf)
+    click.echo(result.output)
+
     result = runner.invoke(ddf, args=['build_recipe',
                                       os.path.join(base_path, 'chef/recipes/test_flatten.yml')])
-    # click.echo(result.output)
+    click.echo(result.output)
     assert result.exit_code == 0
 
     tmpdir = tempfile.mkdtemp()
@@ -74,5 +78,5 @@ def test_ddf_cli():
                                       '--outdir', tmpdir,
                                       '--ddf_dir',
                                       os.path.join(base_path, 'chef/datasets/')])
-    # click.echo(result.output)
+    click.echo(result.output)
     assert result.exit_code == 0
