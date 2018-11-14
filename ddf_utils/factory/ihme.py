@@ -19,6 +19,7 @@ import requests
 
 import pandas as pd
 from ddf_utils.chef.helpers import read_opt
+from . common import requests_retry_session
 
 
 url_hir = 'http://ghdx.healthdata.org/sites/all/modules/custom/ihme_query_tool/gbd-search/php/hierarchy/'
@@ -27,7 +28,7 @@ url_version = 'http://ghdx.healthdata.org/sites/all/modules/custom/ihme_query_to
 # url for query data: http://ghdx.healthdata.org/sites/all/modules/custom/ihme_query_tool/gbd-search/php/data.php
 # below is url for download data as zip
 url_data = 'http://ghdx.healthdata.org/sites/all/modules/custom/ihme_query_tool/gbd-search/php/download.php'
-url_task = 'https://s3.healthdata.org/gbd-api-2016-public/{hash}'  # access to download link
+url_task = 'https://s3.healthdata.org/gbd-api-2017-public/{hash}'  # access to download link
 
 
 metadata = None
@@ -35,8 +36,10 @@ metadata = None
 
 def load_metadata():
     """load all codes used in GBD in a dictionary."""
-    meta = requests.get(url_metadata).json()
-    versions = requests.get(url_version).json()
+
+    session = requests_retry_session()
+    meta = session.get(url_metadata).json()
+    versions = session.get(url_version).json()
 
     global metadata
     metadata = {}
@@ -54,7 +57,7 @@ def has_newer_source(ver):
         load_metadata()
 
     versions = metadata['version']
-    newer = versions[versions['vesrion_id'] > ver].values
+    newer = versions[versions['id'] > ver].values
     return bool(len(newer) > 0)
 
 
@@ -89,8 +92,9 @@ def bulk_download(out_dir, version, context=None, query=None, **kwargs):
     taskIDs = set()
 
     # make a series of queries, the server will response a series of task ids.
+    session = requests_retry_session()
     for q in query:
-        res_data = requests.post(url_data, data=q)
+        res_data = session.post(url_data, data=q)
         # print(res_data.json())
         if isinstance(res_data.json()['taskID'], list):
             for taskID in res_data.json()['taskID']:
@@ -101,7 +105,7 @@ def bulk_download(out_dir, version, context=None, query=None, **kwargs):
     # then, we check each task, download all files linked to the task.
     if len(taskIDs) == 0:
         print('no available results')
-        return False
+        return
 
     successed = 0
 
@@ -114,7 +118,7 @@ def bulk_download(out_dir, version, context=None, query=None, **kwargs):
         download_urls = []
 
         while True:
-            res_json = requests.get(url).json()
+            res_json = session.get(url).json()
 
             dus = res_json['urls']
             for du in dus:
@@ -138,21 +142,27 @@ def bulk_download(out_dir, version, context=None, query=None, **kwargs):
         for u in download_urls:
             _run_download(u, out_dir, taskID=i)
     if successed == 0:
-        return False
-    return True
+        return
+    return [i[:8] for i in taskIDs]
 
 
 def _run_download(u, out_dir, taskID):
     '''accept an URL and download it to out_dir'''
-    download_file = requests.get(u, stream=True)
+    download_file = requests_retry_session().get(u, stream=True, timeout=60)
+
+    if download_file.status_code != 200:
+        print(f'can not download source file: {u}')
+        return
+
     if not osp.exists(osp.join(out_dir, taskID[:8])):
         os.mkdir(osp.join(out_dir, taskID[:8]))
+
     fn = osp.join(out_dir, taskID[:8], osp.basename(u))
     print('downloading {} to {}'.format(u, fn))
     with open(fn, 'wb') as f:
         for c in download_file.iter_content(chunk_size=1024):
             f.write(c)
-        f.close()
+            f.flush()
 
 
 def _make_query(context, version, **kwargs):
@@ -160,14 +170,15 @@ def _make_query(context, version, **kwargs):
     if not metadata:
         load_metadata()
 
-    ages = metadata['age']['age_id'].values
+    ages = metadata['age']['id'].values
     # location: there is a `custom` location. don't include that one.
-    locations = [x for x in metadata['location']['location_id'].values if x != 'custom']
-    sexs = metadata['sex']['sex_id'].values
-    years = metadata['year']['year_id'].values
-    metrics = metadata['metric']['metric_id'].values
-    measures = metadata['measure']['measure_id'].values
-    causes = metadata['cause']['cause_id'].values
+    locations_md = metadata['location']
+    locations = locations_md[locations_md['location_id'] != 'custom']['id'].values
+    sexs = metadata['sex']['id'].values
+    years = metadata['year']['id'].values
+    metrics = metadata['metric']['id'].values
+    measures = metadata['measure']['id'].values
+    causes = metadata['cause']['id'].values
     # risk/etiology/impairment
     # There are actually 4 types data in this dictionary:
     # risk, etiology, impairmen and injury n-codes.
@@ -224,7 +235,7 @@ def _make_query(context, version, **kwargs):
     # insert context and version and other configs
     rows = read_opt(kwargs, 'rows', default=10000000)  # the maximum records we can get
     # ^ Note: user guide[1] says it's 500000 row. But actually we can set this to 10000000
-    # [1]: http://ghdx.healthdata.org/sites/default/files/ihme_query_tool/GBD_Data_Tool_User_Guide_(2016).pdf
+    # [1]: http://www.healthdata.org/sites/default/files/files/Data_viz/GBD_2017_Tools_Overview.pdf
     email = read_opt(kwargs, 'email', default='downloader@gapminder.org')
     idsOrNames = read_opt(kwargs, 'idsOrNames', default='ids')           # ids / names / both
     singleOrMult = read_opt(kwargs, 'singleOrMult', default='multiple')  # single / multiple
