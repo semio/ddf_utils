@@ -58,7 +58,7 @@ def download(i, out_dir):
     url = urljoin(main_url, f'indicator/{i}.csv.gz')
     res = requests_retry_session().get(url, stream=True, timeout=60)
     if res.status_code != 200:
-        print('can not download source file: {url}')
+        print(f'can not download source file: {url}')
         return
 
     with Path(out_dir, f'{i}.csv.gz').expanduser().open('wb') as f:
