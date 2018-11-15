@@ -15,8 +15,6 @@ import os
 import os.path as osp
 from time import sleep
 
-import requests
-
 import pandas as pd
 from ddf_utils.chef.helpers import read_opt
 from . common import requests_retry_session
@@ -61,6 +59,33 @@ def has_newer_source(ver):
     return bool(len(newer) > 0)
 
 
+def download_links(url):
+    session = requests_retry_session()
+
+    sent_urls = []
+
+    success_results = [
+        'Your search returned no results.',
+        'success'
+    ]  # other results means still working
+
+    while True:
+        res_json = session.get(url).json()
+
+        dus = res_json['urls']
+        for du in dus:
+            if du in sent_urls:
+                continue
+            else:
+                sent_urls.append(du)
+                print(du)
+                yield du
+
+        if res_json['state'] in success_results:
+            break
+        sleep(10)
+
+
 def bulk_download(out_dir, version, context=None, query=None, **kwargs):
     """download the selected contexts/queries from GBD result tools.
 
@@ -84,11 +109,6 @@ def bulk_download(out_dir, version, context=None, query=None, **kwargs):
         if not isinstance(query, list):
             query = [query]
 
-    success_results = [
-        'Your search returned no results.',
-        'success'
-    ]
-
     taskIDs = set()
 
     # make a series of queries, the server will response a series of task ids.
@@ -107,42 +127,15 @@ def bulk_download(out_dir, version, context=None, query=None, **kwargs):
         print('no available results')
         return
 
-    successed = 0
-
     for i in taskIDs:
         url = url_task.format(hash=i)
         print('working on {}'.format(url))
         print('check status as http://ghdx.healthdata.org/gbd-results-tool/result/{}'.format(i))
         print('available downloads:')
 
-        download_urls = []
-
-        while True:
-            res_json = session.get(url).json()
-
-            dus = res_json['urls']
-            for du in dus:
-                if du in download_urls:
-                    continue
-                else:
-                    download_urls.append(du)
-                    print(du)
-
-            if res_json['state'] in success_results:
-                break
-            sleep(10)
-
-        if res_json['state'] == success_results[0]:
-            continue
-        else:
-            successed = successed + 1
-
-        download_urls = res_json['urls']
-
-        for u in download_urls:
+        for u in download_links(url):
             _run_download(u, out_dir, taskID=i)
-    if successed == 0:
-        return
+
     return [i[:8] for i in taskIDs]
 
 
