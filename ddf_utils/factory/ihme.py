@@ -13,9 +13,13 @@ make use of it.
 
 import os
 import os.path as osp
+import math
 from time import sleep
 
 import pandas as pd
+
+from tqdm import tqdm
+
 from ddf_utils.chef.helpers import read_opt
 from . common import requests_retry_session
 
@@ -134,7 +138,16 @@ def bulk_download(out_dir, version, context=None, query=None, **kwargs):
         print('available downloads:')
 
         for u in download_links(url):
-            _run_download(u, out_dir, taskID=i)
+            tries = 1
+            while tries <= 5:
+                try:
+                    _run_download(u, out_dir, taskID=i)
+                    break
+                except ValueError:
+                    if tries == 5:
+                        raise
+                    print("download interrupted, retrying...")
+                    tries = tries + 1
 
     return [i[:8] for i in taskIDs]
 
@@ -152,10 +165,18 @@ def _run_download(u, out_dir, taskID):
 
     fn = osp.join(out_dir, taskID[:8], osp.basename(u))
     print('downloading {} to {}'.format(u, fn))
+
+    block_size = 1024
+    total_size = int(download_file.headers.get('content-length', 0))
+    wrote = 0
     with open(fn, 'wb') as f:
-        for c in download_file.iter_content(chunk_size=1024):
+        for c in tqdm(download_file.iter_content(chunk_size=1024),
+                      total=math.ceil(total_size // block_size), unit='KB', unit_scale=True):
             f.write(c)
+            wrote = wrote + len(c)
             f.flush()
+    if wrote != total_size:
+        raise ValueError("download failed.")
 
 
 def _make_query(context, version, **kwargs):
