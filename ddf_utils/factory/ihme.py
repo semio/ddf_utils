@@ -15,7 +15,7 @@ import os
 import os.path as osp
 import math
 from time import sleep
-
+import requests
 import pandas as pd
 
 from tqdm import tqdm
@@ -143,7 +143,7 @@ def bulk_download(out_dir, version, context=None, query=None, **kwargs):
                 try:
                     _run_download(u, out_dir, taskID=i)
                     break
-                except ValueError:
+                except (ValueError, requests.exceptions.ConnectionError) as e:
                     if tries == 5:
                         raise
                     print("download interrupted, retrying...")
