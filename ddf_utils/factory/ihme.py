@@ -120,6 +120,9 @@ def bulk_download(out_dir, version, context=None, query=None, **kwargs):
     for q in query:
         res_data = session.post(url_data, data=q)
         # print(res_data.json())
+        if res_data.status_code != 200:
+            print(res_data.text)
+            raise ValueError("status code not 200: {}".format(res_data.status_code))
         if isinstance(res_data.json()['taskID'], list):
             for taskID in res_data.json()['taskID']:
                 taskIDs.add(taskID)
@@ -187,12 +190,12 @@ def _make_query(context, version, **kwargs):
     ages = metadata['age']['id'].values
     # location: there is a `custom` location. don't include that one.
     locations_md = metadata['location']
-    locations = locations_md[locations_md['location_id'] != 'custom']['id'].values
-    sexs = metadata['sex']['id'].values
-    years = metadata['year']['id'].values
-    metrics = metadata['metric']['id'].values
-    measures = metadata['measure']['id'].values
-    causes = metadata['cause']['id'].values
+    locations = locations_md[locations_md['location_id'] != 'custom']['id'].tolist()
+    sexs = metadata['sex']['id'].tolist()
+    years = metadata['year']['id'].tolist()
+    metrics = metadata['metric']['id'].tolist()
+    measures = metadata['measure']['id'].tolist()
+    causes = metadata['cause']['id'].tolist()
     # risk/etiology/impairment
     # There are actually 4 types data in this dictionary:
     # risk, etiology, impairmen and injury n-codes.
@@ -232,7 +235,7 @@ def _make_query(context, version, **kwargs):
         # TODO: should be split, don't combine these context here.
         measure = read_opt(kwargs, 'measure', default=measures)
         metric = read_opt(kwargs, 'metric', default=[1, 2, 3])
-        context_values = rei[rei['type'] == context]['rei_id'].values
+        context_values = rei[rei['type'] == context]['rei_id'].tolist()
         cause = read_opt(kwargs, 'cause', default=causes)
         queries.update({
             'measure[]': measure,
