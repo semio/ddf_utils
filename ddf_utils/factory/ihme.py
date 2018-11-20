@@ -120,7 +120,7 @@ def bulk_download(out_dir, version, context=None, query=None, **kwargs):
     for q in query:
         res_data = session.post(url_data, data=q)
         # print(res_data.json())
-        if res_data.status_code != 200:
+        if res_data.status_code not in [200, 202]:
             print(res_data.text)
             raise ValueError("status code not 200: {}".format(res_data.status_code))
         if isinstance(res_data.json()['taskID'], list):
