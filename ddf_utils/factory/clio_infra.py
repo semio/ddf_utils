@@ -19,7 +19,7 @@ metadata = None
 
 
 def _get_home_page(url):
-    response = requests.get(url)
+    response = requests.get(url, verify=False)
     content = response.content
     tree = etree.fromstring(content, parser=etree.HTMLParser())
 
@@ -81,7 +81,7 @@ def bulk_download(out_dir, data_type=None):
         name = row['name']
         path = row['url']
 
-        res = requests.get(urljoin(url, path), stream=True)
+        res = requests.get(urljoin(url, path), stream=True, verify=False)
         fn = osp.join(out_dir, f'{name}.xls')
         print(fn, end=', ')
         with open(fn, 'wb') as f:
