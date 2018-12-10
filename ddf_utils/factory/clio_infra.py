@@ -14,7 +14,7 @@ import requests
 from urllib.parse import urljoin
 
 
-url = 'https://www.clio-infra.eu/index.html'
+url = 'https://clio-infra.eu/index.html'
 metadata = None
 
 
@@ -81,9 +81,11 @@ def bulk_download(out_dir, data_type=None):
         name = row['name']
         path = row['url']
 
-        res = requests.get(urljoin(url, path), stream=True, verify=False)
-        fn = osp.join(out_dir, f'{name}.xls')
-        print(fn, end=', ')
+        file_url = urljoin(url, path)
+        res = requests.get(file_url, stream=True, verify=False)
+        fn = osp.join(out_dir, f'{name}.xlsx')
+
+        print("downloading {} to {}".format(file_url, fn))
         with open(fn, 'wb') as f:
             for chunk in res.iter_content(chunk_size=1024):
                 if chunk:
