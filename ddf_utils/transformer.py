@@ -333,6 +333,11 @@ def trend_bridge(old_ser: pd.Series, new_ser: pd.Series, bridge_length: int) -> 
     old_data = old_ser.sort_index()
     new_data = new_ser.sort_index()
 
+    if old_data.empty:
+        return new_data
+    if new_data.empty:
+        return old_data
+
     bridge_end = new_data.index[0]
 
     if old_data.index[0] > bridge_end:  # not bridging in this case
@@ -361,7 +366,7 @@ def trend_bridge(old_ser: pd.Series, new_ser: pd.Series, bridge_length: int) -> 
 
     bridge_data = old_data.copy()
 
-    for i in bridge_data.loc[bridge_start:bridge_end].index:
+    for i in old_data.loc[bridge_start:bridge_end].index:
         bridge_data.loc[i:bridge_end] = bridge_data.loc[i:bridge_end] + fraction
 
     # combine old/new/bridged data
