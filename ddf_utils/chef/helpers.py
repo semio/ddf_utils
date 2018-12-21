@@ -278,25 +278,33 @@ def debuggable(func):
     def wrapper(*args, **kwargs):
         if 'debug' in kwargs.keys():
             debug = kwargs.pop('debug')
-            result = func(*args, **kwargs)
-            chef = args[0]
-            if debug:
-                debug_path = chef.config.get('debug_output_path', None)
-                if debug_path is None:
-                    logging.warning('debug output path not set!')
-                    chef.add_config(debug_output_path='./_debug')
-                    debug_path = './_debug'
-                outpath = os.path.join(debug_path, result.ingred_id)
-                if os.path.exists(outpath):
-                    import shutil
-                    shutil.rmtree(outpath)
-                    os.mkdir(outpath)
-                result.serve(outpath)
         else:
-            if 'breakpoint' in kwargs.keys():
-                bk = kwargs.pop('breakpoint')
-                if bk:
-                    import ipdb; ipdb.set_trace()
+	    debug = False
+
+	if 'breakpoint' in kwargs.keys():
+	    bk = kwargs.pop('breakpoint')
+	else:
+	    bk = False
+
+	if bk:
+	    import ipdb
+	    ipdb.pm()
+	    result = ipdb.runcall(func, *args, **kwargs)
+	else:
             result = func(*args, **kwargs)
+
+	if debug:
+	    chef = args[0]
+	    debug_path = chef.config.get('debug_output_path', None)
+	    if debug_path is None:
+		logging.warning('debug output path not set!')
+		chef.add_config(debug_output_path='./_debug')
+		debug_path = './_debug'
+	    outpath = os.path.join(debug_path, result.ingred_id)
+	    if os.path.exists(outpath):
+		import shutil
+		shutil.rmtree(outpath)
+		os.mkdir(outpath)
+	    result.serve(outpath)
         return result
     return wrapper
