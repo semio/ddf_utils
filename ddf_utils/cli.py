@@ -67,14 +67,13 @@ def cleanup(path, how, force):
               help='overwrite existing datapackage.json')
 def create_datapackage(path, update, overwrite):
     """create datapackage.json"""
-    from ddf_utils.datapackage import get_datapackage
     from ddf_utils.model.package import Datapackage
     import json
     if not update and not overwrite:
         if os.path.exists(os.path.join(path, 'datapackage.json')):
             click.echo('datapackage.json already exists. use --update to update or --overwrite to create new')
             return
-        res = get_datapackage(path, use_existing=False)
+        res = Datapackage.get_datapackage(path, use_existing=False)
     else:
         if os.path.exists(os.path.join(path, 'datapackage.json')):
             click.echo('backing up previous datapackage.json...')
@@ -82,9 +81,9 @@ def create_datapackage(path, update, overwrite):
             shutil.copy(os.path.join(path, 'datapackage.json'),
                         os.path.join(path, 'datapackage.json.bak'))
         if overwrite:
-            res = get_datapackage(path, use_existing=False)
+            res = Datapackage.get_datapackage(path, use_existing=False)
         else:
-            res = get_datapackage(path, use_existing=True, update=True)
+            res = Datapackage.get_datapackage(path, use_existing=True, update=True)
 
     with open(os.path.join(path, 'datapackage.json'), 'w', encoding='utf8') as f:
         json.dump(res, f, indent=4, ensure_ascii=False)
@@ -106,7 +105,7 @@ def create_datapackage(path, update, overwrite):
 def run_recipe(recipe, outdir, ddf_dir, update, dry_run, gen_dp, show_tree):
     """generate new ddf dataset with recipe"""
     from ddf_utils.chef.api import Chef
-    from ddf_utils.datapackage import create_datapackage, dump_json
+    from ddf_utils.io import dump_json
     import json
 
     coloredlogs.install(logger=logging.getLogger('Chef'),

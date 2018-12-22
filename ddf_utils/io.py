@@ -3,12 +3,21 @@
 
 import os
 import shutil
+import json
 import threading
 import time
 from urllib.parse import urlsplit
 
 import pandas as pd
 import requests
+
+
+# helper for dumping datapackage json
+def dump_json(path, obj):
+    """convenient function to dump a dictionary object to json"""
+    with open(path, 'w+') as f:
+        json.dump(obj, f, ensure_ascii=False, indent=4)
+        f.close()
 
 
 def to_csv(df, out_dir, ftype, concept, by=None, **kwargs):
@@ -100,7 +109,8 @@ def csvs_to_ddf(files, out_path):
     import re
     from os.path import join
     from ddf_utils.str import to_concept_id
-    from ddf_utils.datapackage import get_datapackage, dump_json
+    from ddf_utils.model.package import Datapackage
+    from ddf_utils.io import dump_json
 
     concepts_df = pd.DataFrame([['name', 'Name', 'string']],
                                columns=['concept', 'name', 'concept_type'])
@@ -176,7 +186,7 @@ def csvs_to_ddf(files, out_path):
     for c, df in all_entities.items():
         df.to_csv(join(out_path, 'ddf--entities--{}.csv'.format(c)), index=False)
 
-    dp = get_datapackage(out_path, use_existing=False)
+    dp = Datapackage.get_datapackage(out_path, use_existing=False)
     dump_json(os.path.join(out_path, 'datapackage.json'), dp)
 
     return

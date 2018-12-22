@@ -10,12 +10,12 @@ import os
 import json
 import numpy as np
 import pandas as pd
-from . datapackage import get_datapackage
+from . model.package import Datapackage
 
 
 def split_translations_json(path, split_path='langsplit', exclude_concepts=None, overwrite=False):
     """split all string concepts and save them as json files"""
-    datapackage = get_datapackage(path)
+    datapackage = Datapackage.get_datapackage(path)
     split_path = os.path.join(path, split_path)
 
     try:
@@ -78,7 +78,7 @@ def split_translations_json(path, split_path='langsplit', exclude_concepts=None,
 
 def split_translations_csv(path, split_path='langsplit', exclude_concepts=None, overwrite=False):
     """split all string concepts and save them as csv files"""
-    datapackage = get_datapackage(path)
+    datapackage = Datapackage.get_datapackage(path)
     split_path = os.path.join(path, split_path)
 
     try:

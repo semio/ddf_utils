@@ -7,8 +7,6 @@ import os.path as osp
 from copy import deepcopy
 import numpy as np
 import pandas as pd
-import dask.dataframe as dd
-from .utils import load_datapackage_json
 
 
 class Dataset:
