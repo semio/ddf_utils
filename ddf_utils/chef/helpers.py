@@ -273,38 +273,57 @@ def query(df, conditions, available_scopes=None):
     return df.query(q)
 
 
+def procedure(func, **options_dict):
+    """The procedure wrapper, to create a procedure
+
+    @procedure
+    def procedure_func(**options):
+        pass
+
+    will automatically create this:
+
+    def procedure_func(chef=chef, ingredients=[], result='result', **options) 
+
+    """
+    @wraps(func)
+    @debuggable
+    def procedure_func(chef, ingredients, result, *args, **kwargs):
+        return
+    return procedure_func
+
+
 def debuggable(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
         if 'debug' in kwargs.keys():
             debug = kwargs.pop('debug')
         else:
-	    debug = False
+            debug = False
 
-	if 'breakpoint' in kwargs.keys():
-	    bk = kwargs.pop('breakpoint')
-	else:
-	    bk = False
+        if 'breakpoint' in kwargs.keys():
+            bk = kwargs.pop('breakpoint')
+        else:
+            bk = False
 
-	if bk:
-	    import ipdb
-	    ipdb.pm()
-	    result = ipdb.runcall(func, *args, **kwargs)
-	else:
+        if bk:
+            import ipdb
+            ipdb.pm()
+            result = ipdb.runcall(func, *args, **kwargs)
+        else:
             result = func(*args, **kwargs)
 
-	if debug:
-	    chef = args[0]
-	    debug_path = chef.config.get('debug_output_path', None)
-	    if debug_path is None:
-		logging.warning('debug output path not set!')
-		chef.add_config(debug_output_path='./_debug')
-		debug_path = './_debug'
-	    outpath = os.path.join(debug_path, result.ingred_id)
-	    if os.path.exists(outpath):
-		import shutil
-		shutil.rmtree(outpath)
-		os.mkdir(outpath)
-	    result.serve(outpath)
+        if debug:
+            chef = args[0]
+            debug_path = chef.config.get('debug_output_path', None)
+            if debug_path is None:
+                logging.warning('debug output path not set!')
+                chef.add_config(debug_output_path='./_debug')
+                debug_path = './_debug'
+            outpath = os.path.join(debug_path, result.ingred_id)
+            if os.path.exists(outpath):
+                import shutil
+                shutil.rmtree(outpath)
+                os.mkdir(outpath)
+            result.serve(outpath)
         return result
     return wrapper
