@@ -2,6 +2,5 @@
 
 __version__ = '0.5.0'
 
-from . import (str, cli, datapackage, i18n, io,
-               patch, qa, transformer, factory)
-from .datapackage import get_datapackage
+from . import (str, cli, i18n, io, patch, qa, transformer, factory)
+from ddf_utils.model.package import Datapackage

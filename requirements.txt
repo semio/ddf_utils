@@ -22,3 +22,5 @@ pytz
 requests
 gitpython
 hy
+ipdb
+attrs
