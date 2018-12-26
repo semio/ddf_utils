@@ -151,7 +151,6 @@ class IHMELoader(DataFactory):
 
         return [i[:8] for i in taskIDs]
 
-
     @retry(times=3)
     def _run_download(self, u, out_dir, taskID):
         '''accept an URL and download it to out_dir'''
