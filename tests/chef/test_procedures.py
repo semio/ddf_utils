@@ -81,10 +81,8 @@ def test_groupby():
 
     assert len(dp1.keys()) == 1
     assert len(dp2.keys()) == 1
-    assert set(dp1['agriculture_percentage'].columns) == set(['country', 'year',
-                                                              'agriculture_percentage'])
-    assert set(dp2['agriculture_thousands'].columns) == set(['country', 'year',
-                                                             'agriculture_thousands'])
+    assert set(dp1['agriculture_percentage'].columns) == {'country', 'year', 'agriculture_percentage'}
+    assert set(dp2['agriculture_thousands'].columns) == {'country', 'year', 'agriculture_thousands'}
     # assert dp1['agriculture_percentage'].dtypes['year'] == np.int16
     # assert dp2['agriculture_thousands'].dtypes['year'] == np.int16
 

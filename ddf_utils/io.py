@@ -6,11 +6,14 @@ import shutil
 import json
 import threading
 import time
+import typing
 from urllib.parse import urlsplit
 
+from io import BytesIO
 import pandas as pd
-import requests
+import requests as req
 
+from ddf_utils.str import format_float_digits
 
 # helper for dumping datapackage json
 def dump_json(path, obj):
@@ -20,27 +23,46 @@ def dump_json(path, obj):
         f.close()
 
 
-def to_csv(df, out_dir, ftype, concept, by=None, **kwargs):
-    """save a ddf dataframe to csv file.
-    the file path of csv will be out_dir/ddf--$ftype--$concept--$by.csv
+def serve_datapoint(df_: pd.DataFrame, out_dir, concept, copy=True,
+                    by: typing.Iterable = None,
+                    formatter: typing.Callable = format_float_digits, **kwargs):
+    """save a pandas dataframe to datapoint file.
+    the file path of csv will be out_dir/ddf--datapoints--$concept--$by.csv
+
+    addition keyword arguments can be passed to `pd.DataFrame.to_csv()` function.
     """
-
-    if not by:
-        path = os.path.join(out_dir, 'ddf--'+ftype+'--'+concept+'.csv')
+    if copy:
+        df = df_.copy()
     else:
-        if isinstance(by, list):
-            filename = 'dff--' + '--'.join([ftype, concept]) + '--'.join(by) + '.csv'
-        else:
-            filename = 'dff--' + '--'.join([ftype, concept, by]) + '.csv'
+        df = df_
+    # formatting the concept column
+    if formatter is not None:
+        df[concept] = df[concept].map(formatter)
 
-        path = os.path.join(out_dir, filename)
+    if by is None:
+        by = df.index.names
+    by = '--'.join(by)
 
+    path = os.path.join(out_dir, 'ddf--datapoints--{}--by--{}.csv'.format(concept, by))
     df.to_csv(path, **kwargs)
 
 
-def load_google_xls(filehash):
-    # TODO: return the xls file with given filehash
-    raise NotImplementedError
+def serve_concept():
+    pass
+
+
+def serve_entity():
+    pass
+
+
+def open_google_spreadsheet(docid):
+    """read google spreadsheet into excel io object"""
+    tmpl_xls = "https://docs.google.com/spreadsheets/d/{docid}/export?format=xlsx&id={docid}"
+    url = tmpl_xls.format(docid=docid)
+    res = req.get(url)
+    if res.ok:
+        return BytesIO(res.content)
+    return None
 
 
 def cleanup(path, how='ddf'):
@@ -69,7 +91,7 @@ def download_csv(urls, out_path):
     """download csv files"""
 
     def download(url_, out_path_):
-        r = requests.get(url_, stream=True)
+        r = req.get(url_, stream=True)
         total_length = int(r.headers.get('content-length'))
         if total_length == 0:
             return
@@ -110,7 +132,6 @@ def csvs_to_ddf(files, out_path):
     from os.path import join
     from ddf_utils.str import to_concept_id
     from ddf_utils.model.package import Datapackage
-    from ddf_utils.io import dump_json
 
     concepts_df = pd.DataFrame([['name', 'Name', 'string']],
                                columns=['concept', 'name', 'concept_type'])
@@ -118,7 +139,7 @@ def csvs_to_ddf(files, out_path):
 
     all_entities = dict()
 
-    pattern = 'indicators--by--([ 0-9a-zA-Z_-]*).csv'
+    pattern = r'indicators--by--([ 0-9a-zA-Z_-]*).csv'
 
     for f in files:
         data = pd.read_csv(f)
@@ -151,7 +172,7 @@ def csvs_to_ddf(files, out_path):
             else:
                 t = 'measure'
 
-            concepts_df.ix[concept] = [col, t]
+            concepts_df.loc[concept] = [col, t]
 
         for ent in ent_keys:
             ent_df = data[[ent]].drop_duplicates().copy()

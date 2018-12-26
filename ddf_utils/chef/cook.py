@@ -25,7 +25,7 @@ logger = logging.getLogger('Chef')
 
 def _loadfile(f):
     """load json/yaml file, into AttrDict"""
-    if re.match('.*\.json', f):
+    if re.match(r'.*\.json', f):
         res = json.load(open(f))
     else:
         res = yaml.load(open(f), Loader=yaml.Loader)

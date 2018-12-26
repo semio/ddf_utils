@@ -210,7 +210,7 @@ class Datapackage:
                             if r.pkey != domain:
                                 df = df.rename(columns={r.pkey: domain})
                             entities[domain].append(df)
-                        entities[domain] = pd.concat(entities[domain], ignore_index=True)
+                        entities[domain] = pd.concat(entities[domain], ignore_index=True, sort=False)
                     else:  # no sets for this domain
                         paths = (idx_table[idx_table.pkey == domain]['path']
                                  .unique().tolist())
@@ -666,7 +666,7 @@ class Datapackage:
 
             if 'datapoints' in name_res:
                 # TODO: judge from headers instead of filename (github#76)
-                conc, keys = re.match('ddf--datapoints--([\w_]+)--by--(.*)', name_res).groups()
+                conc, keys = re.match(r'ddf--datapoints--([\w_]+)--by--(.*)', name_res).groups()
                 primary_keys = keys.split('--')
                 # print(conc, primary_keys)
                 for i, k in enumerate(primary_keys):
@@ -695,7 +695,7 @@ class Datapackage:
                 resources[n].update({'schema': schema})
 
             elif 'entities' in name_res:
-                match = re.match('ddf--entities--([\w_]+)(--[\w_]*)?-?.*', name_res).groups()
+                match = re.match(r'ddf--entities--([\w_]+)(--[\w_]*)?-?.*', name_res).groups()
                 domain, concept = match
                 if concept is not None:
                     concept = concept[2:]

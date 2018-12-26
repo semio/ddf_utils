@@ -105,6 +105,7 @@ def create_datapackage(path, update, overwrite):
 def run_recipe(recipe, outdir, ddf_dir, update, dry_run, gen_dp, show_tree):
     """generate new ddf dataset with recipe"""
     from ddf_utils.chef.api import Chef
+    from ddf_utils.model.package import Datapackage
     from ddf_utils.io import dump_json
     import json
 
@@ -135,7 +136,7 @@ def run_recipe(recipe, outdir, ddf_dir, update, dry_run, gen_dp, show_tree):
             if 'translations' in dp_old.keys():
                 chef = chef.add_metadata(translations=dp_old['translations'])
         dump_json(os.path.join(outdir, 'datapackage.json'),
-                  create_datapackage(outdir, gen_schema=True, **chef.metadata))
+                  Datapackage.create_datapackage(outdir, gen_schema=True, **chef.metadata))
     click.echo("Done.")
 
 

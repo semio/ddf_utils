@@ -12,7 +12,7 @@ def test_to_concept_id(s):
 
     res = to_concept_id(s)
     if res:
-        assert re.match('[0-9a-z_]*', res)
+        assert re.match(r'[0-9a-z_]*', res)
 
 
 @given(num=st.floats())
@@ -22,12 +22,12 @@ def test_format_float_sigfig(num):
     res1 = format_float_sigfig(num, 5)
 
     if not pd.isnull(res1):
-        assert re.match('[0-9.e\+]*', res1)
+        assert re.match(r'[0-9.e\+]*', res1)
 
     res2 = format_float_sigfig(str(num), 5)
 
     if not pd.isnull(res2):
-        assert re.match('[0-9.e\+]*', res2)
+        assert re.match(r'[0-9.e\+]*', res2)
 
 
 @given(num=st.floats())
@@ -37,12 +37,12 @@ def test_format_float_digits(num):
     res1 = format_float_digits(num, 5)
 
     if not pd.isnull(res1):
-        assert re.match('[0-9.e\+]*', res1)
+        assert re.match(r'[0-9.e\+]*', res1)
 
     res2 = format_float_digits(str(num), 5, keep_decimal=False)
 
     if not pd.isnull(res2):
-        assert re.match('[0-9]*', res2)
+        assert re.match(r'[0-9]*', res2)
 
 
 def test_fix_time_range():

@@ -136,7 +136,7 @@ def merge_translations_csv(path, split_path='langsplit', lang_path='lang', overw
     split_path = os.path.join(path, split_path)
     lang_path = os.path.join(path, lang_path)
 
-    datapackage = get_datapackage(path)
+    datapackage = Datapackage.get_datapackage(path)
     source_lang = datapackage['language']['id']
     # get all available translations, update it when necessary below.
     if 'translations' not in datapackage.keys():
@@ -188,7 +188,7 @@ def merge_translations_json(path, split_path='langsplit', lang_path='lang', over
     split_path = os.path.join(path, split_path)
     lang_path = os.path.join(path, lang_path)
 
-    datapackage = get_datapackage(path)
+    datapackage = Datapackage.get_datapackage(path)
     source_lang = datapackage['language']['id']
 
     # because the primaryKey is not in the splited files, we generate

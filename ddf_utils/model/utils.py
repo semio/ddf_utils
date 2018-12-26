@@ -8,7 +8,6 @@ import logging
 from functools import partial
 
 
-
 # helper functions:
 # check if a directory is dataset root dir
 def is_dataset(path):

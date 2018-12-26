@@ -109,7 +109,7 @@ def rval(comp_df, indicator, on='geo'):
 
     def f(df):
         df_ = df - df.shift(1)
-        r = df_.corr().ix[old_name, new_name]
+        r = df_.corr().loc[old_name, new_name]
         return r
 
     level = comp_df.index.names.index(on)

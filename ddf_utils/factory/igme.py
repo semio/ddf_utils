@@ -49,7 +49,7 @@ class IGMELoader(DataFactory):
         metadata = self.metadata
         link = metadata.loc[0, 'link']
 
-        ver = re.match('.*files_v(\d+).*', link).groups()[0]
+        ver = re.match(r'.*files_v(\d+).*', link).groups()[0]
 
         if int(ver) > v:
             return True
