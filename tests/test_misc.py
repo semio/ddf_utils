@@ -24,3 +24,19 @@ def test_build_dictionary():
     fp = 'indicators_cme_to_sg.json'
     c.add_config(dictionaries_dir=dfp)
     assert build_dictionary(c, fp) == d2
+
+
+def test_retry():
+    import time
+    from ddf_utils.factory.common import retry
+    from numpy.testing import assert_almost_equal
+
+    @retry(times=4)
+    def test():
+        raise NotImplementedError
+
+    t0 = time.time()
+    test()
+    t1 = time.time()
+    print('Took', t1 - t0, 'seconds')
+    assert_almost_equal(t1 - t0, 5, 1)  # 0.5 + 1 + 1.5 + 2 = 5

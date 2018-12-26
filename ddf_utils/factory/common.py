@@ -4,6 +4,8 @@ import attr
 from abc import abstractmethod, ABC
 
 import requests as req
+from time import sleep
+from functools import wraps
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
 
@@ -27,6 +29,25 @@ def requests_retry_session(
     session.mount('http://', adapter)
     session.mount('https://', adapter)
     return session
+
+
+def retry(times=5, backoff=0.5):
+    """general wrapper to retry things"""
+    def wrapper(func):
+        @wraps(func)
+        def newfunc(*args, **kwargs):
+            mtimes = times
+            ttimes = times
+            while ttimes > 0:
+                try:
+                    func(*args, **kwargs)
+                except KeyboardInterrupt:
+                    raise
+                except Exception as e:
+                    ttimes = ttimes - 1
+                    sleep(backoff * (mtimes - ttimes))
+        return newfunc
+    return wrapper
 
 
 @attr.s
