@@ -10,12 +10,12 @@ import os
 import json
 import numpy as np
 import pandas as pd
-from . model.package import Datapackage
+from . model.package import DataPackage
 
 
 def split_translations_json(path, split_path='langsplit', exclude_concepts=None, overwrite=False):
     """split all string concepts and save them as json files"""
-    datapackage = Datapackage.get_datapackage(path)
+    datapackage = DataPackage.get_datapackage(path)
     split_path = os.path.join(path, split_path)
 
     try:
@@ -78,7 +78,7 @@ def split_translations_json(path, split_path='langsplit', exclude_concepts=None,
 
 def split_translations_csv(path, split_path='langsplit', exclude_concepts=None, overwrite=False):
     """split all string concepts and save them as csv files"""
-    datapackage = Datapackage.get_datapackage(path)
+    datapackage = DataPackage.get_datapackage(path)
     split_path = os.path.join(path, split_path)
 
     try:
@@ -136,7 +136,7 @@ def merge_translations_csv(path, split_path='langsplit', lang_path='lang', overw
     split_path = os.path.join(path, split_path)
     lang_path = os.path.join(path, lang_path)
 
-    datapackage = Datapackage.get_datapackage(path)
+    datapackage = DataPackage.get_datapackage(path)
     source_lang = datapackage['language']['id']
     # get all available translations, update it when necessary below.
     if 'translations' not in datapackage.keys():
@@ -188,7 +188,7 @@ def merge_translations_json(path, split_path='langsplit', lang_path='lang', over
     split_path = os.path.join(path, split_path)
     lang_path = os.path.join(path, lang_path)
 
-    datapackage = Datapackage.get_datapackage(path)
+    datapackage = DataPackage.get_datapackage(path)
     source_lang = datapackage['language']['id']
 
     # because the primaryKey is not in the splited files, we generate

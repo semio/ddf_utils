@@ -67,13 +67,13 @@ def cleanup(path, how, force):
               help='overwrite existing datapackage.json')
 def create_datapackage(path, update, overwrite):
     """create datapackage.json"""
-    from ddf_utils.model.package import Datapackage
+    from ddf_utils.model.package import DataPackage
     import json
     if not update and not overwrite:
         if os.path.exists(os.path.join(path, 'datapackage.json')):
             click.echo('datapackage.json already exists. use --update to update or --overwrite to create new')
             return
-        res = Datapackage.get_datapackage(path, use_existing=False)
+        res = DataPackage.get_datapackage(path, use_existing=False)
     else:
         if os.path.exists(os.path.join(path, 'datapackage.json')):
             click.echo('backing up previous datapackage.json...')
@@ -81,9 +81,9 @@ def create_datapackage(path, update, overwrite):
             shutil.copy(os.path.join(path, 'datapackage.json'),
                         os.path.join(path, 'datapackage.json.bak'))
         if overwrite:
-            res = Datapackage.get_datapackage(path, use_existing=False)
+            res = DataPackage.get_datapackage(path, use_existing=False)
         else:
-            res = Datapackage.get_datapackage(path, use_existing=True, update=True)
+            res = DataPackage.get_datapackage(path, use_existing=True, update=True)
 
     with open(os.path.join(path, 'datapackage.json'), 'w', encoding='utf8') as f:
         json.dump(res, f, indent=4, ensure_ascii=False)
@@ -105,7 +105,7 @@ def create_datapackage(path, update, overwrite):
 def run_recipe(recipe, outdir, ddf_dir, update, dry_run, gen_dp, show_tree):
     """generate new ddf dataset with recipe"""
     from ddf_utils.chef.api import Chef
-    from ddf_utils.model.package import Datapackage
+    from ddf_utils.model.package import DataPackage
     from ddf_utils.io import dump_json
     import json
 
@@ -136,7 +136,7 @@ def run_recipe(recipe, outdir, ddf_dir, update, dry_run, gen_dp, show_tree):
             if 'translations' in dp_old.keys():
                 chef = chef.add_metadata(translations=dp_old['translations'])
         dump_json(os.path.join(outdir, 'datapackage.json'),
-                  Datapackage.create_datapackage(outdir, gen_schema=True, **chef.metadata))
+                  DataPackage.create_datapackage(outdir, gen_schema=True, **chef.metadata))
     click.echo("Done.")
 
 
@@ -247,7 +247,7 @@ def merge_translation(path, split_path, lang_path, dtype, overwrite):
 @click.option('--indicator', '-i', multiple=True)
 def diff(dataset1, dataset2, git, checkout_path, indicator):
     """give a report on the statistical differences for datapoints between 2 datasets."""
-    from ddf_utils.model.package import Datapackage
+    from ddf_utils.model.package import DataPackage
     from ddf_utils.model.utils import is_dataset
     from ddf_utils.qa import compare_with_func
     import tabulate
@@ -279,12 +279,12 @@ def diff(dataset1, dataset2, git, checkout_path, indicator):
         except FileExistsError:
             pass
 
-        d1 = Datapackage(join(checkout_path, p1)).dataset
-        d2 = Datapackage(join(checkout_path, p2)).dataset
+        d1 = DataPackage(join(checkout_path, p1)).dataset
+        d2 = DataPackage(join(checkout_path, p2)).dataset
 
     else:
-        d1 = Datapackage(join(checkout_path, dataset1)).dataset
-        d2 = Datapackage(join(checkout_path, dataset2)).dataset
+        d1 = DataPackage(join(checkout_path, dataset1)).dataset
+        d2 = DataPackage(join(checkout_path, dataset2)).dataset
 
     result = compare_with_func(d1, d2, fns=indicator)
     # if diff_only:

@@ -91,7 +91,7 @@ class IHMELoader(DataFactory):
         Either context or query should be supplied. If both are supplied,
         query will be used.
 
-        `context` should be a list of string and `query` sould be a list
+        `context` should be a list of string and `query` should be a list
         of dictionaries containing post requests data.
         """
         if not self.metadata:

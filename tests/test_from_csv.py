@@ -4,7 +4,7 @@ from ddf_utils.cli import from_csv
 from click.testing import CliRunner
 import os
 from tempfile import mkdtemp
-from ddf_utils.model import Datapackage
+from ddf_utils.model import DataPackage
 
 
 def test_from_csv():
@@ -14,5 +14,5 @@ def test_from_csv():
     test_runner = CliRunner()
     test_runner.invoke(from_csv, ['-i', input_dir, '-o', out_dir])
 
-    d = Datapackage(out_dir).load()
+    d = DataPackage(out_dir).load()
     assert len(d.indicators()) == 31

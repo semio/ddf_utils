@@ -4,12 +4,12 @@ import os
 import tempfile
 
 def test_dataset():
-    from ddf_utils.model.package import Datapackage
+    from ddf_utils.model.package import DataPackage
 
     dataset_path = os.path.join(os.path.dirname(__file__),
                                 'chef/datasets/ddf--gapminder--dummy_companies')
 
-    ds = Datapackage(dataset_path).dataset
+    ds = DataPackage(dataset_path).dataset
 
     conc = ds.concepts
     ent = ds.entities

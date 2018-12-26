@@ -11,7 +11,7 @@ from urllib.parse import urlparse
 
 from git import Repo as GRepo
 
-from .package import Datapackage
+from .package import DataPackage
 
 logger = logging.getLogger(__name__)
 
@@ -66,4 +66,4 @@ class Repo:
         if ref is not None:
             self.__repo.git.checkout(ref)
 
-        return Datapackage(self.local_path)
+        return DataPackage(self.local_path)

@@ -66,7 +66,7 @@ class Resource:
         return osp.join(self.base_dir, self.path)
 
 
-class Datapackage:
+class DataPackage:
     def __init__(self, datapackage, base_dir='./'):
         """create datapackage object from datapackage descriptor.
 
@@ -79,14 +79,14 @@ class Datapackage:
                     dp = json.load(open(osp.join(path, 'datapackage.json')))
                 except FileNotFoundError:
                     logging.warning('datapackage.json not found, will generate one')
-                    dp = Datapackage.create_datapackage(path, gen_schema=False)
+                    dp = DataPackage.create_datapackage(path, gen_schema=False)
                 basedir = path
             else:
                 try:
                     dp = json.load(open(path))
                 except FileNotFoundError:
                     logging.warning('datapackage.json not found, will generate one')
-                    dp = Datapackage.create_datapackage(path, gen_schema=False)
+                    dp = DataPackage.create_datapackage(path, gen_schema=False)
                 basedir = osp.dirname(path)
             return basedir, dp
 
@@ -590,13 +590,13 @@ class Datapackage:
                     datapackage_old.pop('ddfSchema')  # and ddf schema
                 except KeyError:
                     logging.warning('no resources or ddfSchema in datapackage.json')
-                datapackage_new = Datapackage.create_datapackage(path, **datapackage_old)
+                datapackage_new = DataPackage.create_datapackage(path, **datapackage_old)
             else:
-                datapackage_new = Datapackage.create_datapackage(path)
+                datapackage_new = DataPackage.create_datapackage(path)
         else:
             if use_existing:
                 print("WARNING: no existing datapackage.json")
-            datapackage_new = Datapackage.create_datapackage(path)
+            datapackage_new = DataPackage.create_datapackage(path)
 
         return datapackage_new
 
@@ -750,7 +750,7 @@ class Datapackage:
 
         # generate ddf schema
         if gen_schema:
-            dp = Datapackage(datapackage, base_dir=path)
+            dp = DataPackage(datapackage, base_dir=path)
             logging.info('generating ddf schema, may take some time...')
             dp.generate_ddfschema()
 

@@ -4,18 +4,18 @@ import os
 
 
 def test_create_datapackage_1():
-    from ddf_utils.model.package import Datapackage
+    from ddf_utils.model.package import DataPackage
 
     dataset_path = os.path.join(os.path.dirname(__file__),
                                 'chef/datasets/ddf--gapminder--dummy_companies')
 
-    dp1 = Datapackage.get_datapackage(dataset_path, use_existing=True)
+    dp1 = DataPackage.get_datapackage(dataset_path, use_existing=True)
     assert dp1['license'] == 'foo'
 
-    dp2 = Datapackage.get_datapackage(dataset_path, use_existing=False)
+    dp2 = DataPackage.get_datapackage(dataset_path, use_existing=False)
     assert 'license' not in dp2.keys()
 
-    dp_ = Datapackage(dataset_path)
+    dp_ = DataPackage(dataset_path)
     dp_.generate_ddfschema()
     assert 'ddfSchema' in dp_.datapackage.keys()
 
@@ -32,12 +32,12 @@ def test_create_datapackage_1():
 
 
 def test_create_datapackage_2():
-    from ddf_utils.model.package import Datapackage
+    from ddf_utils.model.package import DataPackage
 
     dataset_path = os.path.join(os.path.dirname(__file__),
                                 'chef/datasets/ddf--datapackage--testing')
 
-    dp = Datapackage(dataset_path)
+    dp = DataPackage(dataset_path)
     dp.generate_ddfschema()
     assert 'ddfSchema' in dp.datapackage.keys()
 

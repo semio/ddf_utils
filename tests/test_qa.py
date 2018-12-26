@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
-from ddf_utils.model.package import Datapackage
+from ddf_utils.model.package import DataPackage
 import numpy as np
 from numpy.testing import assert_array_equal
 
@@ -10,8 +10,8 @@ wd = os.path.dirname(__file__)
 
 def test_compare_func():
     from ddf_utils.qa import compare_with_func
-    d1 = Datapackage(os.path.join(wd, 'chef/datasets/ddf--bp--energy')).load()
-    d2 = Datapackage(os.path.join(wd, 'chef/datasets/ddf--cme')).load()
+    d1 = DataPackage(os.path.join(wd, 'chef/datasets/ddf--bp--energy')).load()
+    d2 = DataPackage(os.path.join(wd, 'chef/datasets/ddf--cme')).load()
 
     res1 = compare_with_func(d1, d1, fns=['rval', 'avg_pct_chg', 'max_pct_chg'])
     res2 = compare_with_func(d1, d2, fns=['rval', 'avg_pct_chg', 'max_pct_chg'])
@@ -29,8 +29,8 @@ def test_compare_func():
 
 def test_compare_func2():
     from ddf_utils.qa import compare_with_func
-    d1 = Datapackage(os.path.join(wd, 'chef/datasets/ddf--bp--energy')).load()
-    d2 = Datapackage(os.path.join(wd, 'chef/datasets/ddf--cme')).load()
+    d1 = DataPackage(os.path.join(wd, 'chef/datasets/ddf--bp--energy')).load()
+    d2 = DataPackage(os.path.join(wd, 'chef/datasets/ddf--cme')).load()
 
     res1 = compare_with_func(d1, d1, fns=['rval', 'max_change_index'])
     res2 = compare_with_func(d1, d2, fns=['rval', 'max_change_index'])

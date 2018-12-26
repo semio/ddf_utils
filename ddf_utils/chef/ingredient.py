@@ -11,7 +11,7 @@ import numpy as np
 import pandas as pd
 
 import dask.dataframe as dd
-from ddf_utils.model.package import Datapackage
+from ddf_utils.model.package import DataPackage
 from ddf_utils.model.repo import Repo, is_url
 from itertools import product
 
@@ -419,7 +419,7 @@ class Ingredient(BaseIngredient):
         else:
             if self._ddf_id:
                 if self._ddf_id not in self.chef.ddf_object_cache.keys():
-                    self._ddf = Datapackage(
+                    self._ddf = DataPackage(
                         os.path.join(self.chef.config['ddf_dir'], self._ddf_id))
                     self.chef.ddf_object_cache[self._ddf_id] = self._ddf
                 else:
