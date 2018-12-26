@@ -46,6 +46,8 @@ def retry(times=5, backoff=0.5):
                 except Exception as e:
                     ttimes = ttimes - 1
                     sleep(backoff * (mtimes - ttimes))
+                else:
+                    break
         return newfunc
     return wrapper
 
