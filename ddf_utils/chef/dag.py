@@ -9,6 +9,7 @@ on eval.
 
 from .exceptions import ProcedureError, ChefRuntimeError
 from .helpers import get_procedure
+import logging
 
 
 class BaseNode:
@@ -105,6 +106,7 @@ class IngredientNode(BaseNode):
 
     def evaluate(self):
         """return the ingredient as is"""
+        logging.debug("evaluating {}".format(self.node_id))
         return self.ingredient
 
 
@@ -125,6 +127,7 @@ class ProcedureNode(BaseNode):
         self.result_ingredient = None
 
     def evaluate(self):
+        logging.debug("evaluating {}".format(self.node_id))
         if self.result_ingredient is not None:
             if self.result_ingredient.get_data() is not None:
                 return self.result_ingredient
