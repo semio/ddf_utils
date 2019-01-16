@@ -4,20 +4,22 @@ import os
 
 
 def test_create_datapackage_1():
-    from ddf_utils.model.package import DataPackage
+    from ddf_utils.model.package import DDFcsv
+    from ddf_utils.package import get_datapackage
 
     dataset_path = os.path.join(os.path.dirname(__file__),
                                 'chef/datasets/ddf--gapminder--dummy_companies')
 
-    dp1 = DataPackage.get_datapackage(dataset_path, use_existing=True)
+    dp1 = get_datapackage(dataset_path, use_existing=True)
     assert dp1['license'] == 'foo'
 
-    dp2 = DataPackage.get_datapackage(dataset_path, use_existing=False)
+    dp2 = get_datapackage(dataset_path, use_existing=False)
     assert 'license' not in dp2.keys()
 
-    dp_ = DataPackage(dataset_path)
-    dp_.generate_ddfschema()
-    assert 'ddfSchema' in dp_.datapackage.keys()
+    dp_ = DDFcsv.from_path(dataset_path)
+    dp_.generate_ddf_schema()
+    datapackage = dp_.to_dict()
+    assert 'ddfSchema' in datapackage.keys()
 
     d = {
         "primaryKey": [
@@ -28,19 +30,20 @@ def test_create_datapackage_1():
             "ddf--entities--project"
         ]
     }
-    assert d in dp_.datapackage['ddfSchema']['entities']
+    assert d in datapackage['ddfSchema']['entities']
 
 
 def test_create_datapackage_2():
-    from ddf_utils.model.package import DataPackage
+    from ddf_utils.model.package import DDFcsv
 
     dataset_path = os.path.join(os.path.dirname(__file__),
                                 'chef/datasets/ddf--datapackage--testing')
 
-    dp = DataPackage(dataset_path)
-    dp.generate_ddfschema()
-    assert 'ddfSchema' in dp.datapackage.keys()
+    dp = DDFcsv.from_path(dataset_path)
+    dp.generate_ddf_schema()
+    datapackage = dp.to_dict()
+    assert 'ddfSchema' in datapackage.keys()
 
-    assert len(dp.datapackage['ddfSchema']['datapoints']) == 3
+    assert len(datapackage['ddfSchema']['datapoints']) == 3
 
 
