@@ -218,8 +218,7 @@ def create_datapackage(path, gen_schema=True, **kwargs):
     if gen_schema:
         dp = DDFcsv.from_dict(datapackage, base_path=path)
         logger.info('generating ddf schema, may take some time...')
-        dp.generate_ddf_schema()
-
+        dp.ddfSchema = dp.generate_ddf_schema()
         result = dp.to_dict()
     else:
         result = datapackage

@@ -17,7 +17,7 @@ def test_create_datapackage_1():
     assert 'license' not in dp2.keys()
 
     dp_ = DDFcsv.from_path(dataset_path)
-    dp_.generate_ddf_schema()
+    dp_.get_ddf_schema(update=True)
     datapackage = dp_.to_dict()
     assert 'ddfSchema' in datapackage.keys()
 
@@ -40,7 +40,7 @@ def test_create_datapackage_2():
                                 'chef/datasets/ddf--datapackage--testing')
 
     dp = DDFcsv.from_path(dataset_path)
-    dp.generate_ddf_schema()
+    dp.get_ddf_schema(update=True)
     datapackage = dp.to_dict()
     assert 'ddfSchema' in datapackage.keys()
 
