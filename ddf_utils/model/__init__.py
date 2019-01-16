@@ -1,2 +1,2 @@
-from .ddf import Dataset
-from .package import DataPackage
+from .ddf import DDF
+from .package import DDFcsv

@@ -2,473 +2,317 @@
 
 """datapackage model"""
 
-import logging
-import os
 import os.path as osp
+from typing import List, Tuple, Dict, Union, Callable
+import attr
 import json
-import csv
-import re
-from datetime import datetime, timezone
-
-from collections import Mapping, Sequence, OrderedDict
 from itertools import product
-
-import dask.dataframe as dd
-import pandas as pd
-
+from collections import OrderedDict
 from tqdm import tqdm
 
-from .ddf import Dataset
-from .utils import sort_json, get_ddf_files
+import pandas as pd
 
-logger = logging.getLogger('root')
+from .ddf import DDF, Concept, EntityDomain, Entity, DaskDataPoint, Synonym
+
+import logging
+
+logger = logging.getLogger(__name__)
 
 
-class Resource:
-    """A base class for all resources in a CSV datapackage.
-
-    We assume all recources are CSV files here.
-    """
-    def __init__(self, path, name, fields, primaryKey, base_dir='./'):
-        # TODO: find out all possible keys
-        self.path = path
-        self.name = name
-        self.fields = fields
-        self.primaryKey = primaryKey
-        self.base_dir = base_dir
-
-    def __repr__(self):
-        return "name: {}, key: {}".format(self.name, self.primaryKey)
+@attr.s(auto_attribs=True, repr=False)
+class TableSchema:
+    """Table Schema Object Class"""
+    fields: List[dict]
+    primaryKey: Union[List[str], str]
 
     @classmethod
-    def from_datapackage_record(cls, r, base_dir=None):
-        path = r['path']
-        name = r['name']
-        fields = r['schema']['fields']
-        primaryKey = r['schema']['primaryKey']
-
-        if base_dir is None:
-            return Resource(path, name, fields, primaryKey, './')
-        else:
-            return Resource(path, name, fields, primaryKey, base_dir)
-
-    def to_datapackage_record(self):
-        rec = dict()
-        rec['path'] = self.path
-        rec['name'] = self.name
-        rec['schema'] = {'primaryKey': self.primaryKey, 'fields': self.fields}
-        return rec
+    def from_dict(cls, d: dict):
+        fields = d['fields']
+        primaryKey = d['primaryKey']
+        return cls(fields, primaryKey)
 
     @property
-    def full_path(self):
-        # return Path(self.base_dir, self.path)
-        # dask don't support Path object yet so we return a path string.
-        return osp.join(self.base_dir, self.path)
+    def field_names(self):
+        return [f['name'] for f in self.fields]
+
+    @property
+    def common_fields(self):
+        field_names = self.field_names
+        pkey = self.primaryKey
+        if isinstance(pkey, str):
+            common_fields = list(filter(lambda x: x != pkey, field_names))
+        else:
+            common_fields = list(filter(lambda x: x not in pkey, field_names))
+        return common_fields
+
+    def __repr__(self):
+        return "TableSchema(primaryKey: {}, fields: {})".format(self.primaryKey, self.common_fields)
 
 
+@attr.s(auto_attribs=True)
+class Resource:
+    name: str
+    path: str
+    schema: TableSchema
+
+    @classmethod
+    def from_dict(cls, d: dict):
+        path = d['path']
+        name = d['name']
+        schema = TableSchema.from_dict(d['schema'])
+        return cls(name, path, schema)
+
+    def to_dict(self):
+        res = vars(self).copy()
+        if 'schema' in res:
+            res['schema'] = vars(res['schema']).copy()
+        return res
+
+
+@attr.s(auto_attribs=True)
+class DDFSchema:
+    primaryKey: List[str]
+    value: str
+    resources: List[str]  # a list of resource names
+
+    @classmethod
+    def from_dict(cls, d: dict):
+        primaryKey = d['primaryKey']
+        value = d['value']
+        resources = d['resources']
+        return cls(primaryKey=primaryKey, value=value, resources=resources)
+
+
+@attr.s(auto_attribs=True, repr=False)
 class DataPackage:
-    def __init__(self, datapackage, base_dir='./'):
-        """create datapackage object from datapackage descriptor.
+    base_path: str
+    resources: List[Resource]
+    props: dict = attr.ib(factory=dict)
 
-        datapackage: can be a path to datapackage file or dictioinary in datapackage format
-        """
-        # TODO: change this function to `from_datapackage_json`
-        def load_datapackage_json(path):
-            if osp.isdir(path):
-                try:
-                    dp = json.load(open(osp.join(path, 'datapackage.json')))
-                except FileNotFoundError:
-                    logging.warning('datapackage.json not found, will generate one')
-                    dp = DataPackage.create_datapackage(path, gen_schema=False)
-                basedir = path
-            else:
-                try:
-                    dp = json.load(open(path))
-                except FileNotFoundError:
-                    logging.warning('datapackage.json not found, will generate one')
-                    dp = DataPackage.create_datapackage(path, gen_schema=False)
-                basedir = osp.dirname(path)
-            return basedir, dp
+    def __repr__(self):
+        return f"DataPackage({self.base_path})"
 
-        if isinstance(datapackage, Mapping):
-            self.base_dir = base_dir
-            self.datapackage = datapackage
-        elif isinstance(datapackage, str):
-            self.base_dir, self.datapackage = load_datapackage_json(datapackage)
+    @classmethod
+    def from_dict(cls, d_: dict, base_path='./'):
+        d = d_.copy()
+        resources = list(map(Resource.from_dict, d.pop('resources')))
+        return cls(base_path=base_path, resources=resources, props=d)
 
-        # for caching
-        self._resources = None
-        self._concepts = None
-        self._entities = None
-        self._synonyms = None
-        self._dataset = None
+    @classmethod
+    def from_json(cls, json_path):
+        # TODO: security checking.
+        assert osp.exists(json_path), f"file not found: {json_path}"
+        base_path = osp.dirname(json_path)
+        d = json.load(open(json_path))
+        return cls.from_dict(d, base_path)
 
-        # config for read_csv
-        self._default_reader_options = {'keep_default_na': False, 'na_values': ['']}
+    @classmethod
+    def from_path(cls, path):
+        json_path = osp.join(path, 'datapackage.json')
+        return cls.from_json(json_path)
 
-    @property
-    def name(self):
-        return self.datapackage['name']
+    def to_dict(self):
+        """dump the datapackage to disk"""
+        raise NotImplementedError
 
-    @property
-    def resources(self):
-        if self._resources is None:
-            self._resources = [Resource.from_datapackage_record(r, base_dir=self.base_dir)
-                               for r in self.datapackage['resources']]
-        return self._resources
 
-    @property
-    def concepts_resources(self):
-        return [r for r in self.resources if r.primaryKey == 'concept']
+@attr.s(repr=False)
+class DDFcsv(DataPackage):
+    """DDFCSV datapackage."""
+    ddfSchema: Dict[str, List[DDFSchema]] = attr.ib(factory=dict)
+    ddf: DDF = attr.ib(init=False)
+    concepts_resources: List[Resource] = attr.ib(init=False)
+    entities_resources: List[Resource] = attr.ib(init=False)
+    datapoints_resources: List[Resource] = attr.ib(init=False)
+    synonyms_resources: List[Resource] = attr.ib(init=False)
 
-    @property
-    def entities_resources(self):
-        return [r for r in self.resources if
-                (r.primaryKey != 'concept') and (isinstance(r.primaryKey, str))]
+    # config for read_csv
+    _default_reader_options = {'keep_default_na': False, 'na_values': ['']}
 
-    @property
-    def datapoints_resources(self):
-        # TODO: it might not be true that primaryKey is always a list for datapoints
-        # sometimes it could be just one string?
-        return [r for r in self.resources
-                if isinstance(r.primaryKey, list) and 'synonym' not in r.primaryKey]
-
-    @property
-    def synonyms_resources(self):
-        return [r for r in self.resources
-                if isinstance(r.primaryKey, list) and 'synonym' in r.primaryKey]
-
-    @property
-    def index_table(self):
-        rows = list()
-
+    def __attrs_post_init__(self):
+        conc = list()
+        ent = list()
+        dp = list()
+        syn = list()
         for r in self.resources:
-            pkey = r.primaryKey
-            if not isinstance(pkey, list):
-                pkey = [pkey]
-            pkey = sorted(pkey)
-            columns = [x['name'] for x in r.fields]
+            pkey = r.schema.primaryKey
+            if isinstance(pkey, str):
+                if pkey == 'concept':
+                    conc.append(r)
+                else:
+                    ent.append(r)
+            else:  # TODO: datapoints key might be one column, not list of columns?
+                if 'synonym' in pkey:
+                    syn.append(r)
+                else:
+                    dp.append(r)
+        self.concepts_resources = conc
+        self.entities_resources = ent
+        self.datapoints_resources = dp
+        self.synonyms_resources = syn
+        self.ddf = self.load_ddf()
 
-            if len(columns) == len(pkey):  # there is only the primary column.
-                row = dict()
-                row['pkey'] = ','.join(pkey)
-                row['column'] = None
-                row['path'] = r.full_path
-                row['name'] = r.name
-                rows.append(row)
-                continue
+    @classmethod
+    def from_dict(cls, d_: dict, base_path='./'):
+        d = d_.copy()
+        resources = list(map(Resource.from_dict, d.pop('resources')))
+        if 'ddfSchema' in d.keys():
+            ddf_schema_ = d.pop('ddfSchema')
+            ddf_schema = dict()
+            for k, v in ddf_schema_.items():
+                ddf_schema[k] = [DDFSchema.from_dict(d) for d in v]
+        else:
+            ddf_schema = {}
+        return cls(base_path=base_path, resources=resources, ddfSchema=ddf_schema, props=d)
 
-            for c in columns:
-                if c in pkey:
-                    continue
-                row = dict()
-                row['pkey'] = ','.join(pkey)
-                row['column'] = c
-                row['path'] = r.full_path
-                row['name'] = r.name
-                rows.append(row)
-        return pd.DataFrame.from_records(rows)
+    def to_dict(self):
+        res = OrderedDict(self.props.copy())
+        res['resources'] = [r.to_dict() for r in self.resources]
+        if self.ddfSchema:
+            res['ddfSchema'] = dict()
+            for k, v in self.ddfSchema.items():
+                res['ddfSchema'][k] = [vars(sch).copy() for sch in v]
+        return res
 
-    @property
-    def dataset(self):
-        if self._dataset is None:
-            self._dataset = self.load()
-        return self._dataset
+    def _gen_concepts(self):
+        concepts_paths = [osp.join(self.base_path, r.path) for r in self.concepts_resources]
+        for p in concepts_paths:
+            df = pd.read_csv(p, index_col='concept', dtype=str, **self._default_reader_options)
+            for concept, row in df.iterrows():
+                concept_type = row['concept_type']
+                props = row.drop('concept_type').to_dict()
+                yield (concept, Concept(id=concept, concept_type=concept_type, props=props))
 
-    @property
-    def concepts(self):
-        """return a DataFrame for concepts"""
-        if self._concepts is None:
-            fs = (self.index_table[self.index_table.pkey == 'concept']['path']
-                  .unique().tolist())
-            concepts = [pd.read_csv(f, **self._default_reader_options) for f in fs]
-            self._concepts = pd.concat(concepts, ignore_index=True)
-        return self._concepts
+    def _gen_entities(self, concepts: Dict[str, Concept]):
+        for r in self.entities_resources:
+            pkey = r.schema.primaryKey
+            if concepts[pkey].concept_type == 'entity_domain':
+                domain = concepts[pkey].id
+            else:
+                domain = concepts[pkey].props['domain']
 
-    @property
-    def entities(self):
-        """return dictionary, which keys are domains and values are DataFrames"""
-        if self._entities is None:
-            cdf = self.concepts
-            idx_table = self.index_table
-            entities = dict()
-            for domain in cdf[cdf['concept_type'] == 'entity_domain']['concept']:
-                entities[domain] = list()
-                if 'domain' in cdf.columns:
-                    esets = cdf[(cdf['concept_type'] == 'entity_set') &
-                                (cdf['domain'] == domain)]['concept']
-                    if not esets.empty:
-                        rows = (idx_table[(idx_table.pkey == domain) |
-                                          (idx_table.pkey.isin(esets.tolist()))]
-                                .drop_duplicates(subset='path'))
-                        # filter ambiougus names where domain is different but set name
-                        # is same.
-                        for _, r in rows.iterrows():
-                            if domain not in r['name']:
-                                continue
-                            df = pd.read_csv(r.path, dtype=str, **self._default_reader_options)
-                            if r.pkey != domain:
-                                df = df.rename(columns={r.pkey: domain})
-                            entities[domain].append(df)
-                        entities[domain] = pd.concat(entities[domain], ignore_index=True, sort=False)
-                    else:  # no sets for this domain
-                        paths = (idx_table[idx_table.pkey == domain]['path']
-                                 .unique().tolist())
-                        entities[domain] = dd.read_csv(paths, dtype=str, **self._default_reader_options).compute()
-                else:  # no domain column
-                    paths = (idx_table[idx_table.pkey == domain]['path']
-                             .unique().tolist())
-                    entities[domain] = dd.read_csv(paths, dtype=str, **self._default_reader_options).compute()
+            df = pd.read_csv(osp.join(self.base_path, r.path), index_col=pkey, **self._default_reader_options)
+            is_cols = list(filter(lambda x: x.startswith('is--'), df.columns.values))
+            for ent, row in df.iterrows():
+                sets = list()
+                for c in is_cols:
+                    if row[c] is True and c[4:] != domain:
+                        sets.append(c[4:])  # strip the 'is--' part, only keep set name
+                yield (domain, Entity(id=ent, domain=domain, sets=sets, props=row.drop(is_cols).to_dict()))
 
-            self._entities = entities
-        return self._entities
-
-    @property
-    def synonyms(self):
-        """return a dictonary, where keys are domains or `concept` and values are DataFrames"""
-        if self._synonyms is not None:
-            return self._synonyms
-
-        syms = dict()
-        for r in self.synonyms_resources:
-            pks = r.primaryKey
-            key_for_sym = [x for x in pks if x != 'synonym']
-            assert len(key_for_sym) == 1, "synonyms resource can only have two primary keys"
-            syms[key_for_sym[0]] = pd.read_csv(r.full_path, dtype=str, **self._default_reader_options)
-        self._synonyms = syms
-        return self._synonyms
-
-    def indicators(self, by=None):
-        """return a list of indicator names, filtered by the primaryKeys"""
-        res = set()
+    def _gen_datapoints(self):
         for r in self.datapoints_resources:
-            if by is not None and set(by) != set(r.primaryKey):
-                continue
-            for f in r.fields:
-                if f['name'] not in r.primaryKey:
-                    res.add(f['name'])
-        return list(res)
+            fields = r.schema.common_fields
+            pkey = r.schema.primaryKey
+            for f in fields:
+                yield (f, pkey, osp.join(self.base_path, r.path))
 
-    def get_datapoint_df(self, i, primary_key):
-        if isinstance(primary_key, Sequence):
-            pkey = ','.join(sorted(primary_key))
-            dtypes = dict([x, 'category'] for x in primary_key)
-        else:
-            pkey = primary_key
-            dtypes = {primary_key: 'category'}
-
-        paths = (self.index_table[(self.index_table.pkey == pkey) &
-                                  (self.index_table.column == i)]['path']
-                 .unique().tolist())
-        if len(paths) == 0:
-            raise ValueError('no datapoint find for {} by {}'.format(i, pkey))
-
-        cdf = self.concepts
-        time_concepts = cdf[cdf['concept_type'] == 'time']['concept'].values
-
-        for tc in time_concepts:
-            dtypes[tc] = 'int16'
-
-        return dd.read_csv(paths, dtype=dtypes, **self._default_reader_options)
-
-    def get_entity(self, entity_domain, entity_set=None):
-        df = self.entities[entity_domain]
-        if entity_set is not None:
-            col = 'is--{}'.format(entity_set)
-            df = (df[df[col] == 'TRUE'].dropna(axis=1, how='all'))
-            # rename the primaryKey column to match the entity set name
-            df = df.rename(columns={entity_domain: entity_set})
-        return df
-
-    def get_synonym_dict(self, concept):
-        """return a synonym dictionary for a concept"""
-        try:
-            df = self.synonyms[concept]
-        except KeyError:  # no synonyms for this concept
-            return None
-        return df.set_index('synonym')[concept].to_dict()
-
-    # TODO: refactor this method
-    def load(self, **kwargs):
-        """read from local DDF csv dataset.
-
-        datapackage: path to the datapackage folder or datapackage.json
-
-        Keyword Args
-        ============
-        no_datapoints : bool
-            if true, return only first few rows of a datapoints dataframe, to speedup things.
-        """
-        logging.info("loading dataset from disk: " + self.name)
-
-        concepts = list()
-        entities_ = list()  # temp, the final data will be entities
-        entities = dict()
-        datapoints = dict()
-
-        def _update_datapoints(fn_, keys_, indicator_name_):
-            """helper function to make datapoints dictionary"""
-            if keys_ in datapoints.keys():
-                if indicator_name_ in datapoints[keys_]:
-                    datapoints[keys_][indicator_name_].append(fn_)
-                else:
-                    datapoints[keys_][indicator_name_] = [fn_]
+    def _gen_synonyms(self):
+        for r in self.synonyms_resources:
+            # there should be only two columns
+            pkey = r.schema.primaryKey
+            if pkey[0] == 'synonym':
+                concept = pkey[1]
             else:
-                datapoints[keys_] = dict()
-                datapoints[keys_][indicator_name_] = [fn_]
+                concept = pkey[0]
+            df = pd.read_csv(osp.join(self.base_path, r.path), **self._default_reader_options)
+            sym = Synonym(concept_id=concept, synonyms=df.set_index('synonym')[concept].to_dict())
+            yield (concept, sym)
 
-        no_datapoints = kwargs.get('no_datapoints', False)
+    @staticmethod
+    def entity_domain_to_categorical(domain: EntityDomain):
+        entities = [e.id for e in domain.entities]
+        return pd.api.types.CategoricalDtype(entities)
 
-        dp = self.datapackage
+    def load_ddf(self):
+        """-> DDF"""
+        # load concepts
+        concepts = dict(self._gen_concepts())
 
-        # concepts
-        for r in self.resources:
-            pkey = r.primaryKey
-            if pkey == 'concept':
-                concepts.append(pd.read_csv(r.full_path, **self._default_reader_options))
+        # load entities
+        entities = list(self._gen_entities(concepts))
+        domains = dict()
+        for domain, entity in entities:
+            if domain not in domains.keys():
+                domains[domain] = EntityDomain(id=domain, entities=[])
 
-        concepts = pd.concat(concepts)
+            domains[domain].add_entity(entity)
 
-        time_concepts = concepts[concepts['concept_type'] == 'time'].concept.values
-
-        # others
-        for r in self.resources:
-            pkey = r.primaryKey
-            if pkey == 'concept':
-                continue
-            elif isinstance(pkey, str):  # entities
-                entities_.append(
-                    {
-                        # "data": pd.read_csv(osp.join(base_dir, r['path']), dtype={pkey: str}),
-                        "data": pd.read_csv(r.full_path, dtype=str, encoding='utf8',  # read all as string
-                                            **self._default_reader_options),
-                        "key": pkey
-                    })
-            elif 'synonym' not in r.primaryKey:  # datapoints
-                assert not isinstance(pkey, str)
-                fn = r.full_path
-                df = next(pd.read_csv(fn, chunksize=1, **self._default_reader_options))
-                indicator_names = list(set(df.columns) - set(pkey))
-
-                if len(indicator_names) == 0:
-                    raise ValueError('No indicator in {}'.format(r.path))
-
-                keys = tuple(sorted(pkey))
-                # TODO: if something went wrong, such as there is a typo in pkey, give better message
-                if len(indicator_names) == 1:
-                    indicator_name = indicator_names[0]
-                    _update_datapoints(fn, keys, indicator_name)
+        # load datapoints. Here we will use Dask for all
+        # 1. create categories for entity domains
+        dtypes = dict()
+        for domain_name, domain in domains.items():
+            dtypes[domain_name] = self.entity_domain_to_categorical(domain)
+        # 2. dtype for time
+        for c_id, c in concepts.items():
+            if c.concept_type == 'time':
+                dtypes[c_id] = 'int16'  # TODO: maybe there are other format for time.
+        # 3. group files for same indicator together
+        indicators = dict()
+        for field, pkey, path in self._gen_datapoints():
+            # import ipdb; ipdb.set_trace()
+            indicator = field
+            pkey = tuple(sorted(pkey))
+            if indicator not in indicators:
+                indicators.setdefault(indicator, dict([(pkey, [path])]))
+            else:
+                if pkey not in indicators[indicator]:
+                    indicators[indicator][pkey] = [path]
                 else:
-                    for indicator_name in indicator_names:
-                        _update_datapoints(fn, keys, indicator_name)
-            else:  # synonyms/other types.
-                continue
+                    indicators[indicator][pkey].append(path)
+        datapoints = dict()
+        for i, v in indicators.items():
+            datapoints[i] = dict()
+            dtypes_ = dtypes.copy()
+            # dtypes_[i] = 'float'  # TODO: supporting string/float datatypes, not just float
+            for k, paths in v.items():
+                dp = DaskDataPoint(id=i, dimensions=k, path=paths, dtypes=dtypes_)
+                datapoints[i][k] = dp
 
-        # datapoints
-        for i, kvs in datapoints.items():
-            for k, l in kvs.items():
-                dtypes = dict([x, 'category'] for x in i)
-                for tc in time_concepts:
-                    # dtypes[tc] = 'uint16'  # not using this because of bug #96
-                    dtypes[tc] = 'int16'  # TODO: maybe there are other time format?
-                cols = list(i + tuple([k]))
+        # load synonyms
+        synonyms = dict(self._gen_synonyms())
 
-                if not no_datapoints:
-                    df = dd.read_csv(l, dtype=dtypes, **self._default_reader_options)[cols]
-                else:
-                    df = pd.DataFrame([], columns=cols)
+        # return complete DDF object
+        return DDF(concepts=concepts, entities=domains, datapoints=datapoints, synonyms=synonyms, props=self.props)
 
-                kvs[k] = df
-        # entities
-        # TODO: check if concept_type match the type inferred from file.
-        # i.e. it's wrong when concept file says a concept is domain but
-        # the ddf file indicates it's entity set.
-        if 'entity_set' not in concepts.concept_type.values:  # only domains
-            for e in entities_:
-                entities[e['key']] = [e['data']]
-        else:
-            for domain in concepts[concepts.concept_type == 'entity_domain']['concept']:
-                entities[domain] = []
-                for e in entities_:
-                    if e['key'] == domain:
-                        entities[domain].append(e['data'])
-                    elif e['key'] in concepts[concepts.domain == domain]['concept'].values:
-                        e['data'] = e['data'].rename(columns={e['key']: domain})
-                        entities[domain].append(e['data'])
-        for e, l in entities.items():
-            try:
-                df = l[0]
-            except IndexError:
-                logging.critical('no entity file found for {}!'.format(e))
-                raise
-            for df_ in l[1:]:
-                df = pd.merge(df, df_, on=e, how='outer')
-                for c in list(df.columns):
-                    if c.endswith('_x'):
-                        c_orig = c[:-2]
-                        df[c_orig] = None
-                        for i in df.index:
-                            if not pd.isnull(df.loc[i, c]):
-                                if not pd.isnull(df.loc[i, c_orig+'_y']):
-                                    # assert df.loc[i, c] == df.loc[i, c_orig+'_y'], \
-                                    #     "different values for same cell:{}, {}".format(i, c)
-                                    logger.debug('different values for same cell: '
-                                                 '{}: {}, {}'.format(c_orig,
-                                                                     df.at[i, c_orig],
-                                                                     df.at[i, c_orig+'_y']))
-                                    df.loc[i, c_orig] = df.loc[i, c]
-                                else:
-                                    df.loc[i, c_orig] = df.loc[i, c]
-                            else:
-                                df.loc[i, c_orig] = df.loc[i, c_orig+'_y']
-                        df = df.drop([c, c_orig+'_y'], axis=1)
-            entities[e] = df
-
-        return Dataset(concepts=concepts, entities=entities,
-                       datapoints=datapoints, attrs=dp)
-
-    def generate_ddfschema(self):
-        ds = self.dataset
-        cdf = ds.concepts.set_index('concept')
+    def generate_ddf_schema(self):
         hash_table = {}
         ddf_schema = {'concepts': [], 'entities': [], 'datapoints': [], 'synonyms': []}
         entity_value_cache = dict()
+        dtypes = dict()
 
         # generate set-membership details for every single entity in dataset
-        for domain, df in ds.entities.items():
-            entity_value_cache[domain] = dict()
-            for _, row in df.iterrows():
+        # also create dtypes for later use
+        for domain_id, domain in self.ddf.entities.items():
+            dtypes[domain_id] = self.entity_domain_to_categorical(domain)
+            entity_value_cache[domain_id] = dict()
+            for ent in domain.entities:
                 sets = set()
-                sets.add(domain)
-                for c in df.columns:
-                    if c.startswith('is--'):
-                        if row[c] == "TRUE":
-                            sets.add(c[4:])
-                entity_value_cache[domain][row[domain]] = tuple(sets)
-
-        all_entity_concepts = cdf[cdf.concept_type.isin(['entity_set', 'entity_domain'])].index
-        dtypes = dict([(c, 'category') for c in all_entity_concepts])  # set all entity column to string type
+                sets.add(domain_id)
+                for s in ent.sets:
+                    sets.add(s)
+                entity_value_cache[domain_id][ent.id] = tuple(sets)
 
         def _which_sets(entity_, domain_):
             try:
                 return entity_value_cache[domain_][entity_]
             except KeyError:
-                logging.debug('entity {} is not in {} domain!'.format(entity_, domain_))
+                logger.debug('entity {} is not in {} domain!'.format(entity_, domain_))
                 raise
 
-        def _gen_key_value_object(resource):
-            logging.debug('working on: {}'.format(resource.path))
-            if isinstance(resource.primaryKey, str):
-                pkeys = [resource.primaryKey]
+        def _gen_key_value_object(resource: Resource):
+            logger.debug('working on: {}'.format(resource.path))
+            if isinstance(resource.schema.primaryKey, str):
+                pkeys = [resource.schema.primaryKey]
             else:
-                pkeys = resource.primaryKey
+                pkeys = resource.schema.primaryKey
 
-            entity_cols = [x for x in pkeys if
-                           (x in cdf.index) and
-                           (cdf.loc[x, 'concept_type'] in ['entity_set', 'entity_domain'])]
-            value_cols = list(set([x['name'] for x in resource.fields]) - set(pkeys))
-
-            data = pd.read_csv(resource.full_path, dtype=dtypes, **self._default_reader_options)
+            entity_cols = [x for x in pkeys
+                           if x in self.ddf.concepts
+                           and self.ddf.concepts[x].concept_type in ['entity_domain', 'entity_set']]
+            value_cols = resource.schema.common_fields
+            data = pd.read_csv(osp.join(self.base_path, resource.path), dtype=dtypes,
+                               **self._default_reader_options)
 
             # for resources that have entity_columns: only consider all permutations on entity columns
             if len(entity_cols) > 0:
@@ -476,15 +320,17 @@ class DataPackage:
 
             pkeys_prop = dict()
             for c in pkeys:
-                if c not in cdf.index:
+                if c not in self.ddf.concepts:
                     pkeys_prop[c] = {'type': 'non_concept'}
-                elif cdf.at[c, 'concept_type'] == 'entity_set':
-                    pkeys_prop[c] = {'type': 'entity_set',
-                                     'domain': cdf.at[c, 'domain']}
-                elif cdf.at[c, 'concept_type'] == 'entity_domain':
-                    pkeys_prop[c] = {'type': 'entity_domain'}
                 else:
-                    pkeys_prop[c] = {'type': 'others'}
+                    concept = self.ddf.concepts[c]
+                    if concept.concept_type == 'entity_set':
+                        pkeys_prop[c] = {'type': 'entity_set',
+                                         'domain': concept.props['domain']}
+                    elif concept.concept_type == 'entity_domain':
+                        pkeys_prop[c] = {'type': 'entity_domain'}
+                    else:
+                        pkeys_prop[c] = {'type': 'others'}
 
             all_permutations = set()
             for _, r in data.iterrows():
@@ -504,11 +350,16 @@ class DataPackage:
                 for perm in product(*row):
                     if len(value_cols) > 0:
                         for c in value_cols:
-                            yield {'primaryKey': list(perm), 'value': c, 'resource': resource.name}
+                            obj = {'primaryKey': list(perm), 'value': c, 'resource': resource.name}
+                            logger.debug('yielding: {}'.format(str(obj)))
+                            yield obj
                     else:
-                        yield {'primaryKey': list(perm), 'value': None, 'resource': resource.name}
+                        obj = {'primaryKey': list(perm), 'value': None, 'resource': resource.name}
+                        logger.debug('yielding: {}'.format(str(obj)))
+                        yield obj
 
         def _add_to_schema(resource_schema):
+            """handle objects generated by ``_gen_key_value_object``"""
             key = '-'.join(sorted(resource_schema['primaryKey']))
             if not pd.isnull(resource_schema['value']):
                 hash_val = key + '--' + resource_schema['value']
@@ -518,10 +369,13 @@ class DataPackage:
                 hash_table[hash_val] = {
                     'primaryKey': sorted(resource_schema['primaryKey']),
                     'value': resource_schema['value'],
-                    'resources': set([resource_schema['resource']])
+                    'resources': {resource_schema['resource']}
                 }
             else:
                 hash_table[hash_val]['resources'].add(resource_schema['resource'])
+
+        # make progressbar and run the process to generate schema
+        # TODO: improve progress bar codes
 
         if logger.getEffectiveLevel() != 10:
             pbar = tqdm(total=len(self.resources))
@@ -537,225 +391,26 @@ class DataPackage:
             pbar.close()
 
         for sch in hash_table.values():
-            sch['resources'] = list(sch['resources'])
+            sch['resources'] = list(sch['resources'])  # convert set to list
+            sch_object = DDFSchema.from_dict(sch)
             if len(sch['primaryKey']) == 1:
                 if sch['primaryKey'][0] == 'concept':
-                    ddf_schema['concepts'].append(sch)
+                    ddf_schema['concepts'].append(sch_object)
                 else:
-                    ddf_schema['entities'].append(sch)
+                    ddf_schema['entities'].append(sch_object)
             else:
                 if 'synonym' in sch['primaryKey']:
-                    ddf_schema['synonyms'].append(sch)
+                    ddf_schema['synonyms'].append(sch_object)
                 else:
-                    ddf_schema['datapoints'].append(sch)
+                    ddf_schema['datapoints'].append(sch_object)
 
-        self.datapackage['ddfSchema'] = ddf_schema
+        return ddf_schema
 
-    def dump(self, path):
-        """dump the datapackage to path."""
-        # TODO: dump all files
-        # for now we only dump the datapackage.json
-        with open(osp.join(path, 'datapackage.json')) as f:
-            json.dump(self.datapackage, f)
-            f.close()
-
-    @staticmethod
-    def get_datapackage(path, use_existing=True, update=False):
-        """get the datapackage.json from a dataset path, create one if it's not exists
-
-        Parameters
-        ----------
-        path : `str`
-            the dataset path
-
-        Keyword Args
-        ------------
-        use_existing : bool
-            whether or not to use the existing datapackage
-        update : bool
-            if update is true, will update the resources and schema in existing datapackage.json. else just return existing
-            datapackage.json
-        """
-        datapackage_path = os.path.join(path, 'datapackage.json')
-
-        if os.path.exists(datapackage_path):
-            with open(datapackage_path, encoding='utf8') as f:
-                datapackage_old = json.load(f, object_pairs_hook=OrderedDict)
-
-            if use_existing:
-                if not update:
-                    return datapackage_old
-                try:
-                    datapackage_old.pop('resources')  # don't use the old resources
-                    datapackage_old.pop('ddfSchema')  # and ddf schema
-                except KeyError:
-                    logging.warning('no resources or ddfSchema in datapackage.json')
-                datapackage_new = DataPackage.create_datapackage(path, **datapackage_old)
-            else:
-                datapackage_new = DataPackage.create_datapackage(path)
+    def get_ddf_schema(self, update=False):
+        if not update and self.ddfSchema is not None:
+            return self.ddfSchema
+        elif not update and self.ddfSchema is None:
+            raise ValueError('No ddfSchema, please use update=True to generate one')
         else:
-            if use_existing:
-                print("WARNING: no existing datapackage.json")
-            datapackage_new = DataPackage.create_datapackage(path)
-
-        return datapackage_new
-
-    @staticmethod
-    def create_datapackage(path, gen_schema=True, **kwargs):
-        """create datapackage.json base on the files in `path`.
-
-        If you want to set some attributes manually, you can pass them as
-        keyword arguments to this function
-
-        Note
-        ----
-        A DDFcsv datapackage MUST contain the fields `name` and `resources`.
-
-        if name is not provided, then the base name of `path` will be used.
-
-        Parameters
-        ----------
-        path : `str`
-            the dataset path to create datapackage.json
-        """
-
-        datapackage = OrderedDict()
-
-        # setting default name / lang
-        try:
-            name = kwargs.pop('name')
-        except KeyError:
-            # print('name not specified, using the path name')
-            name = os.path.basename(os.path.normpath(os.path.abspath(path)))
-        try:
-            lang = kwargs.pop('language')
-        except KeyError:
-            lang = {'id': 'en'}
-
-        datapackage['name'] = name
-        datapackage['language'] = lang
-
-        # add all optional settings
-        for k in sorted(kwargs.keys()):
-            datapackage[k] = kwargs[k]
-
-        # update the last updated time
-        datapackage['created'] = datetime.utcnow().replace(tzinfo=timezone.utc).isoformat()
-
-        # generate resources
-        resources = []
-        names_sofar = dict()
-
-        for f in get_ddf_files(path):
-            path_res = f
-            name_res = os.path.splitext(os.path.basename(f))[0]
-
-            if name_res in names_sofar.keys():
-                names_sofar[name_res] = names_sofar[name_res] + 1
-                # adding a tail to the resource name, because it should be unique
-                name_res = name_res + '-' + str(names_sofar[name_res])
-            else:
-                names_sofar[name_res] = 0
-
-            resources.append(OrderedDict([('path', path_res), ('name', name_res)]))
-
-        for n, r in enumerate(resources):
-            name_res = r['name']
-            path_res = r['path']
-            schema = {"fields": [], "primaryKey": None}
-
-            if 'datapoints' in name_res:
-                # TODO: judge from headers instead of filename (github#76)
-                conc, keys = re.match(r'ddf--datapoints--([\w_]+)--by--(.*)', name_res).groups()
-                primary_keys = keys.split('--')
-                # print(conc, primary_keys)
-                for i, k in enumerate(primary_keys):
-                    if '-' in k:
-                        k_new, *enums = k.split('-')
-                        primary_keys[i] = k_new
-                        constraint = {'enum': enums}
-                        schema['fields'].append({'name': k_new, 'constraints': constraint})
-                    else:
-                        schema['fields'].append({'name': k})
-
-                with open(os.path.join(path, path_res)) as f:
-                    headers_line = f.readline()
-                    f.close()
-
-                headers_line = headers_line.strip('\n')
-                headers = headers_line.split(',')
-                headers = [x.strip() for x in headers]
-                headers = set(headers)
-                fields = headers.difference(set(primary_keys))
-
-                for field in fields:
-                    schema['fields'].append({'name': field})
-                schema['primaryKey'] = primary_keys
-
-                resources[n].update({'schema': schema})
-
-            elif 'entities' in name_res:
-                match = re.match(r'ddf--entities--([\w_]+)(--[\w_]*)?-?.*', name_res).groups()
-                domain, concept = match
-                if concept is not None:
-                    concept = concept[2:]
-
-                with open(os.path.join(path, r['path'])) as f:
-                    reader = csv.reader(f, delimiter=',', quotechar='"')
-                    # we only need the headers for index file
-                    header = next(reader)
-
-                if domain in header:
-                    key = domain
-                elif concept is not None and concept in header:
-                    key = concept
-                else:
-                    raise ValueError('no header in {} matches its implied domain/entity_set!'.format(name_res))
-                    # print(
-                    #     """There is no matching header found for {}. Using the first column header
-                    #     """.format(name_res)
-                    # )
-                    # key = header[0]
-
-                schema['primaryKey'] = key
-                for h in header:
-                    schema['fields'].append({'name': h})
-                resources[n].update({'schema': schema})
-
-            elif 'concepts' in name_res:
-                with open(os.path.join(path, r['path'])) as f:
-                    reader = csv.reader(f, delimiter=',', quotechar='"')
-                    header = next(reader)
-                schema['primaryKey'] = 'concept'
-                for h in header:
-                    schema['fields'].append({'name': h})
-
-                resources[n].update({'schema': schema})
-            elif 'synonyms' in name_res:
-                with open(os.path.join(path, r['path'])) as f:
-                    reader = csv.reader(f, delimiter=',', quotechar='"')
-                    header = next(reader)
-                k1 = 'synonym'
-                k2 = r['name'].split('--')[-1]
-                schema['primaryKey'] = [k1, k2]
-                for h in header:
-                    schema['fields'].append({'name': h})
-
-                resources[n].update({'schema': schema})
-            else:  # not entity/concept/datapoint. it's not supported yet so we don't include them.
-                print("not supported file: " + name_res)
-                resources[n] = None
-
-        datapackage['resources'] = [x for x in resources if x is not None]
-
-        # generate ddf schema
-        if gen_schema:
-            dp = DataPackage(datapackage, base_dir=path)
-            logging.info('generating ddf schema, may take some time...')
-            dp.generate_ddfschema()
-
-            result = dp.datapackage
-        else:
-            result = datapackage
-
-        return sort_json(result)
+            self.ddfSchema = self.generate_ddf_schema()
+            return self.ddfSchema

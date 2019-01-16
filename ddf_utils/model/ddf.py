@@ -2,33 +2,200 @@
 
 """The DDF model"""
 
-import os
 import os.path as osp
-from copy import deepcopy
+from typing import List, Tuple, Dict, Union, Callable
+from abc import ABC, abstractmethod
+import attr
+import json
+from pathlib import Path
+from itertools import product
+from tqdm import tqdm
+from collections import OrderedDict
+
 import numpy as np
 import pandas as pd
+import dask.dataframe as dd
+
+import logging
+
+logger = logging.getLogger(__name__)
 
 
-class Dataset:
-    """DDF dataset"""
-    def __init__(self, concepts=None, entities=None, datapoints=None, attrs=None):
-        """create a Dataset object
+@attr.s(auto_attribs=True)
+class Concept:
+    id: str
+    concept_type: str
+    props: dict = attr.ib(factory=dict)
 
-        concepts: dataframe with all concepts definition
+    def to_dict(self):
+        res = OrderedDict()
+        res['concept'] = self.id
+        res['concept_type'] = self.concept_type
+        props = self.props.copy()
+        for k, v in props.items():
+            res[k] = v
+        return res
 
-        entities: dictionary of entity name and dataframe mapping
 
-        datapoints: dictionary of indicator name and primarykey -> dataframe mapping.
-        So it's a nested dictionary. Note that datapoints are dask dataframes.
+@attr.s(auto_attribs=True)
+class Entity:
+    id: str
+    domain: str
+    sets: List[str]
+    props: dict = attr.ib(factory=dict)
+
+    def to_dict(self, pkey=None):
+        """create a dictionary containing name/domain/is--headers/and properties
+        So this can be easily plug in pandas.DataFrame.from_records()
         """
-        # TODO: add type check using the type defined in datapackage schema
-        self._concepts = concepts
-        self._entities = entities
-        self._datapoints = datapoints
-        self.attrs = attrs
+        res = OrderedDict()
+        if pkey:
+            res[pkey] = self.id
+        else:
+            res[self.domain] = self.id
+        if self.sets:
+            for s in self.sets:
+                header = f'is--{s}'
+                res[header] = 'TRUE'
+        props = self.props.copy()
+        for k, v in props.items():
+            res[k] = v
+
+        return res
+
+
+# @attr.s(auto_attribs=True)
+# class EntitySet:
+#     id: str
+#     entities: List[Entity]
+#     domain: str
+#     props: dict = attr.ib(factory=dict)
+
+
+@attr.s(auto_attribs=True)
+class EntityDomain:
+    id: str
+    entities: List[Entity]
+    props: dict = attr.ib(factory=dict)
+
+    @property
+    def entity_sets(self):
+        sets = set()
+        for e in self.entities:
+            for s in e.sets:
+                sets.add(s)
+        return list(sets)
+
+    def get_entity_set(self, s):
+        return [e for e in self.entities if s in e.sets]
+
+    def to_dict(self, eset=None):
+        if eset:
+            entities = self.get_entity_set(eset)
+            return [e.to_dict(eset) for e in entities]
+        else:
+            defaultdict = dict()
+            for s in self.entity_sets:
+                header = f'is--{s}'
+                defaultdict[header] = 'FALSE'
+            entities = self.entities
+            res = list()
+            for e in entities:
+                d = e.to_dict()
+                # appending False into the is--headers
+                for k, v in defaultdict.items():
+                    d.setdefault(k, v)
+                res.append(d)
+            return res
+
+    def add_entity(self, ent: Entity):
+        if ent.domain != self.id:
+            raise ValueError('domain name mismatch for the entity object and domain object!')
+        for existing_ent in self.entities:
+            if ent.id == existing_ent.id:
+                logger.debug('updating existing entity: {}'.format(existing_ent.id))
+                for s in ent.sets:
+                    if s not in existing_ent.sets:
+                        existing_ent.sets.append(s)
+                # TODO: logging for existing fileds
+                existing_ent.props.update(ent.props)
+                break
+        else:
+            logger.debug('appending entity: {}'.format(ent.id))
+            self.entities.append(ent)
+
+    def __getitem__(self, item):
+        return self.get_entity_set(item)
+
+
+@attr.s(auto_attribs=True)
+class DataPoint(ABC):
+    """A DataPoint object stores a set of datapoints which have same dimensions and
+    which belongs to only one indicator."""
+    id: str
+    dimensions: Tuple[str]
+    store: str
+    # TODO: think about cache
+
+    @property
+    @abstractmethod
+    def data(self):
+        ...
+
+
+@attr.s
+class PandasDataPoint(DataPoint):
+    """load datapoints with pandas"""
+    path: str = attr.ib()
+    dtypes: dict = attr.ib()
+    store = attr.ib(default='pandas')
+    # data_cache = attr.ib()
+
+    @property
+    def data(self):
+        cols = [*self.dimensions, self.id]
+        return pd.read_csv(self.path, dtype=self.dtypes)[cols]
+
+
+@attr.s
+class DaskDataPoint(DataPoint):
+    """load datapoints with dask"""
+    path: Union[List[str], str] = attr.ib()  # can be a list of paths
+    dtypes: dict = attr.ib()
+    store = attr.ib(default='dask')
+
+    @property
+    def data(self):
+        cols = [*self.dimensions, self.id]
+        return dd.read_csv(self.path, dtype=self.dtypes)[cols]
+
+
+@attr.s(auto_attribs=True, repr=False)
+class Synonym:
+    concept_id: str
+    synonyms: Dict[str, str]
 
     def __repr__(self):
+        dict_str = self.synonyms.__str__()
+        if len(dict_str) > 20:
+            dict_str = dict_str[:20] + ' ... }'
+        return "Synonym(concept_id={}, synonyms={})".format(self.concept_id, dict_str)
 
+    def to_dict(self):
+        pass
+
+
+@attr.s(auto_attribs=True, repr=False)
+class DDF:
+    # Here I use dictionaries for the data structure, just for performance
+    # in fact they are just lists, i.e. concepts should be just a list of Concept objects.
+    concepts: Dict[str, Concept]
+    entities: Dict[str, EntityDomain] = attr.ib(factory=dict)
+    datapoints: Dict[str, Dict[str, DataPoint]] = attr.ib(factory=dict)
+    synonyms: Dict[str, Synonym] = attr.ib(factory=dict)
+    props: dict = attr.ib(factory=dict)
+
+    def __repr__(self):
         def maybe_truncate(obj, maxlen=20, fillspaces=False):
             if isinstance(obj, np.ndarray):
                 s = ', '.join(map(str, obj))
@@ -46,195 +213,88 @@ class Dataset:
 
         indent = 4
 
-        concs = self.concepts.set_index('concept')
-        docs = ["<Dataset {}>".format(self.attrs['name'])]
-        docs.append("entities:")
-        if 'entity_set' in concs['concept_type'].values:
-            for domain, entities in self.entities.items():
-                if len(concs[concs.domain == domain]) == 0:
-                    vals = self.get_entity(domain)[domain].head(20).values
-                    docs.append('{}- {}{}{}'.format(' ' * indent,
-                                                    maybe_truncate(domain, 10, True),
-                                                    ' ' * indent * 2,
-                                                    maybe_truncate(vals, 50)))
-                else:
-                    docs.append('{}- {}:'.format(' ' * indent, domain))
-                    sets = concs[concs.domain == domain]
-                    for i in sets.index:
-                        vals = self.get_entity(i)[i].head(20).values
-                        docs.append('{}- {}{}{}'.format(' ' * indent * 2,
-                                                        maybe_truncate(i, 10, True),
-                                                        ' ' * indent * 2,
-                                                        maybe_truncate(vals, 50)))
-        else:
-            for domain, entities in self.entities.items():
-                vals = self.get_entity(domain)[domain].head(20).values
-                docs.append('{}- {}{}{}'.format(' ' * indent,
-                                                maybe_truncate(domain, 10, True),
-                                                ' ' * indent * 2,
-                                                maybe_truncate(vals, 50)))
-
-        docs.append('indicators:')
-        for i, data in self.datapoints.items():
-            docs.append('{}by {}:'.format(' ' * indent, maybe_truncate(i, 50)))
-            for var in data.keys():
-                docs.append('{}- {}'.format(' ' * indent * 2, maybe_truncate(var)))
+        # TODO: also report domains/datapoints defined in concepts but without data.
+        docs = ["<Dataset {}>".format(self.props.get('name', 'NONAME'))]
+        docs.append("entity domains:")
+        for domain_id, domain in self.entities.items():
+            if not domain.entity_sets:
+                docs.append(f'{" " * indent}* {domain_id}')
+            else:
+                docs.append(f'{" " * indent}* {domain_id}:')
+                for ent_set in domain.entity_sets:
+                    docs.append(f'{" " * indent * 2}- {ent_set}')
+        docs.append("datapoints:")
+        for indicator_id, ind_dict in self.datapoints.items():
+            for pkey, _ in ind_dict.items():
+                pkey_str = ', '.join(pkey)
+                docs.append(f'{" " * indent}- ({pkey_str}) {indicator_id}')
 
         return '\n'.join(docs)
 
-    @property
-    def concepts(self):
-        return self._concepts
-
-    @property
-    def datapoints(self):
-        return self._datapoints
-
-    @property
-    def entities(self):
-        return self._entities
-
-    @property
-    def domains(self):
-        return list(self.entities.keys())
-
-    @property
-    def is_empty(self):
-        if self.concepts is None and self.entities is None and self.datapoints is None:
-            return True
-        else:
-            return False
-
     def indicators(self, by=None):
+        # TODO: naming
         if not by:
-            from functools import reduce
-            res = reduce(lambda a, b: [*a, *list(b.keys())], self._datapoints.values(), [])
-            return list(set(res))
-
-        by = tuple(sorted(by))
-        assert by in self._datapoints.keys(), "key pair {} not in dataset".format(by)
-        return list(self._datapoints[by].keys())
-
-    def get_entity(self, ent):
-        conc = self.concepts.set_index('concept')
-        if conc.loc[ent, 'concept_type'] == 'entity_domain':
-            return self.entities[ent]
+            return list(self.datapoints.keys())
         else:
-            domain = conc.loc[ent, 'domain']
-            ent_domain = self.entities[domain]
-            return (ent_domain[ent_domain['is--'+ent] == 'TRUE']
-                    .dropna(axis=1, how='all')
-                    .rename(columns={domain: ent}))
-
-    def get_datapoint_df(self, indicator, primary_key=None):
-        if primary_key:
-            key = tuple(sorted(list(primary_key)))
-            # if isinstance(self.datapoints[indicator][key], dd.DataFrame):
-            #     self.datapoints[indicator][key] = self.datapoints[indicator][key].compute()
-            return self.datapoints[key][indicator]
-        else:
-            res = {}
-            for k, v in self.datapoints.items():
-                # if isinstance(df, dd.DataFrame):
-                #     df = df.compute()
-                if indicator in v:
-                    res[k] = v[indicator]
+            res = list()
+            for i, v in self.datapoints.items():
+                if tuple(sorted(by)) in v.keys():
+                    res.append(i)
             return res
 
-    def validate(self, **options):
-        """validate the dataset"""
-        raise NotImplementedError
-
-    def get_data_copy(dataset):
-        concepts = dataset.concepts.copy()
-        entities = deepcopy(dataset.entities)
-        datapoints = deepcopy(dataset.datapoints)
-
-        return (concepts, entities, datapoints)
-
-    def _update_inplace(self, ds):
-        self._concepts = ds.concepts
-        self._entities = ds.entities
-        self._datapoints = ds.datapoints
-        self.attrs = ds.attrs
-
-    def _rename_concepts(self, dictionary, inplace=False):
-        concepts, entities, datapoints = self.get_data_copy()
-
-        if self.concepts is not None:
-            concepts = concepts.rename(columns=dictionary)
-            concepts.concept = concepts.concept.map(lambda x: dictionary[x] if x in dictionary.keys() else x)
-
-        # translate entities
-        if self.entities is not None:
-            keys_orig = list(entities.keys())
-
-            for e, df in entities.items():
-                entities[e] = df.rename(columns=dictionary)
-            for k, v in dictionary.items():  # also change the keys in entities dict
-                if k in keys_orig:
-                    df = entities.pop(k)
-                    entities[v] = df
-
-        # translate datapoints
-        # FIXME: datapoints structure is changed
-        if self.datapoints is not None:
-            indicators_orig = list(datapoints.keys())
-
-            for i in indicators_orig:
-                keys_orig = list(datapoints[i].keys())
-                for keys in keys_orig:
-                    datapoints[i][keys] = datapoints[i][keys].rename(columns=dictionary)
-
-                    ks = list(keys)
-                    ks_ = [dictionary[x]
-                           if x in dictionary.keys()
-                           else x
-                           for x in ks]
-                    if not ks == ks_:
-                        ks_ = tuple(sorted(ks_))
-                        df = datapoints[i].pop(keys)
-                        datapoints[i][ks_] = df
-                if i in dictionary.keys():
-                    di = datapoints.pop(i)
-                    datapoints[dictionary[i]] = di
-
-        res = Dataset(concepts=concepts, entities=entities, datapoints=datapoints, attrs=self.attrs)
-        if inplace:
-            self._update_inplace(res)
+    def get_datapoints(self, i, by=None):
+        if by:
+            by_ = tuple(sorted(by))
         else:
-            return res
+            if len(self.datapoints[i]) > 1:
+                raise ValueError("there are multiple primary keys for this indicator, "
+                                 "you should provide the primary key")
+            by_ = list(self.datapoints[i].keys())[0]
 
-    def _rename_entities(self, dictionary, inplace=False):
-        raise NotImplementedError
+        return self.datapoints[i][by_]
 
-    def rename(self, concepts=None, entities=None):
-        """rename concepts or entities"""
-        raise NotImplementedError
+    def get_entities(self, domain, eset=None):
+        if not eset:
+            return self.entities[domain].entities
+        else:
+            return [e for e in self.entities[domain].entities if eset in e.sets]
 
-    def to_ddfcsv(self, out_dir, **kwargs):
-        """save data to disk"""
-        # concepts
-        self.concepts.to_csv(osp.join(out_dir, 'ddf--concepts.csv'), index=False)
+    # TODO: maybe add below methods to modify DDF objects.
+    # def get_concept_ids(self, concept_type=None):
+    #     if concept_type is not None:
+    #         return [concept.id for concept in self.concepts if concept.concept_type == concept_type]
+    #     return [concept.id for concept in self.concepts]
+    #
+    # def get_indicators(self):
+    #     dps = [(dp.id, dp.dimensions) for dp in self.datapoints]
+    #
+    # def add_concept(self, c: Concept):
+    #     self.concepts.append(c)
+    #
+    # def remove_concept(self, c_id: str):
+    #     self.concepts = [concept for concept in self.concepts if concept.id != c_id]
+    #
+    # def add_entity_domain(self, e: EntityDomain):
+    #     self.entities.append(e)
+    #
+    # def remove_entity_domain(self, e_id: str):
+    #     pass
+    #
+    # def add_datapoints(self, dps: DataPoint):
+    #     self.datapoints.append(dps)
+    #
+    # def remove_datapoints(self, dps_id: str):
+    #     pass
 
-        # entities
-        for domain, df in self.entities.items():
-            fn = osp.join(out_dir, 'ddf--entities--{}.csv'.format(domain))
-
-            # change lower case bool values in is--entity columns to upper case
-            for c in df.columns:
-                if c.startswith('is--'):
-                    df[c] = df[c].map(lambda x: str(x).upper() if x else x)
-
-            df.to_csv(fn, index=False)
-
-        # datapoints. If it's dask dataframe, we should compute it before save to disk
-        # FIXME: datapoints structure is changed
-        for indicator, kvs in self.datapoints.items():
-            for keys, df in kvs.items():
-                keys_str = '--'.join(keys)
-                fn = osp.join(out_dir, 'ddf--datapoints--{}--by--{}.csv'.format(indicator, keys_str))
-                if not isinstance(df, pd.DataFrame):
-                    df.compute().to_csv(fn, index=False)
-                else:
-                    df.to_csv(fn, index=False)
+    # def validate(self):  # should be a function outside the class.
+    #     """check if the DDF object is valid.
+    #
+    #     1. datapoints's dimensions should be time or entity domains/sets
+    #     2. datapoints concepts and entity concepts should exists in concepts
+    #     3. call every object's validate method.
+    #     """
+    #     pass
+    #
+    # def create_concepts(self):
+    #     """create concepts from existing entity_domain/entity_set/datapoints"""
+    #     pass
