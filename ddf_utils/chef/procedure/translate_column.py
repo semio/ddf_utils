@@ -112,6 +112,7 @@ def translate_column(chef: Chef, ingredients: List[str], result, dictionary,
             df[column] = df[column].astype('str')
         new_data[k] = tc(df, column, dict_type, dictionary_, target_column, base_df,
                          not_found, ambiguity, ignore_case)
+        # TODO: astype() returns unknown category, but it's better to be known.
         if categorical_col:
             new_data[k][target_column] = new_data[k][target_column].astype("category")
 

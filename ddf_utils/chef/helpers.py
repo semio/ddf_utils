@@ -47,12 +47,19 @@ def build_dictionary(chef, dict_def, ignore_case=False):
             keys = key
         ingredient = chef.dag.node_dict[dict_def['base']].evaluate()
         if ingredient.dtype == 'synonyms':
-            df = ingredient.get_data()[value]
+            di = ingredient.get_data()[value]   # synonyms data is already dict
+            if ignore_case:
+                res = dict()
+                for k, v in di.items():
+                    res[k.lower()] = v
+            else:
+                res = di.copy()
+            return res
         elif ingredient.dtype == 'entities':
             df = ingredient.get_data()[ingredient.key]
+            return build_dictionary_from_dataframe(df, keys, value, ignore_case)
         else:
             raise NotImplementedError('unsupported data type {}'.format(ingredient.dtype))
-        return build_dictionary_from_dataframe(df, keys, value, ignore_case)
     elif isinstance(dict_def, str):
         base_path = chef.config['dictionaries_dir']
         path = os.path.join(base_path, dict_def)
