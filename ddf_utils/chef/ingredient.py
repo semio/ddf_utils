@@ -6,14 +6,17 @@ import fnmatch
 import logging
 import os
 from collections import Mapping, Sequence
+from itertools import product
+from typing import Optional
 
 import numpy as np
 import pandas as pd
 
 import dask.dataframe as dd
-from ddf_utils.model.package import DataPackage
+from ddf_utils.model.package import DDFcsv
+from ddf_utils.model.ddf import DDF
 from ddf_utils.model.repo import Repo, is_url
-from itertools import product
+
 
 from ..str import format_float_digits
 from .exceptions import IngredientError
@@ -412,15 +415,15 @@ class Ingredient(BaseIngredient):
             return cls(chef, ingred_id, data_def=data_def, key=key, values=values, row_filter=row_filter)
 
     @property
-    def ddf(self):
+    def ddf(self) -> Optional[DDF]:
         """The DDF reader object"""
         if self._ddf:
             return self._ddf
         else:
             if self._ddf_id:
                 if self._ddf_id not in self.chef.ddf_object_cache.keys():
-                    self._ddf = DataPackage(
-                        os.path.join(self.chef.config['ddf_dir'], self._ddf_id))
+                    self._ddf = DDFcsv.from_path(
+                        os.path.join(self.chef.config['ddf_dir'], self._ddf_id)).ddf
                     self.chef.ddf_object_cache[self._ddf_id] = self._ddf
                 else:
                     self._ddf = self.chef.ddf_object_cache[self._ddf_id]
@@ -446,12 +449,12 @@ class Ingredient(BaseIngredient):
 
         if self.values == '*':
             for i in self.ddf.indicators(by=keys):
-                data[i] = self.ddf.get_datapoint_df(i, primary_key=keys)
+                data[i] = self.ddf.get_datapoints(i, by=keys).data
         else:
             if isinstance(self.values, Sequence):  # just a list of indicators to include
                 for i in self.values:
                     if i in self.ddf.indicators(by=keys):
-                        data[i] = self.ddf.get_datapoint_df(i, primary_key=keys)
+                        data[i] = self.ddf.get_datapoints(i, by=keys).data
                     else:
                         logging.warning("indicator {} not found in dataset {}".format(i, self._ddf_id))
             else:  # a dictionary with queries
@@ -465,7 +468,7 @@ class Ingredient(BaseIngredient):
                                 logging.warning("indicator matching {} not found in dataset {}".format(i, self._ddf_id))
                                 continue
                             for m in matches:
-                                data[m] = self.ddf.get_datapoint_df(m, primary_key=keys)
+                                data[m] = self.ddf.get_datapoints(m, by=keys).data
                     else:
                         all_indicators = self.ddf.indicators(by=keys)
                         matches = set(all_indicators) - set(fnmatch.filter(all_indicators, items[0]))
@@ -476,23 +479,22 @@ class Ingredient(BaseIngredient):
                                             "found in dataset " + self._ddf_id)
                             continue
                         for m in matches:
-                            data[m] = self.ddf.get_datapoint_df(m, primary_key=keys)
+                            data[m] = self.ddf.get_datapoints(m, by=keys).data
         if len(data) == 0:
             raise IngredientError('no datapoint found for the ingredient: ' + self.ingred_id)
 
         return data
 
-    # because concept ingerdient and entity ingerdient only have one key in the
+    # because concept ingredient and entity ingredient only have one key in the
     # data dictionary, so they don't need to support the column filter
     def _get_data_entities(self):
-        cdf = self.ddf.concepts.set_index('concept')
-        if cdf.at[self.key, 'concept_type'] == 'entity_domain':
+        if self.ddf.concepts[self.key].concept_type == 'entity_domain':
             domain = self.key
             eset = None
         else:
-            domain = cdf.at[self.key, 'domain']
+            domain = self.ddf.concepts[self.key].props['domain']
             eset = self.key
-        df = self.ddf.get_entity(domain, eset)
+        df = pd.DataFrame.from_records(self.ddf.entities[domain].to_dict(eset))
         if self.values != '*':
             if isinstance(self.values, Mapping):
                 assert len(self.values) == 1
@@ -511,7 +513,8 @@ class Ingredient(BaseIngredient):
             return {self.key: df}
 
     def _get_data_concepts(self):
-        df = self.ddf.concepts
+        concepts = self.ddf.concepts
+        df = pd.DataFrame.from_records([x.to_dict() for x in concepts.values()])
         if self.values != '*':
             if isinstance(self.values, Mapping):
                 assert len(self.values) == 1
@@ -526,7 +529,9 @@ class Ingredient(BaseIngredient):
     def _get_data_synonyms(self):
         ks = self.key_to_list()
         ks.remove('synonym')
-        return {ks[0]: self.ddf.synonyms[ks[0]]}
+        key = ks[0]
+        synonyms = self.ddf.synonyms[key].synonyms  # this is a dictionary, not dataframe.
+        return {key: synonyms}
 
     def get_data(self, copy=False, key_as_index=False):
         """read in and return the ingredient data

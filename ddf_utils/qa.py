@@ -12,18 +12,18 @@ logger = logging.getLogger('QA')
 this = sys.modules[__name__]
 
 
-def _gen_indicator_key_list(d):
-    for k, v in d.items():
-        for i in v:
-            yield (i, k)
+def _gen_indicator_key_list(ddf):
+    for indicator, key_data_pair in ddf.datapoints.items():
+        for key in key_data_pair.keys():
+            yield(indicator, key)
 
 
 def compare_with_func(dataset1, dataset2, fns=['rmse', 'nrmse'],
                       indicators=None, key=None):
     """compare 2 datasets with functions"""
 
-    indicators1 = [(k, tuple(sorted(v))) for k, v in _gen_indicator_key_list(dataset1.datapoints)]
-    indicators2 = [(k, tuple(sorted(v))) for k, v in _gen_indicator_key_list(dataset2.datapoints)]
+    indicators1 = list(_gen_indicator_key_list(dataset1))
+    indicators2 = list(_gen_indicator_key_list(dataset2))
 
     # check availability for indicators
     s1 = set(indicators1)
@@ -33,13 +33,13 @@ def compare_with_func(dataset1, dataset2, fns=['rmse', 'nrmse'],
     diff21 = s2 - s1
 
     if len(diff12) > 0:
-        msg = ["below indicators are only available in {}".format(dataset1.attrs['name'])]
+        msg = ["below indicators are only available in {}".format(dataset1.props['name'])]
         for item in diff12:
             msg.append("- {} by {}".format(item[0], ', '.join(item[1])))
         msg.append('')
         logger.warning('\n'.join(msg))
     if len(diff21) > 0:
-        msg = ["below indicators are only available in {}".format(dataset2.attrs['name'])]
+        msg = ["below indicators are only available in {}".format(dataset2.props['name'])]
         for item in diff21:
             msg.append("- {} by {}".format(item[0], ', '.join(item[1])))
         msg.append('')
@@ -53,11 +53,11 @@ def compare_with_func(dataset1, dataset2, fns=['rmse', 'nrmse'],
         # FIXME: support multiple indicator in one file
         # like the indicators in ddf--sodertorn--stockholm_lan_basomrade
         try:
-            i1 = dataset1.get_datapoint_df(indicator, k).compute().set_index(list(k))
+            i1 = dataset1.get_datapoints(indicator, k).data.compute().set_index(list(k))
         except KeyError:
             raise
         try:
-            i2 = dataset2.get_datapoint_df(indicator, k).compute().set_index(list(k))
+            i2 = dataset2.get_datapoints(indicator, k).data.compute().set_index(list(k))
         except KeyError:
             raise
         # i1 = i1.rename(columns={indicator: 'old'})

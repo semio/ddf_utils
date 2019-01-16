@@ -275,15 +275,17 @@ def translate_column(df, column, dictionary_type, dictionary,
     if dictionary_type == 'inline':
         df_new = _translate_column_inline(df, column, target_column, dictionary,
                                           not_found, ambiguity, ignore_case)
-    if dictionary_type == 'file':
+    elif dictionary_type == 'file':
         with open(dictionary) as f:
             d = json.load(f)
         df_new = _translate_column_inline(df, column, target_column, d,
                                           not_found, ambiguity)
-    if dictionary_type == 'dataframe':
+    elif dictionary_type == 'dataframe':
         assert 'key' in dictionary.keys() and 'value' in dictionary.keys()
         df_new = _translate_column_df(df, column, target_column, dictionary, base_df,
                                       not_found, ambiguity, ignore_case)
+    else:
+        raise ValueError("dictionary_type not supported: ()".format(dictionary_type))
 
     return df_new
 
