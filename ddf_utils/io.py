@@ -25,6 +25,7 @@ def dump_json(path, obj):
         f.close()
 
 
+# TODO: integrate with Ingredient.serve
 def serve_datapoint(df_: pd.DataFrame, out_dir, concept, copy=True,
                     by: typing.Iterable = None,
                     formatter: typing.Callable = format_float_digits, **kwargs):

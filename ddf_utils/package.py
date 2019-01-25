@@ -18,12 +18,27 @@ import pandas as pd
 from tqdm import tqdm
 
 from .model.package import DDFcsv
-from .model.utils import sort_json, get_ddf_files
+from .model.utils import sort_json
 
 import logging
 
 
 logger = logging.getLogger(__name__)
+
+
+# check if a directory is dataset root dir
+def is_datapackage(path):
+    """check if a directory is a dataset directory
+
+    This function checks if ddf--index.csv and datapackage.json exists
+    to judge if the dir is a dataset.
+    """
+    index_path = osp.join(path, 'ddf--index.csv')
+    datapackage_path = osp.join(path, 'datapackage.json')
+    if osp.exists(index_path) or osp.exists(datapackage_path):
+        return True
+    else:
+        return False
 
 
 def get_datapackage(path, use_existing=True, update=False):
@@ -224,3 +239,37 @@ def create_datapackage(path, gen_schema=True, **kwargs):
         result = datapackage
 
     return sort_json(result)
+
+
+def get_ddf_files(path, root=None):
+    """yield all csv files which are named following the DDF model standard.
+
+    Parameters
+    -----------
+    path : `str`
+        the path to check
+    root : `str`, optional
+        if path is relative, append the root to all files.
+    """
+    info = next(os.walk(path))
+
+    # don't include hidden and lang/etl dir.
+    sub_dirs = [
+        x for x in info[1] if (not x.startswith('.') and x not in ['lang', 'etl', 'langsplit'])
+    ]
+    files = list()
+    for x in info[2]:
+        if x.startswith('ddf--') and x != 'ddf--index.csv' and x.endswith('.csv'):
+            files.append(x)
+        else:
+            logging.warning('skipping file {}'.format(x))
+
+    for f in files:
+        if root:
+            yield os.path.join(root, f)
+        else:
+            yield f
+
+    for sd in sub_dirs:
+        for p in get_ddf_files(os.path.join(path, sd), root=sd):
+            yield p

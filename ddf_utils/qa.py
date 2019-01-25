@@ -18,9 +18,12 @@ def _gen_indicator_key_list(ddf):
             yield(indicator, key)
 
 
-def compare_with_func(dataset1, dataset2, fns=['rmse', 'nrmse'],
+def compare_with_func(dataset1, dataset2, fns=None,
                       indicators=None, key=None):
     """compare 2 datasets with functions"""
+
+    if not fns:
+        fns = ['rmse', 'nrmse']
 
     indicators1 = list(_gen_indicator_key_list(dataset1))
     indicators2 = list(_gen_indicator_key_list(dataset2))

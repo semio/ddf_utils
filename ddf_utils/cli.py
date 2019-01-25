@@ -47,11 +47,11 @@ def cleanup(path, how, force):
     path: the dataset path
     """
     from ddf_utils.io import cleanup as cl
-    from ddf_utils.model.utils import is_dataset
+    from ddf_utils.package import is_datapackage
     if force:
         cl(path, how)
     else:
-        if not is_dataset(path):
+        if not is_datapackage(path):
             print('not a dataset path: {}. Please set correct path or '
                   'use --force to force run.'.format(os.path.abspath(path)))
         else:
@@ -247,15 +247,14 @@ def merge_translation(path, split_path, lang_path, dtype, overwrite):
 @click.option('--indicator', '-i', multiple=True)
 def diff(dataset1, dataset2, git, checkout_path, indicator):
     """give a report on the statistical differences for datapoints between 2 datasets."""
-    from ddf_utils.model.package import DataPackage
-    from ddf_utils.model.utils import is_dataset
+    from ddf_utils.package import DDFcsv, is_datapackage
     from ddf_utils.qa import compare_with_func
     import tabulate
     from os.path import join
 
     if git:
         from subprocess import check_output
-        assert is_dataset('./'), 'please run this command in a dataset dir.'
+        assert is_datapackage('./'), 'please run this command in a dataset dir.'
 
         c1 = check_output(['git', 'rev-parse', dataset1])
         p1 = c1.strip().decode('utf8')
@@ -279,12 +278,12 @@ def diff(dataset1, dataset2, git, checkout_path, indicator):
         except FileExistsError:
             pass
 
-        d1 = DataPackage(join(checkout_path, p1)).dataset
-        d2 = DataPackage(join(checkout_path, p2)).dataset
+        d1 = DDFcsv.from_path(join(checkout_path, p1)).ddf
+        d2 = DDFcsv.from_path(join(checkout_path, p2)).ddf
 
     else:
-        d1 = DataPackage(join(checkout_path, dataset1)).dataset
-        d2 = DataPackage(join(checkout_path, dataset2)).dataset
+        d1 = DDFcsv.from_path(join(checkout_path, dataset1)).ddf
+        d2 = DDFcsv.from_path(join(checkout_path, dataset2)).ddf
 
     result = compare_with_func(d1, d2, fns=indicator)
     # if diff_only:
