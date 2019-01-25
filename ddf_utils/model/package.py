@@ -197,12 +197,13 @@ class DDFcsv(DataPackage):
             else:
                 domain = concepts[pkey].props['domain']
 
-            df = pd.read_csv(osp.join(self.base_path, r.path), index_col=pkey, **self._default_reader_options)
+            df = pd.read_csv(osp.join(self.base_path, r.path), dtype=str,  # TODO: is it okay to use str for all?
+                             index_col=pkey, **self._default_reader_options)
             is_cols = list(filter(lambda x: x.startswith('is--'), df.columns.values))
             for ent, row in df.iterrows():
                 sets = list()
                 for c in is_cols:
-                    if row[c] is True and c[4:] != domain:
+                    if row[c] == 'TRUE' and c[4:] != domain:
                         sets.append(c[4:])  # strip the 'is--' part, only keep set name
                 yield (domain, Entity(id=ent, domain=domain, sets=sets, props=row.drop(is_cols).to_dict()))
 

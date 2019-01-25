@@ -293,16 +293,17 @@ class EntityIngredient(Ingredient):
         subpath = options.get('path', None)
         outpath = _handel_subpath(outpath, subpath)
         for k, df in self.data_computed.items():
-            # change boolean into string
+            # handling is-- headers
             for c in df.columns:
-                if df.dtypes[c] == 'bool':  # inferred boolean values
-                    df[c] = df[c].map(lambda x: str(x).upper() if not pd.isnull(x) else x)
+                # changing to upper case is no longer required because it will be upper case string from DDFcsv
+                # if df.dtypes[c] == 'bool':  # inferred boolean values
+                #     df[c] = df[c].map(lambda x: str(x).upper() if not pd.isnull(x) else x)
                 if c.startswith('is--'):  # is-- columns
                     if no_keep_sets:
                         df = df.drop(c, axis=1)
                     else:
                         sets.append(c[4:])
-                        df[c] = df[c].map(lambda x: str(x).upper() if not pd.isnull(x) else x)
+                        # df[c] = df[c].map(lambda x: str(x).upper() if not pd.isnull(x) else x)
             domain = self.key
             if k == domain:
                 if len(sets) == 0:
