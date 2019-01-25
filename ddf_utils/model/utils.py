@@ -7,8 +7,17 @@ import logging
 
 from functools import partial
 
+# TODO: move is_dataset to is_datapackage; move this module out of model/
 
-# helper functions:
+
+# return absolute path from any path string
+def absolute_path(path: str) -> str:
+    if not osp.isabs(path):
+        return osp.abspath(osp.expanduser(path))
+    else:
+        return path
+
+
 # check if a directory is dataset root dir
 def is_dataset(path):
     """check if a directory is a dataset directory

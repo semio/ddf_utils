@@ -13,6 +13,7 @@ from tqdm import tqdm
 import pandas as pd
 
 from .ddf import DDF, Concept, EntityDomain, Entity, DaskDataPoint, Synonym
+from .utils import absolute_path
 
 import logging
 
@@ -89,6 +90,9 @@ class DataPackage:
     resources: List[Resource]
     props: dict = attr.ib(factory=dict)
 
+    def __attrs_post_init__(self):
+        self.base_path = absolute_path(self.base_path)
+
     def __repr__(self):
         return f"DataPackage({self.base_path})"
 
@@ -101,13 +105,14 @@ class DataPackage:
     @classmethod
     def from_json(cls, json_path):
         # TODO: security checking.
-        assert osp.exists(json_path), f"file not found: {json_path}"
+        json_path = absolute_path(json_path)
         base_path = osp.dirname(json_path)
         d = json.load(open(json_path))
         return cls.from_dict(d, base_path)
 
     @classmethod
     def from_path(cls, path):
+        path = absolute_path(path)
         json_path = osp.join(path, 'datapackage.json')
         return cls.from_json(json_path)
 
@@ -130,6 +135,7 @@ class DDFcsv(DataPackage):
     _default_reader_options = {'keep_default_na': False, 'na_values': ['']}
 
     def __attrs_post_init__(self):
+        super(DDFcsv, self).__attrs_post_init__()
         conc = list()
         ent = list()
         dp = list()
