@@ -5,7 +5,6 @@ import numpy as np
 import shutil
 import tempfile
 from ddf_utils.chef.api import Chef
-from ddf_utils.chef.ingredient import Ingredient
 from ddf_utils.chef.exceptions import IngredientError, ProcedureError, ChefRuntimeError
 
 
@@ -31,7 +30,7 @@ def test_debug_option():
 def test_extract_concepts():
     chef = chef_fn('test_extract_concepts.yaml')
     res = chef.run()
-    res = res[0].compute()['concept']
+    res = res[0].get_data()['concept']
 
     assert 'geo' in res.concept.values
     assert 'year' in res.concept.values
@@ -44,7 +43,7 @@ def test_filter():
     res_ent = list(filter(lambda x: True if x.dtype == 'entities' else False, res))[0]
     res_dps = list(filter(lambda x: True if x.dtype == 'datapoints' else False, res))[0]
 
-    country = res_ent.compute()['country']
+    country = res_ent.get_data()['country']
     dps = res_dps.compute()
 
     assert set(dps.keys()) == {'imr_upper', 'imr_lower'}
@@ -168,7 +167,7 @@ def test_merge_2():
     chef = chef_fn('test_merge_2.yaml')
     res = chef.run()
 
-    data = res[0].compute()
+    data = res[0].get_data()
     data = data['concept'].set_index('concept')
     assert data.loc['col1', 'col1'] == 'testing1'
     assert data.loc['col2', 'col2'] == 'testing2'
@@ -193,11 +192,3 @@ def test_import_procedure_fail():
         pass
     except:
         raise
-
-
-def test_deprecated():
-    chef1 = chef_fn('test_filter_row.yml')
-    chef1.run()
-
-    chef2 = chef_fn('test_filter_item.yaml')
-    chef2.run()
