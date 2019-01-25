@@ -1,12 +1,10 @@
 """APIs for chef"""
 
-import logging
-
 import coloredlogs
 
-from ddf_utils.chef.cook import Chef
+from . model.chef import Chef
+from . model.ingredient import ingredient_from_dict
 
-# logger = logging.getLogger('Chef')
 
 coloredlogs.install(level=None, fmt='%(asctime)s %(levelname)s %(message)s')
 

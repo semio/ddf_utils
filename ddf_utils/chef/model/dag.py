@@ -7,8 +7,9 @@ each node will have a `evaluate()` function, which will return an ingredient
 on eval.
 """
 
-from .exceptions import ProcedureError, ChefRuntimeError
-from .helpers import get_procedure
+from . ingredient import Ingredient
+from ..exceptions import ProcedureError, ChefRuntimeError
+from ..helpers import get_procedure
 import logging
 
 
@@ -104,7 +105,7 @@ class IngredientNode(BaseNode):
         super(IngredientNode, self).__init__(node_id, chef)
         self.ingredient = ingredient
 
-    def evaluate(self):
+    def evaluate(self) -> Ingredient:
         """return the ingredient as is"""
         logging.debug("evaluating {}".format(self.node_id))
         return self.ingredient
@@ -126,7 +127,7 @@ class ProcedureNode(BaseNode):
         self.procedure = procedure
         self.result_ingredient = None
 
-    def evaluate(self):
+    def evaluate(self) -> Ingredient:
         logging.debug("evaluating {}".format(self.node_id))
         if self.result_ingredient is not None:
             if self.result_ingredient.get_data() is not None:

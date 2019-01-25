@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""recipe cooking"""
+
+"""The Chef object"""
 
 import json
 import logging
@@ -15,12 +16,15 @@ from dask import delayed
 import ruamel.yaml as yaml
 from graphviz import Digraph
 
-from ddf_utils.chef.dag import DAG, IngredientNode, ProcedureNode
-from ddf_utils.chef.exceptions import ChefRuntimeError
-from ddf_utils.chef.helpers import get_procedure
-from ddf_utils.chef.ingredient import Ingredient
+from typing import List
 
-logger = logging.getLogger('Chef')
+from . dag import DAG, IngredientNode, ProcedureNode
+from .. exceptions import ChefRuntimeError
+from .. helpers import get_procedure, gen_sym, query, read_local_ddf
+from . ingredient import Ingredient, ingredient_from_dict
+
+
+logger = logging.getLogger(__name__)
 
 
 def _loadfile(f):
@@ -33,10 +37,11 @@ def _loadfile(f):
     return res
 
 
+# TODO: type annotate the class
 class Chef:
     """the chef api"""
 
-    def __init__(self, dag=None, metadata=None, config=None, cooking=None, serving=None, recipe=None):
+    def __init__(self, dag: DAG = None, metadata=None, config=None, cooking=None, serving=None, recipe=None):
         if dag is None:
             self.dag = DAG()
         else:
@@ -59,7 +64,7 @@ class Chef:
             self._serving = serving
 
         self._recipe = recipe
-        self.ddf_object_cache = {}
+        # self.ddf_object_cache = {}
 
     @property
     def config(self):
@@ -107,7 +112,7 @@ class Chef:
         return chef
 
     @property
-    def ingredients(self):
+    def ingredients(self) -> List[Ingredient]:
         return [x.evaluate() for x in self.dag.nodes if isinstance(x, IngredientNode)]
 
     def copy(self):
@@ -128,12 +133,12 @@ class Chef:
         ddf_dir = self.config['ddf_dir']
         datasets = set()
         for ingred in self.ingredients:
-            if ingred.ddf_id:
-                datasets.add(ingred.ddf_id)
+            if ingred.dataset:
+                datasets.add(ingred.dataset)
         not_exists = []
         for d in datasets:
-            if not os.path.exists(os.path.join(ddf_dir, d)):
-                not_exists.append(d)
+            if not os.path.exists(d):
+                not_exists.append(os.path.relpath(d, self.config['ddf_dir']))
         if len(not_exists) > 0:
             logger.critical("not enough datasets! please checkout following datasets:\n{}\n"
                             .format('\n'.join(not_exists)))
@@ -173,8 +178,8 @@ class Chef:
         :py:meth:`ddf_utils.chef.ingredient.Ingredient.from_dict` method. Check ``from_dict()``
         doc for available keywords
         """
-        ingredient = Ingredient.from_dict(chef=self, dictionary=kwargs)
-        self.dag.add_node(IngredientNode(ingredient.ingred_id, ingredient, self))
+        ingredient = ingredient_from_dict(dictionary=kwargs, **self.config)
+        self.dag.add_node(IngredientNode(ingredient.id, ingredient, self))
         return self
 
     def add_procedure(self, collection, procedure, ingredients, result=None, options=None):
@@ -204,9 +209,9 @@ class Chef:
         # create inline ingredients and change definition to actual id
         for idx, ing in enumerate(ingredients):
             if isinstance(ing, dict):
-                ingredient = Ingredient.from_dict(chef=self, dictionary=ing)
-                self.dag.add_node(IngredientNode(ingredient.ingred_id, ingredient, self))
-                ingredients[idx] = ingredient.ingred_id
+                ingredient = ingredient_from_dict(dictionary=ing, **self.config)
+                self.dag.add_node(IngredientNode(ingredient.id, ingredient, self))
+                ingredients[idx] = ingredient.id
 
         if options is None:
             pdict = {'procedure': procedure, 'ingredients': ingredients, 'result': result}
@@ -275,11 +280,12 @@ class Chef:
         recipe['cooking'] = dict()
         recipe['serving'] = self.serving
 
+        # FIXME: ingredient should allow external csv
         for ingredient in self.ingredients:
-            info = {'id': ingredient.ingred_id,
+            info = {'id': ingredient.id,
                     'dataset': ingredient.ddf_id,
                     'key': ingredient.key,
-                    'values': ingredient.values,
+                    'values': ingredient.value,
                     }
             if ingredient.row_filter is not None:
                 info['row_filter'] = ingredient.row_filter

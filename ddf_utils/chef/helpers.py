@@ -14,7 +14,23 @@ import numpy as np
 import pandas as pd
 import dask.dataframe as dd
 
+from joblib import Memory
+from tempfile import mkdtemp
+
 from . import ops
+from ..model.package import DDFcsv
+
+
+memory = Memory(location=mkdtemp(), verbose=0)
+
+
+@memory.cache
+def read_local_ddf(ddf_id, base_dir='./'):
+    if os.path.isabs(ddf_id):
+        return DDFcsv.from_path(ddf_id).ddf
+    else:
+        path = os.path.join(base_dir, ddf_id)
+        return DDFcsv.from_path(path).ddf
 
 
 def create_dsk(data, parts=10):
@@ -144,7 +160,7 @@ def sort_df(df, key):
     return df[cols_new]
 
 
-def read_opt(options, key, required=False, default=None):
+def read_opt(options, key, required=False, default=None, method='get'):
     """utility to read an attribute from an options dictionary
 
     Parameters
@@ -162,7 +178,12 @@ def read_opt(options, key, required=False, default=None):
         a default to return if `key` is not in option dict and `required` is false
     """
     if key in options.keys():
-        return options.pop(key)
+        if method == 'get':
+            return options.get(key)
+        elif method == 'pop':
+            return options.pop(key)
+        else:
+            raise ValueError("{} is not supported method".format(method))
     if required:
         raise KeyError('Field "{}" is mandatory. Please provide this field in the options.'.format(key))
     return default
@@ -213,7 +234,7 @@ def get_procedure(procedure, base_dir):
     return func
 
 
-def gen_sym(key, others, options):
+def gen_sym(key, others=None, options=None):
     """generate symbol for chef ingredient/procedure result"""
     tail = hashlib.sha256((str(others) + str(options) + str(time())).encode('utf8')).hexdigest()[:6]
     return '{}_{}'.format(key, tail)
@@ -326,7 +347,7 @@ def debuggable(func):
                 logging.warning('debug output path not set!')
                 chef.add_config(debug_output_path='./_debug')
                 debug_path = './_debug'
-            outpath = os.path.join(debug_path, result.ingred_id)
+            outpath = os.path.join(debug_path, result.id)
             if os.path.exists(outpath):
                 import shutil
                 shutil.rmtree(outpath)
