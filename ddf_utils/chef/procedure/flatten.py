@@ -12,18 +12,17 @@ from typing import Dict, List, Optional, Union
 import numpy as np
 import pandas as pd
 
-from ddf_utils.chef.cook import Chef
-
-from .. dag import DAG
 from .. exceptions import ProcedureError
 from .. helpers import debuggable, mkfunc, query, read_opt, create_dsk, build_dictionary
-from .. ingredient import BaseIngredient, ProcedureResult
+from .. model.ingredient import *
+from .. model.chef import Chef
 
-logger = logging.getLogger('Chef')
+
+logger = logging.getLogger('flatten')
 
 
 @debuggable
-def flatten(chef: Chef, ingredients: List[str], result, **options) -> ProcedureResult:
+def flatten(chef: Chef, ingredients: List[DataPointIngredient], result, **options) -> DataPointIngredient:
     """flattening some dimensions, create new indicators.
 
     procedure format:
@@ -69,23 +68,24 @@ def flatten(chef: Chef, ingredients: List[str], result, **options) -> ProcedureR
 
     # ingredient = chef.dag.get_node(ingredients[0]).evaluate()
     ingredient = ingredients[0]
-    data = ingredient.compute()
+    data = ingredient.get_data()
 
-    logger.info("flatten: " + ingredient.ingred_id)
+    logger.info("flatten: " + ingredient.id)
 
-    flatten_dimensions = options['flatten_dimensions']
+    flatten_dimensions = read_opt(options, 'flatten_dimensions', required=True)
     if not isinstance(flatten_dimensions, list):
         flatten_dimensions = [flatten_dimensions]
-    dictionary = options['dictionary']
+    dictionary = read_opt(options, 'dictionary', required=True)
     skip_totals_among_entities = read_opt(options, 'skip_totals_among_entities')
 
-    newkey = [x for x in ingredient.key_to_list() if x not in flatten_dimensions]
+    newkey = [x for x in ingredient.key if x not in flatten_dimensions]
     newkey = ','.join(newkey)
 
     res = {}
     for from_name_tmpl, new_name_tmpl in dictionary.items():
         dfs = dict([(x, data[x]) for x in fnmatch.filter(data.keys(), from_name_tmpl)])
-        for from_name, df in dfs.items():
+        for from_name, df_ in dfs.items():
+            df = df_.compute()
             grouper = df.groupby(flatten_dimensions)
             for g, _ in grouper.groups.items():
                 # logger.warn(g)
@@ -113,4 +113,4 @@ def flatten(chef: Chef, ingredients: List[str], result, **options) -> ProcedureR
                     logger.warning("{} already exists! It will be overwritten.".format(new_name))
                 res[new_name] = df_.rename(columns={from_name: new_name}).drop(flatten_dimensions, axis=1)
 
-    return ProcedureResult(chef, result, newkey, data=create_dsk(res))
+    return DataPointIngredient.from_procedure_result(result, newkey, data_computed=res)

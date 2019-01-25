@@ -2,8 +2,6 @@
 
 from . extract_concepts import extract_concepts
 from . filter import filter
-from . filter_row import filter_row
-from . filter_item import filter_item
 from . flatten import flatten
 from . groupby import groupby
 from . merge import merge

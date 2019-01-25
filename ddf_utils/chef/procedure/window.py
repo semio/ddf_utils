@@ -12,18 +12,17 @@ from typing import Dict, List, Optional, Union
 import numpy as np
 import pandas as pd
 
-from ddf_utils.chef.cook import Chef
-
-from .. dag import DAG
 from .. exceptions import ProcedureError
 from .. helpers import debuggable, mkfunc, query, read_opt, create_dsk, build_dictionary
-from .. ingredient import BaseIngredient, ProcedureResult
+from .. model.ingredient import *
+from .. model.chef import Chef
 
-logger = logging.getLogger('Chef')
+
+logger = logging.getLogger('window')
 
 
 @debuggable
-def window(chef: Chef, ingredients: List[str], result, **options) -> ProcedureResult:
+def window(chef: Chef, ingredients: List[DataPointIngredient], result, **options) -> DataPointIngredient:
     """apply functions on a rolling window
 
     .. highlight:: yaml
@@ -91,7 +90,7 @@ def window(chef: Chef, ingredients: List[str], result, **options) -> ProcedureRe
     assert len(ingredients) == 1, "procedure only support 1 ingredient for now."
     # ingredient = chef.dag.get_node(ingredients[0]).evaluate()
     ingredient = ingredients[0]
-    logger.info('window: ' + ingredient.ingred_id)
+    logger.info('window: ' + ingredient.id)
 
     # reading options
     window = options.pop('window')
@@ -109,9 +108,9 @@ def window(chef: Chef, ingredients: List[str], result, **options) -> ProcedureRe
         f = mkfunc(func)
         # keys for grouping. in multidimensional data like datapoints, we want create
         # groups before rolling. Just group all key column except the column to aggregate.
-        keys = ingredient.key_to_list()
+        keys = ingredient.key.copy()
         keys.remove(column)
-        df = data[k].set_index(ingredient.key_to_list())
+        df = data[k].set_index(ingredient.key)
         levels = [df.index.names.index(x) for x in keys]
         if size == 'expanding':
             newdata[k] = (df.groupby(level=levels, group_keys=False)
@@ -127,5 +126,4 @@ def window(chef: Chef, ingredients: List[str], result, **options) -> ProcedureRe
                           .rolling(window=size, min_periods=min_periods, center=center)
                           .agg(f).reset_index().dropna())
 
-    newdata = create_dsk(newdata)
-    return ProcedureResult(chef, result, ingredient.key, newdata)
+    return DataPointIngredient.from_procedure_result(result, ingredient.key, newdata)

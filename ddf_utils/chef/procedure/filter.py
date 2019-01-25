@@ -12,18 +12,17 @@ from typing import Dict, List, Optional, Union
 import numpy as np
 import pandas as pd
 
-from ddf_utils.chef.cook import Chef
-
-from .. dag import DAG
 from .. exceptions import ProcedureError
 from .. helpers import debuggable, mkfunc, query, read_opt, create_dsk, build_dictionary
-from .. ingredient import BaseIngredient, ProcedureResult
+from .. model.ingredient import *
+from .. model.chef import Chef
 
-logger = logging.getLogger('Chef')
+
+logger = logging.getLogger('filter')
 
 
 @debuggable
-def filter(chef: Chef, ingredients: List[str], result, **options) -> ProcedureResult:
+def filter(chef: Chef, ingredients: List[Ingredient], result, **options) -> Ingredient:
     """filter items and rows just as what `value` and `filter` do in ingredient definition.
 
     Procedure format:
@@ -68,7 +67,7 @@ def filter(chef: Chef, ingredients: List[str], result, **options) -> ProcedureRe
     assert len(ingredients) == 1, "procedure only support 1 ingredient for now."
     # ingredient = chef.dag.get_node(ingredients[0]).evaluate()
     ingredient = ingredients[0]
-    logger.info("filter_row: " + ingredient.ingred_id)
+    logger.info("filter_row: " + ingredient.id)
 
     data = ingredient.get_data()
     row_filters = read_opt(options, 'row', False, None)
@@ -86,14 +85,14 @@ def filter(chef: Chef, ingredients: List[str], result, **options) -> ProcedureRe
                     if i in data.keys():
                         res[i] = data[i].copy()
                     else:
-                        logger.warning("concept {} not found in ingredient {}".format(i, ingredient.ingred_id))
+                        logger.warning("concept {} not found in ingredient {}".format(i, ingredient.id))
             else:
                 for k, v in data.items():
                     items_ = items.copy()
                     for i in items_:
                         if i not in v.columns:
                             items_.remove(i)
-                            logger.warning("concept {} not found in ingredient {}".format(i, ingredient.ingred_id))
+                            logger.warning("concept {} not found in ingredient {}".format(i, ingredient.id))
                     res[k] = v[items_].copy()
         elif isinstance(items, dict) and len(items) == 1:
             assert list(items.keys())[0] in ['$in', '$nin']
@@ -105,7 +104,7 @@ def filter(chef: Chef, ingredients: List[str], result, **options) -> ProcedureRe
                         if i in data.keys():
                             res[i] = data[i].copy()
                         else:
-                            logger.warning("concept {} not found in ingredient {}".format(i, ingredient.ingred_id))
+                            logger.warning("concept {} not found in ingredient {}".format(i, ingredient.id))
                 else:
                     for k, df in data.items():
                         if k not in item_list:
@@ -117,13 +116,13 @@ def filter(chef: Chef, ingredients: List[str], result, **options) -> ProcedureRe
                         for i in items_:
                             if i not in v.columns:
                                 items_.remove(i)
-                                logger.warning("concept {} not found in ingredient {}".format(i, ingredient.ingred_id))
+                                logger.warning("concept {} not found in ingredient {}".format(i, ingredient.id))
                         res[k] = v[item_list].copy()
                 else:
                     for k, v in data.items():
                         for i in item_list:
                             if i not in v.columns:
-                                logger.warning("concept {} not found in ingredient {}".format(i, ingredient.ingred_id))
+                                logger.warning("concept {} not found in ingredient {}".format(i, ingredient.id))
                         keep_cols = list(set(v.columns.values) - set(item_list))
                         res[k] = v[keep_cols].copy()
         else:
@@ -136,4 +135,4 @@ def filter(chef: Chef, ingredients: List[str], result, **options) -> ProcedureRe
         for k, df in res.items():
             res[k] = query(df, row_filters, available_scopes=df.columns)
 
-    return ProcedureResult(chef, result, ingredient.key, data=res)
+    return get_ingredient_class(ingredient.dtype).from_procedure_result(result, ingredient.key, data_computed=res)

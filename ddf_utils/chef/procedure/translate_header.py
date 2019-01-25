@@ -12,19 +12,18 @@ from typing import Dict, List, Optional, Union
 import numpy as np
 import pandas as pd
 
-from ddf_utils.chef.cook import Chef
-
-from .. dag import DAG
 from .. exceptions import ProcedureError
 from .. helpers import debuggable, mkfunc, query, read_opt, create_dsk, build_dictionary
-from .. ingredient import BaseIngredient, ProcedureResult
+from .. model.ingredient import *
+from .. model.chef import Chef
 
-logger = logging.getLogger('Chef')
+
+logger = logging.getLogger('translate_header')
 
 
 @debuggable
-def translate_header(chef: Chef, ingredients: List[str],
-                     result, dictionary, duplicated='error') -> ProcedureResult:
+def translate_header(chef: Chef, ingredients: List[Ingredient],
+                     result, dictionary, duplicated='error') -> Ingredient:
     """Translate column headers
 
     Procedure format:
@@ -58,7 +57,7 @@ def translate_header(chef: Chef, ingredients: List[str],
     """
     assert len(ingredients) == 1, "procedure only support 1 ingredient for now."
     ingredient = ingredients[0]
-    logger.info("translate_header: " + ingredient.ingred_id)
+    logger.info("translate_header: " + ingredient.id)
 
     data = ingredient.get_data()
     new_data = dict()
@@ -101,7 +100,7 @@ def translate_header(chef: Chef, ingredients: List[str],
     if ingredient.dtype == 'datapoints':
         for key in rm.keys():
             if key in ingredient.key:
-                newkey = newkey.replace(key, rm[key])
+                newkey[newkey.index(key)] = rm[key]
     elif ingredient.dtype == 'entities':
         for key in rm.keys():
             if key == ingredient.key:
@@ -111,5 +110,5 @@ def translate_header(chef: Chef, ingredients: List[str],
             raise ValueError('can translate the primaryKey for concept!')
 
     if not result:
-        result = ingredient.ingred_id + '-translated'
-    return ProcedureResult(chef, result, newkey, data=new_data)
+        result = ingredient.id + '-translated'
+    return get_ingredient_class(ingredient.dtype).from_procedure_result(result, newkey, data_computed=new_data)

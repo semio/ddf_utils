@@ -12,18 +12,17 @@ from typing import Dict, List, Optional, Union
 import numpy as np
 import pandas as pd
 
-from ddf_utils.chef.cook import Chef
-
-from .. dag import DAG
 from .. exceptions import ProcedureError
 from .. helpers import debuggable, mkfunc, query, read_opt, create_dsk, build_dictionary
-from .. ingredient import BaseIngredient, ProcedureResult
+from .. model.ingredient import *
+from .. model.chef import Chef
 
-logger = logging.getLogger('Chef')
+
+logger = logging.getLogger('groupby')
 
 
 @debuggable
-def groupby(chef: Chef, ingredients: List[str], result, **options) -> ProcedureResult:
+def groupby(chef: Chef, ingredients: List[DataPointIngredient], result, **options) -> DataPointIngredient:
     """group ingredient data by column(s) and run aggregate function
 
     .. highlight:: yaml
@@ -85,8 +84,8 @@ def groupby(chef: Chef, ingredients: List[str], result, **options) -> ProcedureR
 
     # ingredient = chef.dag.get_node(ingredients[0]).evaluate()
     ingredient = ingredients[0]
-    logger.info("groupby: " + ingredient.ingred_id)
-    data = ingredient.compute()
+    logger.info("groupby: " + ingredient.id)
+    data = ingredient.get_data()
     by = options.pop('groupby')
     if 'insert_key' in options:
         insert_key = options.pop('insert_key')
@@ -115,16 +114,17 @@ def groupby(chef: Chef, ingredients: List[str], result, **options) -> ProcedureR
         func = mkfunc(func)
         indicator_names = fnmatch.filter(data.keys(), name_tmpl)
         for k in indicator_names:
+            df = data[k].compute()
             if comp_type == 'aggregate':
-                newdata[k] = (data[k].groupby(by=by).agg({k: func})
+                newdata[k] = (df.groupby(by=by).agg({k: func})
                               .reset_index().dropna())
             if comp_type == 'transform':
-                df = data[k].set_index(ingredient.key_to_list())
+                df = df.set_index(ingredient.key)
                 levels = [df.index.names.index(x) for x in by]
                 newdata[k] = (df.groupby(level=levels)[k].transform(func)
                               .reset_index().dropna())
             if comp_type == 'filter':
-                df = data[k].set_index(ingredient.key_to_list())
+                df = df.set_index(ingredient.key)
                 levels = [df.index.names.index(x) for x in by]
                 newdata[k] = (df.groupby(level=levels)[k].filter(func)
                               .reset_index().dropna())
@@ -132,5 +132,4 @@ def groupby(chef: Chef, ingredients: List[str], result, **options) -> ProcedureR
                 newdata[k][col] = val
                 newkey = newkey+','+col
 
-    newdata = create_dsk(newdata)
-    return ProcedureResult(chef, result, newkey, data=newdata)
+    return DataPointIngredient.from_procedure_result(result, newkey, data_computed=newdata)

@@ -12,19 +12,17 @@ from typing import Dict, List, Optional, Union
 import numpy as np
 import pandas as pd
 
-from ddf_utils.chef.cook import Chef
-
-from .. dag import DAG
 from .. exceptions import ProcedureError
 from .. helpers import debuggable, mkfunc, query, read_opt, create_dsk, build_dictionary
-from .. ingredient import BaseIngredient, ProcedureResult
+from .. model.ingredient import *
+from .. model.chef import Chef
 
-logger = logging.getLogger('Chef')
+logger = logging.getLogger('trend_bridge')
 
 
 @debuggable
-def trend_bridge(chef: Chef, ingredients: List[str], bridge_start, bridge_end, bridge_length, bridge_on,
-                 result, target_column=None) -> ProcedureResult:
+def trend_bridge(chef: Chef, ingredients: List[DataPointIngredient], bridge_start, bridge_end,
+                 bridge_length, bridge_on, result, target_column=None) -> DataPointIngredient:
     """run trend bridge on ingredients
 
     .. highlight:: yaml
@@ -106,7 +104,7 @@ def trend_bridge(chef: Chef, ingredients: List[str], bridge_start, bridge_end, b
     assert len(bridge_end['column']) == len(bridge_start['column']),\
         "columns length in bridge_start and bridge_end should be the same!"
 
-    logger.info("trend_bridge: {} and {}".format(start.ingred_id, end.ingred_id))
+    logger.info("trend_bridge: {} and {}".format(start.id, end.id))
 
     if target_column is None:
         target_column = bridge_end['column']
@@ -114,12 +112,12 @@ def trend_bridge(chef: Chef, ingredients: List[str], bridge_start, bridge_end, b
     # get the column to group. Because datapoints are multidimensional, but we only
     # bridge them in one column, so we should group other columns.
     try:
-        assert set(start.key_to_list()) == set(end.key_to_list())
+        assert set(start.key) == set(end.key)
     except AssertionError:
         logger.critical("start and end have different keys! {} and {}".format(start.key, end.key))
         raise
 
-    keys = start.key_to_list()
+    keys = start.key
     keys.remove(bridge_on)
 
     # calculate for each column
@@ -176,8 +174,7 @@ def trend_bridge(chef: Chef, ingredients: List[str], bridge_start, bridge_end, b
     if ingredient is not None:
         from . merge import _merge_two
         merged = _merge_two(ingredient.compute(), new_data,
-                            start.key_to_list(), 'datapoints', deep=False)
-        return ProcedureResult(chef, result, start.key, create_dsk(merged))
+                            start.key, 'datapoints', deep=False)
+        return DataPointIngredient.from_procedure_result(result, start.key, merged)
     else:
-        return ProcedureResult(chef, result, start.key,
-                               create_dsk(new_data))
+        return DataPointIngredient.from_procedure_result(result, start.key, new_data)

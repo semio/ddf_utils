@@ -12,18 +12,17 @@ from typing import Dict, List, Optional, Union
 import numpy as np
 import pandas as pd
 
-from ddf_utils.chef.cook import Chef
-
-from .. dag import DAG
 from .. exceptions import ProcedureError
 from .. helpers import debuggable, mkfunc, query, read_opt, create_dsk, build_dictionary
-from .. ingredient import BaseIngredient, ProcedureResult
+from .. model.ingredient import *
+from .. model.chef import Chef
+
 
 logger = logging.getLogger('Chef')
 
 
 @debuggable
-def run_op(chef: Chef, ingredients: List[BaseIngredient], result, op) -> ProcedureResult:
+def run_op(chef: Chef, ingredients: List[DataPointIngredient], result, op) -> DataPointIngredient:
     """run math operation on each row of ingredient data.
 
     Procedure format:
@@ -64,10 +63,11 @@ def run_op(chef: Chef, ingredients: List[BaseIngredient], result, op) -> Procedu
     # ingredient = chef.dag.get_node(ingredients[0]).evaluate()
     ingredient = ingredients[0]
     assert ingredient.dtype == 'datapoints'
-    logger.info("run_op: " + ingredient.ingred_id)
+    logger.info("run_op: " + ingredient.id)
 
+    # FIXME: avoid using compute
     data = ingredient.compute()
-    keys = ingredient.key_to_list()
+    keys = ingredient.key
 
     # concat all the datapoint dataframe first, and eval the ops
     to_concat = [v for v in data.values()]
@@ -94,7 +94,6 @@ def run_op(chef: Chef, ingredients: List[BaseIngredient], result, op) -> Procedu
             df[k] = res
         data[k] = res.reset_index()
 
-    newdata = create_dsk(data)
     if not result:
-        result = ingredient.ingred_id + '-op'
-    return ProcedureResult(chef, result, ingredient.key, data=create_dsk(newdata))
+        result = ingredient.id + '-op'
+    return DataPointIngredient.from_procedure_result(result, ingredient.key, data_computed=data)

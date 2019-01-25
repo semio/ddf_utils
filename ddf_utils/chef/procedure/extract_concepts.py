@@ -12,19 +12,18 @@ from typing import Dict, List, Optional, Union
 import numpy as np
 import pandas as pd
 
-from ddf_utils.chef.cook import Chef
-
-from .. dag import DAG
 from .. exceptions import ProcedureError
 from .. helpers import debuggable, mkfunc, query, read_opt, create_dsk, build_dictionary
-from .. ingredient import BaseIngredient, ProcedureResult
+from .. model.ingredient import *
+from .. model.chef import Chef
 
-logger = logging.getLogger('Chef')
+
+logger = logging.getLogger('extract_concepts')
 
 
 @debuggable
-def extract_concepts(chef: Chef, ingredients: List[str], result,
-                     join=None, overwrite=None, include_keys=False) -> ProcedureResult:
+def extract_concepts(chef: Chef, ingredients: List[Ingredient], result,
+                     join=None, overwrite=None, include_keys=False) -> ConceptIngredient:
     """extract concepts from other ingredients.
 
     .. highlight:: yaml
@@ -78,7 +77,7 @@ def extract_concepts(chef: Chef, ingredients: List[str], result,
     """
 
     # ingredients = [chef.dag.get_node(x).evaluate() for x in ingredients]
-    logger.info("extract concepts: {}".format([x.ingred_id for x in ingredients]))
+    logger.info("extract concepts: {}".format([x.id for x in ingredients]))
 
     if join:
         base = chef.dag.get_node(join['base']).evaluate()
@@ -95,7 +94,11 @@ def extract_concepts(chef: Chef, ingredients: List[str], result,
 
     for i in ingredients:
         data = i.get_data()
-        pks = i.key_to_list()
+        if i.dtype in ['concepts', 'entities']:
+            pks = [i.key]
+        else:
+            pks = i.key
+
         for k, df in data.items():
             if include_keys:
                 cols = df.columns
@@ -134,4 +137,5 @@ def extract_concepts(chef: Chef, ingredients: List[str], result,
             concepts.loc[k, 'concept_type'] = v
     if not result:
         result = 'concepts_extracted'
-    return ProcedureResult(chef, result, 'concept', data={'concept': concepts.reset_index()})
+    return ConceptIngredient.from_procedure_result(result, 'concept',
+                                                   data_computed={'concept': concepts.reset_index()})

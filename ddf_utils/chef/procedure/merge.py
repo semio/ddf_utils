@@ -7,24 +7,23 @@ import logging
 import time
 import warnings
 from collections import Mapping, Sequence
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Union, TypeVar
 
 import numpy as np
 import pandas as pd
 import dask.dataframe as dd
 
-from ddf_utils.chef.cook import Chef
-
-from .. dag import DAG
 from .. exceptions import ProcedureError
 from .. helpers import debuggable, mkfunc, query, read_opt, create_dsk, build_dictionary, dsk_to_pandas
-from .. ingredient import BaseIngredient, ProcedureResult
+from .. model.ingredient import *
+from .. model.chef import Chef
 
-logger = logging.getLogger('Chef')
+
+logger = logging.getLogger('merge')
 
 
 @debuggable
-def merge(chef: Chef, ingredients: List[str], result, deep=False) -> ProcedureResult:
+def merge(chef: Chef, ingredients: List[Ingredient], result, deep=False) -> Ingredient:
     """merge a list of ingredients
 
     The ingredients will be merged one by one in the order of how they are provided to this
@@ -65,16 +64,16 @@ def merge(chef: Chef, ingredients: List[str], result, deep=False) -> ProcedureRe
     (e.g. afr,2015-population_total) exists, it gets overwritten, if it doesn't it stays
     """
     # ingredients = [chef.dag.get_node(x).evaluate() for x in ingredients]
-    logger.info("merge: " + str([i.ingred_id for i in ingredients]))
+    logger.info("merge: " + str([i.id for i in ingredients]))
 
     # assert that dtype and key are same in all dataframe
     try:
         for x in ingredients[1:]:
-            assert set(x.key_to_list()) == set(ingredients[0].key_to_list())
+            assert set(x.key) == set(ingredients[0].key)
         assert len(set([x.dtype for x in ingredients])) == 1
     except (AssertionError, TypeError):
         log1 = "multiple dtype/key detected: \n"
-        log2 = "\n".join(["{}: {}, {}".format(x.ingred_id, x.dtype, x.key) for x in ingredients])
+        log2 = "\n".join(["{}: {}, {}".format(x.id, x.dtype, x.key) for x in ingredients])
         logger.warning(log1 + log2)
         raise ProcedureError("can't merge data with multiple dtype/key!")
 
@@ -84,7 +83,7 @@ def merge(chef: Chef, ingredients: List[str], result, deep=False) -> ProcedureRe
     dtype = ingredients[0].dtype
 
     if dtype == 'datapoints':
-        index_col = ingredients[0].key_to_list()
+        index_col = ingredients[0].key
         newkey = ','.join(index_col)
     else:
         index_col = ingredients[0].key
@@ -101,7 +100,7 @@ def merge(chef: Chef, ingredients: List[str], result, deep=False) -> ProcedureRe
     if not result:
         result = 'all_data_merged_' + str(int(time.time() * 1000))
 
-    return ProcedureResult(chef, result, newkey, data=create_dsk(res_all))
+    return get_ingredient_class(dtype).from_procedure_result(result, newkey, data_computed=res_all)
 
 
 def __get_last_item(ser):
@@ -113,8 +112,8 @@ def __get_last_item(ser):
         return ser_.values[-1]
 
 
-def _merge_two(left: Dict[str, pd.DataFrame],  # FIXME: signature is wrong
-               right: Dict[str, pd.DataFrame],
+def _merge_two(left: Dict[str, Union[pd.DataFrame, dd.DataFrame]],
+               right: Dict[str, Union[pd.DataFrame, dd.DataFrame]],
                index_col: Union[List, str],
                dtype: str, deep=False) -> Dict[str, pd.DataFrame]:
     """merge 2 ingredient data."""
@@ -143,30 +142,30 @@ def _merge_two(left: Dict[str, pd.DataFrame],  # FIXME: signature is wrong
     # for concepts/entities, we don't need to use dask.
     elif dtype == 'concepts':
 
-        left_df = pd.concat([x for x in dsk_to_pandas(left).values()])
-        right_df = pd.concat([x for x in dsk_to_pandas(right).values()])
+        left_df = pd.concat([x for x in left.values()], sort=False)
+        right_df = pd.concat([x for x in right.values()], sort=False)
 
         if deep:
-            merged = left_df.append(right_df)
+            merged = left_df.append(right_df, sort=False)
             res = merged.groupby(by=index_col).agg(__get_last_item)
             res_data = {'concept': res.reset_index()}
         else:
             res_data = {'concept':
                         right_df.drop_duplicates(subset='concept',
                                                  keep='last')}
-        res_data = create_dsk(res_data)
+        res_data = res_data
 
     else:  # entities
         if deep:
             for k, df in right.items():
                 if k in left.keys():
-                    left[k] = left[k].append(df, ignore_index=True)
+                    left[k] = left[k].append(df, ignore_index=True, sort=False)
                     left[k] = left[k].groupby(index_col).agg(__get_last_item).reset_index()
                 else:
                     left[k] = df
         else:
             for k, df in right.items():
                 left[k] = df
-        res_data = create_dsk(left)
+        res_data = left
 
     return res_data

@@ -12,20 +12,18 @@ from typing import Dict, List, Optional, Union
 import numpy as np
 import pandas as pd
 
-from ddf_utils.chef.cook import Chef
-
-from .. dag import DAG
 from .. exceptions import ProcedureError
 from .. helpers import debuggable, mkfunc, query, read_opt, create_dsk, build_dictionary
-from .. ingredient import BaseIngredient, ProcedureResult
+from .. model.ingredient import *
+from .. model.chef import Chef
 
 logger = logging.getLogger('Chef')
 
 
 @debuggable
-def translate_column(chef: Chef, ingredients: List[str], result, dictionary,
+def translate_column(chef: Chef, ingredients: List[Ingredient], result, dictionary,
                      column, *, target_column=None, not_found='drop',
-                     ambiguity='prompt', ignore_case=False) -> ProcedureResult:
+                     ambiguity='prompt', ignore_case=False) -> Ingredient:
     """Translate column values.
 
     Procedure format:
@@ -88,7 +86,7 @@ def translate_column(chef: Chef, ingredients: List[str], result, dictionary,
 
     # ingredient = chef.dag.get_node(ingredients[0]).evaluate()
     ingredient = ingredients[0]
-    logger.info("translate_column: " + ingredient.ingred_id)
+    logger.info("translate_column: " + ingredient.id)
 
     if target_column is None:
         target_column = column
@@ -117,5 +115,6 @@ def translate_column(chef: Chef, ingredients: List[str], result, dictionary,
             new_data[k][target_column] = new_data[k][target_column].astype("category")
 
     if not result:
-        result = ingredient.ingred_id + '-translated'
-    return ProcedureResult(chef, result, ingredient.key, data=new_data)
+        result = ingredient.id + '-translated'
+    return get_ingredient_class(ingredient.dtype).from_procedure_result(
+        result, ingredient.key, data_computed=new_data)
