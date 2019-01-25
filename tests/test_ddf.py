@@ -18,7 +18,7 @@ def test_dataset():
     ent_foundation = ds.get_entities('company', 'foundation')
     for e in ent_foundation:
         d = e.to_dict()
-        assert d['is--foundation'] is True
+        assert d['is--foundation'] == 'TRUE'
 
     dp = ds.get_datapoints('lines_of_code', ('company', 'anno')).data
     assert 'lines_of_code' in dp.columns
