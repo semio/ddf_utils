@@ -25,3 +25,4 @@ gitpython
 hy
 ipdb
 attrs
+joblib
