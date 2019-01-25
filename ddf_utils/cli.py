@@ -167,8 +167,8 @@ def validate_recipe(recipe, build):
     schema_file = os.path.join(os.path.dirname(__file__), '../res/specs/recipe.json')
     schema = json.load(open(schema_file))
     if build:
-        from ddf_utils.chef.cook import build_recipe as buildrcp
-        recipe = buildrcp(recipe)
+        from ddf_utils.chef.model.chef import Chef
+        recipe = Chef._build_recipe(recipe)
         # reload the recipe to get rid of AttrDict in the object
         recipe = json.loads(json.dumps(recipe))
     else:

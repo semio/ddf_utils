@@ -14,6 +14,8 @@ import pandas as pd
 import requests as req
 
 from ddf_utils.str import format_float_digits
+from ddf_utils.package import get_datapackage
+
 
 # helper for dumping datapackage json
 def dump_json(path, obj):
@@ -207,7 +209,7 @@ def csvs_to_ddf(files, out_path):
     for c, df in all_entities.items():
         df.to_csv(join(out_path, 'ddf--entities--{}.csv'.format(c)), index=False)
 
-    dp = DataPackage.get_datapackage(out_path, use_existing=False)
+    dp = get_datapackage(out_path, use_existing=False)
     dump_json(os.path.join(out_path, 'datapackage.json'), dp)
 
     return

@@ -1,4 +1,4 @@
-from ddf_utils.chef.ingredient import ProcedureResult
+from ddf_utils.chef.model.ingredient import DataPointIngredient
 
 
 def multiply_1000(chef, ingredients, result, **options):
@@ -11,4 +11,4 @@ def multiply_1000(chef, ingredients, result, **options):
         df_[k] = df_[k] * 1000
         new_data[k] = df_
 
-    return ProcedureResult(chef, result, ingredient.key, new_data)
+    return DataPointIngredient.from_procedure_result(result, ingredient.key, new_data)
