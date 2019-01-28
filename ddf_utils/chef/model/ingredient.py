@@ -86,6 +86,7 @@ class Ingredient(ABC):
     dataset: str = attr.ib(default=None)
     data: dict = attr.ib(default=None)
     row_filter: dict = attr.ib(default=None)
+    base_dir: str = attr.ib(default='./')
 
     is_procedure_result: bool = attr.ib(default=False, init=False)  # if data is created by a procedure
     data_computed: dict = attr.ib(default=None, init=False)  # cached result from get_data() or a procedure.
@@ -105,9 +106,18 @@ class Ingredient(ABC):
                 return 'inline'
 
     @property
+    def dataset_path(self):
+        """return the full path to ingredient's dataset if the ingredient is from local ddf dataset."""
+        if self.ingredient_type == 'ddf':
+            if os.path.isabs(self.dataset):
+                return self.dataset
+            return os.path.join(self.base_dir, self.dataset)
+        return None
+
+    @property
     def ddf_id(self):
         if self.ingredient_type == 'ddf':
-            ddf = read_local_ddf(self.dataset)
+            ddf = read_local_ddf(self.dataset_path)
             return ddf.props.get('name', self.dataset)
         return None
 
@@ -156,7 +166,7 @@ class ConceptIngredient(Ingredient):
     def get_data(self) -> Dict[str, pd.DataFrame]:
         ingredient_type = self.ingredient_type
         if ingredient_type == 'ddf':
-            self.data_computed = self.get_data_from_ddf_dataset(self.dataset, self.value, self.row_filter)
+            self.data_computed = self.get_data_from_ddf_dataset(self.dataset_path, self.value, self.row_filter)
         if ingredient_type == 'external':
             self.data_computed = self.get_data_from_external_csv(self.data, self.key, self.row_filter)
         if ingredient_type == 'inline':
@@ -233,7 +243,7 @@ class EntityIngredient(Ingredient):
     def get_data(self) -> Dict[str, pd.DataFrame]:
         ingredient_type = self.ingredient_type
         if ingredient_type == 'ddf':
-            self.data_computed = self.get_data_from_ddf_dataset(self.dataset, self.key, self.value, self.row_filter)
+            self.data_computed = self.get_data_from_ddf_dataset(self.dataset_path, self.key, self.value, self.row_filter)
         if ingredient_type == 'external':
             self.data_computed = self.get_data_from_external_csv(self.data, self.key, self.row_filter)
         if ingredient_type == 'inline':
@@ -353,7 +363,8 @@ class DataPointIngredient(Ingredient):
     def get_data(self) -> Dict[str, dd.DataFrame]:
         ingredient_type = self.ingredient_type
         if ingredient_type == 'ddf':
-            self.data_computed = self.get_data_from_ddf_dataset(self.id, self.dataset, self.key, self.value, self.row_filter)
+            self.data_computed = self.get_data_from_ddf_dataset(self.id, self.dataset_path, self.key,
+                                                                self.value, self.row_filter)
         if ingredient_type == 'external':
             self.data_computed = self.get_data_from_external_csv(self.data, self.key, self.row_filter)
         if ingredient_type == 'inline':
@@ -541,7 +552,7 @@ class SynonymIngredient(Ingredient):
     def get_data(self):
         ingredient_type = self.ingredient_type
         if ingredient_type == 'ddf':
-            self.data_computed = self.get_data_from_ddf_dataset(self.dataset, self.key)
+            self.data_computed = self.get_data_from_ddf_dataset(self.dataset_path, self.key)
         if ingredient_type == 'external':
             self.data_computed = self.get_data_from_external_csv(self.data, self.key)
         if ingredient_type == 'inline':
@@ -634,9 +645,9 @@ def ingredient_from_dict(dictionary: dict, **chef_options) -> Ingredient:
     if ingredient_type == 'ddf':
         if is_url(dataset):  # data will read from github dataset
             repo = Repo(dataset, base_path=dataset_dir)  # this will clone the repo to dataset_dir if it doesn't exist
-            dataset = repo.local_path
-        else:
-            dataset = os.path.join(dataset_dir, dataset)
+            dataset = os.path.relpath(repo.local_path, dataset_dir)
+        # else:
+        #     dataset = os.path.join(dataset_dir, dataset)
 
     if ingredient_type == 'external':
         data = os.path.join(external_csv_dir, data)
@@ -644,13 +655,17 @@ def ingredient_from_dict(dictionary: dict, **chef_options) -> Ingredient:
     keys = key_to_list(key)
     dtype = infer_type_from_keys(keys)
     if dtype == 'concepts':
-        return ConceptIngredient(id=ingred_id, dataset=dataset, data=data, key=key, value=value, row_filter=row_filter)
+        return ConceptIngredient(id=ingred_id, dataset=dataset, data=data, key=key, value=value,
+                                 row_filter=row_filter, base_dir=dataset_dir)
     if dtype == 'entities':
-        return EntityIngredient(id=ingred_id, dataset=dataset, data=data, key=key, value=value, row_filter=row_filter)
+        return EntityIngredient(id=ingred_id, dataset=dataset, data=data, key=key, value=value,
+                                row_filter=row_filter, base_dir=dataset_dir)
     if dtype == 'datapoints':
-        return DataPointIngredient(id=ingred_id, dataset=dataset, data=data, key=key, value=value, row_filter=row_filter)
+        return DataPointIngredient(id=ingred_id, dataset=dataset, data=data, key=key, value=value,
+                                   row_filter=row_filter, base_dir=dataset_dir)
     if dtype == 'synonyms':
-        return SynonymIngredient(id=ingred_id, dataset=dataset, data=data, key=key, value=value, row_filter=row_filter)
+        return SynonymIngredient(id=ingred_id, dataset=dataset, data=data, key=key, value=value,
+                                 row_filter=row_filter, base_dir=dataset_dir)
 
 
 def get_ingredient_class(cls):

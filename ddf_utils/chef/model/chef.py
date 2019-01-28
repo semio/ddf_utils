@@ -131,17 +131,17 @@ class Chef:
         """
         # 1. check dataset availability
         ddf_dir = self.config['ddf_dir']
-        datasets = set()
+        datasets = list()
         for ingred in self.ingredients:
-            if ingred.dataset:
-                datasets.add(ingred.dataset)
-        not_exists = []
+            if ingred.ingredient_type == 'ddf':
+                datasets.append(ingred)
+        not_exists = set()
         for d in datasets:
-            if not os.path.exists(d):
-                not_exists.append(os.path.relpath(d, self.config['ddf_dir']))
+            if not os.path.exists(d.dataset_path):
+                not_exists.add(d.dataset)
         if len(not_exists) > 0:
             logger.critical("not enough datasets! please checkout following datasets:\n{}\n"
-                            .format('\n'.join(not_exists)))
+                            .format('\n'.join(list(not_exists))))
             raise ChefRuntimeError('not enough datasets')
 
         # 2. check procedure availability
