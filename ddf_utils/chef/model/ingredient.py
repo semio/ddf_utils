@@ -80,6 +80,8 @@ class Ingredient(ABC):
              concept_type: measure
              description: concept_description_2
     """
+    # TODO: make some of these attributes _Frozen_
+    # currently attrs doesn't support frozen attrs, check issue 133 for attrs
     id: str = attr.ib()
     key: Union[list, str] = attr.ib()
     value: Union[list, dict, str] = attr.ib(default='*')
@@ -127,9 +129,9 @@ class Ingredient(ABC):
         for _, df in data_computed.items():
             if isinstance(key, list):
                 for k in key:
-                    assert k in df.columns
+                    assert k in df.columns, "the key {} not in data!".format(k)
             else:
-                assert key in df.columns
+                assert key in df.columns, "the key {} not in data!".format(key)
         res.data_computed = data_computed
         res.is_procedure_result = True
         return res
@@ -379,7 +381,7 @@ class DataPointIngredient(Ingredient):
         res = cls(id, key)
         for _, df in data_computed.items():
             for k in key:
-                assert k in df.columns
+                assert k in df.columns, "the key {} not in data!".format(k)
         res.data_computed = create_dsk(data_computed)
         res.is_procedure_result = True
         return res
