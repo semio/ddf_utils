@@ -96,19 +96,20 @@ def translate_header(chef: Chef, ingredients: List[Ingredient],
             new_data[k] = df_new
 
     # also rename the key
-    newkey = ingredient.key
     if ingredient.dtype == 'datapoints':
+        newkey = ingredient.key.copy()
         for key in rm.keys():
             if key in ingredient.key:
                 newkey[newkey.index(key)] = rm[key]
     elif ingredient.dtype == 'entities':
+        newkey = ingredient.key
         for key in rm.keys():
             if key == ingredient.key:
                 newkey = rm[key]
     else:
+        newkey = ingredient.key
         if 'concept' in rm.keys():
-            raise ValueError('can translate the primaryKey for concept!')
-
+            raise ValueError('cannot translate the primaryKey for concept!')
     if not result:
         result = ingredient.id + '-translated'
     return get_ingredient_class(ingredient.dtype).from_procedure_result(result, newkey, data_computed=new_data)
