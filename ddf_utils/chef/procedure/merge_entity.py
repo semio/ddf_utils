@@ -22,8 +22,8 @@ logger = logging.getLogger('merge_entity')
 
 
 @debuggable
-def merge_entity(chef: Chef, ingredients: List[EntityIngredient], dictionary,
-                 target_column, result, merged='drop') -> EntityIngredient:
+def merge_entity(chef: Chef, ingredients: List[DataPointIngredient], dictionary,
+                 target_column, result, merged='drop') -> DataPointIngredient:
     """merge entities"""
     from ... transformer import merge_keys
 
@@ -31,11 +31,11 @@ def merge_entity(chef: Chef, ingredients: List[EntityIngredient], dictionary,
     # ingredient = chef.dag.get_node(ingredients[0]).evaluate()
     ingredient = ingredients[0]
 
-    data = ingredient.get_data()
+    data = ingredient.compute()
 
     res_data = dict()
     for k, df in data.items():
         res_data[k] = merge_keys(df.set_index(ingredient.key),
                                  dictionary, target_column=target_column, merged=merged).reset_index()
 
-    return EntityIngredient.from_procedure_result(result, ingredient.key, res_data)
+    return DataPointIngredient.from_procedure_result(result, ingredient.key, res_data)

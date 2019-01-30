@@ -22,8 +22,8 @@ logger = logging.getLogger('split_entity')
 
 
 @debuggable
-def split_entity(chef: Chef, ingredients: List[EntityIngredient], dictionary,
-                 target_column, result, splitted='drop') -> EntityIngredient:
+def split_entity(chef: Chef, ingredients: List[DataPointIngredient], dictionary,
+                 target_column, result, splitted='drop') -> DataPointIngredient:
     """split entities"""
     from ... transformer import split_keys
 
@@ -31,11 +31,11 @@ def split_entity(chef: Chef, ingredients: List[EntityIngredient], dictionary,
     # ingredient = chef.dag.get_node(ingredients[0]).evaluate()
     ingredient = ingredients[0]
 
-    data = ingredient.get_data()
+    data = ingredient.compute()
 
     res_data = dict()
     for k, df in data.items():
         res_data[k] = split_keys(df.set_index(ingredient.key),
                                  target_column, dictionary, splitted).reset_index()
 
-    return EntityIngredient.from_procedure_result(result, ingredient.key, res_data)
+    return DataPointIngredient.from_procedure_result(result, ingredient.key, res_data)
