@@ -166,6 +166,9 @@ class ConceptIngredient(Ingredient):
         self.key = 'concept'
 
     def get_data(self) -> Dict[str, pd.DataFrame]:
+        if self.data_computed is not None:
+            return self.data_computed
+
         ingredient_type = self.ingredient_type
         if ingredient_type == 'ddf':
             self.data_computed = self.get_data_from_ddf_dataset(self.dataset_path, self.value, self.row_filter)
@@ -243,6 +246,9 @@ class EntityIngredient(Ingredient):
             self.key = self.key[0]
 
     def get_data(self) -> Dict[str, pd.DataFrame]:
+        if self.data_computed is not None:
+            return self.data_computed
+
         ingredient_type = self.ingredient_type
         if ingredient_type == 'ddf':
             self.data_computed = self.get_data_from_ddf_dataset(self.dataset_path, self.key, self.value, self.row_filter)
@@ -363,6 +369,9 @@ class DataPointIngredient(Ingredient):
             self.key = key_to_list(self.key)
 
     def get_data(self) -> Dict[str, dd.DataFrame]:
+        if self.data_computed is not None:
+            return self.data_computed
+
         ingredient_type = self.ingredient_type
         if ingredient_type == 'ddf':
             self.data_computed = self.get_data_from_ddf_dataset(self.id, self.dataset_path, self.key,
@@ -552,6 +561,9 @@ class SynonymIngredient(Ingredient):
             self.key = key_to_list(self.key)
 
     def get_data(self):
+        if self.data_computed is not None:
+            return self.data_computed
+
         ingredient_type = self.ingredient_type
         if ingredient_type == 'ddf':
             self.data_computed = self.get_data_from_ddf_dataset(self.dataset_path, self.key)
