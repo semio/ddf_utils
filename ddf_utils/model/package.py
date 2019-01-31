@@ -198,7 +198,8 @@ class DDFcsv(DataPackage):
                 domain = concepts[pkey].props['domain']
 
             df = pd.read_csv(osp.join(self.base_path, r.path), dtype=str,  # TODO: is it okay to use str for all?
-                             index_col=pkey, **self._default_reader_options)
+                             **self._default_reader_options)
+            df = df.set_index(pkey)
             is_cols = list(filter(lambda x: x.startswith('is--'), df.columns.values))
             for ent, row in df.iterrows():
                 sets = list()
