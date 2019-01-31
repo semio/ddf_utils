@@ -132,6 +132,8 @@ def trend_bridge(chef: Chef, ingredients: List[DataPointIngredient], bridge_star
         end_group = end_computed[c2].set_index(bridge_on).groupby(keys)
 
         # get all groups
+        # NOTE: currently pandas (0.24) always emits all values from a category when doing groupby, regardless whether
+        # the value is actually in the column.
         g1 = list(start_group.groups.keys())
         g2 = list(end_group.groups.keys())
         all_groups = g1.copy()
@@ -142,15 +144,24 @@ def trend_bridge(chef: Chef, ingredients: List[DataPointIngredient], bridge_star
         # calculate trend bridge on each group
         res_grouped = []
         for g in all_groups:
-            if g not in g1:
-                logger.warning("no data for bridge start: " + str(g))
-                bridged = end_group.get_group(g)[c2].copy()
-            elif g not in g2:
-                logger.warning("no data for bridge end: " + str(g))
-                bridged = start_group.get_group(g)[c1].copy()
-            else:
+            try:
                 gstart = start_group.get_group(g)[c1].copy()
+            except KeyError:
+                logger.warning("no data for bridge start: " + str(g))
+                gstart = None
+            try:
                 gend = end_group.get_group(g)[c2].copy()
+            except KeyError:
+                logger.warning("no data for bridge end: " + str(g))
+                gend = None
+
+            if gstart is None and gend is None:
+                continue
+            if gstart is None:
+                bridged = gend
+            elif gend is None:
+                bridged = gstart
+            else:
                 bridged = tb(gstart, gend, bridge_length)
 
             res_grouped.append((g, bridged))
