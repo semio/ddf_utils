@@ -232,6 +232,12 @@ class DDFcsv(DataPackage):
         entities = [e.id for e in domain.entities]
         return pd.api.types.CategoricalDtype(entities)
 
+    @staticmethod
+    def entity_set_to_categorical(domain: EntityDomain, s: str):
+        entity_set = domain.get_entity_set(s)
+        entities = [e.id for e in entity_set]
+        return pd.api.types.CategoricalDtype(entities)
+
     def load_ddf(self):
         """-> DDF"""
         # load concepts
@@ -251,6 +257,8 @@ class DDFcsv(DataPackage):
         dtypes = dict()
         for domain_name, domain in domains.items():
             dtypes[domain_name] = self.entity_domain_to_categorical(domain)
+            for eset in domain.entity_sets:
+                dtypes[eset] = self.entity_set_to_categorical(domain, eset)
         # 2. dtype for time
         for c_id, c in concepts.items():
             if c.concept_type == 'time':
