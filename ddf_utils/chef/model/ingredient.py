@@ -221,6 +221,7 @@ class ConceptIngredient(Ingredient):
         filename = read_opt(options, 'file_name', default='ddf--concepts.csv')
         subpath = read_opt(options, 'path', default=None)
         outpath = _handel_subpath(outpath, subpath)
+        logger.info('serving: {}'.format(self.id))
         for _, df_ in self.data_computed.items():
             # change boolean into string
             # and remove tailing spaces
@@ -310,6 +311,7 @@ class EntityIngredient(Ingredient):
         no_keep_sets = options.get('no_keep_sets', False)  # serve as entity domain
         subpath = options.get('path', None)
         outpath = _handel_subpath(outpath, subpath)
+        logger.info('serving: {}'.format(self.id))
         for k, df in self.data_computed.items():
             # handling is-- headers
             for c in df.columns:
@@ -491,11 +493,15 @@ class DataPointIngredient(Ingredient):
                 df[k] = df[k].map(lambda x: format_float_digits(x, digits))
             df.to_csv(path, encoding='utf8', index=False)
 
+        logger.info('serving: {}'.format(self.id))
+
         # compute all dask dataframe to pandas dataframe and save to csv files
         # TODO: maybe no need to convert to pandas?
         for k, df in self.compute().items():
-            if dont_serve_empty and df.empty:
-                continue
+            if df.empty:
+                logger.info('empty data for {}'.format(k))
+                if dont_serve_empty:
+                    continue
             by = self.key
             df = sort_df(df, key=by)
             if not split_by:

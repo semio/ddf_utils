@@ -188,7 +188,7 @@ class Synonym:
 @attr.s(auto_attribs=True, repr=False)
 class DDF:
     # Here I use dictionaries for the data structure, just for performance
-    # in fact they are just lists, i.e. concepts should be just a list of Concept objects.
+    # in fact they can be just lists, i.e. concepts is just a list of Concept objects.
     concepts: Dict[str, Concept]
     entities: Dict[str, EntityDomain] = attr.ib(factory=dict)
     datapoints: Dict[str, Dict[str, DataPoint]] = attr.ib(factory=dict)
