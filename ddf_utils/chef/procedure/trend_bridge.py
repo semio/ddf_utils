@@ -117,7 +117,7 @@ def trend_bridge(chef: Chef, ingredients: List[DataPointIngredient], bridge_star
         logger.critical("start and end have different keys! {} and {}".format(start.key, end.key))
         raise
 
-    keys = start.key
+    keys = start.key.copy()
     keys.remove(bridge_on)
 
     # calculate for each column
