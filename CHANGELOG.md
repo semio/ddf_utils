@@ -1,3 +1,9 @@
+## version 0.5.1 2018-11-07
+
+- updated trend_bridge, adding bridge start/end detection
+- updated factory methods for a few sources
+- improvments and bug fix in chef
+
 ## version 0.5.0 2018-10-17
 
 - split `procedure.py` into seperated files for each procedure
