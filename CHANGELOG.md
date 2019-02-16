@@ -1,3 +1,8 @@
+## version 0.6.0 2019-01-16
+
+- updated module structure, move functions to correct place
+- type annotation for classes
+
 ## version 0.5.1 2018-11-07
 
 - updated trend_bridge, adding bridge start/end detection
