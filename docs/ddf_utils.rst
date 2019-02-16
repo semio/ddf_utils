@@ -30,10 +30,10 @@ ddf_utils.i18n module
     :undoc-members:
     :show-inheritance:
 
-ddf_utils.datapackage module
-----------------------------
+ddf_utils.package module
+------------------------
 
-.. automodule:: ddf_utils.datapackage
+.. automodule:: ddf_utils.package
     :members:
     :undoc-members:
     :show-inheritance:

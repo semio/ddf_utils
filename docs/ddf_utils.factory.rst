@@ -4,6 +4,14 @@ ddf_utils.factory package
 Submodules
 ----------
 
+ddf_utils.factory.common module
+-------------------------------
+
+.. automodule:: ddf_utils.factory.common
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 ddf_utils.factory.cdiac module
 ------------------------------
 
@@ -38,7 +46,7 @@ ddf_utils.factory.ihme module
     :show-inheritance:
 
 ddf_utils.factory.ilo module
-------------------------------
+----------------------------
 
 .. automodule:: ddf_utils.factory.ilo
     :members:

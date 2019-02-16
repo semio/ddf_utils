@@ -12,42 +12,18 @@ ddf_utils.chef.api module
     :undoc-members:
     :show-inheritance:
 
-ddf_utils.chef.cook module
---------------------------
+ddf_utils.chef.model module
+---------------------------
 
-.. automodule:: ddf_utils.chef.cook
+.. automodule:: ddf_utils.chef.model
     :members:
     :undoc-members:
     :show-inheritance:
 
-ddf_utils.chef.ops module
--------------------------
-
-.. automodule:: ddf_utils.chef.ops
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-ddf_utils.chef.ingredient module
+ddf_utils.chef.exceptions module
 --------------------------------
 
-.. automodule:: ddf_utils.chef.ingredient
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-ddf_utils.chef.procedure module
--------------------------------
-
-.. automodule:: ddf_utils.chef.procedure
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-ddf_utils.chef.dag module
--------------------------
-
-.. automodule:: ddf_utils.chef.dag
+.. automodule:: ddf_utils.chef.exceptions
     :members:
     :undoc-members:
     :show-inheritance:
@@ -56,6 +32,14 @@ ddf_utils.chef.helpers module
 -----------------------------
 
 .. automodule:: ddf_utils.chef.helpers
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ddf_utils.chef.ops module
+-------------------------
+
+.. automodule:: ddf_utils.chef.ops
     :members:
     :undoc-members:
     :show-inheritance:
