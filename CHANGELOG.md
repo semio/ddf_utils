@@ -1,3 +1,7 @@
+## version 0.6.1 2019-03-04
+
+- fix installation error (issue #114)
+
 ## version 0.6.0 2019-01-16
 
 - updated module structure, move functions to correct place
