@@ -1,4 +1,4 @@
-## version 0.6.1 2019-03-04
+## version 0.6.1/0.6.2 2019-03-04
 
 - fix installation error (issue #114)
 
