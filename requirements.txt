@@ -26,3 +26,4 @@ hy
 ipdb
 attr
 joblib
+lxml

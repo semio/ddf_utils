@@ -33,7 +33,8 @@ requirements = [
     'gitpython',
     'hy',
     'attr',
-    'joblib'
+    'joblib',
+    'lxml'
 ]
 
 setup(
