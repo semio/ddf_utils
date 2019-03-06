@@ -32,7 +32,7 @@ requirements = [
     'requests',
     'gitpython',
     'hy',
-    'attr',
+    'attrs',
     'joblib',
     'lxml'
 ]
