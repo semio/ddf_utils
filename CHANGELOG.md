@@ -1,3 +1,7 @@
+## version 0.6.3 2019-03-04
+
+- fix wrong requirement (issue #115)
+
 ## version 0.6.1/0.6.2 2019-03-04
 
 - fix installation error (issue #114)
