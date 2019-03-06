@@ -24,6 +24,6 @@ requests
 gitpython
 hy
 ipdb
-attr
+attrs
 joblib
 lxml
