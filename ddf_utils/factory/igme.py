@@ -5,6 +5,10 @@
 source link: `CME data portal`_
 
 .. _`CME data portal`: http://www.childmortality.org
+
+Note: This factory class is no longer works as CME website
+switched to a javascript app.
+
 """
 
 
@@ -22,7 +26,7 @@ from . common import DataFactory
 
 class IGMELoader(DataFactory):
 
-    url = 'http://www.childmortality.org/'
+    url = 'https://www.childmortality.org/'
 
     def load_metadata(self):
         r = requests.get(self.url)

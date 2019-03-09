@@ -28,8 +28,7 @@ class CDIACLoader(DataFactory):
 
         data = pd.read_html(r.content)[0]
 
-        data = data.dropna(axis=1, how='all')
-        data.columns = data.iloc[0]
+        data = data.dropna(axis=1, how='all').dropna(axis=0, how='all')
         data = data.iloc[2:]
 
         data['Last modified'] = pd.to_datetime(data['Last modified'])
