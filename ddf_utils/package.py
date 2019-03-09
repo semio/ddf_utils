@@ -146,8 +146,7 @@ def create_datapackage(path, gen_schema=True, **kwargs):
         schema = {"fields": [], "primaryKey": None}
 
         if 'datapoints' in name_res:
-            # TODO: judge from headers instead of filename (github#76)
-            conc, keys = re.match(r'ddf--datapoints--([\w_]+)--by--(.*)', name_res).groups()
+            keys = re.match(r'ddf--datapoints--.*--by--(.*)', name_res).groups()[0]
             primary_keys = keys.split('--')
             # print(conc, primary_keys)
             for i, k in enumerate(primary_keys):
