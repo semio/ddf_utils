@@ -1,3 +1,9 @@
+## version 0.6.4 2019-03-09
+
+- fix exception when creating datapackage for files with multiple indicators (issue #113)
+- fix factory method issue for cdiac
+- factory method for IGME no longer works. mark it in doc.
+
 ## version 0.6.3 2019-03-04
 
 - fix wrong requirement (issue #115)
