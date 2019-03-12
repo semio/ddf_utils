@@ -20,7 +20,7 @@ requirements = [
     'typing',
     'cookiecutter',
     'jsonschema',
-    'Click',
+    'Click<7',
     'daff',
     'tabulate',
     'dask[dataframe]',
