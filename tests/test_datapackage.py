@@ -14,7 +14,8 @@ def test_create_datapackage_1():
     assert dp1['license'] == 'foo'
 
     dp2 = get_datapackage(dataset_path, use_existing=False)
-    assert 'license' not in dp2.keys()
+    for k in ['name', 'title', 'author', 'description', 'language', 'license']:
+        assert k in dp2.keys()
 
     dp_ = DDFcsv.from_path(dataset_path)
     dp_.get_ddf_schema(update=True)
@@ -45,5 +46,3 @@ def test_create_datapackage_2():
     assert 'ddfSchema' in datapackage.keys()
 
     assert len(datapackage['ddfSchema']['datapoints']) == 3
-
-
