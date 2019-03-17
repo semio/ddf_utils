@@ -19,6 +19,7 @@ from tqdm import tqdm
 
 from .model.package import DDFcsv
 from .model.utils import sort_json
+from ddf_utils.chef.helpers import read_opt
 
 import logging
 
@@ -98,23 +99,31 @@ def create_datapackage(path, gen_schema=True, **kwargs):
     ----------
     path : `str`
         the dataset path to create datapackage.json
+    gen_schema : bool
+        whether to create DDFSchema in datapackage.json. Default is True
+    kwargs : dict
+        metadata to write into datapackage.json. According to spec,
+        title, description, author and license SHOULD be fields in datapackage.json.
     """
 
     datapackage = OrderedDict()
 
-    # setting default name / lang
-    try:
-        name = kwargs.pop('name')
-    except KeyError:
-        # print('name not specified, using the path name')
-        name = os.path.basename(os.path.normpath(os.path.abspath(path)))
-    try:
-        lang = kwargs.pop('language')
-    except KeyError:
-        lang = {'id': 'en'}
+    # setting default fields
+    default_name = os.path.basename(os.path.normpath(os.path.abspath(path)))
+    name = read_opt(kwargs, 'name', default=default_name, method='pop')
+    title = read_opt(kwargs, 'title', default=default_name, method='pop')
+    description = read_opt(kwargs, 'description', default='', method='pop')
+    author = read_opt(kwargs, 'author', default='', method='pop')
+    dp_license = read_opt(kwargs, 'license', default='', method='pop')
+    default_lang = {'id': 'en'}
+    lang = read_opt(kwargs, 'lang', default=default_lang, method='pop')
 
     datapackage['name'] = name
     datapackage['language'] = lang
+    datapackage['title'] = title
+    datapackage['description'] = description
+    datapackage['author'] = author
+    datapackage['license'] = dp_license
 
     # add all optional settings
     for k in sorted(kwargs.keys()):
