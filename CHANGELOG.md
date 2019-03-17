@@ -1,3 +1,8 @@
+## version 0.6.5 2019-03-17
+
+- fix click version issue when install with pip
+- add default fields to create_datapackage
+
 ## version 0.6.4 2019-03-09
 
 - fix exception when creating datapackage for files with multiple indicators (issue #113)
