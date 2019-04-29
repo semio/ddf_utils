@@ -12,6 +12,7 @@ import numpy as np
 import pandas as pd
 from .package import get_datapackage
 
+
 def split_translations_json(path, split_path='langsplit', exclude_concepts=None, overwrite=False):
     """split all string concepts and save them as json files"""
     datapackage = get_datapackage(path)
@@ -233,6 +234,8 @@ def merge_translations_json(path, split_path='langsplit', lang_path='lang', over
                         df_old = pd.read_csv(target_file_path, index_col=0)
                         df_old.update(df)
                         df = df_old.copy()
+                    # dropping lines without any translations
+                    df = df.dropna(how='all', axis=1)
                     df.to_csv(target_file_path, encoding='utf8')
     # update datapackage if there are new translations
     if new_translations:
