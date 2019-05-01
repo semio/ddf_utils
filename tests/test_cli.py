@@ -63,14 +63,17 @@ def test_ddf_cli():
 
     runner = CliRunner()
 
+    # base command
     result = runner.invoke(ddf)
     click.echo(result.output)
 
+    # build recipe
     result = runner.invoke(ddf, args=['build_recipe',
                                       os.path.join(base_path, 'chef/recipes/test_flatten.yml')])
     click.echo(result.output)
     assert result.exit_code == 0
 
+    # run recipe
     tmpdir = tempfile.mkdtemp()
     result = runner.invoke(ddf, args=['run_recipe',
                                       '--recipe',
@@ -79,4 +82,13 @@ def test_ddf_cli():
                                       '--ddf_dir',
                                       os.path.join(base_path, 'chef/datasets/')])
     click.echo(result.output)
+
+    # create_datapackage
+    result = runner.invoke(ddf, args=['create_datapackage', '--update', tmpdir])
+
+    # etl_type
+    result = runner.invoke(ddf, args=['etl_type', '-d', os.path.join(tmpdir, 'etl/scripts')])
+
+    # cleanup
+    result = runner.invoke(ddf, args=['cleanup', 'ddf', tmpdir])
     assert result.exit_code == 0
