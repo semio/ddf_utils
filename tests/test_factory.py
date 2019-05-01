@@ -12,4 +12,4 @@ def test_factory():
 
     # test for specific loader
     ihme = IHMELoader()
-    ihme._make_query()
+    ihme._make_query('cause', 376)
