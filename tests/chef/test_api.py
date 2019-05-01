@@ -3,9 +3,9 @@
 
 import os
 
-import ruamel.yaml as yaml
+import tempfile
 
-from ddf_utils.chef.api import Chef, ingredient_from_dict
+from ddf_utils.chef.api import Chef, ingredient_from_dict, run_recipe
 from ddf_utils.chef.exceptions import ChefRuntimeError, IngredientError
 
 wd = os.path.dirname(__file__)
@@ -26,10 +26,10 @@ def test_chef_api_call():
                        base=['ddf--bp--energy'])
          .add_ingredient(id='bp-datapoints', dataset='ddf--bp--energy', key='geo, year', value='*')
          .add_procedure(collection='datapoints',
-                           procedure='translate_header',
-                           ingredients=['bp-datapoints'],
-                           result='bp-datapoints-translate',
-                           options={'dictionary': {'geo': 'country'}}))
+                        procedure='translate_header',
+                        ingredients=['bp-datapoints'],
+                        result='bp-datapoints-translate',
+                        options={'dictionary': {'geo': 'country'}}))
 
     def multiply_1000(chef, ingredients, result, **options):
         # ingredients = [chef.dag.get_node(x) for x in ingredients]
@@ -59,6 +59,11 @@ def test_chef_api_call():
     res = chef.run()
 
     assert 1
+
+
+def test_run_recipe():
+    tmpdir = tempfile.mkdtemp()
+    run_recipe(os.path.join(wd, 'recipes/test_api.yaml'), tmpdir)
 
 
 def test_chef_load_recipe():

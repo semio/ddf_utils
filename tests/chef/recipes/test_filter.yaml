@@ -35,12 +35,25 @@ cooking:
       result: final_datapoints-0
     - procedure: filter
       ingredients:
+        - cme-datapoints
+      options:
+        item:
+            $nin:
+                - imr_upper
+      result: final_datapoints-1
+    - procedure: filter
+      ingredients:
         - final_datapoints-0
       options:
         item:
-          - imr_upper
-          - imr_lower
+            $in:
+                - imr_upper
+                - imr_lower
       result: final_datapoints
+    - procedure: serve
+      ingredients:
+          - final_datapoints
+          - final_datapoints-1
   concepts:
     - procedure: serve
       ingredients:
