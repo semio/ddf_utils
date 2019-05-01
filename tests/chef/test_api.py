@@ -63,7 +63,7 @@ def test_chef_api_call():
 
 def test_run_recipe():
     tmpdir = tempfile.mkdtemp()
-    run_recipe(os.path.join(wd, 'recipes/test_api.yaml'), os.path.join(wd, 'datasets/'), tmpdir)
+    run_recipe(os.path.join(wd, 'recipes/test_cli.yaml'), os.path.join(wd, 'datasets/'), tmpdir)
 
 
 def test_chef_load_recipe():
