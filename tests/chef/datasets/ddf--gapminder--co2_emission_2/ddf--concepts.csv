@@ -1,0 +1,9 @@
+concept,name,concept_type,indicator_url,unit
+name,Name,string,,
+indicator_url,Indicator URL,string,,
+unit,Unit,string,,
+country,Country,entity_domain,,
+year,Year,time,,
+yearly_co2_emissions_1000_tonnes,Yearly CO2 emissions,measure,https://github.com/open-numbers/ddf--gapminder--co2_emission,1000 metric tons
+cumulative_co2_emissions_tonnes,Cumulative CO2 emissions,measure,https://github.com/open-numbers/ddf--gapminder--co2_emission,metric tons
+co2_emissions_tonnes_per_person,CO2 per capita,measure,https://github.com/open-numbers/ddf--gapminder--co2_emission,metric tons per person

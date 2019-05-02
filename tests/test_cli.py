@@ -92,6 +92,6 @@ def test_ddf_cli_3():
                                       '-i', 'new_datapoints',
                                       '-i', 'dropped_datapoints',
                                       os.path.join(base_path, 'chef/datasets/ddf--gapminder--co2_emission'),
-                                      os.path.join(base_path, 'chef/datasets/open-numbers/ddf--gapminder--co2_emission')])
+                                      os.path.join(base_path, 'chef/datasets/ddf--gapminder--co2_emission_2')])
 
     assert result.exit_code == 0
