@@ -1,0 +1,8 @@
+{
+    "east_west_pakistan": ["pakistan", "bangladesh"],
+    "yugoslavia_montenegro_serbia": ["montenegro", "serbia"],
+    "czechoslovakia": ["czech_republic", "slovakia"],
+    "ussr": ["ukraine", "russian_federation", "belarus", "armenia", "azerbaijan",
+             "georgia", "kazakhstan", "kyrgyzstan", "lithuania",
+             "republic_of_moldova", "tajikistan", "turkmenistan", "uzbekistan"]
+}

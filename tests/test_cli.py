@@ -4,30 +4,15 @@
 need input from user.
 """
 
-import ddf_utils.chef as chef
+import os
+import tempfile
+from ddf_utils.cli import ddf
 
 import click
 from click.testing import CliRunner
 import pandas as pd
 
-
-# def test_prompt_select():
-
-#     @click.command()
-#     def test():
-#         options = ['foo', 'baz']
-#         res = chef.helpers.prompt_select(options, 'testing prompt')
-#         click.echo(str(res))
-
-#     runner = CliRunner()
-#     result = runner.invoke(test, input='1')
-#     assert result.output.split('\n')[-2] == 'foo'
-#     result = runner.invoke(test, input='2')
-#     assert result.output.split('\n')[-2] == 'baz'
-#     result = runner.invoke(test, input='n')
-#     assert result.output.split('\n')[-2] == '-1'
-#     result = runner.invoke(test, input='q')
-#     assert result.exit_code == 130
+base_path = os.path.dirname(__file__)
 
 
 def test_translate_column():
@@ -54,19 +39,15 @@ def test_translate_column():
     assert result.output.split('\n')[-2] == 'cog'
 
 
-def test_ddf_cli():
-    import os
-    import tempfile
-    from ddf_utils.cli import ddf
-
-    base_path = os.path.dirname(__file__)
-
+def test_ddf_cli_1():
     runner = CliRunner()
-
     # base command
     result = runner.invoke(ddf)
     click.echo(result.output)
 
+
+def test_ddf_cli_2():
+    runner = CliRunner()
     # build recipe
     result = runner.invoke(ddf, args=['build_recipe',
                                       os.path.join(base_path, 'chef/recipes/test_flatten.yml')])
@@ -82,13 +63,27 @@ def test_ddf_cli():
                                       '--ddf_dir',
                                       os.path.join(base_path, 'chef/datasets/')])
     click.echo(result.output)
+    assert result.exit_code == 0
 
     # create_datapackage
     result = runner.invoke(ddf, args=['create_datapackage', '--update', tmpdir])
+    assert result.exit_code == 0
 
     # etl_type
-    result = runner.invoke(ddf, args=['etl_type', '-d', os.path.join(tmpdir, 'etl/scripts')])
+    result = runner.invoke(ddf, args=['etl_type', '-d',
+                                      os.path.join(base_path, 'chef/datasets/ddf--gapminder--co2_emission', 'etl/scripts')])
+    assert result.exit_code == 0
 
     # cleanup
     result = runner.invoke(ddf, args=['cleanup', 'ddf', tmpdir])
+    assert result.exit_code == 0
+
+
+def test_ddf_cli_3():
+    runner = CliRunner()
+    # diff
+    result = runner.invoke(ddf, args=['diff',
+                                      os.path.join(base_path, 'chef/datasets/ddf--gapminder--co2_emission'),
+                                      os.path.join(base_path, 'chef/datasets/open-numbers/ddf--gapminder--co2_emission')])
+
     assert result.exit_code == 0

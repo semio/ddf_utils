@@ -1,0 +1,158 @@
+{
+    "name": "ddf--gapminder--co2_emission",
+    "language": {
+        "id": "en"
+    },
+    "resources": [
+        {
+            "path": "ddf--concepts.csv",
+            "name": "ddf--concepts",
+            "schema": {
+                "fields": [
+                    {
+                        "name": "concept"
+                    },
+                    {
+                        "name": "name"
+                    },
+                    {
+                        "name": "concept_type"
+                    },
+                    {
+                        "name": "indicator_url"
+                    },
+                    {
+                        "name": "unit"
+                    }
+                ],
+                "primaryKey": "concept"
+            }
+        },
+        {
+            "path": "ddf--datapoints--co2_emissions_tonnes_per_person--by--country--year.csv",
+            "name": "ddf--datapoints--co2_emissions_tonnes_per_person--by--country--year",
+            "schema": {
+                "fields": [
+                    {
+                        "name": "country"
+                    },
+                    {
+                        "name": "year"
+                    },
+                    {
+                        "name": "co2_emissions_tonnes_per_person"
+                    }
+                ],
+                "primaryKey": [
+                    "country",
+                    "year"
+                ]
+            }
+        },
+        {
+            "path": "ddf--datapoints--cumulative_co2_emissions_tonnes--by--country--year.csv",
+            "name": "ddf--datapoints--cumulative_co2_emissions_tonnes--by--country--year",
+            "schema": {
+                "fields": [
+                    {
+                        "name": "country"
+                    },
+                    {
+                        "name": "year"
+                    },
+                    {
+                        "name": "cumulative_co2_emissions_tonnes"
+                    }
+                ],
+                "primaryKey": [
+                    "country",
+                    "year"
+                ]
+            }
+        },
+        {
+            "path": "ddf--datapoints--yearly_co2_emissions_1000_tonnes--by--country--year.csv",
+            "name": "ddf--datapoints--yearly_co2_emissions_1000_tonnes--by--country--year",
+            "schema": {
+                "fields": [
+                    {
+                        "name": "country"
+                    },
+                    {
+                        "name": "year"
+                    },
+                    {
+                        "name": "yearly_co2_emissions_1000_tonnes"
+                    }
+                ],
+                "primaryKey": [
+                    "country",
+                    "year"
+                ]
+            }
+        },
+        {
+            "path": "ddf--entities--country.csv",
+            "name": "ddf--entities--country",
+            "schema": {
+                "fields": [
+                    {
+                        "name": "country"
+                    },
+                    {
+                        "name": "name"
+                    }
+                ],
+                "primaryKey": "country"
+            }
+        }
+    ],
+    "ddfSchema": {
+        "concepts": [
+            {
+                "primaryKey": ["concept"],
+                "value": "name",
+                "resources": ["ddf--concepts"]
+            },
+            {
+                "primaryKey": ["concept"],
+                "value": "concept_type",
+                "resources": ["ddf--concepts"]
+            },
+            {
+                "primaryKey": ["concept"],
+                "value": "indicator_url",
+                "resources": ["ddf--concepts"]
+            },
+            {
+                "primaryKey": ["concept"],
+                "value": "unit",
+                "resources": ["ddf--concepts"]
+            }
+        ],
+        "entities": [
+            {
+                "primaryKey": ["country"],
+                "value": "name",
+                "resources": ["ddf--entities--country"]
+            }
+        ],
+        "datapoints": [
+            {
+                "primaryKey": ["country","year"],
+                "value": "yearly_co2_emissions_1000_tonnes",
+                "resources": ["ddf--datapoints--yearly_co2_emissions_1000_tonnes--by--country--year"]
+            },
+            {
+                "primaryKey": ["country","year"],
+                "value": "cumulative_co2_emissions_tonnes",
+                "resources": ["ddf--datapoints--cumulative_co2_emissions_tonnes--by--country--year"]
+            },
+            {
+                "primaryKey": ["country","year"],
+                "value": "co2_emissions_tonnes_per_person",
+                "resources": ["ddf--datapoints--co2_emissions_tonnes_per_person--by--country--year"]
+            }
+        ]
+    }
+}

@@ -210,7 +210,7 @@ def diff(dataset1, dataset2, git, checkout_path, indicator):
     """give a report on the statistical differences for datapoints between 2 datasets."""
     from ddf_utils.package import DDFcsv, is_datapackage
     from ddf_utils.qa import compare_with_func
-    import tabulate
+
     from os.path import join
 
     if git:
@@ -243,14 +243,10 @@ def diff(dataset1, dataset2, git, checkout_path, indicator):
         d2 = DDFcsv.from_path(join(checkout_path, p2)).ddf
 
     else:
-        d1 = DDFcsv.from_path(join(checkout_path, dataset1)).ddf
-        d2 = DDFcsv.from_path(join(checkout_path, dataset2)).ddf
+        d1 = DDFcsv.from_path(dataset1).ddf
+        d2 = DDFcsv.from_path(dataset2).ddf
 
     result = compare_with_func(d1, d2, fns=indicator)
-    # if diff_only:
-        # result = result[result.rval != 1]
-
-    cols = result.columns
 
     # sort it
     result = result.sort_values(by='indicator', ascending=True).set_index('indicator')
