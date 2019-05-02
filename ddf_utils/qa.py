@@ -19,7 +19,7 @@ def _gen_indicator_key_list(ddf):
 
 
 def compare_with_func(dataset1, dataset2, fns=None,
-                      indicators=None, key=None):
+                      indicators=None, key=None, **kwargs):
     """compare 2 datasets with functions"""
 
     if not fns:
@@ -80,7 +80,7 @@ def compare_with_func(dataset1, dataset2, fns=None,
         if comp_df.dtypes[indicator+'_old'] == 'object' or comp_df.dtypes[indicator+'_new'] == 'object':
             return [np.nan] * len(fns)
 
-        return [f(comp_df, indicator) if callable(f) else getattr(this, f)(comp_df, indicator)
+        return [f(comp_df, indicator, **kwargs) if callable(f) else getattr(this, f)(comp_df, indicator, **kwargs)
                 for f in fns]
 
     # only keep indicators we want to compare
@@ -135,15 +135,12 @@ def avg_pct_chg(comp_df, indicator, on='geo'):
 
         return chg.replace([np.inf, -np.inf], np.nan).mean()
 
-    # if indicator == 'births_attended_by_skilled_health_staff_percent_of_total':
-    #     import ipdb; ipdb.set_trace()
-
     res = comp_df.groupby(level=level).apply(f)
 
     return res.abs().mean()
 
 
-def max_pct_chg(comp_df, indicator):
+def max_pct_chg(comp_df, indicator, **kwargs):
     """return average precentage changes between old and new data"""
     old_name = indicator+'_old'
     new_name = indicator+'_new'
@@ -161,7 +158,7 @@ def max_pct_chg(comp_df, indicator):
 #     return res.min()
 
 
-def max_change_index(comp_df, indicator):
+def max_change_index(comp_df, indicator, **kwargs):
     # FIXME: this function makes all result column type to be object
     # see test cases in test_qa.py
     old_name = indicator+'_old'
@@ -175,7 +172,7 @@ def max_change_index(comp_df, indicator):
     return str(idx)
 
 
-def rmse(comp_df, indicator):
+def rmse(comp_df, indicator, **kwargs):
     old_name = indicator+'_old'
     new_name = indicator+'_new'
     diff_2 = np.power(comp_df[new_name] - comp_df[old_name], 2)
@@ -184,7 +181,7 @@ def rmse(comp_df, indicator):
     return rmse_val
 
 
-def nrmse(comp_df, indicator):
+def nrmse(comp_df, indicator, **kwargs):
     old_name = indicator+'_old'
     new_name = indicator+'_new'
 
@@ -194,7 +191,7 @@ def nrmse(comp_df, indicator):
     return nrmse_val
 
 
-def new_datapoints(comp_df, indicator):
+def new_datapoints(comp_df, indicator, **kwargs):
     old_name = indicator+'_old'
     new_name = indicator+'_new'
 
@@ -202,7 +199,7 @@ def new_datapoints(comp_df, indicator):
     return count
 
 
-def dropped_datapoints(comp_df, indicator):
+def dropped_datapoints(comp_df, indicator, **kwargs):
     old_name = indicator+'_old'
     new_name = indicator+'_new'
 

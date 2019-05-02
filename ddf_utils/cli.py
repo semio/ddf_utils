@@ -206,7 +206,8 @@ def merge_translation(path, split_path, lang_path, dtype, overwrite):
 @click.option('--checkout-path', '-o', type=click.Path(), default='./etl/diff')
 #  @click.option('--diff-only', is_flag=True)  # buggy
 @click.option('--indicator', '-i', multiple=True)
-def diff(dataset1, dataset2, git, checkout_path, indicator):
+@click.option('--on_key', '-k')  # for those comparsion need to group by keys
+def diff(dataset1, dataset2, git, checkout_path, indicator, on_key):
     """give a report on the statistical differences for datapoints between 2 datasets."""
     from ddf_utils.package import DDFcsv, is_datapackage
     from ddf_utils.qa import compare_with_func
@@ -246,7 +247,7 @@ def diff(dataset1, dataset2, git, checkout_path, indicator):
         d1 = DDFcsv.from_path(dataset1).ddf
         d2 = DDFcsv.from_path(dataset2).ddf
 
-    result = compare_with_func(d1, d2, fns=indicator)
+    result = compare_with_func(d1, d2, fns=indicator, on=on_key)
 
     # sort it
     result = result.sort_values(by='indicator', ascending=True).set_index('indicator')
