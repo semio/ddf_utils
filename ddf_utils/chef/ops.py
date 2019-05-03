@@ -28,10 +28,10 @@ def lt(x, val, how='all', include_eq=False):
     if include_eq:
         return f(x <= val)
     else:
-        return f(x <= val)
+        return f(x < val)
 
 
-def between(x, upper, lower, how='all', include_upper=False, include_lower=False):
+def between(x, lower, upper, how='all', include_upper=False, include_lower=False):
     return gt(x, lower, how, include_lower) and lt(x, upper, how, include_upper)
 
 

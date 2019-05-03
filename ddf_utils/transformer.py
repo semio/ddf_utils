@@ -305,7 +305,7 @@ def translate_header(df, dictionary, dictionary_type='inline'):
     if dictionary_type == 'inline':
         return df.rename(columns=dictionary)
     elif dictionary_type == 'file':
-        with open(dictionary, 'utf8') as f:
+        with open(dictionary, 'r') as f:
             dictionary = json.load(f)
         return df.rename(columns=dictionary)
     else:

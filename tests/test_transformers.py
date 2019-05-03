@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import pandas as pd
-import numpy as np
+import os
 
 
 def test_trend_bridge():
@@ -147,3 +147,18 @@ def test_translate_column():
                           {'key': ['alt1', 'alt2'], 'value': 'geo'},
                           target_column='new_geo', base_df=base_df2)
     print(r3)
+
+
+def test_translate_header():
+    from ddf_utils.transformer import translate_header
+
+    wd = os.path.dirname(__file__)
+
+    df = pd.DataFrame([[0, 1, 2]], columns=['imr_lower', 'imr_median', 'no_name'])
+    translate_header(df, {'no_name': 'yes_name'})
+    translate_header(df, os.path.join(wd, 'chef/translation_dictionaries/indicators_cme_to_sg.json'), dictionary_type='file')
+
+    try:
+        translate_header(df, {}, dictionary_type='something')
+    except ValueError:
+        pass

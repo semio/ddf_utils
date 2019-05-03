@@ -2,6 +2,7 @@
 
 import os
 import numpy as np
+import pandas as pd
 import shutil
 import tempfile
 from ddf_utils.chef.api import Chef
@@ -190,5 +191,20 @@ def test_import_procedure_fail():
         chef.run()
     except ChefRuntimeError:
         pass
-    except:
-        raise
+
+
+def test_ops():
+    from ddf_utils.chef.ops import gt, lt, between, aagr
+
+    x = np.ones(1000)
+    assert gt(x, 0)
+    assert gt(x, 1, include_eq=True)
+    assert not gt(x, 2)
+
+    assert lt(x, 2)
+    assert lt(x, 1, include_eq=True)
+    assert not lt(x, 0)
+
+    assert between(x, 0, 2)
+
+    assert np.all(aagr(pd.DataFrame(x)) == 0)

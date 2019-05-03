@@ -43,5 +43,5 @@ cooking:
           base: geo-aligned
           key: geo
           value: geo_new
-        not_found: drop
+        not_found: include
       result: bp-datapoints-aligned
