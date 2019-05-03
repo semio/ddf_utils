@@ -93,6 +93,42 @@ def test_ingredients():
     i = ingredient_from_dict(dictionary={
         'id': 'ddf--cme',
         'dataset': 'ddf--cme',
+        'key': 'concept',
+        'value': {
+            '$in': ['concept', 'name', 'concept_type']
+        }
+    }, **chef.config)
+    assert set(i.get_data()['concept'].columns) == set(['concept', 'name', 'concept_type'])
+
+    i = ingredient_from_dict(dictionary={
+        'id': 'ddf--cme',
+        'dataset': 'ddf--cme',
+        'key': 'concept',
+        'value': ['concept', 'name', 'concept_type']
+    }, **chef.config)
+    assert set(i.get_data()['concept'].columns) == set(['concept', 'name', 'concept_type'])
+
+    i = ingredient_from_dict(dictionary={
+        'id': 'ddf--cme',
+        'dataset': 'ddf--cme',
+        'key': 'country',
+        'value': {
+            '$nin': ['iso_code']
+        }
+    }, **chef.config)
+    assert 'iso_code' not in i.get_data()['country'].columns
+
+    i = ingredient_from_dict(dictionary={
+        'id': 'ddf--cme',
+        'dataset': 'ddf--cme',
+        'key': 'country',
+        'value': ['country', 'iso_code']
+    }, **chef.config)
+    assert 'iso_code' in i.get_data()['country'].columns
+
+    i = ingredient_from_dict(dictionary={
+        'id': 'ddf--cme',
+        'dataset': 'ddf--cme',
         'key': 'country, year',
         'value': {
             '$nin': ['*lower']
@@ -149,3 +185,12 @@ def test_ingredients():
         'key': 'synonym, region'
     }, **chef.config)
     assert set(list(i.get_data().keys())) == set(['region'])
+
+    i = ingredient_from_dict(dictionary={
+        'id': 'geo_entity_domain',
+        'dataset': 'ddf--gapminder--geo_entity_domain',
+        'key': 'country',
+        'value': {
+            '$in': ['country', 'name']
+        }
+    }, **chef.config)

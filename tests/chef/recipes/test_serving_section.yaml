@@ -5,7 +5,14 @@ ingredients:
     - id: datapoints-ilo
       dataset: ddf--ilo--kilm_employment_sector
       key: "country,sex,year"
-      value: "*"
+      value:
+          $in:
+              - agriculture_thousands
+              - agriculture_percentage
+    - id: gw-countries
+      dataset: ddf--gapminder--geo_entity_domain
+      key: country
+      value: '*'
 
 cooking:
     datapoints:
@@ -19,7 +26,7 @@ cooking:
               aggregate:
                   agriculture_thousands: sum
                   agriculture_percentage: sum
-          result: datapoints-by-country-year 
+          result: datapoints-by-country-year
         - procedure: groupby
           ingredients:
               - datapoints-by-country-year
@@ -47,3 +54,5 @@ serving:
       options:
           digits: 2
           path: test_serving
+          split_by: country
+    - id: gw-countries

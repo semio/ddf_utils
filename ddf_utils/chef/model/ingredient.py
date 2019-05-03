@@ -189,7 +189,7 @@ class ConceptIngredient(Ingredient):
                 assert len(value) == 1
                 assert list(value.keys())[0] in ['$in', '$nin']
                 kw = list(value.keys())[0]
-                if kw == ['$in']:
+                if kw == '$in':
                     data = {'concept': df[value[kw]]}
                 else:
                     data = {'concept': df[df.columns.drop(value[kw])]}
@@ -217,7 +217,7 @@ class ConceptIngredient(Ingredient):
 
     def serve(self, outpath, **options):
         if not self.data_computed:
-            self.get_data() 
+            self.get_data()
         filename = read_opt(options, 'file_name', default='ddf--concepts.csv')
         subpath = read_opt(options, 'path', default=None)
         outpath = _handel_subpath(outpath, subpath)
@@ -275,7 +275,7 @@ class EntityIngredient(Ingredient):
                 assert len(value) == 1
                 assert list(value.keys())[0] in ['$in', '$nin']
                 kw = list(value.keys())[0]
-                if kw == ['$in']:
+                if kw == '$in':
                     cols = [key, *value[kw]]
                     data = {key: df[cols]}
                 else:

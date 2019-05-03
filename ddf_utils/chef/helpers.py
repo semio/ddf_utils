@@ -294,7 +294,7 @@ def gen_query(conds, scope=None, available_scopes=None):
 def query(df, conditions, available_scopes=None):
     """query a dataframe with mongo-like queries"""
     q = gen_query(conditions, available_scopes=available_scopes)
-    logging.debug("querying: {}".format(q))
+    logging.info("querying: {}".format(q))
     if q == '' or q == '()':
         logging.warning("empty query")
         return df
