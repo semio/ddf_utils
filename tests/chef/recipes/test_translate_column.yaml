@@ -14,6 +14,10 @@ ingredients:
     dataset: ddf--bp--energy
     key: 'geo,year'
     value: '*'
+  - id: gw-countries-synonym
+    dataset: ddf--gapminder--geo_entity_domain
+    key: geo, synonym
+    value: '*'
 
 cooking:
   entities:
@@ -32,6 +36,17 @@ cooking:
           value: country
         not_found: drop
       result: geo-aligned
+    - procedure: translate_column
+      ingredients:
+          - bp-geo
+      options:
+          column: name
+          target_column: geo_new
+          dictionary:
+              base: gw-countries-synonym
+              key: synonym
+              value: geo
+      result: final-entity
   datapoints:
     - procedure: translate_column
       ingredients:
