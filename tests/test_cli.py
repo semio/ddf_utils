@@ -69,6 +69,9 @@ def test_ddf_cli_2():
     result = runner.invoke(ddf, args=['create_datapackage', '--update', tmpdir])
     assert result.exit_code == 0
 
+    result = runner.invoke(ddf, args=['create_datapackage', tmpdir])
+    assert result.exit_code == 0
+
     # etl_type
     result = runner.invoke(ddf, args=['etl_type', '-d',
                                       os.path.join(base_path, 'chef/datasets/ddf--gapminder--co2_emission/', 'etl/scripts')])

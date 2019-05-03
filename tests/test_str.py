@@ -45,21 +45,11 @@ def test_format_float_digits(num):
         assert re.match(r'[0-9]*', res2)
 
 
-@given(num=st.floats())
-def test_format_float_digits_str(num):
-    from ddf_utils.str import format_float_digits
+@given(num=st.floats(min_value=0.1, max_value=10e13))
+def test_float_to_decimal(num):
+    from ddf_utils.str import _float_to_decimal
 
-    num = str(num)
-
-    res1 = format_float_digits(num, 5)
-
-    if not pd.isnull(res1):
-        assert re.match(r'[0-9.e\+]*', res1)
-
-    res2 = format_float_digits(str(num), 5, keep_decimal=False)
-
-    if not pd.isnull(res2):
-        assert re.match(r'[0-9]*', res2)
+    _float_to_decimal(num)
 
 
 def test_fix_time_range():

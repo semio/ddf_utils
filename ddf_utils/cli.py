@@ -207,7 +207,8 @@ def merge_translation(path, split_path, lang_path, dtype, overwrite):
 #  @click.option('--diff-only', is_flag=True)  # buggy
 @click.option('--indicator', '-i', multiple=True)
 @click.option('--on_key', '-k')  # for those comparsion need to group by keys
-def diff(dataset1, dataset2, git, checkout_path, indicator, on_key):
+@click.option('-C', 'git_base_path', type=click.Path(), default='./')
+def diff(dataset1, dataset2, git, checkout_path, indicator, on_key, git_base_path):
     """give a report on the statistical differences for datapoints between 2 datasets."""
     from ddf_utils.package import DDFcsv, is_datapackage
     from ddf_utils.qa import compare_with_func
@@ -216,27 +217,27 @@ def diff(dataset1, dataset2, git, checkout_path, indicator, on_key):
 
     if git:
         from subprocess import check_output
-        assert is_datapackage('./'), 'please run this command in a dataset dir.'
+        assert is_datapackage(git_base_path), 'please run this command in a dataset dir.'
 
-        c1 = check_output(['git', 'rev-parse', dataset1])
+        c1 = check_output(['git', '-C', git_base_path, 'rev-parse', dataset1])
         p1 = c1.strip().decode('utf8')
 
-        c2 = check_output(['git', 'rev-parse', dataset2])
+        c2 = check_output(['git', '-C', git_base_path, 'rev-parse', dataset2])
         p2 = c2.strip().decode('utf8')
 
         try:
             os.makedirs(join(checkout_path, p1))
             logging.info('checkout git rev {} into {}'.format(dataset1, join(checkout_path, p1)))
-            os.system('git checkout {}'.format(p1))
-            os.system('git checkout-index -a -f --prefix={}/'.format(join(checkout_path, p1)))
+            os.system('git -C {} checkout {}'.format(git_base_path, p1))
+            os.system('git -C {} checkout-index -a -f --prefix={}/'.format(git_base_path, join(checkout_path, p1)))
         except FileExistsError:
             pass
 
         try:
             os.makedirs(join(checkout_path, p2))
             logging.info('checkout git rev {} into {}'.format(dataset2, join(checkout_path, p2)))
-            os.system('git checkout {}'.format(p2))
-            os.system('git checkout-index -a -f --prefix={}/'.format(join(checkout_path, p2)))
+            os.system('git -C {} checkout {}'.format(git_base_path, p2))
+            os.system('git -C {} checkout-index -a -f --prefix={}/'.format(git_base_path, join(checkout_path, p2)))
         except FileExistsError:
             pass
 
