@@ -84,7 +84,7 @@ def test_ingredients_concepts():
         'value': {
             '$in': ['concept', 'name', 'concept_type']
         },
-        'row_filter': {'concept': ['imr_lower']}
+        'filter': {'concept': ['imr_lower']}
     }, **chef.config)
     assert set(i.get_data()['concept'].columns) == set(['concept', 'name', 'concept_type'])
 
@@ -114,7 +114,6 @@ def test_ingredients_concepts():
         i = ConceptIngredient(id='test',
                               key=['concept', 'name'],
                               data=[{'concept': 'test', 'name': 'Test', 'concept_type': 'measure'}])
-        i.get_data()
 
 
 def test_ingredients_datapoints():
@@ -184,9 +183,7 @@ def test_ingredients_datapoints():
         'id': 'ddf--cme',
         'dataset': 'ddf--cme',
         'key': 'country, year',
-        'value': {
-            '$in': ['imr_lower', 'lsdf']
-        }
+        'value': ['imr_lower', 'lsdf']
     }, **chef.config)
     assert set(list(i.get_data().keys())) == set(['imr_lower'])
 
@@ -301,4 +298,3 @@ def test_ingredients_entities():
         i = EntityIngredient(id='test',
                              key=['country', 'name'],
                              data=[{'country': 'chn', 'name': 'China'}])
-        i.get_data()
