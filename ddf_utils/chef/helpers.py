@@ -301,23 +301,23 @@ def query(df, conditions, available_scopes=None):
     return df.query(q)
 
 
-def procedure(func, **options_dict):
-    """The procedure wrapper, to create a procedure
+# def procedure(func, **options_dict):
+#     """The procedure wrapper, to create a procedure
 
-    @procedure
-    def procedure_func(**options):
-        pass
+#     @procedure
+#     def procedure_func(**options):
+#         pass
 
-    will automatically create this:
+#     will automatically create this:
 
-    def procedure_func(chef=chef, ingredients=[], result='result', **options) 
+#     def procedure_func(chef=chef, ingredients=[], result='result', **options)
 
-    """
-    @wraps(func)
-    @debuggable
-    def procedure_func(chef, ingredients, result, *args, **kwargs):
-        return
-    return procedure_func
+#     """
+#     @wraps(func)
+#     @debuggable
+#     def procedure_func(chef, ingredients, result, *args, **kwargs):
+#         return
+#     return procedure_func
 
 
 def debuggable(func):
