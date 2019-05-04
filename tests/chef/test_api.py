@@ -200,10 +200,19 @@ def test_ingredients_datapoints():
                 'geo': 'abc',
                 'time': 1990,
                 'indicator': 12
+            },
+            {
+                'geo': 'cde',
+                'time': 2000,
+                'indicator': 13
             }
         ]
     }, **chef.config)
     assert set(list(i.get_data().keys())) == set(['indicator'])
+
+    # test split entity
+    out_path = tempfile.mkdtemp()
+    i.serve(out_path, split_by='geo')
 
     i = ingredient_from_dict(dictionary={
         'id': 'ddf--cme',
@@ -238,6 +247,18 @@ def test_ingredients_synonyms():
     }, **chef.config)
     assert set(list(i.get_data().keys())) == set(['country'])
 
+    i = ingredient_from_dict(dictionary={
+        'id': 'ddf--dummy',
+        'key': 'synonym, country',
+        'data': [
+            {
+                'country': 'chn',
+                'synonym': 'China'
+            }
+        ]
+    }, **chef.config)
+    assert set(list(i.get_data().keys())) == set(['country'])
+
 
 def test_ingredients_entities():
     chef = Chef()
@@ -252,3 +273,23 @@ def test_ingredients_entities():
             '$in': ['country', 'name']
         }
     }, **chef.config)
+    assert set(i.get_data()['country'].columns) == set(['country', 'name'])
+
+    i = ingredient_from_dict(dictionary={
+        'id': 'geo_entity_domain',
+        'key': 'country',
+        'data': [
+            {
+                'country': 'chn',
+                'name': 'China'
+            }
+        ]
+    }, **chef.config)
+    assert set(i.get_data()['country'].columns) == set(['country', 'name'])
+
+    i = ingredient_from_dict(dictionary={
+        'id': 'geo_entity_domain',
+        'key': 'country',
+        'data': 'external_entity.csv'
+    }, **chef.config)
+    assert set(i.get_data()['country'].columns) == set(['country', 'name'])
