@@ -4,16 +4,17 @@
 import os
 
 import tempfile
+import pytest
 
 from ddf_utils.chef.api import Chef, ingredient_from_dict, run_recipe
 from ddf_utils.chef.exceptions import ChefRuntimeError, IngredientError
+from ddf_utils.chef.model.ingredient import ConceptIngredient, EntityIngredient, DataPointIngredient
 
 wd = os.path.dirname(__file__)
 
 
 def test_chef_api_call():
     from ddf_utils.chef.model.dag import DAG
-    from ddf_utils.chef.model.ingredient import DataPointIngredient
     # create empty chef
     dag = DAG()
     Chef(dag=dag, metadata={}, config={}, cooking={}, serving=[])
@@ -67,11 +68,8 @@ def test_run_recipe():
 def test_chef_load_recipe():
     recipe_file = os.path.join(wd, 'recipes/test_flatten.yml')
     chef = Chef.from_recipe(recipe_file)
-    try:
+    with pytest.raises(ChefRuntimeError):
         chef.validate()
-    except ChefRuntimeError:
-        pass
-    assert 1
 
 
 def test_ingredients_concepts():
@@ -85,7 +83,8 @@ def test_ingredients_concepts():
         'key': 'concept',
         'value': {
             '$in': ['concept', 'name', 'concept_type']
-        }
+        },
+        'row_filter': {'concept': ['imr_lower']}
     }, **chef.config)
     assert set(i.get_data()['concept'].columns) == set(['concept', 'name', 'concept_type'])
 
@@ -110,6 +109,12 @@ def test_ingredients_concepts():
         'data': 'external.csv'
     }, **chef.config)
     assert set(i.get_data()['concept'].columns) == set(['concept', 'name', 'concept_type'])
+
+    with pytest.raises(IngredientError):
+        i = ConceptIngredient(id='test',
+                              key=['concept', 'name'],
+                              data=[{'concept': 'test', 'name': 'Test', 'concept_type': 'measure'}])
+        i.get_data()
 
 
 def test_ingredients_datapoints():
@@ -199,12 +204,12 @@ def test_ingredients_datapoints():
             {
                 'geo': 'abc',
                 'time': 1990,
-                'indicator': 12
+                'indicator': '12'
             },
             {
                 'geo': 'cde',
                 'time': 2000,
-                'indicator': 13
+                'indicator': 'str'
             }
         ]
     }, **chef.config)
@@ -212,7 +217,7 @@ def test_ingredients_datapoints():
 
     # test split entity
     out_path = tempfile.mkdtemp()
-    i.serve(out_path, split_by='geo')
+    i.serve(out_path, split_datapoints_by=['geo'])
 
     i = ingredient_from_dict(dictionary={
         'id': 'ddf--cme',
@@ -222,10 +227,8 @@ def test_ingredients_datapoints():
             '$nin': ['imr_*']
         }
     }, **chef.config)
-    try:
+    with pytest.raises(IngredientError):
         i.get_data()
-    except IngredientError:
-        pass
 
 
 def test_ingredients_synonyms():
@@ -293,3 +296,9 @@ def test_ingredients_entities():
         'data': 'external_entity.csv'
     }, **chef.config)
     assert set(i.get_data()['country'].columns) == set(['country', 'name'])
+
+    with pytest.raises(IngredientError):
+        i = EntityIngredient(id='test',
+                             key=['country', 'name'],
+                             data=[{'country': 'chn', 'name': 'China'}])
+        i.get_data()
