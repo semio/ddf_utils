@@ -58,8 +58,6 @@ def test_chef_api_call():
     chef.validate()
     res = chef.run()
 
-    assert 1
-
 
 def test_run_recipe():
     tmpdir = tempfile.mkdtemp()
@@ -76,19 +74,10 @@ def test_chef_load_recipe():
     assert 1
 
 
-def test_ingredients():
+def test_ingredients_concepts():
     chef = Chef()
-    chef = chef.add_config(ddf_dir=os.path.join(wd, 'datasets'))
-
-    i = ingredient_from_dict(dictionary={
-        'id': 'ddf--cme',
-        'dataset': 'ddf--cme',
-        'key': 'country, year',
-        'value': {
-            '$in': ['*lower']
-        }
-    }, **chef.config)
-    assert set(list(i.get_data().keys())) == set(['imr_lower'])
+    chef = chef.add_config(ddf_dir=os.path.join(wd, 'datasets'),
+                           external_csv_dir=os.path.join(wd, 'csvs'))
 
     i = ingredient_from_dict(dictionary={
         'id': 'ddf--cme',
@@ -107,6 +96,36 @@ def test_ingredients():
         'value': ['concept', 'name', 'concept_type']
     }, **chef.config)
     assert set(i.get_data()['concept'].columns) == set(['concept', 'name', 'concept_type'])
+
+    i = ingredient_from_dict(dictionary={
+        'id': 'ddf--cme',
+        'key': 'concept',
+        'data': [{'concept': 'test', 'name': 'Test', 'concept_type': 'measure'}]
+    }, **chef.config)
+    assert set(i.get_data()['concept'].columns) == set(['concept', 'name', 'concept_type'])
+
+    i = ingredient_from_dict(dictionary={
+        'id': 'ddf--cme',
+        'key': 'concept',
+        'data': 'external.csv'
+    }, **chef.config)
+    assert set(i.get_data()['concept'].columns) == set(['concept', 'name', 'concept_type'])
+
+
+def test_ingredients_datapoints():
+    chef = Chef()
+    chef = chef.add_config(ddf_dir=os.path.join(wd, 'datasets'),
+                           external_csv_dir=os.path.join(wd, 'csvs'))
+
+    i = ingredient_from_dict(dictionary={
+        'id': 'ddf--cme',
+        'dataset': 'ddf--cme',
+        'key': 'country, year',
+        'value': {
+            '$in': ['*lower']
+        }
+    }, **chef.config)
+    assert set(list(i.get_data().keys())) == set(['imr_lower'])
 
     i = ingredient_from_dict(dictionary={
         'id': 'ddf--cme',
@@ -168,6 +187,26 @@ def test_ingredients():
 
     i = ingredient_from_dict(dictionary={
         'id': 'ddf--cme',
+        'key': 'geo, time',
+        'data': 'external_dp.csv'
+    }, **chef.config)
+    assert set(list(i.get_data().keys())) == set(['indicator'])
+
+    i = ingredient_from_dict(dictionary={
+        'id': 'ddf--cme',
+        'key': 'geo, time',
+        'data': [
+            {
+                'geo': 'abc',
+                'time': 1990,
+                'indicator': 12
+            }
+        ]
+    }, **chef.config)
+    assert set(list(i.get_data().keys())) == set(['indicator'])
+
+    i = ingredient_from_dict(dictionary={
+        'id': 'ddf--cme',
         'dataset': 'ddf--cme',
         'key': 'country, year',
         'value': {
@@ -179,12 +218,31 @@ def test_ingredients():
     except IngredientError:
         pass
 
+
+def test_ingredients_synonyms():
+    chef = Chef()
+    chef = chef.add_config(ddf_dir=os.path.join(wd, 'datasets'),
+                           external_csv_dir=os.path.join(wd, 'csvs'))
+
     i = ingredient_from_dict(dictionary={
         'id': 'ddf--dummy',
         'dataset': 'ddf--gapminder--dummy_companies',
         'key': 'synonym, region'
     }, **chef.config)
     assert set(list(i.get_data().keys())) == set(['region'])
+
+    i = ingredient_from_dict(dictionary={
+        'id': 'ddf--dummy',
+        'data': 'external_sym.csv',
+        'key': 'synonym, country'
+    }, **chef.config)
+    assert set(list(i.get_data().keys())) == set(['country'])
+
+
+def test_ingredients_entities():
+    chef = Chef()
+    chef = chef.add_config(ddf_dir=os.path.join(wd, 'datasets'),
+                           external_csv_dir=os.path.join(wd, 'csvs'))
 
     i = ingredient_from_dict(dictionary={
         'id': 'geo_entity_domain',
