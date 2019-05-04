@@ -37,11 +37,13 @@ class ILOLoader(DataFactory):
         return self.metadata
 
     def has_newer_source(self, indicator, date):
-        if not self.metadata:
+        if self.metadata is None:
             self.load_metadata()
         md = self.metadata
-        last_update = md.loc[md.id == 'indicator', 'last.update']
-        if last_update > pd.to_datetime(date):
+        last_update = md.loc[md.id == indicator, 'last.update']
+        assert len(last_update) == 1
+        last_update = last_update.values[0]
+        if pd.to_datetime(last_update) > pd.to_datetime(date):
             return True
         return False
 
