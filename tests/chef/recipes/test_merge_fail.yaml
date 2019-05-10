@@ -1,0 +1,28 @@
+info:
+    id: test-merge-fail
+
+ingredients:
+    - id: dp-1
+      key: country, year
+      data:
+          -
+              country: geo
+              year: 1000
+              value: 1
+    - id: dp-2
+      key: geo, year
+      data:
+          -
+              geo: abc
+              year: 1234
+              value: 2
+
+cooking:
+    concepts:
+        - procedure: merge
+          ingredients:
+              - dp-1
+              - dp-2
+          options:
+              deep: true
+          result: res

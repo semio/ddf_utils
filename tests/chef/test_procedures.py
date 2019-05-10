@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 import shutil
 import tempfile
+import pytest
 from ddf_utils.chef.api import Chef
 from ddf_utils.chef.exceptions import IngredientError, ProcedureError, ChefRuntimeError
 
@@ -174,6 +175,12 @@ def test_merge_2():
     assert data.loc['col2', 'col2'] == 'testing2'
     assert data.loc['col1', 'col2'] == 'bar'
     assert data.loc['col2', 'col1'] is np.nan
+
+
+def test_merge_fail():
+    chef = chef_fn('test_merge_fail.yaml')
+    with pytest.raises(ProcedureError):
+        chef.run()
 
 
 def test_run_op():

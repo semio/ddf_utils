@@ -18,6 +18,10 @@ ingredients:
       dataset: ddf--bp--energy
       key: concept
       value: "*"
+    - id: bp-entity
+      dataset: ddf--bp--energy
+      key: geo
+      value: "*"
 
 cooking:
     datapoints:
@@ -65,3 +69,11 @@ cooking:
         - procedure: serve
           ingredients:
               - res-concepts
+    entities:
+        - procedure: merge
+          ingredients:
+              - bp-entity
+              - bp-entity
+          options:
+              deep: merge
+          result: res-entity
