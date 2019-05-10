@@ -23,11 +23,34 @@ cooking:
         - procedure: extract_concepts
           ingredients:
               - cme-datapoints-translated
-          result: res
+          result: res0
+          options:
+              join:
+                  base: geo-concepts
+              include_keys: true
+              overwrite:
+                  year: time
+        - procedure: extract_concepts
+          ingredients:
+              - cme-datapoints-translated
+          result: res1
           options:
               join:
                   base: geo-concepts
                   type: full_outer
               include_keys: true
+        - procedure: extract_concepts
+          ingredients:
+              - cme-datapoints-translated
+          result: res2
+          options:
               overwrite:
                   year: time
+        - procedure: merge
+          ingredients:
+              - res0
+              - res1
+              - res2
+          options:
+              deep: true
+          result: res
