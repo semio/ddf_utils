@@ -1,0 +1,7 @@
+concept,name,concept_type
+country,Country,entity_domain
+sex,Sex,entity_domain
+year,Year,time
+bridge_start,bridge start,measure
+bridge_end,bridge end,measure
+name,Name,string

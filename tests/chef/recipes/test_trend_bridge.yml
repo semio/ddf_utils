@@ -10,6 +10,12 @@ ingredients:
       dataset: ddf--cme
       key: country, year
       value: '*'
+    - id: bridge_test
+      dataset: ddf--test--procedure
+      key: country,sex,year
+      value:
+          - bridge_start
+          - bridge_end
 
 cooking:
     datapoints:
@@ -44,4 +50,22 @@ cooking:
               bridge_on: year
               target_column:
                   - bridged
-          result: res
+          result: res-1
+        - procedure: trend_bridge
+          ingredients: []
+          options:
+              bridge_start:
+                  ingredient: bridge_test
+                  column:
+                      - bridge_start
+              bridge_end:
+                  ingredient: bridge_test
+                  column:
+                      - bridge_end
+              bridge_length: 2
+              bridge_on: year
+          result: res-2
+        - procedure: serve
+          ingredients:
+              - res-1
+              - res-2

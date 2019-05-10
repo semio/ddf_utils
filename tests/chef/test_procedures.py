@@ -123,7 +123,7 @@ def test_trend_bridge():
     chef = chef_fn('test_trend_bridge.yml')
     chef.run()
 
-    res = chef.dag.get_node('res').evaluate().compute()
+    res = chef.dag.get_node('res-1').evaluate().compute()
     assert res['imr_lower'].dtypes['year'] == np.int16
 
 
