@@ -2,23 +2,90 @@
 
 """filter procedure for recipes"""
 
-import fnmatch
+
 import logging
-import time
-import warnings
-from collections import Mapping, Sequence
-from typing import Dict, List, Optional, Union
 
-import numpy as np
-import pandas as pd
-
+from typing import List, Sequence
 from .. exceptions import ProcedureError
 from .. helpers import debuggable, mkfunc, query, read_opt, create_dsk, build_dictionary
-from .. model.ingredient import *
+from .. model.ingredient import Ingredient, get_ingredient_class
 from .. model.chef import Chef
 
 
 logger = logging.getLogger('filter')
+
+
+def _check_item_type(item):
+    """item filter only accept certain format"""
+    if isinstance(item, Sequence):
+        return "list"
+    elif isinstance(item, dict) and len(item) == 1:
+        assert list(item.keys())[0] in ['$in', '$nin'], "only $in, $nin supported in item filter"
+        return "mongo"
+    else:
+        raise ProcedureError("not supported item filter: " + str(item))
+
+
+def _filter_datapoint_item(ingredient, item):
+
+    data = ingredient.get_data()
+
+    def filter_in_list(d, l):
+        r = dict()
+        for i in l:
+            if i in d.keys():
+                r[i] = d[i].copy()
+            else:
+                logger.warning("concept {} not found in ingredient {}".format(i, ingredient.id))
+        return r
+
+    item_type = _check_item_type(item)
+    if item_type == 'list':
+        res = filter_in_list(data, item)
+    else:  # mongo
+        selector = list(item.keys())[0]
+        item_list = list(item.values())[0]
+        if selector == '$in':
+            res = filter_in_list(data, item_list)
+        else:  # $nin
+            res = dict()
+            for k, df in data.items():
+                if k not in item_list:
+                    res[k] = data[k].copy()
+    return res
+
+
+def _filter_other_item(ingredient, item):
+    data = ingredient.get_data()
+    item_type = _check_item_type(item)
+
+    def filter_in_list(d, l):
+        r = dict()
+        for k, v in d.items():
+            items_ = l.copy()
+            for i in items_:
+                if i not in v.columns:
+                    items_.remove(i)
+                    logger.warning("concept {} not found in ingredient {}".format(i, ingredient.id))
+            r[k] = v[items_].copy()
+        return r
+
+    if item_type == 'list':
+        res = filter_in_list(data, item)
+    else:  # mongo
+        selector = list(item.keys())[0]
+        item_list = list(item.values())[0]
+        if selector == '$in':
+            res = filter_in_list(data, item_list)
+        else:
+            res = dict()
+            for k, v in data.items():
+                for i in item_list:
+                    if i not in v.columns:
+                        logger.warning("concept {} not found in ingredient {}".format(i, ingredient.id))
+                keep_cols = list(set(v.columns.values) - set(item_list))
+                res[k] = v[keep_cols].copy()
+    return res
 
 
 @debuggable
@@ -69,65 +136,22 @@ def filter(chef: Chef, ingredients: List[Ingredient], result, **options) -> Ingr
     ingredient = ingredients[0]
     logger.info("filter_row: " + ingredient.id)
 
-    data = ingredient.get_data()
     row_filters = read_opt(options, 'row', False, None)
     items = read_opt(options, 'item', False, None)
-
-    res = {}
 
     if row_filters is None and items is None:
         raise ProcedureError('filter procedure: at least one of `row` and `item` should be set in the options!')
 
+    # first handel item filter, then row filter.
+    # easily to see that the order doesn't affect the final result.
     if items is not None and len(items) != 0:
-        if isinstance(items, Sequence):
-            if ingredient.dtype == 'datapoints':
-                for i in items:
-                    if i in data.keys():
-                        res[i] = data[i].copy()
-                    else:
-                        logger.warning("concept {} not found in ingredient {}".format(i, ingredient.id))
-            else:
-                for k, v in data.items():
-                    items_ = items.copy()
-                    for i in items_:
-                        if i not in v.columns:
-                            items_.remove(i)
-                            logger.warning("concept {} not found in ingredient {}".format(i, ingredient.id))
-                    res[k] = v[items_].copy()
-        elif isinstance(items, dict) and len(items) == 1:
-            assert list(items.keys())[0] in ['$in', '$nin']
-            selector = list(items.keys())[0]
-            item_list = list(items.values())[0]
-            if ingredient.dtype == 'datapoints':
-                if selector == '$in':
-                    for i in item_list:
-                        if i in data.keys():
-                            res[i] = data[i].copy()
-                        else:
-                            logger.warning("concept {} not found in ingredient {}".format(i, ingredient.id))
-                else:
-                    for k, df in data.items():
-                        if k not in item_list:
-                            res[k] = data[k].copy()
-            else:
-                if selector == '$in':
-                    items_ = item_list.copy()
-                    for k, v in data.items():
-                        for i in items_:
-                            if i not in v.columns:
-                                items_.remove(i)
-                                logger.warning("concept {} not found in ingredient {}".format(i, ingredient.id))
-                        res[k] = v[item_list].copy()
-                else:
-                    for k, v in data.items():
-                        for i in item_list:
-                            if i not in v.columns:
-                                logger.warning("concept {} not found in ingredient {}".format(i, ingredient.id))
-                        keep_cols = list(set(v.columns.values) - set(item_list))
-                        res[k] = v[keep_cols].copy()
+        if ingredient.dtype == 'datapoints':
+            res = _filter_datapoint_item(ingredient, items)
         else:
-            raise ValueError("item filter not supported: " + str(items))
+            res = _filter_other_item(ingredient, items)
     else:
+        res = dict()
+        data = ingredient.get_data()
         for k, df in data.items():
             res[k] = df.copy()
 

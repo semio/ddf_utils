@@ -55,9 +55,19 @@ cooking:
           - final_datapoints
           - final_datapoints-1
   concepts:
+    - procedure: filter
+      ingredients:
+          - cme-concepts
+      options:
+          item:
+              $in:
+                  concept:
+                      - imr_lower
+                      - no_exist
+      result: cme-concepts-filtered
     - procedure: serve
       ingredients:
-        - cme-concepts
+        - cme-concepts-filtered
   entities:
     - procedure: filter
       ingredients:
@@ -66,6 +76,7 @@ cooking:
         item:
           - country
           - countryname
+          - on_exist
         row:
           country:
             $in:
