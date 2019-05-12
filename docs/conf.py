@@ -20,6 +20,10 @@
 import os
 import sys
 sys.path.insert(0, os.path.abspath('../'))
+sys.path.insert(0, os.path.abspath('../ddf_utils'))
+sys.path.insert(0, os.path.abspath('../ddf_utils/chef'))
+sys.path.insert(0, os.path.abspath('../ddf_utils/chef/model'))
+sys.path.insert(0, os.path.abspath('../ddf_utils/chef/procedure'))
 
 # fixing readthedoc problem
 # http://blog.rtwilson.com/how-to-make-your-sphinx-documentation-compile-with-readthedocs-when-youre-using-numpy-and-scipy/
@@ -377,4 +381,3 @@ source_suffix = ['.rst', '.md']
 source_parsers = {
 	'.md': CommonMarkParser,
 }
-

@@ -633,7 +633,11 @@ def infer_type_from_keys(keys: list):
 
 
 def ingredient_from_dict(dictionary: dict, **chef_options) -> Ingredient:
-    """create ingredient from recipe definition and options."""
+    """create ingredient from recipe definition and options. Parameters
+    for ingredient should be passed in a dictionary. See the doc for
+    :ref:`ingredient def` or :py:class:`ddf_utils.chef.model.ingredient.Ingredient` for
+    available parameters.
+    """
     ingred_id = read_opt(dictionary, 'id', default=None, method='pop')
     dataset = read_opt(dictionary, 'dataset', default=None, method='pop')
     data = read_opt(dictionary, 'data', default=None, method='pop')

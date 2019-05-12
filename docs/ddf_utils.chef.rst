@@ -1,6 +1,16 @@
 ddf_utils.chef package
 ======================
 
+Subpackages
+-----------
+
+.. toctree::
+    :maxdepth: 4
+
+    ddf_utils.chef.model
+    ddf_utils.chef.procedure
+
+
 Submodules
 ----------
 
@@ -12,13 +22,6 @@ ddf_utils.chef.api module
     :undoc-members:
     :show-inheritance:
 
-ddf_utils.chef.model module
----------------------------
-
-.. automodule:: ddf_utils.chef.model
-    :members:
-    :undoc-members:
-    :show-inheritance:
 
 ddf_utils.chef.exceptions module
 --------------------------------

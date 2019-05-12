@@ -54,13 +54,13 @@ domain, namely:
 - :py:mod:`chef <ddf_utils.chef.api>`: Recipe cooking functions. See :doc:`recipe`
   for how to write recipes
 - :py:mod:`i18n <ddf_utils.i18n>`: Splitting/merging translation files
-- :py:mod:`datapackage <ddf_utils.datapackage>`: Generating/updating datapackage.json
-- :py:mod:`model <ddf_utils.model.ddf>`: Data Models for dataset and datapackage
+- :py:mod:`package <ddf_utils.package>`: Generating/updating datapackage.json
+- :py:mod:`model <ddf_utils.model.ddf>` / :py:mod:`model <ddf_utils.model.package>`: Data Models for dataset and datapackage
 - :py:mod:`patch <ddf_utils.patch>`: Applying patch in `daff format`_
 - :py:mod:`qa <ddf_utils.qa>`: Functions for QA tasks
 - :py:mod:`str <ddf_utils.str>`: Functions for string/number formatting
-- :py:mod:`transformer <ddf_utils.transformer>`: Data transforming functions,
-  such as column/row translation, trend bridge, etc.
+- :py:mod:`transformer <ddf_utils.transformer>`: Data transforming
+  functions, such as column/row translation, trend bridge, etc.
 
 see above links for documents for each module.
 

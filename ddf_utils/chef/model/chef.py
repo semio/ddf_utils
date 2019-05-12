@@ -174,9 +174,11 @@ class Chef:
     def add_ingredient(self, **kwargs):
         """add a new ingredient in DAG.
 
-        keyword arguments will send as a dictionary to the ``dictionary`` keyword of
-        :py:meth:`ddf_utils.chef.ingredient.Ingredient.from_dict` method. Check ``from_dict()``
-        doc for available keywords
+        keyword arguments will send as a dictionary to the
+        ``dictionary`` keyword of
+        :py:func:`ddf_utils.chef.model.ingredient.ingredient_from_dict`
+        method.
+
         """
         ingredient = ingredient_from_dict(dictionary=kwargs, **self.config)
         self.dag.add_node(IngredientNode(ingredient.id, ingredient, self))

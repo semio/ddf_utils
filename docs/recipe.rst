@@ -76,6 +76,8 @@ can set this option in ``config`` section.
 There are other options you can set in this section, check `config section`_ for
 available options.
 
+.. _ingredient def:
+
 3. Define Ingredients
 ~~~~~~~~~~~~~~~~~~~~~
 
@@ -795,9 +797,14 @@ procedure:
 filter
 ~~~~~~
 
-Filter ingredient data with Mongo-like queries.
+Filter ingredient data with Mongo-like queries. You can filter the
+ingredient by item, which means indicators in datapoints or columns in
+other type of ingredients, and/or by row.
 
-**TODO**: More info
+``item`` filter accepts a list of items, or a list followed by ``$in``
+or ``$nin``. ``row`` filter accepts a query similar to mongo queries,
+supportted keywords are ``$and``, ``$or``, ``$eq``, ``$ne``, ``$gt``,
+``$lt``. See below for an example.
 
 **usage and options**:
 
@@ -807,11 +814,11 @@ Filter ingredient data with Mongo-like queries.
      ingredients:
          - ingredient_id
      options:
-         item:  # just as `value` in ingredient def
+         item:  # just as `value` in ingredient definition
              $in:
                  - concept_1
                  - concept_2
-         row:  # just as `filter` in ingredient def
+         row:  # just as `filter` in ingredient definition
              $and:
                  geo:
                      $ne: usa
@@ -819,76 +826,10 @@ Filter ingredient data with Mongo-like queries.
                      $gt: 2010
       result: output_ingredient
 
-for more information, see the :py:class:`ddf_utils.chef.ingredient.Ingredient` class.
+for more information, see the
+:py:class:`ddf_utils.chef.model.ingredient.Ingredient` class and
+:py:func:`ddf_utils.chef.procedure.filter` function.
 
-filter\_row
-~~~~~~~~~~~
-
-.. warning::
-
-   Please use ``filter`` procedure. This one is deprecated
-
-Filter ingredient data by column values.
-
-**usage and options**
-
-.. code-block:: yaml
-
-    procedure: filter_row
-    ingredients:  # list of ingredient id
-      - ingredient_id
-    result: str  # new ingledient id
-    options:
-      filters: dict  # filter definition block
-
-**filter definition**
-
-A filter definitioin block have following format:
-
-.. code-block:: yaml
-
-    filters:
-        column_name:
-          key_col_1: object  # type should match the data type of the key column, can be a list
-          key_col_2: object
-
-also, wildcard is supported for column names:
-
-.. code-block:: yaml
-
-    filters:
-        population*:
-          gender: ["male"]  # filter gender == "male" for all indicators starts with population
-
-**notes**
-
--  currently chef only support one ingredient in the ``ingredients``
-   parameter
-
-filter\_item
-~~~~~~~~~~~~
-
-.. warning::
-
-   Please use ``filter`` procedure. This one is deprecated
-
-Filter ingredient data by concepts.
-
-**usage and options**
-
-.. code-block:: yaml
-
-    procedure: filter_item
-    ingredients:  # list of ingredient id
-      - ingredient_id
-    result: str  # new ingledient id
-    options:
-      items: list  # a list of items should be in the result ingredient
-
-**notes**
-
--  currently chef only support one ingredient in the ``ingredients``
-   parameter
 
 run\_op
 ~~~~~~~
@@ -1144,6 +1085,21 @@ For a pretty printed output of the invalid path, try using json processors like
     },
     "result": "unpop-datapoints-pop-by-age-country"
   }
+
+Other then the json schema, we can also valiate recipe using ``dhall``, as we will talk about in `next section <Write recipe in Dhall>`_.
+
+Write recipe in Dhall
+---------------------
+
+Sometimes there will be recurring tasks, for example, you might
+applying same procedures again and again to different ingredients. In
+this case we would benefit from Dhall_ language. Also, there are more
+advantages on using Dhall over yaml, such as type checking. We provide
+type definitions for the recipe in `an other repo`_. Check examples in
+the repo to see how to use them.
+
+.. _Dhall: https://dhall-lang.org
+.. _`an other repo`: https://github.com/semio/dhall-ddf-recipe
 
 General guidelines for writing recipes
 --------------------------------------
