@@ -8,7 +8,7 @@ import pandas as pd
 
 from typing import List
 
-from .. helper import debuggable
+from .. helpers import debuggable
 from .. model.ingredient import Ingredient, ConceptIngredient
 from .. model.chef import Chef
 
