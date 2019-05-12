@@ -7,7 +7,7 @@ import logging
 
 from typing import List, Sequence
 from .. exceptions import ProcedureError
-from .. helpers import debuggable, mkfunc, query, read_opt, create_dsk, build_dictionary
+from .. helpers import debuggable, read_opt, query
 from .. model.ingredient import Ingredient, get_ingredient_class
 from .. model.chef import Chef
 

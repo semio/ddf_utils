@@ -2,19 +2,14 @@
 
 """extract_concepts procedure for recipes"""
 
-import fnmatch
 import logging
-import time
-import warnings
-from collections import Mapping, Sequence
-from typing import Dict, List, Optional, Union
-
 import numpy as np
 import pandas as pd
 
-from .. exceptions import ProcedureError
-from .. helpers import debuggable, mkfunc, query, read_opt, create_dsk, build_dictionary
-from .. model.ingredient import *
+from typing import List
+
+from .. helper import debuggable
+from .. model.ingredient import Ingredient, ConceptIngredient
 from .. model.chef import Chef
 
 

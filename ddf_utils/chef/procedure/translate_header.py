@@ -2,19 +2,11 @@
 
 """translate_header procedures for recipes"""
 
-import fnmatch
 import logging
-import time
-import warnings
-from collections import Mapping, Sequence
-from typing import Dict, List, Optional, Union
+from typing import List
 
-import numpy as np
-import pandas as pd
-
-from .. exceptions import ProcedureError
-from .. helpers import debuggable, mkfunc, query, read_opt, create_dsk, build_dictionary
-from .. model.ingredient import *
+from .. helpers import debuggable, build_dictionary
+from .. model.ingredient import Ingredient, get_ingredient_class
 from .. model.chef import Chef
 
 

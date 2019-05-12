@@ -4,17 +4,11 @@
 
 import fnmatch
 import logging
-import time
-import warnings
-from collections import Mapping, Sequence
-from typing import Dict, List, Optional, Union
 
-import numpy as np
-import pandas as pd
+from typing import List
 
-from .. exceptions import ProcedureError
-from .. helpers import debuggable, mkfunc, query, read_opt, create_dsk, build_dictionary
-from .. model.ingredient import *
+from .. helpers import debuggable, read_opt
+from .. model.ingredient import DataPointIngredient
 from .. model.chef import Chef
 
 
@@ -106,7 +100,7 @@ def flatten(chef: Chef, ingredients: List[DataPointIngredient], result, **option
                 # remove totals among entities from name
                 if skip_totals_among_entities is not None:
                     for e in skip_totals_among_entities:
-                        new_name = new_name.replace('_'+e, '')
+                        new_name = new_name.replace('_' + e, '')
                     logger.info('new name w/o total among entities is {}'.format(new_name))
                 if new_name in res.keys():
                     # raise ProcedureError("{} already created! check your name template please.".format(new_name))

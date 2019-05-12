@@ -2,20 +2,18 @@
 
 """merge procedure for recipes"""
 
-import fnmatch
 import logging
 import time
-import warnings
-from collections import Mapping, Sequence
-from typing import Dict, List, Optional, Union, TypeVar
+
+from typing import List, Dict, Union
 
 import numpy as np
 import pandas as pd
 import dask.dataframe as dd
 
 from .. exceptions import ProcedureError
-from .. helpers import debuggable, mkfunc, query, read_opt, create_dsk, build_dictionary, dsk_to_pandas
-from .. model.ingredient import *
+from .. helpers import debuggable
+from .. model.ingredient import Ingredient, get_ingredient_class
 from .. model.chef import Chef
 
 
