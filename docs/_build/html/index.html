@@ -156,18 +156,59 @@
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="intro.html#installation">Installation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="intro.html#usage">Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="intro.html#installation">Installation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="intro.html#for-windows-users">For Windows users</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="intro.html#usage">Usage</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="intro.html#library">Library</a></li>
+<li class="toctree-l3"><a class="reference internal" href="intro.html#command-line-helper">Command line helper</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="recipe.html">Recipe Cookbook (draft)</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="recipe.html#what-is-recipe">What is Recipe</a></li>
-<li class="toctree-l2"><a class="reference internal" href="recipe.html#write-your-first-recipe">Write Your First Recipe</a></li>
-<li class="toctree-l2"><a class="reference internal" href="recipe.html#structure-of-a-recipe">Structure of a Recipe</a></li>
+<li class="toctree-l2"><a class="reference internal" href="recipe.html#write-your-first-recipe">Write Your First Recipe</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="recipe.html#prologue">0. Prologue</a></li>
+<li class="toctree-l3"><a class="reference internal" href="recipe.html#add-basic-info">1. Add basic info</a></li>
+<li class="toctree-l3"><a class="reference internal" href="recipe.html#set-options">2. Set Options</a></li>
+<li class="toctree-l3"><a class="reference internal" href="recipe.html#define-ingredients">3. Define Ingredients</a></li>
+<li class="toctree-l3"><a class="reference internal" href="recipe.html#add-cooking-procedures">4. Add Cooking Procedures</a></li>
+<li class="toctree-l3"><a class="reference internal" href="recipe.html#serve-dishes">5. Serve Dishes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="recipe.html#running-the-recipe">6. Running the Recipe</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="recipe.html#structure-of-a-recipe">Structure of a Recipe</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="recipe.html#info-section">info section</a></li>
+<li class="toctree-l3"><a class="reference internal" href="recipe.html#config-section">config section</a></li>
+<li class="toctree-l3"><a class="reference internal" href="recipe.html#include-section">include section</a></li>
+<li class="toctree-l3"><a class="reference internal" href="recipe.html#ingredients-section">ingredients section</a></li>
+<li class="toctree-l3"><a class="reference internal" href="recipe.html#cooking-section">cooking section</a></li>
+<li class="toctree-l3"><a class="reference internal" href="recipe.html#serving-section-and-serve-procedure">serving section and serve procedure</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="recipe.html#recipe-execution">Recipe execution</a></li>
-<li class="toctree-l2"><a class="reference internal" href="recipe.html#available-procedures">Available procedures</a></li>
+<li class="toctree-l2"><a class="reference internal" href="recipe.html#available-procedures">Available procedures</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="recipe.html#translate-header">translate_header</a></li>
+<li class="toctree-l3"><a class="reference internal" href="recipe.html#translate-column">translate_column</a></li>
+<li class="toctree-l3"><a class="reference internal" href="recipe.html#merge">merge</a></li>
+<li class="toctree-l3"><a class="reference internal" href="recipe.html#groupby">groupby</a></li>
+<li class="toctree-l3"><a class="reference internal" href="recipe.html#window">window</a></li>
+<li class="toctree-l3"><a class="reference internal" href="recipe.html#filter">filter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="recipe.html#run-op">run_op</a></li>
+<li class="toctree-l3"><a class="reference internal" href="recipe.html#extract-concepts">extract_concepts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="recipe.html#trend-bridge">trend_bridge</a></li>
+<li class="toctree-l3"><a class="reference internal" href="recipe.html#flatten">flatten</a></li>
+<li class="toctree-l3"><a class="reference internal" href="recipe.html#split-entity">split_entity</a></li>
+<li class="toctree-l3"><a class="reference internal" href="recipe.html#merge-entity">merge_entity</a></li>
+<li class="toctree-l3"><a class="reference internal" href="recipe.html#custom-procedures">custom procedures</a></li>
+<li class="toctree-l3"><a class="reference internal" href="recipe.html#checking-intermediate-results">Checking Intermediate Results</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="recipe.html#validate-the-result-with-ddf-validation">Validate the Result with ddf-validation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="recipe.html#validate-recipe-with-schema">Validate Recipe with Schema</a></li>
+<li class="toctree-l2"><a class="reference internal" href="recipe.html#write-recipe-in-dhall">Write recipe in Dhall</a></li>
 <li class="toctree-l2"><a class="reference internal" href="recipe.html#general-guidelines-for-writing-recipes">General guidelines for writing recipes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="recipe.html#the-hy-mode">The Hy Mode</a></li>
 </ul>
@@ -178,7 +219,24 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="modules.html">API References</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="ddf_utils.html">ddf_utils package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ddf_utils.html">ddf_utils package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ddf_utils.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="ddf_utils.chef.html">ddf_utils.chef package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ddf_utils.model.html">ddf_utils.model package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ddf_utils.factory.html">ddf_utils.factory package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="ddf_utils.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ddf_utils.html#module-ddf_utils.cli">ddf_utils.cli module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ddf_utils.html#module-ddf_utils.i18n">ddf_utils.i18n module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ddf_utils.html#module-ddf_utils.package">ddf_utils.package module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ddf_utils.html#module-ddf_utils.io">ddf_utils.io module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ddf_utils.html#module-ddf_utils.patch">ddf_utils.patch module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ddf_utils.html#module-ddf_utils.qa">ddf_utils.qa module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ddf_utils.html#module-ddf_utils.str">ddf_utils.str module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ddf_utils.html#module-ddf_utils.transformer">ddf_utils.transformer module</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>

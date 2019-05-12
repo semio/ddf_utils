@@ -180,9 +180,21 @@
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="ddf_utils.chef.html">ddf_utils.chef package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ddf_utils.chef.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ddf_utils.chef.model.html">ddf_utils.chef.model package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="ddf_utils.chef.model.html#module-ddf_utils.chef.model.chef">ddf_utils.chef.model.chef</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ddf_utils.chef.model.html#module-ddf_utils.chef.model.dag">ddf_utils.chef.model.dag</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ddf_utils.chef.model.html#module-ddf_utils.chef.model.ingredient">ddf_utils.chef.model.ingredient</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="ddf_utils.chef.procedure.html">ddf_utils.chef.procedure package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="ddf_utils.chef.procedure.html#module-ddf_utils.chef.procedure.extract_concepts">Available Procedures</a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="ddf_utils.chef.html#submodules">Submodules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ddf_utils.chef.html#module-ddf_utils.chef.api">ddf_utils.chef.api module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ddf_utils.chef.html#module-ddf_utils.chef.model">ddf_utils.chef.model module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ddf_utils.chef.html#module-ddf_utils.chef.exceptions">ddf_utils.chef.exceptions module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ddf_utils.chef.html#module-ddf_utils.chef.helpers">ddf_utils.chef.helpers module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ddf_utils.chef.html#module-ddf_utils.chef.ops">ddf_utils.chef.ops module</a></li>
@@ -265,7 +277,13 @@ keyword arguments to this function</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>path</strong> (<cite>str</cite>) – the dataset path to create datapackage.json</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>path</strong> (<cite>str</cite>) – the dataset path to create datapackage.json</li>
+<li><strong>gen_schema</strong> (<em>bool</em>) – whether to create DDFSchema in datapackage.json. Default is True</li>
+<li><strong>kwargs</strong> (<em>dict</em>) – metadata to write into datapackage.json. According to spec,
+title, description, author and license SHOULD be fields in datapackage.json.</li>
+</ul>
+</td>
 </tr>
 </tbody>
 </table>
@@ -373,7 +391,7 @@ to judge if the dir is a dataset.</p>
 
 <dl class="function">
 <dt id="ddf_utils.io.serve_datapoint">
-<code class="descclassname">ddf_utils.io.</code><code class="descname">serve_datapoint</code><span class="sig-paren">(</span><em>df_: &lt;Mock name='mock.DataFrame' id='4391014016'&gt;</em>, <em>out_dir</em>, <em>concept</em>, <em>copy=True</em>, <em>by: Iterable = None</em>, <em>formatter: Callable = &lt;function format_float_digits&gt;</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.io.serve_datapoint" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.io.</code><code class="descname">serve_datapoint</code><span class="sig-paren">(</span><em>df_: &lt;Mock name='mock.DataFrame' id='4416528848'&gt;</em>, <em>out_dir</em>, <em>concept</em>, <em>copy=True</em>, <em>by: Iterable = None</em>, <em>formatter: Callable = &lt;function format_float_digits&gt;</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.io.serve_datapoint" title="Permalink to this definition">¶</a></dt>
 <dd><p>save a pandas dataframe to datapoint file.
 the file path of csv will be out_dir/ddf–datapoints–$concept–$by.csv</p>
 <p>addition keyword arguments can be passed to <cite>pd.DataFrame.to_csv()</cite> function.</p>
@@ -408,39 +426,39 @@ more on the diff format, see: <a class="reference external" href="http://specs.f
 
 <dl class="function">
 <dt id="ddf_utils.qa.compare_with_func">
-<code class="descclassname">ddf_utils.qa.</code><code class="descname">compare_with_func</code><span class="sig-paren">(</span><em>dataset1</em>, <em>dataset2</em>, <em>fns=None</em>, <em>indicators=None</em>, <em>key=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.qa.compare_with_func" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.qa.</code><code class="descname">compare_with_func</code><span class="sig-paren">(</span><em>dataset1</em>, <em>dataset2</em>, <em>fns=None</em>, <em>indicators=None</em>, <em>key=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.qa.compare_with_func" title="Permalink to this definition">¶</a></dt>
 <dd><p>compare 2 datasets with functions</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.qa.dropped_datapoints">
-<code class="descclassname">ddf_utils.qa.</code><code class="descname">dropped_datapoints</code><span class="sig-paren">(</span><em>comp_df</em>, <em>indicator</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.qa.dropped_datapoints" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.qa.</code><code class="descname">dropped_datapoints</code><span class="sig-paren">(</span><em>comp_df</em>, <em>indicator</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.qa.dropped_datapoints" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.qa.max_change_index">
-<code class="descclassname">ddf_utils.qa.</code><code class="descname">max_change_index</code><span class="sig-paren">(</span><em>comp_df</em>, <em>indicator</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.qa.max_change_index" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.qa.</code><code class="descname">max_change_index</code><span class="sig-paren">(</span><em>comp_df</em>, <em>indicator</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.qa.max_change_index" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.qa.max_pct_chg">
-<code class="descclassname">ddf_utils.qa.</code><code class="descname">max_pct_chg</code><span class="sig-paren">(</span><em>comp_df</em>, <em>indicator</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.qa.max_pct_chg" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.qa.</code><code class="descname">max_pct_chg</code><span class="sig-paren">(</span><em>comp_df</em>, <em>indicator</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.qa.max_pct_chg" title="Permalink to this definition">¶</a></dt>
 <dd><p>return average precentage changes between old and new data</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.qa.new_datapoints">
-<code class="descclassname">ddf_utils.qa.</code><code class="descname">new_datapoints</code><span class="sig-paren">(</span><em>comp_df</em>, <em>indicator</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.qa.new_datapoints" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.qa.</code><code class="descname">new_datapoints</code><span class="sig-paren">(</span><em>comp_df</em>, <em>indicator</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.qa.new_datapoints" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.qa.nrmse">
-<code class="descclassname">ddf_utils.qa.</code><code class="descname">nrmse</code><span class="sig-paren">(</span><em>comp_df</em>, <em>indicator</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.qa.nrmse" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.qa.</code><code class="descname">nrmse</code><span class="sig-paren">(</span><em>comp_df</em>, <em>indicator</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.qa.nrmse" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.qa.rmse">
-<code class="descclassname">ddf_utils.qa.</code><code class="descname">rmse</code><span class="sig-paren">(</span><em>comp_df</em>, <em>indicator</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.qa.rmse" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.qa.</code><code class="descname">rmse</code><span class="sig-paren">(</span><em>comp_df</em>, <em>indicator</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.qa.rmse" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
@@ -607,7 +625,7 @@ avaliable options are <cite>drop</cite>, <cite>error</cite>, <cite>include</cite
 
 <dl class="function">
 <dt id="ddf_utils.transformer.trend_bridge">
-<code class="descclassname">ddf_utils.transformer.</code><code class="descname">trend_bridge</code><span class="sig-paren">(</span><em>old_ser: &lt;Mock name='mock.Series' id='4392523984'&gt;</em>, <em>new_ser: &lt;Mock name='mock.Series' id='4392523984'&gt;</em>, <em>bridge_length: int</em><span class="sig-paren">)</span> &#x2192; &lt;Mock name='mock.Series' id='4392523984'&gt;<a class="headerlink" href="#ddf_utils.transformer.trend_bridge" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.transformer.</code><code class="descname">trend_bridge</code><span class="sig-paren">(</span><em>old_ser: &lt;Mock name='mock.Series' id='4412376624'&gt;</em>, <em>new_ser: &lt;Mock name='mock.Series' id='4412376624'&gt;</em>, <em>bridge_length: int</em><span class="sig-paren">)</span> &#x2192; &lt;Mock name='mock.Series' id='4412376624'&gt;<a class="headerlink" href="#ddf_utils.transformer.trend_bridge" title="Permalink to this definition">¶</a></dt>
 <dd><p>smoothing data between series.</p>
 <p>To avoid getting artificial stairs in the data, we smooth between to
 series. Sometime one source is systematically higher than another source,
