@@ -55,7 +55,7 @@ domain, namely:
   for how to write recipes
 - :py:mod:`i18n <ddf_utils.i18n>`: Splitting/merging translation files
 - :py:mod:`package <ddf_utils.package>`: Generating/updating datapackage.json
-- :py:mod:`model <ddf_utils.model.ddf>` / :py:mod:`model <ddf_utils.model.package>`: Data Models for dataset and datapackage
+- :py:mod:`model.ddf <ddf_utils.model.ddf>` / :py:mod:`model.package <ddf_utils.model.package>`: Data Models for dataset and datapackage
 - :py:mod:`patch <ddf_utils.patch>`: Applying patch in `daff format`_
 - :py:mod:`qa <ddf_utils.qa>`: Functions for QA tasks
 - :py:mod:`str <ddf_utils.str>`: Functions for string/number formatting
