@@ -127,9 +127,9 @@ ingredients:
          dataset: ddf--bp--energy
          key: geo
          value: "*"
-       - id: gapminder-country-entities
+       - id: gapminder-country-synonyms
          dataset: ddf--gapminder--population
-         key: country
+         key: country, synonym
          value: "*"
 
 4. Add Cooking Procedures
@@ -192,13 +192,9 @@ these tasks done.
              column: geo_name  # the procedure will search for values in this column
              target_column: country  # ... and put the matched value in this column
              dictionary:
-                 base: gapminder-country-entities
+                 base: gapminder-country-synonyms
                  # key is the columns to search for match of geo names
-                 key: ['gapminder_list', 'alternative_1', 'alternative_2', 'alternative_3',
-                       'alternative_4_cdiac', 'pandg', 'god_id', 'alt_5', 'upper_case_name',
-                       'arb1', 'arb2', 'arb3', 'arb4', 'arb5', 'arb6', 'name', 'iso3166_1_alpha2',
-                       'iso3166_1_alpha3', 'iso3166_2'
-                      ]
+                 key: synonym
                  # value is the column to get new value
                  value: country
 
@@ -230,11 +226,11 @@ these tasks done.
                        oil_consumption_tonnes * 1000 / population
            result: datapoints-calculated
          # only keep the indicator we need
-         - procedure: filter_item
+         - procedure: filter
            ingredients:
                - datapoints-calculated
            options:
-               items:
+               item:
                    - oil_consumption_per_capita
            result: datapoints-final
 
