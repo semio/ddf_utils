@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 """i18n project management for Gapminder's datasets.
 
-The workflow is described in this `google doc`_
+The workflow is described in this `google doc`_. The json part comes from discussion `here`_
 
 .. _google doc: https://docs.google.com/document/d/11d5D5CPlr6I2BqP8z0p2o_dYQC9AYUyxcLGUq1WYCfk/
+.. _here: https://gapminder.slack.com/archives/C0FTBA1P0/p1479832399000650
+
 """
 
 import os
@@ -14,7 +16,15 @@ from .package import get_datapackage
 
 
 def split_translations_json(path, split_path='langsplit', exclude_concepts=None, overwrite=False):
-    """split all string concepts and save them as json files"""
+    """split all string concepts and save them as json files
+
+    Note
+    ----
+
+    There is an issue with dataframe.to_json() method for multiIndex files (i.e. datapoints), which
+    cause we can't read back the split files and merge them. In this case :py:func:`merge_translations_json` will fail.
+
+    """
     datapackage = get_datapackage(path)
     split_path = os.path.join(path, split_path)
 
@@ -183,7 +193,8 @@ def merge_translations_csv(path, split_path='langsplit', lang_path='lang', overw
 
 
 def merge_translations_json(path, split_path='langsplit', lang_path='lang', overwrite=False):
-    """merge all translated json files and update datapackage.json"""
+    """merge all translated json files and update datapackage.json.
+    """
     # make the paths full paths
     split_path = os.path.join(path, split_path)
     lang_path = os.path.join(path, lang_path)

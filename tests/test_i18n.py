@@ -34,7 +34,7 @@ def test_split_translation():
 
 
 def test_merge_translation():
-    from ddf_utils.i18n import merge_translations_csv
+    from ddf_utils.i18n import merge_translations_csv, merge_translations_json
 
     dataset_path = test_dataset_path
     split_path = 'langsplit'
@@ -42,6 +42,15 @@ def test_merge_translation():
     if os.path.exists(os.path.join(dataset_path, 'lang')):
         shutil.rmtree(os.path.join(dataset_path, 'lang'))
 
-    merge_translations_csv(dataset_path)
+    merge_translations_csv(dataset_path, split_path=split_path)
 
-    assert os.path.isdir(os.path.join(dataset_path, split_path, 'zh_CN'))
+    assert os.path.isdir(os.path.join(dataset_path, 'lang', 'zh_CN'))
+
+    split_path = 'langsplit_2'
+
+    if os.path.exists(os.path.join(dataset_path, 'lang')):
+        shutil.rmtree(os.path.join(dataset_path, 'lang'))
+
+    merge_translations_json(dataset_path, split_path=split_path)
+
+    assert os.path.isdir(os.path.join(dataset_path, 'lang', 'zh_CN'))
