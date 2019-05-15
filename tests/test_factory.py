@@ -2,12 +2,17 @@
 
 from ddf_utils.factory import (CDIACLoader, ClioInfraLoader, IGMELoader,
                                IHMELoader, ILOLoader, OECDLoader, WorldBankLoader)
+import tempfile
 
 
 def test_ihme():
     ihme = IHMELoader()
     ihme._make_query('cause', 376)
     ihme.has_newer_source(376)
+
+    tmpdir = tempfile.mkdtemp()
+    test_url = 'http://ipv4.download.thinkbroadband.com/5MB.zip'
+    ihme._run_download(test_url, tmpdir, '12345678')
 
 
 def test_wdi():
