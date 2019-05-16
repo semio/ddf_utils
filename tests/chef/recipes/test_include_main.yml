@@ -1,0 +1,8 @@
+info:
+    id: test-include
+
+config:
+    recipe_dir: ./
+
+include:
+    - test_include.yml

@@ -29,6 +29,11 @@ def test_debug_option():
     shutil.rmtree('./_debug/')
 
 
+def test_include():
+    chef = chef_fn('test_include_main.yml')
+    chef.run()
+
+
 def test_extract_concepts():
     chef = chef_fn('test_extract_concepts.yaml')
     res = chef.run()
