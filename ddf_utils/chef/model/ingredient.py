@@ -31,7 +31,7 @@ from ..exceptions import IngredientError
 from ..helpers import gen_sym, query, read_opt, sort_df, read_local_ddf, create_dsk
 
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('Ingredient')
 
 
 @attr.s
@@ -166,6 +166,7 @@ class ConceptIngredient(Ingredient):
         self.key = 'concept'
 
     def get_data(self) -> Dict[str, pd.DataFrame]:
+        logger.info('evaluating data for {}'.format(self.id))
         if self.data_computed is not None:
             return self.data_computed
 
@@ -247,6 +248,7 @@ class EntityIngredient(Ingredient):
             self.key = self.key[0]
 
     def get_data(self) -> Dict[str, pd.DataFrame]:
+        logger.info('evaluating data for {}'.format(self.id))
         if self.data_computed is not None:
             return self.data_computed
 
@@ -371,6 +373,7 @@ class DataPointIngredient(Ingredient):
             self.key = key_to_list(self.key)
 
     def get_data(self) -> Dict[str, dd.DataFrame]:
+        logger.info('evaluating data for {}'.format(self.id))
         if self.data_computed is not None:
             return self.data_computed
 
@@ -567,6 +570,7 @@ class SynonymIngredient(Ingredient):
             self.key = key_to_list(self.key)
 
     def get_data(self):
+        logger.info('evaluating data for {}'.format(self.id))
         if self.data_computed is not None:
             return self.data_computed
 

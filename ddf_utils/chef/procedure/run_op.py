@@ -12,7 +12,7 @@ from .. model.ingredient import DataPointIngredient
 from .. model.chef import Chef
 
 
-logger = logging.getLogger('Chef')
+logger = logging.getLogger('run_op')
 
 
 @debuggable

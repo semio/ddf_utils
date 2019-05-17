@@ -12,6 +12,9 @@ from functools import partial
 from ddf_utils.chef.helpers import prompt_select
 
 
+logger = logging.getLogger(__name__)
+
+
 def _check_ambiguities(dictionary, ambiguity):
     # check for ambiguities
     dict_ = dictionary.copy()
@@ -43,8 +46,8 @@ def __print_not_found(series, dictionary):
         if v not in dictionary.keys():
             nf.add(v)
     if len(nf) > 0:
-        logging.warning('key not found:')
-        logging.warning(list(nf))
+        logger.warning('key not found:')
+        logger.warning(list(nf))
 
 
 def __process_val(v, dictionary=None):
@@ -105,15 +108,15 @@ def _generate_mapping_dict1(df, column, dictionary, base_df, not_found):
     base_df_ = base_df.dropna(subset=[idx_col]).dropna(subset=[search_col])
 
     if base_df_.set_index(idx_col).index.has_duplicates:
-        logging.warning('there are duplicated keys in the base dataframe:')
+        logger.warning('there are duplicated keys in the base dataframe:')
         m = base_df_.set_index(idx_col).index.duplicated()
-        logging.warning(base_df_.set_index(idx_col).index[m].unique())
+        logger.warning(base_df_.set_index(idx_col).index[m].unique())
 
     if search_col == idx_col:
         mapping_all = dict([(x, x) for x in base_df_[idx_col].values])
     else:
         mapping_all = base_df_.set_index(search_col)[idx_col].to_dict()
-    # add logging for no match
+    # add logger for no match
     no_match = set()
 
     # need to compute the actual dataframe now if it's a dask dataframe.
@@ -126,7 +129,7 @@ def _generate_mapping_dict1(df, column, dictionary, base_df, not_found):
         if v not in mapping_all.keys():
             no_match.add(v)
     if len(no_match) > 0:
-        logging.warning('no match found: ' + str(no_match))
+        logger.warning('no match found: ' + str(no_match))
     return mapping_all
 
 
@@ -142,7 +145,7 @@ def _generate_mapping_dict2(df, column, dictionary, base_df, not_found, ignore_c
 
     for f in df[column].unique():
         if pd.isnull(f):
-            logging.warning('skipping n/a values in column {}'.format(column))
+            logger.warning('skipping n/a values in column {}'.format(column))
             continue
         bools = []
         for sc in search_cols:
@@ -163,11 +166,11 @@ def _generate_mapping_dict2(df, column, dictionary, base_df, not_found, ignore_c
         if len(filtered) == 1:
             mapping[f] = filtered[idx_col].iloc[0]
         elif len(filtered) > 1:
-            logging.warning("multiple match found: "+f)
+            logger.warning("multiple match found: "+f)
             mapping[f] = filtered[idx_col].values.tolist()
 
     if len(no_match) > 0:
-        logging.warning('no match found: ' + str(no_match))
+        logger.warning('no match found: ' + str(no_match))
 
     if not_found == 'error' and len(no_match) > 0:
         raise ValueError('missing keys in dictionary. please check your input.')
@@ -463,7 +466,7 @@ def split_keys(df, target_column, dictionary, splited='drop'):
             tdf = df_[df_[target_column] == spl].set_index(keys).sort_index()
             last = pd.DataFrame(tdf.loc[tdf.index[0], tdf.columns]).T
             last.index.names = keys
-            logging.debug("using {} for first valid index".format(tdf.index[0]))
+            logger.debug("using {} for first valid index".format(tdf.index[0]))
             last = last.reset_index()
             for key in keys:
                 if key != target_column:
@@ -474,7 +477,7 @@ def split_keys(df, target_column, dictionary, splited='drop'):
         ptc = before_spl / total
         ratio[k] = ptc.to_dict()
 
-    logging.debug(ratio)
+    logger.debug(ratio)
     # the ratio format will be:
     # ratio = {
     #     'entity_to_split': {

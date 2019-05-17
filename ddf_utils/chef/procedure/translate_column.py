@@ -9,7 +9,7 @@ from .. helpers import debuggable, build_dictionary
 from .. model.ingredient import Ingredient, get_ingredient_class
 from .. model.chef import Chef
 
-logger = logging.getLogger('Chef')
+logger = logging.getLogger('translate_column')
 
 
 @debuggable
