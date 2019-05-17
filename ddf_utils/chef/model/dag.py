@@ -60,22 +60,6 @@ class BaseNode:
         else:
             return self.downstream_list
 
-    def detect_downstream_cycle(self, node=None):
-        """
-        When invoked, this routine will raise an exception if a cycle is
-        detected downstream from self. It is invoked when nodes are added to
-        the DAG to detect cycles.
-        """
-        if not node:
-            node = self
-        for t in self.get_direct_relatives():
-            if node is t:
-                msg = "Cycle detected in DAG. Faulty node: {0}".format(node)
-                raise ChefRuntimeError(msg)
-            else:
-                t.detect_downstream_cycle(node=node)
-        return False
-
     def detect_missing_dependency(self):
         """
         check if every upstream is available in the DAG.
@@ -223,6 +207,11 @@ class DAG:
         """
         Shows an ascii tree representation of the DAG
         """
+        cycles = self.detect_cycles()
+        if cycles:
+            print("cycle detected: {}".format(cycles))
+            return
+
         def get_downstream(node, level=0):
             print((" " * level * 4) + str(node))
             level += 1
@@ -231,3 +220,51 @@ class DAG:
 
         for t in self.roots:
             get_downstream(t)
+
+    def detect_cycles(self):
+        """Detect cycles in DAG, following `Tarjan's algorithm`_.
+
+        .. _`Tarjan's algorithm`: https://en.wikipedia.org/wiki/Tarjan%27s_strongly_connected_components_algorithm
+        """
+        index_counter = [0]
+        stack = []
+        lowlinks = {}
+        index = {}
+        result = []
+
+        def strongconnect(node: BaseNode):
+            # set the depth index for this node to the smallest unused index
+            node_id = node.node_id
+            index[node_id] = index_counter[0]
+            lowlinks[node_id] = index_counter[0]
+            index_counter[0] += 1
+            stack.append(node)
+
+            successors = node.upstream_list
+            for successor in successors:
+                if successor.node_id not in lowlinks:
+                    # Successor has not yet been visited; recurse on it
+                    strongconnect(successor)
+                    lowlinks[node_id] = min(lowlinks[node_id], lowlinks[successor.node_id])
+                elif successor in stack:
+                    # the successor is in the stack and hence in the current strongly
+                    # connected component (SCC)
+                    lowlinks[node_id] = min(lowlinks[node_id], index[successor.node_id])
+            # If `node` is a root node, pop the stack and generate an SCC
+            if lowlinks[node_id] == index[node_id]:
+                connected_component = []
+
+                while True:
+                    successor = stack.pop()
+                    connected_component.append(successor.node_id)
+                    if successor == node:
+                        break
+                component = tuple(connected_component)
+                # storing the result
+                result.append(component)
+
+        for node in self.nodes:
+            if node.node_id not in lowlinks:
+                strongconnect(node)
+
+        return list(filter(lambda x: len(x) > 1, result))

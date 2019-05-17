@@ -155,8 +155,10 @@ class Chef:
                     raise ChefRuntimeError('procedures not ready')
 
         # 3. check if the DAG is valid
+        cycle = self.dag.detect_cycles()
+        if cycle:
+            raise ChefRuntimeError('cycle detected: {}'.format(cycle))
         for ing in self.serving:
-            self.dag.get_node(ing['id']).detect_downstream_cycle()
             self.dag.get_node(ing['id']).detect_missing_dependency()
 
     def add_config(self, **config):
@@ -273,6 +275,8 @@ class Chef:
         return results
 
     def to_recipe(self, fp=None):
+        self.validate()
+
         if fp is None:
             fp = sys.stdout
         recipe = dict()
