@@ -188,6 +188,12 @@ def test_merge_fail():
         chef.run()
 
 
+def test_dag_fail():
+    chef = chef_fn('test_dag_fail.yaml')
+    with pytest.raises(ChefRuntimeError):
+        chef.run()
+
+
 def test_run_op():
     chef = chef_fn('test_run_op.yaml')
     chef.run()
