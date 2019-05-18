@@ -15,9 +15,8 @@ def test_build_dictionary():
     assert build_dictionary(c, d) == d
 
     d2 = {
-        "imr_lower": "infant_mortality_lower",
         "imr_median": "infant_mortality_median",
-        "imr_upper": "infant_mortality_upper"
+        "imr_upper": "imr_lower"
     }
 
     dfp = os.path.join(wd, 'chef', 'translation_dictionaries')
