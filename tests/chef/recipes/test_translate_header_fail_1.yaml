@@ -1,0 +1,21 @@
+info:
+    id: translate-fail
+
+ingredients:
+    - id: concept
+      key: concept
+      data:
+          - concept: concept1
+            name: Concept1
+            concept_type: measure
+
+
+cooking:
+    concepts:
+        - procedure: translate_header
+          ingredients:
+              - concept
+          options:
+              dictionary:
+                  concept: concept_new
+          result: res

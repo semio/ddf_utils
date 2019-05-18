@@ -116,13 +116,27 @@ def test_translate_header():
     chef = chef_fn('test_translate_header.yaml')
     res = chef.run()
 
-    indicators = ['infant_mortality_upper', 'infant_mortality_median', 'infant_mortality_lower']
+    indicators = ['infant_mortality_median', 'imr_lower']
     data = res[0].compute()
 
     assert set(data.keys()) == set(indicators)
     for i in indicators:
         assert set(data[i].columns) == set(['geo', 'time', i])
         assert data[i].dtypes['time'] == np.int16
+
+    data = res[1].get_data()
+    assert 'city' in data.keys()
+    assert 'city' in data['city']
+
+
+def test_translate_header_fail():
+    chef = chef_fn('test_translate_header_fail_1.yaml')
+    with pytest.raises(ValueError):
+        chef.run()
+
+    chef = chef_fn('test_translate_header_fail_2.yaml')
+    with pytest.raises(ValueError):
+        chef.run()
 
 
 def test_trend_bridge():

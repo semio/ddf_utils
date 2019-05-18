@@ -1,5 +1,5 @@
 info:
-    id: test-debug
+    id: test-translate_header
 
 config:
     dictionary_dir: ../translation_dictionaries
@@ -9,6 +9,9 @@ ingredients:
       dataset: ddf--cme
       key: "country,year"
       value: "*"
+    - id: geo-country
+      dataset: ddf--gapminder--geo_entity_domain
+      key: country
 
 cooking:
     datapoints:
@@ -20,12 +23,10 @@ cooking:
               dictionary:
                   country: geo
                   year: time
-              debug: true
         - procedure: translate_header
           ingredients:
               - dps_key_translated
           result: res
           options:
               dictionary: indicators_cme_to_sg.json
-              debug: true
-              duplicated: replace
+              duplicated: error

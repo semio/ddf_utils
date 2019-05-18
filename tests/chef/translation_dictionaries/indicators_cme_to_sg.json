@@ -1,5 +1,4 @@
 {
-    "imr_lower": "infant_mortality_lower",
     "imr_median": "infant_mortality_median",
-    "imr_upper": "infant_mortality_upper"
+    "imr_upper": "imr_lower"
 }

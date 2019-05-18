@@ -34,6 +34,7 @@ cooking:
           options:
               dictionary:
                   imr_median: new_col
+              debug: true
           result: cme3_translated
         - procedure: trend_bridge
           ingredients:

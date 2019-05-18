@@ -29,6 +29,7 @@ cooking:
           result: res
           options:
               dictionary: indicators_cme_to_sg.json
+              duplicated: replace
     entities:
         - procedure: translate_header
           ingredients:
@@ -37,4 +38,3 @@ cooking:
               dictionary:
                   country: city
           result: res_entity
-
