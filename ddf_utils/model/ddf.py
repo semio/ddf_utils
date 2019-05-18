@@ -196,20 +196,20 @@ class DDF:
     props: dict = attr.ib(factory=dict)
 
     def __repr__(self):
-        def maybe_truncate(obj, maxlen=20, fillspaces=False):
-            if isinstance(obj, np.ndarray):
-                s = ', '.join(map(str, obj))
-                if len(s) > maxlen:
-                    s = ','.join(s[:(maxlen - 3)].split(',')[:-1])
-                    s = s + '...'
-            else:
-                s = str(obj)
-                if len(s) > maxlen:
-                    s = s[:(maxlen - 3)] + '...'
-            if len(s) < maxlen and fillspaces:
-                diff = maxlen - len(s)
-                s = s + ' ' * diff
-            return s
+        # def maybe_truncate(obj, maxlen=20, fillspaces=False):
+        #     if isinstance(obj, np.ndarray):
+        #         s = ', '.join(map(str, obj))
+        #         if len(s) > maxlen:
+        #             s = ','.join(s[:(maxlen - 3)].split(',')[:-1])
+        #             s = s + '...'
+        #     else:
+        #         s = str(obj)
+        #         if len(s) > maxlen:
+        #             s = s[:(maxlen - 3)] + '...'
+        #     if len(s) < maxlen and fillspaces:
+        #         diff = maxlen - len(s)
+        #         s = s + ' ' * diff
+        #     return s
 
         indent = 4
 
