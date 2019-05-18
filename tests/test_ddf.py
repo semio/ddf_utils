@@ -14,6 +14,7 @@ def test_dataset():
     conc = ds.concepts
     ent = ds.entities
     dps = ds.datapoints
+    syms = ds.synonyms
 
     ent_foundation = ds.get_entities('company', 'foundation')
     for e in ent_foundation:
@@ -32,3 +33,5 @@ def test_dataset():
     # path = tempfile.mkdtemp()
     # ds.to_ddfcsv(path)
     str(ds)
+
+    str(syms['region'])
