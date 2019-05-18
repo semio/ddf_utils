@@ -95,7 +95,6 @@ def _translate_header_entities_concepts(ingredient, dictionary, duplicated):
     return new_data
 
 
-
 @debuggable
 def translate_header(chef: Chef, ingredients: List[Ingredient],
                      result, dictionary, duplicated='error') -> Ingredient:
