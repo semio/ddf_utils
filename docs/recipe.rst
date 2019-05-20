@@ -982,8 +982,8 @@ The procedure should be defined as following structure:
 
 .. code-block:: python
 
-   from ddf_utils.chef.cook import Chef
-   from ddf_utils.chef.ingredient import ProcedureResult
+   from ddf_utils.chef.model.chef import Chef
+   from ddf_utils.chef.model.ingredient import ProcedureResult
    from ddf_utils.chef.helpers import debuggable
 
    @debuggable  # adding debug option to the procedure
@@ -999,7 +999,7 @@ The procedure should be defined as following structure:
 
 Check our `predefined procedures`_ for examples.
 
-.. _`predefined procedures`: https://github.com/semio/ddf_utils/blob/master/ddf_utils/chef/procedure.py
+.. _`predefined procedures`: https://github.com/semio/ddf_utils/blob/master/ddf_utils/chef/procedure/
 
 
 Checking Intermediate Results
