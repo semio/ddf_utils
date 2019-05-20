@@ -425,18 +425,13 @@ class Chef:
                 sub_recipes.append(Chef._build_recipe(path))
 
             for rcp in sub_recipes:
-                # appending ingredients
+                # appending ingredients form sub recipes
                 if 'ingredients' in recipe.keys():
-                    # ingredients = [*recipe['ingredients'], *rcp['ingredients']]
-                    # ^ not supportted by Python < 3.5
-                    ingredients = []
-                    if 'ingredients' in recipe.keys():
-                        [ingredients.append(ing) for ing in recipe['ingredients']]
                     if 'ingredients' in rcp.keys():
-                        [ingredients.append(external_csv_abs_path(ing)) for ing in rcp['ingredients']]
+                        [recipe['ingredients'].append(external_csv_abs_path(ing)) for ing in rcp['ingredients']]
                     # drop duplicated ingredients.
                     rcp_dict_tmp = {}
-                    for v in ingredients:
+                    for v in recipe['ingredients']:
                         if v['id'] not in rcp_dict_tmp.keys():
                             rcp_dict_tmp[v['id']] = v
                         else:
@@ -446,7 +441,7 @@ class Chef:
                                     "Different content with same ingredient id detected: " + v['id'])
                     recipe['ingredients'] = list(rcp_dict_tmp.values())
                 else:
-                    recipe['ingredients'] = rcp['ingredients']
+                    recipe['ingredients'] = [external_csv_abs_path(ing) for ing in rcp['ingredients']]
 
                 # appending cooking procedures
                 if 'cooking' not in rcp.keys():
