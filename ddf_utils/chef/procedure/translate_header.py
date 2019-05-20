@@ -82,8 +82,10 @@ def _translate_header_entities_concepts(ingredient, dictionary, duplicated):
         if ingredient.dtype == 'entities':  # also rename the `is--` headers
             rm_ = {}
             for c in df_new.columns:
-                if k == c[4:]:
-                    rm_[c] = 'is--' + dictionary[k]
+                if c.startswith('is--'):
+                    old_name_is_header = c[4:]
+                    if old_name_is_header in dictionary:
+                        rm_[c] = 'is--' + dictionary[old_name_is_header]
             if len(rm_) > 0:
                 df_new = df_new.rename(columns=rm_)
         if k in dictionary.keys():  # if we need to rename the concept name
