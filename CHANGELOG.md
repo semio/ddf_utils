@@ -1,3 +1,10 @@
+## version 1.0.0 2019-05-20
+
+- DDF data models/Chef data models are re-written
+- various improvments/bug fix on chef procedures
+- updated project sturcture
+- improved documents and tests
+
 ## version 0.6.5 2019-03-17
 
 - fix click version issue when install with pip
