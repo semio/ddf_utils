@@ -54,4 +54,6 @@ cooking:
                   "agriculture*": "{concept}_{sex}"
               flatten_dimensions:
                   - sex
+              skip_totals_among_entities:
+                  - mf
           result: res

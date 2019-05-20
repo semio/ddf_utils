@@ -1,0 +1,21 @@
+info:
+    id: translate-fail
+
+ingredients:
+    - id: entity
+      key: country
+      data:
+          - country: chn
+            name: China
+            iso: chn
+
+cooking:
+    entities:
+        - procedure: translate_header
+          ingredients:
+            - entity
+          result: result
+          options:
+              dictionary:
+                  name: iso
+              duplicated: error

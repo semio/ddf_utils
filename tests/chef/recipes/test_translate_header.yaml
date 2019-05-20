@@ -37,4 +37,12 @@ cooking:
           options:
               dictionary:
                   country: city
+          result: country-to-city
+        - procedure: translate_header
+          ingredients:
+              - country-to-city
+          options:
+              dictionary:
+                  name: arb1
+              duplicated: replace
           result: res_entity

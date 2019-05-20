@@ -72,8 +72,8 @@ def test_flatten():
 
     assert set(res[0].compute().keys()) == {
         'agriculture_thousands_f', 'agriculture_thousands_m',
-        'agriculture_thousands_mf', 'agriculture_percentage_f',
-        'agriculture_percentage_m', 'agriculture_percentage_mf'}
+        'agriculture_percentage_f', 'agriculture_percentage_m',
+        'agriculture_thousands', 'agriculture_percentage'}
 
     assert res[0].compute()['agriculture_percentage_m'].dtypes['year'] == np.int16
 
@@ -126,7 +126,8 @@ def test_translate_header():
 
     data = res[1].get_data()
     assert 'city' in data.keys()
-    assert 'city' in data['city']
+    assert 'city' in data['city'].columns
+    assert 'is--city' in data['city'].columns
 
 
 def test_translate_header_fail():
@@ -135,6 +136,10 @@ def test_translate_header_fail():
         chef.run()
 
     chef = chef_fn('test_translate_header_fail_2.yaml')
+    with pytest.raises(ValueError):
+        chef.run()
+
+    chef = chef_fn('test_translate_header_fail_3.yaml')
     with pytest.raises(ValueError):
         chef.run()
 

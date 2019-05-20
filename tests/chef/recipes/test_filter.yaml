@@ -82,6 +82,14 @@ cooking:
             $in:
               - usa
               - swe
+      result: final-entities-0
+    - procedure: filter
+      ingredients:
+          - final-entities-0
+      options:
+          item:
+              $nin:
+                  - nin
       result: final-entities
 
     - procedure: serve
