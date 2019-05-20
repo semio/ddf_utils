@@ -233,7 +233,7 @@
 <div class="section" id="module-ddf_utils.i18n">
 <span id="ddf-utils-i18n-module"></span><h2>ddf_utils.i18n module<a class="headerlink" href="#module-ddf_utils.i18n" title="Permalink to this headline">¶</a></h2>
 <p>i18n project management for Gapminder’s datasets.</p>
-<p>The workflow is described in this <a class="reference external" href="https://docs.google.com/document/d/11d5D5CPlr6I2BqP8z0p2o_dYQC9AYUyxcLGUq1WYCfk/">google doc</a></p>
+<p>The workflow is described in this <a class="reference external" href="https://docs.google.com/document/d/11d5D5CPlr6I2BqP8z0p2o_dYQC9AYUyxcLGUq1WYCfk/">google doc</a>. The json part comes from discussion <a class="reference external" href="https://gapminder.slack.com/archives/C0FTBA1P0/p1479832399000650">here</a></p>
 <dl class="function">
 <dt id="ddf_utils.i18n.merge_translations_csv">
 <code class="descclassname">ddf_utils.i18n.</code><code class="descname">merge_translations_csv</code><span class="sig-paren">(</span><em>path</em>, <em>split_path='langsplit'</em>, <em>lang_path='lang'</em>, <em>overwrite=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.i18n.merge_translations_csv" title="Permalink to this definition">¶</a></dt>
@@ -243,7 +243,7 @@
 <dl class="function">
 <dt id="ddf_utils.i18n.merge_translations_json">
 <code class="descclassname">ddf_utils.i18n.</code><code class="descname">merge_translations_json</code><span class="sig-paren">(</span><em>path</em>, <em>split_path='langsplit'</em>, <em>lang_path='lang'</em>, <em>overwrite=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.i18n.merge_translations_json" title="Permalink to this definition">¶</a></dt>
-<dd><p>merge all translated json files and update datapackage.json</p>
+<dd><p>merge all translated json files and update datapackage.json.</p>
 </dd></dl>
 
 <dl class="function">
@@ -256,6 +256,11 @@
 <dt id="ddf_utils.i18n.split_translations_json">
 <code class="descclassname">ddf_utils.i18n.</code><code class="descname">split_translations_json</code><span class="sig-paren">(</span><em>path</em>, <em>split_path='langsplit'</em>, <em>exclude_concepts=None</em>, <em>overwrite=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.i18n.split_translations_json" title="Permalink to this definition">¶</a></dt>
 <dd><p>split all string concepts and save them as json files</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">There is an issue with dataframe.to_json() method for multiIndex files (i.e. datapoints), which
+cause we can’t read back the split files and merge them. In this case <a class="reference internal" href="#ddf_utils.i18n.merge_translations_json" title="ddf_utils.i18n.merge_translations_json"><code class="xref py py-func docutils literal notranslate"><span class="pre">merge_translations_json()</span></code></a> will fail.</p>
+</div>
 </dd></dl>
 
 </div>
@@ -391,7 +396,7 @@ to judge if the dir is a dataset.</p>
 
 <dl class="function">
 <dt id="ddf_utils.io.serve_datapoint">
-<code class="descclassname">ddf_utils.io.</code><code class="descname">serve_datapoint</code><span class="sig-paren">(</span><em>df_: &lt;Mock name='mock.DataFrame' id='4416528848'&gt;</em>, <em>out_dir</em>, <em>concept</em>, <em>copy=True</em>, <em>by: Iterable = None</em>, <em>formatter: Callable = &lt;function format_float_digits&gt;</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.io.serve_datapoint" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.io.</code><code class="descname">serve_datapoint</code><span class="sig-paren">(</span><em>df_: &lt;Mock name='mock.DataFrame' id='4543889248'&gt;</em>, <em>out_dir</em>, <em>concept</em>, <em>copy=True</em>, <em>by: Iterable = None</em>, <em>formatter: Callable = &lt;function format_float_digits&gt;</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.io.serve_datapoint" title="Permalink to this definition">¶</a></dt>
 <dd><p>save a pandas dataframe to datapoint file.
 the file path of csv will be out_dir/ddf–datapoints–$concept–$by.csv</p>
 <p>addition keyword arguments can be passed to <cite>pd.DataFrame.to_csv()</cite> function.</p>
@@ -625,7 +630,7 @@ avaliable options are <cite>drop</cite>, <cite>error</cite>, <cite>include</cite
 
 <dl class="function">
 <dt id="ddf_utils.transformer.trend_bridge">
-<code class="descclassname">ddf_utils.transformer.</code><code class="descname">trend_bridge</code><span class="sig-paren">(</span><em>old_ser: &lt;Mock name='mock.Series' id='4412376624'&gt;</em>, <em>new_ser: &lt;Mock name='mock.Series' id='4412376624'&gt;</em>, <em>bridge_length: int</em><span class="sig-paren">)</span> &#x2192; &lt;Mock name='mock.Series' id='4412376624'&gt;<a class="headerlink" href="#ddf_utils.transformer.trend_bridge" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ddf_utils.transformer.</code><code class="descname">trend_bridge</code><span class="sig-paren">(</span><em>old_ser: &lt;Mock name='mock.Series' id='4539798416'&gt;</em>, <em>new_ser: &lt;Mock name='mock.Series' id='4539798416'&gt;</em>, <em>bridge_length: int</em><span class="sig-paren">)</span> &#x2192; &lt;Mock name='mock.Series' id='4539798416'&gt;<a class="headerlink" href="#ddf_utils.transformer.trend_bridge" title="Permalink to this definition">¶</a></dt>
 <dd><p>smoothing data between series.</p>
 <p>To avoid getting artificial stairs in the data, we smooth between to
 series. Sometime one source is systematically higher than another source,

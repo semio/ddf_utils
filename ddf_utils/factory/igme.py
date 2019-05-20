@@ -6,7 +6,10 @@ source link: `CME data portal`_
 
 .. _`CME data portal`: http://www.childmortality.org
 
-Note: This factory class is no longer works as CME website
+Warning
+-------
+
+This factory class is no longer works as CME website
 switched to a javascript app.
 
 """

@@ -26,6 +26,7 @@ memory = Memory(location=mkdtemp(), verbose=0)
 
 @memory.cache
 def read_local_ddf(ddf_id, base_dir='./'):
+    """read local dataset and return the DDF object."""
     if os.path.isabs(ddf_id):
         return DDFcsv.from_path(ddf_id).ddf
     else:
@@ -34,6 +35,7 @@ def read_local_ddf(ddf_id, base_dir='./'):
 
 
 def create_dsk(data, parts=10):
+    """given a dictionary of {string: pandas dataframe}, create a new dictionary with dask dataframe"""
     # TODO: check the best parts to use
     for k, v in data.items():
         if isinstance(v, pd.DataFrame):
@@ -321,6 +323,7 @@ def query(df, conditions, available_scopes=None):
 
 
 def debuggable(func):
+    """return a function that accepts `debug` as keyword parameters."""
     @wraps(func)
     def wrapper(*args, **kwargs):
         if 'debug' in kwargs.keys():
