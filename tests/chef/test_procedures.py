@@ -34,6 +34,12 @@ def test_include():
     chef.run()
 
 
+def test_include_fail():
+    with pytest.raises(ChefRuntimeError):
+        chef = chef_fn('test_include_fail_main.yaml')
+        chef.run()
+
+
 def test_extract_concepts():
     chef = chef_fn('test_extract_concepts.yaml')
     res = chef.run()

@@ -1,0 +1,14 @@
+info:
+    id: test-include
+
+config:
+    recipe_dir: ./
+
+ingredients:
+  - id: bp-geo
+    dataset: ddf--bp--energy
+    key: geo2
+    value: "*"
+
+include:
+    - test_include_fail.yaml
