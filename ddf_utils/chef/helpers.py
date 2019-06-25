@@ -338,8 +338,8 @@ def debuggable(func):
 
         if bk:
             import ipdb
-            ipdb.pm()
             result = ipdb.runcall(func, *args, **kwargs)
+            ipdb.pm()
         else:
             result = func(*args, **kwargs)
 
