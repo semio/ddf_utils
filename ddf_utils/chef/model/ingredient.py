@@ -221,6 +221,7 @@ class ConceptIngredient(Ingredient):
             self.get_data()
         filename = read_opt(options, 'file_name', default='ddf--concepts.csv')
         subpath = read_opt(options, 'path', default=None)
+        custom_column_order = read_opt(options, 'custom_column_order', default=None)
         outpath = _handel_subpath(outpath, subpath)
         logger.info('serving: {}'.format(self.id))
         for _, df_ in self.data_computed.items():
@@ -233,7 +234,7 @@ class ConceptIngredient(Ingredient):
                 if v == 'object':
                     df[i] = df[i].str.strip()
             path = os.path.join(outpath, filename)
-            df = sort_df(df, key='concept')
+            df = sort_df(df, key='concept', custom_column_order=custom_column_order)
             df.to_csv(path, index=False, encoding='utf8')
 
 
@@ -313,6 +314,7 @@ class EntityIngredient(Ingredient):
         no_keep_sets = options.get('no_keep_sets', False)  # serve as entity domain
         subpath = options.get('path', None)
         outpath = _handel_subpath(outpath, subpath)
+        custom_column_order = options.get('custom_column_order', None)
         logger.info('serving: {}'.format(self.id))
         for k, df in self.data_computed.items():
             # handling is-- headers
@@ -330,7 +332,7 @@ class EntityIngredient(Ingredient):
             if k == domain:
                 if len(sets) == 0:
                     path = os.path.join(outpath, 'ddf--entities--{}.csv'.format(k))
-                    df = sort_df(df, key=domain)
+                    df = sort_df(df, key=domain, custom_column_order=custom_column_order)
                     df.to_csv(path, index=False, encoding='utf8')
                 else:
                     for s in sets:
@@ -343,7 +345,7 @@ class EntityIngredient(Ingredient):
                         df_ = df_.loc[:, lambda x: ~x.columns.str.startswith('is--')].copy()
                         df_[col] = 'TRUE'
                         df_ = df_.rename({k: s}, axis=1)  # use set name as primary key column name
-                        df_ = sort_df(df_, key=s)
+                        df_ = sort_df(df_, key=s, custom_column_order=custom_column_order)
                         df_.to_csv(path, index=False, encoding='utf8')
                     # serve entities not in any sets
                     is_headers = list(map(lambda x: 'is--' + x, sets))
@@ -360,7 +362,7 @@ class EntityIngredient(Ingredient):
             else:
                 # FIXME: is it even possible that self.key(domain) is not same as k?
                 path = os.path.join(outpath, 'ddf--entities--{}--{}.csv'.format(domain, k))
-                df = sort_df(df, key=k)
+                df = sort_df(df, key=k, custom_column_order=custom_column_order)
                 df.to_csv(path, index=False, encoding='utf8')
 
 
@@ -482,9 +484,12 @@ class DataPointIngredient(Ingredient):
         dont_serve_empty = read_opt(options, 'drop_empty_datapoints', default=True)
         split_by = read_opt(options, 'split_datapoints_by', default=False)
         subpath = read_opt(options, 'path', default=None)
+        custom_key_order = read_opt(options, 'custom_key_order', default=None)
         outpath = _handel_subpath(outpath, subpath)
 
-        def to_disk(df_input, k, path):
+        logger.info('serving: {}'.format(self.id))
+
+        def to_disk(df_input, k, path, order=None):
             df = df_input.copy()
             if not np.issubdtype(df[k].dtype, np.number):
                 try:
@@ -494,9 +499,17 @@ class DataPointIngredient(Ingredient):
                     logger.warning("data not numeric: " + k)
             else:
                 df[k] = df[k].map(lambda x: format_float_digits(x, digits))
+            # sort if custom key order defined
+            if order:
+                df = df.reindex(index=order)
             df.to_csv(path, encoding='utf8', index=False)
 
-        logger.info('serving: {}'.format(self.id))
+        # check if custom key match indicator key
+        if custom_key_order:
+            if set(custom_key_order) != set(self.key):
+                logger.waring("custom keys are not same as ingredient keys")
+                logger.waring("ignoring custom_key_order setting")
+                custom_key_order = None
 
         # compute all dask dataframe to pandas dataframe and save to csv files
         # TODO: maybe no need to convert to pandas?
@@ -506,13 +519,13 @@ class DataPointIngredient(Ingredient):
                 if dont_serve_empty:
                     continue
             by = self.key
-            df = sort_df(df, key=by)
+            df = sort_df(df, key=by, sort_key_columns=False)
             if not split_by:
                 columns = [*by, k]
                 path = os.path.join(
                     outpath,
                     'ddf--datapoints--{}--by--{}.csv'.format(k, '--'.join(by)))
-                to_disk(df[columns], k, path)
+                to_disk(df[columns], k, path, custom_key_order)
             else:
                 # split datapoints by entities. Firstly we calculate all possible
                 # combinations of entities, and then filter the dataframe, create
@@ -558,7 +571,7 @@ class DataPointIngredient(Ingredient):
                         )
                     # logger.debug('query is: ' + query)
                     df_part = df.query(query)
-                    to_disk(df_part[columns], k, path)
+                    to_disk(df_part[columns], k, path, custom_key_order)
 
 
 @attr.s
