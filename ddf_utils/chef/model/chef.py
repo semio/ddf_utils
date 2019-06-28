@@ -7,7 +7,7 @@ import logging
 import os
 import re
 import sys
-from collections import Mapping
+from collections.abc import Mapping
 from copy import deepcopy
 from time import time
 

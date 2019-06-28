@@ -9,7 +9,7 @@ __all__ = ['Ingredient', 'ConceptIngredient', 'EntityIngredient', 'DataPointIngr
 import fnmatch
 import logging
 import os
-from collections import Mapping, Sequence
+from collections.abc import Mapping, Sequence
 from itertools import product
 from functools import singledispatch
 from typing import Optional, Union, Dict

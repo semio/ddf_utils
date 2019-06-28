@@ -6,7 +6,7 @@ import hashlib
 import logging
 import json
 from functools import wraps, partial
-from collections import Sequence, Mapping
+from collections.abc import Sequence, Mapping
 from time import time
 
 import click

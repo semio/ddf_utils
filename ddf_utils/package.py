@@ -9,7 +9,8 @@ import csv
 import re
 from datetime import datetime, timezone
 
-from collections import Mapping, Sequence, OrderedDict
+from collections.abc import Mapping, Sequence
+from collections import OrderedDict
 from itertools import product
 
 import dask.dataframe as dd
