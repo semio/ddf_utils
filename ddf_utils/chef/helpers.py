@@ -141,6 +141,23 @@ def prompt_select(selects, text_before=None):
 
 
 def sort_df(df, key, sort_key_columns=True, custom_column_order=None):
+    """Sorting df columns and rows.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        DataFrame to sort
+    key : `str` or list
+        columns of dataframe, to be used as sorting key(s)
+
+    Keyword Args
+    ------------
+    sort_key_columns : bool
+        whehter to sort index column orders. If false index columns will retain the order of `key` parameter.
+    custom_column_order : dict
+        column weights for columns except keys. Columns not mentioned will have 0 weight.
+        Bigger weight means higher rank.
+    """
     if isinstance(key, str):
         key = [key]
 
