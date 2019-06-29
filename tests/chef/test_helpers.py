@@ -21,5 +21,5 @@ def test_sort_df():
     df2 = sort_df(df, ['D', 'A'], sort_key_columns=False)
     assert df2.columns.tolist() == ['D', 'A', 'B', 'C']
 
-    df3 = sort_df(df, ['D'], custom_column_order={'A': 1, 'C': -1})
-    assert df3.columns.tolist() == ['D', 'C', 'B', 'A']
+    df3 = sort_df(df, ['D'], custom_column_order={'A': 1, 'B': -1})
+    assert df3.columns.tolist() == ['D', 'A', 'C', 'B']

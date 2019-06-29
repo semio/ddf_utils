@@ -501,14 +501,16 @@ class DataPointIngredient(Ingredient):
                 df[k] = df[k].map(lambda x: format_float_digits(x, digits))
             # sort if custom key order defined
             if order:
-                df = df.reindex(index=order)
+                indicator_col, = set(df.columns) - set(order)
+                new_cols = [*order, indicator_col]
+                df = df[new_cols]
             df.to_csv(path, encoding='utf8', index=False)
 
         # check if custom key match indicator key
         if custom_key_order:
             if set(custom_key_order) != set(self.key):
-                logger.waring("custom keys are not same as ingredient keys")
-                logger.waring("ignoring custom_key_order setting")
+                logger.warning("custom keys are not same as ingredient keys")
+                logger.warning("ignoring custom_key_order setting")
                 custom_key_order = None
 
         # compute all dask dataframe to pandas dataframe and save to csv files
