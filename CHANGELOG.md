@@ -1,3 +1,9 @@
+## version 1.0.1 2019-06-29
+
+- added options to modify column headers for chef output (#116)
+- fixed an chef debug option issue
+- added more examples/docs
+
 ## version 1.0.0 2019-05-20
 
 - DDF data models/Chef data models are re-written
