@@ -17,34 +17,36 @@
   
 
   
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-  
     
 
   
-
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="ddf_utils.chef.model package" href="ddf_utils.chef.model.html" />
     <link rel="prev" title="ddf_utils package" href="ddf_utils.html" /> 
-
-  
-  <script src="_static/js/modernizr.min.js"></script>
-
 </head>
 
 <body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
@@ -202,7 +204,7 @@
 <p>APIs for chef</p>
 <dl class="function">
 <dt id="ddf_utils.chef.api.run_recipe">
-<code class="descclassname">ddf_utils.chef.api.</code><code class="descname">run_recipe</code><span class="sig-paren">(</span><em>fn</em>, <em>ddf_dir</em>, <em>out_dir</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.api.run_recipe" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ddf_utils.chef.api.</code><code class="sig-name descname">run_recipe</code><span class="sig-paren">(</span><em class="sig-param">fn</em>, <em class="sig-param">ddf_dir</em>, <em class="sig-param">out_dir</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.api.run_recipe" title="Permalink to this definition">¶</a></dt>
 <dd><p>run the recipe file and serve result</p>
 </dd></dl>
 
@@ -212,19 +214,19 @@
 <p>exceptions for chef</p>
 <dl class="exception">
 <dt id="ddf_utils.chef.exceptions.ChefRuntimeError">
-<em class="property">exception </em><code class="descclassname">ddf_utils.chef.exceptions.</code><code class="descname">ChefRuntimeError</code><a class="headerlink" href="#ddf_utils.chef.exceptions.ChefRuntimeError" title="Permalink to this definition">¶</a></dt>
+<em class="property">exception </em><code class="sig-prename descclassname">ddf_utils.chef.exceptions.</code><code class="sig-name descname">ChefRuntimeError</code><a class="headerlink" href="#ddf_utils.chef.exceptions.ChefRuntimeError" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
 </dd></dl>
 
 <dl class="exception">
 <dt id="ddf_utils.chef.exceptions.IngredientError">
-<em class="property">exception </em><code class="descclassname">ddf_utils.chef.exceptions.</code><code class="descname">IngredientError</code><a class="headerlink" href="#ddf_utils.chef.exceptions.IngredientError" title="Permalink to this definition">¶</a></dt>
+<em class="property">exception </em><code class="sig-prename descclassname">ddf_utils.chef.exceptions.</code><code class="sig-name descname">IngredientError</code><a class="headerlink" href="#ddf_utils.chef.exceptions.IngredientError" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
 </dd></dl>
 
 <dl class="exception">
 <dt id="ddf_utils.chef.exceptions.ProcedureError">
-<em class="property">exception </em><code class="descclassname">ddf_utils.chef.exceptions.</code><code class="descname">ProcedureError</code><a class="headerlink" href="#ddf_utils.chef.exceptions.ProcedureError" title="Permalink to this definition">¶</a></dt>
+<em class="property">exception </em><code class="sig-prename descclassname">ddf_utils.chef.exceptions.</code><code class="sig-name descname">ProcedureError</code><a class="headerlink" href="#ddf_utils.chef.exceptions.ProcedureError" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
 </dd></dl>
 
@@ -233,128 +235,132 @@
 <span id="ddf-utils-chef-helpers-module"></span><h2>ddf_utils.chef.helpers module<a class="headerlink" href="#module-ddf_utils.chef.helpers" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="ddf_utils.chef.helpers.build_dictionary">
-<code class="descclassname">ddf_utils.chef.helpers.</code><code class="descname">build_dictionary</code><span class="sig-paren">(</span><em>chef</em>, <em>dict_def</em>, <em>ignore_case=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.helpers.build_dictionary" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ddf_utils.chef.helpers.</code><code class="sig-name descname">build_dictionary</code><span class="sig-paren">(</span><em class="sig-param">chef</em>, <em class="sig-param">dict_def</em>, <em class="sig-param">ignore_case=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.helpers.build_dictionary" title="Permalink to this definition">¶</a></dt>
 <dd><p>build a dictionary from a dictionary definition</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.chef.helpers.build_dictionary_from_dataframe">
-<code class="descclassname">ddf_utils.chef.helpers.</code><code class="descname">build_dictionary_from_dataframe</code><span class="sig-paren">(</span><em>df</em>, <em>keys</em>, <em>value</em>, <em>ignore_case=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.helpers.build_dictionary_from_dataframe" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ddf_utils.chef.helpers.</code><code class="sig-name descname">build_dictionary_from_dataframe</code><span class="sig-paren">(</span><em class="sig-param">df</em>, <em class="sig-param">keys</em>, <em class="sig-param">value</em>, <em class="sig-param">ignore_case=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.helpers.build_dictionary_from_dataframe" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.chef.helpers.build_dictionary_from_file">
-<code class="descclassname">ddf_utils.chef.helpers.</code><code class="descname">build_dictionary_from_file</code><span class="sig-paren">(</span><em>file_path</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.helpers.build_dictionary_from_file" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ddf_utils.chef.helpers.</code><code class="sig-name descname">build_dictionary_from_file</code><span class="sig-paren">(</span><em class="sig-param">file_path</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.helpers.build_dictionary_from_file" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.chef.helpers.create_dsk">
-<code class="descclassname">ddf_utils.chef.helpers.</code><code class="descname">create_dsk</code><span class="sig-paren">(</span><em>data</em>, <em>parts=10</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.helpers.create_dsk" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ddf_utils.chef.helpers.</code><code class="sig-name descname">create_dsk</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">parts=10</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.helpers.create_dsk" title="Permalink to this definition">¶</a></dt>
 <dd><p>given a dictionary of {string: pandas dataframe}, create a new dictionary with dask dataframe</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.chef.helpers.debuggable">
-<code class="descclassname">ddf_utils.chef.helpers.</code><code class="descname">debuggable</code><span class="sig-paren">(</span><em>func</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.helpers.debuggable" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ddf_utils.chef.helpers.</code><code class="sig-name descname">debuggable</code><span class="sig-paren">(</span><em class="sig-param">func</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.helpers.debuggable" title="Permalink to this definition">¶</a></dt>
 <dd><p>return a function that accepts <cite>debug</cite> as keyword parameters.</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.chef.helpers.dsk_to_pandas">
-<code class="descclassname">ddf_utils.chef.helpers.</code><code class="descname">dsk_to_pandas</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.helpers.dsk_to_pandas" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ddf_utils.chef.helpers.</code><code class="sig-name descname">dsk_to_pandas</code><span class="sig-paren">(</span><em class="sig-param">data</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.helpers.dsk_to_pandas" title="Permalink to this definition">¶</a></dt>
 <dd><p>The reverse for create_dsk function</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.chef.helpers.gen_query">
-<code class="descclassname">ddf_utils.chef.helpers.</code><code class="descname">gen_query</code><span class="sig-paren">(</span><em>conds</em>, <em>scope=None</em>, <em>available_scopes=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.helpers.gen_query" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ddf_utils.chef.helpers.</code><code class="sig-name descname">gen_query</code><span class="sig-paren">(</span><em class="sig-param">conds</em>, <em class="sig-param">scope=None</em>, <em class="sig-param">available_scopes=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.helpers.gen_query" title="Permalink to this definition">¶</a></dt>
 <dd><p>generate dataframe query from mongo-like queries</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.chef.helpers.gen_sym">
-<code class="descclassname">ddf_utils.chef.helpers.</code><code class="descname">gen_sym</code><span class="sig-paren">(</span><em>key</em>, <em>others=None</em>, <em>options=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.helpers.gen_sym" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ddf_utils.chef.helpers.</code><code class="sig-name descname">gen_sym</code><span class="sig-paren">(</span><em class="sig-param">key</em>, <em class="sig-param">others=None</em>, <em class="sig-param">options=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.helpers.gen_sym" title="Permalink to this definition">¶</a></dt>
 <dd><p>generate symbol for chef ingredient/procedure result</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.chef.helpers.get_procedure">
-<code class="descclassname">ddf_utils.chef.helpers.</code><code class="descname">get_procedure</code><span class="sig-paren">(</span><em>procedure</em>, <em>base_dir</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.helpers.get_procedure" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ddf_utils.chef.helpers.</code><code class="sig-name descname">get_procedure</code><span class="sig-paren">(</span><em class="sig-param">procedure</em>, <em class="sig-param">base_dir</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.helpers.get_procedure" title="Permalink to this definition">¶</a></dt>
 <dd><p>return a procedure function from the procedure name</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>procedure</strong> (<cite>str</cite>) – the procedure to get, supported formats are
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>procedure</strong> (<cite>str</cite>) – the procedure to get, supported formats are
 1. procedure: sub/dir/module.function
-2. procedure: module.function</li>
-<li><strong>base_dir</strong> (<cite>str</cite>) – the path for searching procedures</li>
+2. procedure: module.function</p></li>
+<li><p><strong>base_dir</strong> (<cite>str</cite>) – the path for searching procedures</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.chef.helpers.mkfunc">
-<code class="descclassname">ddf_utils.chef.helpers.</code><code class="descname">mkfunc</code><span class="sig-paren">(</span><em>options</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.helpers.mkfunc" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ddf_utils.chef.helpers.</code><code class="sig-name descname">mkfunc</code><span class="sig-paren">(</span><em class="sig-param">options</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.helpers.mkfunc" title="Permalink to this definition">¶</a></dt>
 <dd><p>create function warppers base on the options provided</p>
 <p>This function is used in procedures which have a function block. Such as
 <a class="reference internal" href="ddf_utils.chef.procedure.html#module-ddf_utils.chef.procedure.groupby" title="ddf_utils.chef.procedure.groupby"><code class="xref py py-func docutils literal notranslate"><span class="pre">ddf_utils.chef.procedure.groupby()</span></code></a>. It will try to return functions
 from numpy or <code class="xref py py-mod docutils literal notranslate"><span class="pre">ddf_utils.ops</span></code>.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>options</strong> (<cite>str</cite> or dict) – if a dictionary provided, “function” should be a key in the dictionary</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>options</strong> (<cite>str</cite> or dict) – if a dictionary provided, “function” should be a key in the dictionary</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.chef.helpers.prompt_select">
-<code class="descclassname">ddf_utils.chef.helpers.</code><code class="descname">prompt_select</code><span class="sig-paren">(</span><em>selects</em>, <em>text_before=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.helpers.prompt_select" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ddf_utils.chef.helpers.</code><code class="sig-name descname">prompt_select</code><span class="sig-paren">(</span><em class="sig-param">selects</em>, <em class="sig-param">text_before=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.helpers.prompt_select" title="Permalink to this definition">¶</a></dt>
 <dd><p>ask user to choose in a list of options</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.chef.helpers.query">
-<code class="descclassname">ddf_utils.chef.helpers.</code><code class="descname">query</code><span class="sig-paren">(</span><em>df</em>, <em>conditions</em>, <em>available_scopes=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.helpers.query" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ddf_utils.chef.helpers.</code><code class="sig-name descname">query</code><span class="sig-paren">(</span><em class="sig-param">df</em>, <em class="sig-param">conditions</em>, <em class="sig-param">available_scopes=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.helpers.query" title="Permalink to this definition">¶</a></dt>
 <dd><p>query a dataframe with mongo-like queries</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.chef.helpers.read_opt">
-<code class="descclassname">ddf_utils.chef.helpers.</code><code class="descname">read_opt</code><span class="sig-paren">(</span><em>options</em>, <em>key</em>, <em>required=False</em>, <em>default=None</em>, <em>method='get'</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.helpers.read_opt" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ddf_utils.chef.helpers.</code><code class="sig-name descname">read_opt</code><span class="sig-paren">(</span><em class="sig-param">options</em>, <em class="sig-param">key</em>, <em class="sig-param">required=False</em>, <em class="sig-param">default=None</em>, <em class="sig-param">method='get'</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.helpers.read_opt" title="Permalink to this definition">¶</a></dt>
 <dd><p>utility to read an attribute from an options dictionary</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>options</strong> (<em>dict</em>) – the option dictionary to read</li>
-<li><strong>key</strong> (<cite>str</cite>) – the key to read</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>options</strong> (<em>dict</em>) – the option dictionary to read</p></li>
+<li><p><strong>key</strong> (<cite>str</cite>) – the key to read</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name" colspan="2">Keyword Arguments:</th></tr>
-<tr class="field-even field"><td>&#160;</td><td class="field-body"><ul class="first last simple">
-<li><strong>required</strong> (<em>bool</em>) – if true, raise error if the <cite>key</cite> is not in the option dict</li>
-<li><strong>default</strong> (<em>object</em>) – a default to return if <cite>key</cite> is not in option dict and <cite>required</cite> is false</li>
+</dd>
+<dt class="field-even">Keyword Arguments</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>required</strong> (<em>bool</em>) – if true, raise error if the <cite>key</cite> is not in the option dict</p></li>
+<li><p><strong>default</strong> (<em>object</em>) – a default to return if <cite>key</cite> is not in option dict and <cite>required</cite> is false</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.chef.helpers.sort_df">
-<code class="descclassname">ddf_utils.chef.helpers.</code><code class="descname">sort_df</code><span class="sig-paren">(</span><em>df</em>, <em>key</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.helpers.sort_df" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<code class="sig-prename descclassname">ddf_utils.chef.helpers.</code><code class="sig-name descname">sort_df</code><span class="sig-paren">(</span><em class="sig-param">df</em>, <em class="sig-param">key</em>, <em class="sig-param">sort_key_columns=True</em>, <em class="sig-param">custom_column_order=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.helpers.sort_df" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sorting df columns and rows.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> (<em>pd.DataFrame</em>) – DataFrame to sort</p></li>
+<li><p><strong>key</strong> (<cite>str</cite> or list) – columns of dataframe, to be used as sorting key(s)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Keyword Arguments</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>sort_key_columns</strong> (<em>bool</em>) – whehter to sort index column orders. If false index columns will retain the order of <cite>key</cite> parameter.</p></li>
+<li><p><strong>custom_column_order</strong> (<em>dict</em>) – column weights for columns except keys. Columns not mentioned will have 0 weight.
+Bigger weight means higher rank.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 </div>
 <div class="section" id="module-ddf_utils.chef.ops">
@@ -362,40 +368,39 @@ from numpy or <code class="xref py py-mod docutils literal notranslate"><span cl
 <p>commonly used calculation methods</p>
 <dl class="function">
 <dt id="ddf_utils.chef.ops.aagr">
-<code class="descclassname">ddf_utils.chef.ops.</code><code class="descname">aagr</code><span class="sig-paren">(</span><em>df: &lt;Mock name='mock.DataFrame' id='4542361384'&gt;</em>, <em>window: int = 10</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.ops.aagr" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ddf_utils.chef.ops.</code><code class="sig-name descname">aagr</code><span class="sig-paren">(</span><em class="sig-param">df: &lt;Mock name='mock.DataFrame' id='4351850872'&gt;</em>, <em class="sig-param">window: int = 10</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.ops.aagr" title="Permalink to this definition">¶</a></dt>
 <dd><p>average annual growth rate</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>window</strong> (<cite>int</cite>) – the rolling window size</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>return</strong> – The rolling apply result</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><cite>DataFrame</cite></td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>window</strong> (<cite>int</cite>) – the rolling window size</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>return</strong> – The rolling apply result</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><cite>DataFrame</cite></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.chef.ops.between">
-<code class="descclassname">ddf_utils.chef.ops.</code><code class="descname">between</code><span class="sig-paren">(</span><em>x</em>, <em>lower</em>, <em>upper</em>, <em>how='all'</em>, <em>include_upper=False</em>, <em>include_lower=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.ops.between" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ddf_utils.chef.ops.</code><code class="sig-name descname">between</code><span class="sig-paren">(</span><em class="sig-param">x</em>, <em class="sig-param">lower</em>, <em class="sig-param">upper</em>, <em class="sig-param">how='all'</em>, <em class="sig-param">include_upper=False</em>, <em class="sig-param">include_lower=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.ops.between" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.chef.ops.gt">
-<code class="descclassname">ddf_utils.chef.ops.</code><code class="descname">gt</code><span class="sig-paren">(</span><em>x</em>, <em>val</em>, <em>how='all'</em>, <em>include_eq=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.ops.gt" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ddf_utils.chef.ops.</code><code class="sig-name descname">gt</code><span class="sig-paren">(</span><em class="sig-param">x</em>, <em class="sig-param">val</em>, <em class="sig-param">how='all'</em>, <em class="sig-param">include_eq=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.ops.gt" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.chef.ops.lt">
-<code class="descclassname">ddf_utils.chef.ops.</code><code class="descname">lt</code><span class="sig-paren">(</span><em>x</em>, <em>val</em>, <em>how='all'</em>, <em>include_eq=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.ops.lt" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ddf_utils.chef.ops.</code><code class="sig-name descname">lt</code><span class="sig-paren">(</span><em class="sig-param">x</em>, <em class="sig-param">val</em>, <em class="sig-param">how='all'</em>, <em class="sig-param">include_eq=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.ops.lt" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.chef.ops.zcore">
-<code class="descclassname">ddf_utils.chef.ops.</code><code class="descname">zcore</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.ops.zcore" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ddf_utils.chef.ops.</code><code class="sig-name descname">zcore</code><span class="sig-paren">(</span><em class="sig-param">x</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.chef.ops.zcore" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </div>
@@ -412,7 +417,7 @@ from numpy or <code class="xref py py-mod docutils literal notranslate"><span cl
         <a href="ddf_utils.chef.model.html" class="btn btn-neutral float-right" title="ddf_utils.chef.model package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="ddf_utils.html" class="btn btn-neutral" title="ddf_utils package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="ddf_utils.html" class="btn btn-neutral float-left" title="ddf_utils package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -421,7 +426,7 @@ from numpy or <code class="xref py py-mod docutils literal notranslate"><span cl
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2017, Gapminder Fundation.
+        &copy; Copyright 2017, Gapminder Fundation
 
     </p>
   </div>
@@ -438,33 +443,16 @@ from numpy or <code class="xref py py-mod docutils literal notranslate"><span cl
   
 
 
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'0.1dev',
-            LANGUAGE:'en',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="_static/language_data.js"></script>
-
-  
-
-  <script type="text/javascript" src="_static/js/theme.js"></script>
-
   <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>
