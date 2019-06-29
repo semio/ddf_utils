@@ -17,34 +17,36 @@
   
 
   
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-  
     
 
   
-
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="ddf_utils.chef package" href="ddf_utils.chef.html" />
     <link rel="prev" title="API References" href="modules.html" /> 
-
-  
-  <script src="_static/js/modernizr.min.js"></script>
-
 </head>
 
 <body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
@@ -236,29 +238,29 @@
 <p>The workflow is described in this <a class="reference external" href="https://docs.google.com/document/d/11d5D5CPlr6I2BqP8z0p2o_dYQC9AYUyxcLGUq1WYCfk/">google doc</a>. The json part comes from discussion <a class="reference external" href="https://gapminder.slack.com/archives/C0FTBA1P0/p1479832399000650">here</a></p>
 <dl class="function">
 <dt id="ddf_utils.i18n.merge_translations_csv">
-<code class="descclassname">ddf_utils.i18n.</code><code class="descname">merge_translations_csv</code><span class="sig-paren">(</span><em>path</em>, <em>split_path='langsplit'</em>, <em>lang_path='lang'</em>, <em>overwrite=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.i18n.merge_translations_csv" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ddf_utils.i18n.</code><code class="sig-name descname">merge_translations_csv</code><span class="sig-paren">(</span><em class="sig-param">path</em>, <em class="sig-param">split_path='langsplit'</em>, <em class="sig-param">lang_path='lang'</em>, <em class="sig-param">overwrite=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.i18n.merge_translations_csv" title="Permalink to this definition">¶</a></dt>
 <dd><p>merge all translated csv files and update datapackage.json</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.i18n.merge_translations_json">
-<code class="descclassname">ddf_utils.i18n.</code><code class="descname">merge_translations_json</code><span class="sig-paren">(</span><em>path</em>, <em>split_path='langsplit'</em>, <em>lang_path='lang'</em>, <em>overwrite=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.i18n.merge_translations_json" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ddf_utils.i18n.</code><code class="sig-name descname">merge_translations_json</code><span class="sig-paren">(</span><em class="sig-param">path</em>, <em class="sig-param">split_path='langsplit'</em>, <em class="sig-param">lang_path='lang'</em>, <em class="sig-param">overwrite=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.i18n.merge_translations_json" title="Permalink to this definition">¶</a></dt>
 <dd><p>merge all translated json files and update datapackage.json.</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.i18n.split_translations_csv">
-<code class="descclassname">ddf_utils.i18n.</code><code class="descname">split_translations_csv</code><span class="sig-paren">(</span><em>path</em>, <em>split_path='langsplit'</em>, <em>exclude_concepts=None</em>, <em>overwrite=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.i18n.split_translations_csv" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ddf_utils.i18n.</code><code class="sig-name descname">split_translations_csv</code><span class="sig-paren">(</span><em class="sig-param">path</em>, <em class="sig-param">split_path='langsplit'</em>, <em class="sig-param">exclude_concepts=None</em>, <em class="sig-param">overwrite=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.i18n.split_translations_csv" title="Permalink to this definition">¶</a></dt>
 <dd><p>split all string concepts and save them as csv files</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.i18n.split_translations_json">
-<code class="descclassname">ddf_utils.i18n.</code><code class="descname">split_translations_json</code><span class="sig-paren">(</span><em>path</em>, <em>split_path='langsplit'</em>, <em>exclude_concepts=None</em>, <em>overwrite=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.i18n.split_translations_json" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ddf_utils.i18n.</code><code class="sig-name descname">split_translations_json</code><span class="sig-paren">(</span><em class="sig-param">path</em>, <em class="sig-param">split_path='langsplit'</em>, <em class="sig-param">exclude_concepts=None</em>, <em class="sig-param">overwrite=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.i18n.split_translations_json" title="Permalink to this definition">¶</a></dt>
 <dd><p>split all string concepts and save them as json files</p>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">There is an issue with dataframe.to_json() method for multiIndex files (i.e. datapoints), which
+<p class="admonition-title">Note</p>
+<p>There is an issue with dataframe.to_json() method for multiIndex files (i.e. datapoints), which
 cause we can’t read back the split files and merge them. In this case <a class="reference internal" href="#ddf_utils.i18n.merge_translations_json" title="ddf_utils.i18n.merge_translations_json"><code class="xref py py-func docutils literal notranslate"><span class="pre">merge_translations_json()</span></code></a> will fail.</p>
 </div>
 </dd></dl>
@@ -269,75 +271,62 @@ cause we can’t read back the split files and merge them. In this case <a class
 <p>functions for handling DDF datapackage</p>
 <dl class="function">
 <dt id="ddf_utils.package.create_datapackage">
-<code class="descclassname">ddf_utils.package.</code><code class="descname">create_datapackage</code><span class="sig-paren">(</span><em>path</em>, <em>gen_schema=True</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.package.create_datapackage" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ddf_utils.package.</code><code class="sig-name descname">create_datapackage</code><span class="sig-paren">(</span><em class="sig-param">path</em>, <em class="sig-param">gen_schema=True</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.package.create_datapackage" title="Permalink to this definition">¶</a></dt>
 <dd><p>create datapackage.json base on the files in <cite>path</cite>.</p>
 <p>If you want to set some attributes manually, you can pass them as
 keyword arguments to this function</p>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
+<p class="admonition-title">Note</p>
 <p>A DDFcsv datapackage MUST contain the fields <cite>name</cite> and <cite>resources</cite>.</p>
-<p class="last">if name is not provided, then the base name of <cite>path</cite> will be used.</p>
+<p>if name is not provided, then the base name of <cite>path</cite> will be used.</p>
 </div>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>path</strong> (<cite>str</cite>) – the dataset path to create datapackage.json</li>
-<li><strong>gen_schema</strong> (<em>bool</em>) – whether to create DDFSchema in datapackage.json. Default is True</li>
-<li><strong>kwargs</strong> (<em>dict</em>) – metadata to write into datapackage.json. According to spec,
-title, description, author and license SHOULD be fields in datapackage.json.</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<cite>str</cite>) – the dataset path to create datapackage.json</p></li>
+<li><p><strong>gen_schema</strong> (<em>bool</em>) – whether to create DDFSchema in datapackage.json. Default is True</p></li>
+<li><p><strong>kwargs</strong> (<em>dict</em>) – metadata to write into datapackage.json. According to spec,
+title, description, author and license SHOULD be fields in datapackage.json.</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.package.get_datapackage">
-<code class="descclassname">ddf_utils.package.</code><code class="descname">get_datapackage</code><span class="sig-paren">(</span><em>path</em>, <em>use_existing=True</em>, <em>update=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.package.get_datapackage" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ddf_utils.package.</code><code class="sig-name descname">get_datapackage</code><span class="sig-paren">(</span><em class="sig-param">path</em>, <em class="sig-param">use_existing=True</em>, <em class="sig-param">update=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.package.get_datapackage" title="Permalink to this definition">¶</a></dt>
 <dd><p>get the datapackage.json from a dataset path, create one if it’s not exists</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>path</strong> (<cite>str</cite>) – the dataset path</p>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name" colspan="2">Keyword Arguments:</th></tr>
-<tr class="field-even field"><td>&#160;</td><td class="field-body"><ul class="first last simple">
-<li><strong>use_existing</strong> (<em>bool</em>) – whether or not to use the existing datapackage</li>
-<li><strong>update</strong> (<em>bool</em>) – if update is true, will update the resources and schema in existing datapackage.json. else just return existing
-datapackage.json</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>path</strong> (<cite>str</cite>) – the dataset path</p>
+</dd>
+<dt class="field-even">Keyword Arguments</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>use_existing</strong> (<em>bool</em>) – whether or not to use the existing datapackage</p></li>
+<li><p><strong>update</strong> (<em>bool</em>) – if update is true, will update the resources and schema in existing datapackage.json. else just return existing
+datapackage.json</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.package.get_ddf_files">
-<code class="descclassname">ddf_utils.package.</code><code class="descname">get_ddf_files</code><span class="sig-paren">(</span><em>path</em>, <em>root=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.package.get_ddf_files" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ddf_utils.package.</code><code class="sig-name descname">get_ddf_files</code><span class="sig-paren">(</span><em class="sig-param">path</em>, <em class="sig-param">root=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.package.get_ddf_files" title="Permalink to this definition">¶</a></dt>
 <dd><p>yield all csv files which are named following the DDF model standard.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>path</strong> (<cite>str</cite>) – the path to check</li>
-<li><strong>root</strong> (<cite>str</cite>, optional) – if path is relative, append the root to all files.</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<cite>str</cite>) – the path to check</p></li>
+<li><p><strong>root</strong> (<cite>str</cite>, optional) – if path is relative, append the root to all files.</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.package.is_datapackage">
-<code class="descclassname">ddf_utils.package.</code><code class="descname">is_datapackage</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.package.is_datapackage" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ddf_utils.package.</code><code class="sig-name descname">is_datapackage</code><span class="sig-paren">(</span><em class="sig-param">path</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.package.is_datapackage" title="Permalink to this definition">¶</a></dt>
 <dd><p>check if a directory is a dataset directory</p>
 <p>This function checks if ddf–index.csv and datapackage.json exists
 to judge if the dir is a dataset.</p>
@@ -349,54 +338,50 @@ to judge if the dir is a dataset.</p>
 <p>io functions for ddf files</p>
 <dl class="function">
 <dt id="ddf_utils.io.cleanup">
-<code class="descclassname">ddf_utils.io.</code><code class="descname">cleanup</code><span class="sig-paren">(</span><em>path</em>, <em>how='ddf'</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.io.cleanup" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ddf_utils.io.</code><code class="sig-name descname">cleanup</code><span class="sig-paren">(</span><em class="sig-param">path</em>, <em class="sig-param">how='ddf'</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.io.cleanup" title="Permalink to this definition">¶</a></dt>
 <dd><p>remove all ddf files in the given path</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.io.csvs_to_ddf">
-<code class="descclassname">ddf_utils.io.</code><code class="descname">csvs_to_ddf</code><span class="sig-paren">(</span><em>files</em>, <em>out_path</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.io.csvs_to_ddf" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ddf_utils.io.</code><code class="sig-name descname">csvs_to_ddf</code><span class="sig-paren">(</span><em class="sig-param">files</em>, <em class="sig-param">out_path</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.io.csvs_to_ddf" title="Permalink to this definition">¶</a></dt>
 <dd><p>convert raw files to ddfcsv</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>files</strong> (<em>list</em>) – a list of file paths to build ddf csv</li>
-<li><strong>out_path</strong> (<cite>str</cite>) – the directory to put the ddf dataset</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>files</strong> (<em>list</em>) – a list of file paths to build ddf csv</p></li>
+<li><p><strong>out_path</strong> (<cite>str</cite>) – the directory to put the ddf dataset</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.io.download_csv">
-<code class="descclassname">ddf_utils.io.</code><code class="descname">download_csv</code><span class="sig-paren">(</span><em>urls</em>, <em>out_path</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.io.download_csv" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ddf_utils.io.</code><code class="sig-name descname">download_csv</code><span class="sig-paren">(</span><em class="sig-param">urls</em>, <em class="sig-param">out_path</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.io.download_csv" title="Permalink to this definition">¶</a></dt>
 <dd><p>download csv files</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.io.dump_json">
-<code class="descclassname">ddf_utils.io.</code><code class="descname">dump_json</code><span class="sig-paren">(</span><em>path</em>, <em>obj</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.io.dump_json" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ddf_utils.io.</code><code class="sig-name descname">dump_json</code><span class="sig-paren">(</span><em class="sig-param">path</em>, <em class="sig-param">obj</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.io.dump_json" title="Permalink to this definition">¶</a></dt>
 <dd><p>convenient function to dump a dictionary object to json</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.io.open_google_spreadsheet">
-<code class="descclassname">ddf_utils.io.</code><code class="descname">open_google_spreadsheet</code><span class="sig-paren">(</span><em>docid</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.io.open_google_spreadsheet" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ddf_utils.io.</code><code class="sig-name descname">open_google_spreadsheet</code><span class="sig-paren">(</span><em class="sig-param">docid</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.io.open_google_spreadsheet" title="Permalink to this definition">¶</a></dt>
 <dd><p>read google spreadsheet into excel io object</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.io.serve_concept">
-<code class="descclassname">ddf_utils.io.</code><code class="descname">serve_concept</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.io.serve_concept" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ddf_utils.io.</code><code class="sig-name descname">serve_concept</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.io.serve_concept" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.io.serve_datapoint">
-<code class="descclassname">ddf_utils.io.</code><code class="descname">serve_datapoint</code><span class="sig-paren">(</span><em>df_: &lt;Mock name='mock.DataFrame' id='4542361384'&gt;</em>, <em>out_dir</em>, <em>concept</em>, <em>copy=True</em>, <em>by: Iterable = None</em>, <em>formatter: Callable = &lt;function format_float_digits&gt;</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.io.serve_datapoint" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ddf_utils.io.</code><code class="sig-name descname">serve_datapoint</code><span class="sig-paren">(</span><em class="sig-param">df_: &lt;Mock name='mock.DataFrame' id='4351850872'&gt;</em>, <em class="sig-param">out_dir</em>, <em class="sig-param">concept</em>, <em class="sig-param">copy=True</em>, <em class="sig-param">by: Iterable = None</em>, <em class="sig-param">formatter: Callable = &lt;function format_float_digits&gt;</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.io.serve_datapoint" title="Permalink to this definition">¶</a></dt>
 <dd><p>save a pandas dataframe to datapoint file.
 the file path of csv will be out_dir/ddf–datapoints–$concept–$by.csv</p>
 <p>addition keyword arguments can be passed to <cite>pd.DataFrame.to_csv()</cite> function.</p>
@@ -404,7 +389,7 @@ the file path of csv will be out_dir/ddf–datapoints–$concept–$by.csv</p>
 
 <dl class="function">
 <dt id="ddf_utils.io.serve_entity">
-<code class="descclassname">ddf_utils.io.</code><code class="descname">serve_entity</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.io.serve_entity" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ddf_utils.io.</code><code class="sig-name descname">serve_entity</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.io.serve_entity" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </div>
@@ -413,7 +398,7 @@ the file path of csv will be out_dir/ddf–datapoints–$concept–$by.csv</p>
 <p>functions working with patches</p>
 <dl class="function">
 <dt id="ddf_utils.patch.apply_patch">
-<code class="descclassname">ddf_utils.patch.</code><code class="descname">apply_patch</code><span class="sig-paren">(</span><em>base</em>, <em>patch</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.patch.apply_patch" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ddf_utils.patch.</code><code class="sig-name descname">apply_patch</code><span class="sig-paren">(</span><em class="sig-param">base</em>, <em class="sig-param">patch</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.patch.apply_patch" title="Permalink to this definition">¶</a></dt>
 <dd><p>apply patch created with daff.
 more on the diff format, see: <a class="reference external" href="http://specs.frictionlessdata.io/tabular-diff-format/">http://specs.frictionlessdata.io/tabular-diff-format/</a></p>
 <p>return: the updated DataFrame.</p>
@@ -425,50 +410,50 @@ more on the diff format, see: <a class="reference external" href="http://specs.f
 <p>QA functioins.</p>
 <dl class="function">
 <dt id="ddf_utils.qa.avg_pct_chg">
-<code class="descclassname">ddf_utils.qa.</code><code class="descname">avg_pct_chg</code><span class="sig-paren">(</span><em>comp_df</em>, <em>indicator</em>, <em>on='geo'</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.qa.avg_pct_chg" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ddf_utils.qa.</code><code class="sig-name descname">avg_pct_chg</code><span class="sig-paren">(</span><em class="sig-param">comp_df</em>, <em class="sig-param">indicator</em>, <em class="sig-param">on='geo'</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.qa.avg_pct_chg" title="Permalink to this definition">¶</a></dt>
 <dd><p>return average precentage changes between old and new data</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.qa.compare_with_func">
-<code class="descclassname">ddf_utils.qa.</code><code class="descname">compare_with_func</code><span class="sig-paren">(</span><em>dataset1</em>, <em>dataset2</em>, <em>fns=None</em>, <em>indicators=None</em>, <em>key=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.qa.compare_with_func" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ddf_utils.qa.</code><code class="sig-name descname">compare_with_func</code><span class="sig-paren">(</span><em class="sig-param">dataset1</em>, <em class="sig-param">dataset2</em>, <em class="sig-param">fns=None</em>, <em class="sig-param">indicators=None</em>, <em class="sig-param">key=None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.qa.compare_with_func" title="Permalink to this definition">¶</a></dt>
 <dd><p>compare 2 datasets with functions</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.qa.dropped_datapoints">
-<code class="descclassname">ddf_utils.qa.</code><code class="descname">dropped_datapoints</code><span class="sig-paren">(</span><em>comp_df</em>, <em>indicator</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.qa.dropped_datapoints" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ddf_utils.qa.</code><code class="sig-name descname">dropped_datapoints</code><span class="sig-paren">(</span><em class="sig-param">comp_df</em>, <em class="sig-param">indicator</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.qa.dropped_datapoints" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.qa.max_change_index">
-<code class="descclassname">ddf_utils.qa.</code><code class="descname">max_change_index</code><span class="sig-paren">(</span><em>comp_df</em>, <em>indicator</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.qa.max_change_index" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ddf_utils.qa.</code><code class="sig-name descname">max_change_index</code><span class="sig-paren">(</span><em class="sig-param">comp_df</em>, <em class="sig-param">indicator</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.qa.max_change_index" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.qa.max_pct_chg">
-<code class="descclassname">ddf_utils.qa.</code><code class="descname">max_pct_chg</code><span class="sig-paren">(</span><em>comp_df</em>, <em>indicator</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.qa.max_pct_chg" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ddf_utils.qa.</code><code class="sig-name descname">max_pct_chg</code><span class="sig-paren">(</span><em class="sig-param">comp_df</em>, <em class="sig-param">indicator</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.qa.max_pct_chg" title="Permalink to this definition">¶</a></dt>
 <dd><p>return average precentage changes between old and new data</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.qa.new_datapoints">
-<code class="descclassname">ddf_utils.qa.</code><code class="descname">new_datapoints</code><span class="sig-paren">(</span><em>comp_df</em>, <em>indicator</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.qa.new_datapoints" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ddf_utils.qa.</code><code class="sig-name descname">new_datapoints</code><span class="sig-paren">(</span><em class="sig-param">comp_df</em>, <em class="sig-param">indicator</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.qa.new_datapoints" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.qa.nrmse">
-<code class="descclassname">ddf_utils.qa.</code><code class="descname">nrmse</code><span class="sig-paren">(</span><em>comp_df</em>, <em>indicator</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.qa.nrmse" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ddf_utils.qa.</code><code class="sig-name descname">nrmse</code><span class="sig-paren">(</span><em class="sig-param">comp_df</em>, <em class="sig-param">indicator</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.qa.nrmse" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.qa.rmse">
-<code class="descclassname">ddf_utils.qa.</code><code class="descname">rmse</code><span class="sig-paren">(</span><em>comp_df</em>, <em>indicator</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.qa.rmse" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ddf_utils.qa.</code><code class="sig-name descname">rmse</code><span class="sig-paren">(</span><em class="sig-param">comp_df</em>, <em class="sig-param">indicator</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.qa.rmse" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.qa.rval">
-<code class="descclassname">ddf_utils.qa.</code><code class="descname">rval</code><span class="sig-paren">(</span><em>comp_df</em>, <em>indicator</em>, <em>on='geo'</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.qa.rval" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ddf_utils.qa.</code><code class="sig-name descname">rval</code><span class="sig-paren">(</span><em class="sig-param">comp_df</em>, <em class="sig-param">indicator</em>, <em class="sig-param">on='geo'</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.qa.rval" title="Permalink to this definition">¶</a></dt>
 <dd><p>return r-value between old and new data</p>
 </dd></dl>
 
@@ -478,26 +463,26 @@ more on the diff format, see: <a class="reference external" href="http://specs.f
 <p>string functions for ddf files</p>
 <dl class="function">
 <dt id="ddf_utils.str.fix_time_range">
-<code class="descclassname">ddf_utils.str.</code><code class="descname">fix_time_range</code><span class="sig-paren">(</span><em>s</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.str.fix_time_range" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ddf_utils.str.</code><code class="sig-name descname">fix_time_range</code><span class="sig-paren">(</span><em class="sig-param">s</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.str.fix_time_range" title="Permalink to this definition">¶</a></dt>
 <dd><p>change a time range to the middle of year in the range.
 e.g. fix_time_range(‘1980-90’) = 1985</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.str.format_float_digits">
-<code class="descclassname">ddf_utils.str.</code><code class="descname">format_float_digits</code><span class="sig-paren">(</span><em>number</em>, <em>digits=5</em>, <em>threshold=None</em>, <em>keep_decimal=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.str.format_float_digits" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ddf_utils.str.</code><code class="sig-name descname">format_float_digits</code><span class="sig-paren">(</span><em class="sig-param">number</em>, <em class="sig-param">digits=5</em>, <em class="sig-param">threshold=None</em>, <em class="sig-param">keep_decimal=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.str.format_float_digits" title="Permalink to this definition">¶</a></dt>
 <dd><p>format the number to string, limit the maximum amount of digits. Removing tailing zeros.</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.str.format_float_sigfig">
-<code class="descclassname">ddf_utils.str.</code><code class="descname">format_float_sigfig</code><span class="sig-paren">(</span><em>number</em>, <em>sigfig=5</em>, <em>threshold=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.str.format_float_sigfig" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ddf_utils.str.</code><code class="sig-name descname">format_float_sigfig</code><span class="sig-paren">(</span><em class="sig-param">number</em>, <em class="sig-param">sigfig=5</em>, <em class="sig-param">threshold=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.str.format_float_sigfig" title="Permalink to this definition">¶</a></dt>
 <dd><p>format the number to string, keeping some significant digits.</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.str.to_concept_id">
-<code class="descclassname">ddf_utils.str.</code><code class="descname">to_concept_id</code><span class="sig-paren">(</span><em>s</em>, <em>sep='_'</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.str.to_concept_id" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ddf_utils.str.</code><code class="sig-name descname">to_concept_id</code><span class="sig-paren">(</span><em class="sig-param">s</em>, <em class="sig-param">sep='_'</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.str.to_concept_id" title="Permalink to this definition">¶</a></dt>
 <dd><p>convert a string to alphanumeric format.</p>
 </dd></dl>
 
@@ -507,81 +492,72 @@ e.g. fix_time_range(‘1980-90’) = 1985</p>
 <p>functions for common tasks on ddf datasets</p>
 <dl class="function">
 <dt id="ddf_utils.transformer.extract_concepts">
-<code class="descclassname">ddf_utils.transformer.</code><code class="descname">extract_concepts</code><span class="sig-paren">(</span><em>dfs</em>, <em>base=None</em>, <em>join='full_outer'</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.transformer.extract_concepts" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ddf_utils.transformer.</code><code class="sig-name descname">extract_concepts</code><span class="sig-paren">(</span><em class="sig-param">dfs</em>, <em class="sig-param">base=None</em>, <em class="sig-param">join='full_outer'</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.transformer.extract_concepts" title="Permalink to this definition">¶</a></dt>
 <dd><p>extract concepts from a list of dataframes.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>dfs</strong> (<em>list</em><em>[</em><em>DataFrame</em><em>]</em>) – a list of dataframes to be extracted</p>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name" colspan="2">Keyword Arguments:</th></tr>
-<tr class="field-even field"><td>&#160;</td><td class="field-body"><ul class="first simple">
-<li><strong>base</strong> (<em>DataFrame</em>) – the base concept table to join</li>
-<li><strong>join</strong> (<em>{'full_outer'</em><em>, </em><em>'ingredients_outer'}</em>) – how to join the <cite>base</cite> dataframe. <code class="docutils literal notranslate"><span class="pre">full_outer</span></code> means union of the base and extracted,
-<code class="docutils literal notranslate"><span class="pre">ingredients_outer</span></code> means only keep concepts in extracted</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>dfs</strong> (<em>list</em><em>[</em><em>DataFrame</em><em>]</em>) – a list of dataframes to be extracted</p>
+</dd>
+<dt class="field-even">Keyword Arguments</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>base</strong> (<em>DataFrame</em>) – the base concept table to join</p></li>
+<li><p><strong>join</strong> (<em>{'full_outer'</em><em>, </em><em>'ingredients_outer'}</em>) – how to join the <cite>base</cite> dataframe. <code class="docutils literal notranslate"><span class="pre">full_outer</span></code> means union of the base and extracted,
+<code class="docutils literal notranslate"><span class="pre">ingredients_outer</span></code> means only keep concepts in extracted</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">the result concept table</p>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">DataFrame</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the result concept table</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>DataFrame</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.transformer.merge_keys">
-<code class="descclassname">ddf_utils.transformer.</code><code class="descname">merge_keys</code><span class="sig-paren">(</span><em>df</em>, <em>dictionary</em>, <em>target_column=None</em>, <em>merged='drop'</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.transformer.merge_keys" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ddf_utils.transformer.</code><code class="sig-name descname">merge_keys</code><span class="sig-paren">(</span><em class="sig-param">df</em>, <em class="sig-param">dictionary</em>, <em class="sig-param">target_column=None</em>, <em class="sig-param">merged='drop'</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.transformer.merge_keys" title="Permalink to this definition">¶</a></dt>
 <dd><p>merge keys</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.transformer.split_keys">
-<code class="descclassname">ddf_utils.transformer.</code><code class="descname">split_keys</code><span class="sig-paren">(</span><em>df</em>, <em>target_column</em>, <em>dictionary</em>, <em>splited='drop'</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.transformer.split_keys" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ddf_utils.transformer.</code><code class="sig-name descname">split_keys</code><span class="sig-paren">(</span><em class="sig-param">df</em>, <em class="sig-param">target_column</em>, <em class="sig-param">dictionary</em>, <em class="sig-param">splited='drop'</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.transformer.split_keys" title="Permalink to this definition">¶</a></dt>
 <dd><p>split entities</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.transformer.translate_column">
-<code class="descclassname">ddf_utils.transformer.</code><code class="descname">translate_column</code><span class="sig-paren">(</span><em>df</em>, <em>column</em>, <em>dictionary_type</em>, <em>dictionary</em>, <em>target_column=None</em>, <em>base_df=None</em>, <em>not_found='drop'</em>, <em>ambiguity='prompt'</em>, <em>ignore_case=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.transformer.translate_column" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ddf_utils.transformer.</code><code class="sig-name descname">translate_column</code><span class="sig-paren">(</span><em class="sig-param">df</em>, <em class="sig-param">column</em>, <em class="sig-param">dictionary_type</em>, <em class="sig-param">dictionary</em>, <em class="sig-param">target_column=None</em>, <em class="sig-param">base_df=None</em>, <em class="sig-param">not_found='drop'</em>, <em class="sig-param">ambiguity='prompt'</em>, <em class="sig-param">ignore_case=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.transformer.translate_column" title="Permalink to this definition">¶</a></dt>
 <dd><p>change values in a column base on a mapping dictionary.</p>
 <p>The dictionary can be provided as a python dictionary, pandas dataframe or read from file.</p>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">When translating with a base DataFrame, if ambiguity is found in the data, for example,
+<p class="admonition-title">Note</p>
+<p>When translating with a base DataFrame, if ambiguity is found in the data, for example,
 a dataset with entity-id <cite>congo</cite>, to align to a dataset with <cite>cod</cite> ( Democratic Republic
 of the Congo ) and <cite>cog</cite> ( Republic of the Congo ), the function will ask for user input
 to choose which one or to skip it.</p>
 </div>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>df</strong> (<cite>DataFrame</cite>) – The dataframe to be translated</li>
-<li><strong>column</strong> (<cite>str</cite>) – The column to be translated</li>
-<li><strong>dictionary_type</strong> (<cite>str</cite>) – The type of dictionary, choose from <cite>inline</cite>, <cite>file</cite> and <cite>dataframe</cite></li>
-<li><strong>dictionary</strong> (<cite>str</cite> or <cite>dict</cite>) – The dictionary. Depanding on the <cite>dictionary_type</cite>, the value of this parameter should be:
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> (<cite>DataFrame</cite>) – The dataframe to be translated</p></li>
+<li><p><strong>column</strong> (<cite>str</cite>) – The column to be translated</p></li>
+<li><p><strong>dictionary_type</strong> (<cite>str</cite>) – The type of dictionary, choose from <cite>inline</cite>, <cite>file</cite> and <cite>dataframe</cite></p></li>
+<li><p><strong>dictionary</strong> (<cite>str</cite> or <cite>dict</cite>) – The dictionary. Depanding on the <cite>dictionary_type</cite>, the value of this parameter should be:
 <cite>inline</cite>: <cite>dict</cite>
 <cite>file</cite>: the file path, <cite>str</cite>
-<cite>dataframe</cite>: <cite>dict</cite>, must have <cite>key</cite> and <cite>value</cite> keys. see examples in examples section.</li>
-<li><strong>target_column</strong> (<cite>str</cite>, optional) – The column to store translated resluts. If this is None, then the one set with <cite>column</cite>
-will be replaced.</li>
-<li><strong>base_df</strong> (<cite>DataFrame</cite>, optional) – When <cite>dictionary_type</cite> is <cite>dataframe</cite>, this option should be set</li>
-<li><strong>not_found</strong> (<cite>str</cite>) – What to do if key in the dictionary is not found in the dataframe to be translated.
-avaliable options are <cite>drop</cite>, <cite>error</cite>, <cite>include</cite></li>
-<li><strong>ambiguity</strong> (<cite>str</cite>) – What to do when there is ambiguities in the dictionary. avaliable options are <cite>prompt</cite>,
-<cite>skip</cite>, <cite>error</cite></li>
+<cite>dataframe</cite>: <cite>dict</cite>, must have <cite>key</cite> and <cite>value</cite> keys. see examples in examples section.</p></li>
+<li><p><strong>target_column</strong> (<cite>str</cite>, optional) – The column to store translated resluts. If this is None, then the one set with <cite>column</cite>
+will be replaced.</p></li>
+<li><p><strong>base_df</strong> (<cite>DataFrame</cite>, optional) – When <cite>dictionary_type</cite> is <cite>dataframe</cite>, this option should be set</p></li>
+<li><p><strong>not_found</strong> (<cite>str</cite>) – What to do if key in the dictionary is not found in the dataframe to be translated.
+avaliable options are <cite>drop</cite>, <cite>error</cite>, <cite>include</cite></p></li>
+<li><p><strong>ambiguity</strong> (<cite>str</cite>) – What to do when there is ambiguities in the dictionary. avaliable options are <cite>prompt</cite>,
+<cite>skip</cite>, <cite>error</cite></p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 <p class="rubric">Examples</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">([[</span><span class="s1">&#39;geo&#39;</span><span class="p">,</span> <span class="s1">&#39;Geographical places&#39;</span><span class="p">],</span> <span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">,</span> <span class="s1">&#39;Year&#39;</span><span class="p">]],</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;concept&#39;</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">df</span>
@@ -611,50 +587,42 @@ avaliable options are <cite>drop</cite>, <cite>error</cite>, <cite>include</cite
 
 <dl class="function">
 <dt id="ddf_utils.transformer.translate_header">
-<code class="descclassname">ddf_utils.transformer.</code><code class="descname">translate_header</code><span class="sig-paren">(</span><em>df</em>, <em>dictionary</em>, <em>dictionary_type='inline'</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.transformer.translate_header" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ddf_utils.transformer.</code><code class="sig-name descname">translate_header</code><span class="sig-paren">(</span><em class="sig-param">df</em>, <em class="sig-param">dictionary</em>, <em class="sig-param">dictionary_type='inline'</em><span class="sig-paren">)</span><a class="headerlink" href="#ddf_utils.transformer.translate_header" title="Permalink to this definition">¶</a></dt>
 <dd><p>change the headers of a dataframe base on a mapping dictionary.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>df</strong> (<cite>DataFrame</cite>) – The dataframe to be translated</li>
-<li><strong>dictionary_type</strong> (<cite>str</cite>, default to <cite>inline</cite>) – The type of dictionary, choose from <cite>inline</cite> or <cite>file</cite></li>
-<li><strong>dictionary</strong> (<cite>dict</cite> or <cite>str</cite>) – The mapping dictionary or path of mapping file</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> (<cite>DataFrame</cite>) – The dataframe to be translated</p></li>
+<li><p><strong>dictionary_type</strong> (<cite>str</cite>, default to <cite>inline</cite>) – The type of dictionary, choose from <cite>inline</cite> or <cite>file</cite></p></li>
+<li><p><strong>dictionary</strong> (<cite>dict</cite> or <cite>str</cite>) – The mapping dictionary or path of mapping file</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="ddf_utils.transformer.trend_bridge">
-<code class="descclassname">ddf_utils.transformer.</code><code class="descname">trend_bridge</code><span class="sig-paren">(</span><em>old_ser: &lt;Mock name='mock.Series' id='4538290976'&gt;</em>, <em>new_ser: &lt;Mock name='mock.Series' id='4538290976'&gt;</em>, <em>bridge_length: int</em><span class="sig-paren">)</span> &#x2192; &lt;Mock name='mock.Series' id='4538290976'&gt;<a class="headerlink" href="#ddf_utils.transformer.trend_bridge" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ddf_utils.transformer.</code><code class="sig-name descname">trend_bridge</code><span class="sig-paren">(</span><em class="sig-param">old_ser: &lt;Mock name='mock.Series' id='4353619448'&gt;</em>, <em class="sig-param">new_ser: &lt;Mock name='mock.Series' id='4353619448'&gt;</em>, <em class="sig-param">bridge_length: int</em><span class="sig-paren">)</span> &#x2192; &lt;Mock name='mock.Series' id='4353619448'&gt;<a class="headerlink" href="#ddf_utils.transformer.trend_bridge" title="Permalink to this definition">¶</a></dt>
 <dd><p>smoothing data between series.</p>
 <p>To avoid getting artificial stairs in the data, we smooth between to
 series. Sometime one source is systematically higher than another source,
 and if we jump from one to another in a single year, this looks like an
 actual change in the data.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>old_data</strong> (<em>Series</em>) – </li>
-<li><strong>new_data</strong> (<em>Series</em>) – </li>
-<li><strong>bridge_length</strong> (<em>int</em>) – the length of bridge</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>old_data</strong> (<em>Series</em>) – </p></li>
+<li><p><strong>new_data</strong> (<em>Series</em>) – </p></li>
+<li><p><strong>bridge_length</strong> (<em>int</em>) – the length of bridge</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>bridge_data</strong></p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">the bridged data</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>bridge_data</strong></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>the bridged data</p>
+</dd>
+</dl>
 </dd></dl>
 
 </div>
@@ -671,7 +639,7 @@ actual change in the data.</p>
         <a href="ddf_utils.chef.html" class="btn btn-neutral float-right" title="ddf_utils.chef package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="modules.html" class="btn btn-neutral" title="API References" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="modules.html" class="btn btn-neutral float-left" title="API References" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -680,7 +648,7 @@ actual change in the data.</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2017, Gapminder Fundation.
+        &copy; Copyright 2017, Gapminder Fundation
 
     </p>
   </div>
@@ -697,33 +665,16 @@ actual change in the data.</p>
   
 
 
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'0.1dev',
-            LANGUAGE:'en',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="_static/language_data.js"></script>
-
-  
-
-  <script type="text/javascript" src="_static/js/theme.js"></script>
-
   <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>

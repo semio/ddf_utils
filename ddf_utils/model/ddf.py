@@ -243,6 +243,8 @@ class DDF:
             return res
 
     def get_datapoints(self, i, by=None):
+        # TODO: query by entity domain should work too.
+        # current only entity set can be queried.
         if by:
             by_ = tuple(sorted(by))
         else:

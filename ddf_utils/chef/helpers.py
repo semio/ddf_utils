@@ -6,7 +6,7 @@ import hashlib
 import logging
 import json
 from functools import wraps, partial
-from collections import Sequence, Mapping
+from collections.abc import Sequence, Mapping
 from time import time
 
 import click
@@ -140,20 +140,51 @@ def prompt_select(selects, text_before=None):
     return selects[val-1]
 
 
-def sort_df(df, key):
+def sort_df(df, key, sort_key_columns=True, custom_column_order=None):
+    """Sorting df columns and rows.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        DataFrame to sort
+    key : `str` or list
+        columns of dataframe, to be used as sorting key(s)
+
+    Keyword Args
+    ------------
+    sort_key_columns : bool
+        whehter to sort index column orders. If false index columns will retain the order of `key` parameter.
+    custom_column_order : dict
+        column weights for columns except keys. Columns not mentioned will have 0 weight.
+        Bigger weight means higher rank.
+    """
     if isinstance(key, str):
         key = [key]
 
-    cols_minus_key = df.head().set_index(key).columns.values.tolist()
+    cols_minus_key = df.columns.tolist()
+    for k in key:
+        cols_minus_key.remove(k)
 
-    cols_minus_key.sort()
-    key.sort()
+    if custom_column_order:
+        order = dict([(x, 0) for x in cols_minus_key])
+        order.update(custom_column_order)
+        # sort in a dataframe and back to list.
+        order_new = (pd.DataFrame.from_dict(order, orient='index', columns=['Ord'])
+                     .sort_values(by='Ord', ascending=False).index.tolist())
+        cols_minus_key_new = [x for x in order_new if x in cols_minus_key]
+        cols_minus_key = cols_minus_key_new
+    else:
+        cols_minus_key.sort()
+
+    if sort_key_columns:
+        key.sort()
+
     cols_new = [*key, *cols_minus_key]
 
     # change categorical type to string.
     # we need to do this because we didn't define order for category
     # when we read the data
-    cat_cols = df.select_dtypes(include=['category']).columns.values.tolist()
+    cat_cols = df.select_dtypes(include=['category']).columns.tolist()
     for c in cat_cols:
         df[c] = df[c].astype('str')
 
@@ -338,8 +369,8 @@ def debuggable(func):
 
         if bk:
             import ipdb
-            ipdb.pm()
             result = ipdb.runcall(func, *args, **kwargs)
+            ipdb.pm()
         else:
             result = func(*args, **kwargs)
 

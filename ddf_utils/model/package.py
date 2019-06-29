@@ -311,8 +311,12 @@ class DDFcsv(DataPackage):
 
         def _which_sets(entity_, domain_):
             try:
-                return entity_value_cache[domain_][entity_]
+                # FIXME: make sure entity id are just str, earlier
+                e = str(entity_)
+                return entity_value_cache[domain_][e]
             except KeyError:
+                # possible cause is that the domain does not contain enough entities.
+                # TODO: give warning when creating entity domain
                 logger.debug('entity {} is not in {} domain!'.format(entity_, domain_))
                 raise
 

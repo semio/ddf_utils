@@ -1,8 +1,30 @@
 Use ddf_utils for ETL tasks
 ===========================
 
+Create DDF dataset using data model
+-----------------------------------
 
-compare 2 datasets
+Check `the example`_ for how to build datasets with the class functions.
+
+.. _`the example`: https://github.com/semio/ddf_utils/tree/master/examples/etl
+
+Create DDF dataset from CSV file
+--------------------------------
+
+When you have clean CSV data file, you can use the ``ddf from_csv``
+command to create DDF dataset. Currently only one format is supported:
+Primary Keys as well as all indicators should be in columns.
+
+.. code-block:: bash
+
+   ddf from_csv -i input_file_or_path -o out_path
+
+Where ``-i`` sets the input file or path and when it is a path all
+files in the path will be proceed; ``-o`` sets the path the generated
+DDF dataset will be put to. If ``-i`` is not set, it defaults to
+current path.
+
+Compare 2 datasets
 ------------------
 
 ``ddf diff`` command compares 2 datasets and return useful statistics
@@ -47,19 +69,3 @@ the exported datasets into.
 
 .. _correlation coefficient: https://en.wikipedia.org/wiki/Pearson_correlation_coefficient
 .. _root mean squared error: https://medium.com/human-in-a-machine-world/mae-and-rmse-which-metric-is-better-e60ac3bde13d
-
-
-create DDF dataset from CSV file
---------------------------------
-
-When you have clean CSV data file, you can use the ``ddf from_csv``
-command to create DDF dataset.
-
-.. code-block:: bash
-
-   ddf from_csv -i input_file_or_path -o out_path
-
-Where ``-i`` sets the input file or path and when it is a path all
-files in the path will be proceed; ``-o`` sets the path the generated
-DDF dataset will be put to. If ``-i`` is not set, it defaults to
-current path.
