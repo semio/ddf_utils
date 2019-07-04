@@ -5,6 +5,7 @@
 import logging
 from typing import List
 
+import pandas as pd
 from .. helpers import debuggable, read_opt, mkfunc
 from .. model.ingredient import DataPointIngredient
 from .. model.chef import Chef
@@ -102,20 +103,18 @@ def window(chef: Chef, ingredients: List[DataPointIngredient], result, **options
         # groups before rolling. Just group all key column except the column to aggregate.
         keys = ingredient.key.copy()
         keys.remove(column)
-        df = data[k].set_index(ingredient.key)
-        levels = [df.index.names.index(x) for x in keys]
+        df = data[k].copy()
+
         if size == 'expanding':
-            newdata[k] = (df.groupby(level=levels, group_keys=False)
-                          .expanding(on=column, min_periods=min_periods, center=center)
-                          .agg(f).reset_index().dropna())
+            res = []
+            groups = df.groupby(by=keys)
+            for _, df_g in groups:
+                res.append(df_g.set_index(ingredient.key)
+                           .expanding(min_periods=min_periods, center=center).agg(f))
+            newdata[k] = pd.concat(res, sort=False).reset_index()
         else:
-            # There is a bug when running rolling on with groupby in pandas.
-            # see https://github.com/pandas-dev/pandas/issues/13966
-            # We will implement this later when we found work around or it's fixed
-            # for now, we don't use the `on` parameter in rolling.
-            # FIXME: add back the `on` parameter.
-            newdata[k] = (df.groupby(level=levels, group_keys=False)
-                          .rolling(window=size, min_periods=min_periods, center=center)
-                          .agg(f).reset_index().dropna())
+            newdata[k] = (df.groupby(by=keys)
+                          .rolling(on=column, window=size, min_periods=min_periods, center=center)
+                          .agg({k: f}).reset_index(ingredient.key).dropna())
 
     return DataPointIngredient.from_procedure_result(result, ingredient.key, newdata)
