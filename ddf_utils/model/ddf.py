@@ -182,7 +182,12 @@ class Synonym:
         return "Synonym(concept_id={}, synonyms={})".format(self.concept_id, dict_str)
 
     def to_dict(self):
-        pass
+        return {self.concept_id: self.synonyms}
+
+    def to_dataframe(self):
+        df = pd.DataFrame.from_dict(self.synonyms, orient='index', columns=[self.concept_id])
+        df.index.name = ['synonym']
+        return df.reset_index()
 
 
 @attr.s(auto_attribs=True, repr=False)
@@ -260,6 +265,27 @@ class DDF:
             return self.entities[domain].entities
         else:
             return [e for e in self.entities[domain].entities if eset in e.sets]
+
+    def get_synonyms(self, concept):
+        """get synonym dictionary. return None if no synonyms for the concept."""
+        c = self.concepts[concept]
+        if c.concept_type != 'entity_set':
+            return self.synonyms.get(concept, None)
+
+        # get synonyms for entity_set
+        if concept in self.synonyms:
+            return self.synonyms[concept]
+        else:
+            domain = c.props['domain']
+            if domain not in self.synonyms:
+                return None
+            entities = self.get_entities(domain, eset=concept)
+            ent_ids = [ent.id for ent in entities]
+            res = dict()
+            for k, v in self.synonyms[domain].synonyms.items():
+                if str(v) in ent_ids:
+                    res[k] = v
+            return Synonym(concept_id=concept, synonyms=res)
 
     # TODO: maybe add below methods to modify DDF objects.
     # def get_concept_ids(self, concept_type=None):

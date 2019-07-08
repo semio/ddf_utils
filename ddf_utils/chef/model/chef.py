@@ -275,6 +275,7 @@ class Chef:
         return results
 
     def to_recipe(self, fp=None):
+        """write chef in yaml recipe format"""
         self.validate()
 
         if fp is None:
@@ -286,13 +287,19 @@ class Chef:
         recipe['cooking'] = dict()
         recipe['serving'] = self.serving
 
-        # FIXME: ingredient should allow external csv
         for ingredient in self.ingredients:
-            info = {'id': ingredient.id,
-                    'dataset': ingredient.ddf_id,
-                    'key': ingredient.key,
-                    'values': ingredient.value,
-                    }
+            if ingredient.ingredient_type == 'ddf':
+                info = {'id': ingredient.id,
+                        'dataset': ingredient.ddf_id,
+                        'key': ingredient.key,
+                        'values': ingredient.value,
+                }
+            else:
+                info = {'id': ingredient.id,
+                        'data': ingredient.data,
+                        'key': ingredient.key,
+                        'values': ingredient.value,
+                }
             if ingredient.row_filter is not None:
                 info['row_filter'] = ingredient.row_filter
             recipe['ingredients'].append(info)

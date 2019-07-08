@@ -80,7 +80,9 @@ def compare_with_func(dataset1, dataset2, fns=None,
         if comp_df.dtypes[indicator+'_old'] == 'object' or comp_df.dtypes[indicator+'_new'] == 'object':
             return [np.nan] * len(fns)
 
-        return [f(comp_df, indicator, **kwargs) if callable(f) else getattr(this, f)(comp_df, indicator, **kwargs)
+        return [f(comp_df, indicator, **kwargs)
+                if callable(f)
+                else getattr(this, f)(comp_df, indicator, **kwargs)
                 for f in fns]
 
     # only keep indicators we want to compare
@@ -104,7 +106,6 @@ def compare_with_func(dataset1, dataset2, fns=None,
 
 def rval(comp_df, indicator, on='geo'):
     """return r-value between old and new data"""
-    # FIXME: how to set the on parameter from cli?
     old_name = indicator+'_old'
     new_name = indicator+'_new'
     # logger.warning("{}".format(old_name, new_name))
@@ -123,7 +124,6 @@ def rval(comp_df, indicator, on='geo'):
 
 def avg_pct_chg(comp_df, indicator, on='geo'):
     """return average precentage changes between old and new data"""
-    # FIXME: how to set the on parameter from cli?
     old_name = indicator+'_old'
     new_name = indicator+'_new'
     level = comp_df.index.names.index(on)
@@ -159,8 +159,6 @@ def max_pct_chg(comp_df, indicator, **kwargs):
 
 
 def max_change_index(comp_df, indicator, **kwargs):
-    # FIXME: this function makes all result column type to be object
-    # see test cases in test_qa.py
     old_name = indicator+'_old'
     new_name = indicator+'_new'
     diff = (comp_df[new_name] - comp_df[old_name]) / comp_df[old_name] * 100

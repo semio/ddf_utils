@@ -80,6 +80,8 @@ def split_translations_json(path, split_path='langsplit', exclude_concepts=None,
             os.makedirs(dir_path, exist_ok=True)
             # print(json_path)
             df = df.fillna('')
+            # currently if you have multiIndex dataframe converted to json,
+            # converting back from the json to dataframe is not working.
             # FIXME: handle multiIndex issue
             # see https://github.com/pandas-dev/pandas/issues/4889
             df.to_json(json_path, orient='index', force_ascii=False)

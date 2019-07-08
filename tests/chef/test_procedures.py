@@ -165,8 +165,8 @@ def test_window():
     dp1 = chef.dag.get_node('rolling_datapoints_1').evaluate().compute()
     dp2 = chef.dag.get_node('rolling_datapoints_2').evaluate().compute()
 
-    #assert dp2['biofuels_production_ktoe'].dtypes['year'] == np.int16
-    #assert dp1['biofuels_production_kboed'].dtypes['year'] == np.int16
+    assert dp1['value']['value'].tolist() == [1, 1, 1, 1, 1, 1, 1, 1.5, 2, 3, 4, 5]
+    assert dp2['value']['value'].tolist() == [1, 2, 3, 4, 5, 6, 1, 3, 6, 10, 15, 21]
 
 
 def test_serving():

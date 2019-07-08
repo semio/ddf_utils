@@ -604,10 +604,9 @@ class SynonymIngredient(Ingredient):
         ddf = read_local_ddf(dataset_path)
         key.remove('synonym')
         k = key[0]
-        synonyms = ddf.synonyms[k].synonyms  # this is a dictionary, not dataframe.
+        synonyms = ddf.get_synonyms(k).to_dict()
         # nothing to do with `value` and `row_filter`.
-        data = {k: synonyms}
-        return data
+        return synonyms
 
     @staticmethod
     def get_data_from_external_csv(file_path, key):

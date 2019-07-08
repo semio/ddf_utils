@@ -8,9 +8,10 @@ Recipe is a `Domain-specific language(DSL)`_ for DDF datasets, to manipulate
 existing datasets and create new ones. By reading and running the recipe
 executor(Chef), one can generate a new dataset easily with the procedures we
 provide. Continue with `Write Your First Recipe`_ or `Structure of a Recipe`_ to
-learn how to use recipes.
+learn how to use recipes. You can also check `examples here`_
 
 .. _Domain-specific language(DSL): https://en.wikipedia.org/wiki/Domain-specific_language
+.. _examples here: https://github.com/semio/ddf_utils/tree/master/examples/recipes
 
 Write Your First Recipe
 -----------------------
