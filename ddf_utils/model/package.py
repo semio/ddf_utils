@@ -104,7 +104,6 @@ class DataPackage:
 
     @classmethod
     def from_json(cls, json_path):
-        # TODO: security checking.
         json_path = absolute_path(json_path)
         base_path = osp.dirname(json_path)
         d = json.load(open(json_path))
@@ -301,6 +300,8 @@ class DDFcsv(DataPackage):
         # also create dtypes for later use
         for domain_id, domain in self.ddf.entities.items():
             dtypes[domain_id] = self.entity_domain_to_categorical(domain)
+            for s in self.ddf.entities[domain_id].entity_sets:
+                dtypes[s] = self.entity_set_to_categorical(domain, s)
             entity_value_cache[domain_id] = dict()
             for ent in domain.entities:
                 sets = set()
@@ -311,12 +312,8 @@ class DDFcsv(DataPackage):
 
         def _which_sets(entity_, domain_):
             try:
-                # FIXME: make sure entity id are just str, earlier
-                e = str(entity_)
-                return entity_value_cache[domain_][e]
+                return entity_value_cache[domain_][entity_]
             except KeyError:
-                # possible cause is that the domain does not contain enough entities.
-                # TODO: give warning when creating entity domain
                 logger.debug('entity {} is not in {} domain!'.format(entity_, domain_))
                 raise
 
@@ -333,6 +330,15 @@ class DDFcsv(DataPackage):
             value_cols = resource.schema.common_fields
             data = pd.read_csv(osp.join(self.base_path, resource.path), dtype=dtypes,
                                **self._default_reader_options)
+            # check if entity columns data match entity defined in entity files
+            for c in entity_cols:
+                if data[c].hasnans:
+                    data_ = pd.read_csv(osp.join(self.base_path, resource.path), dtype={c: str}, **self._default_reader_options)
+                    ents = dtypes[c].categories.values
+                    ents_ = data_[c].unique()
+                    diff = set(ents_) - set(ents)
+                    logger.critical("{} column contains entity which is not in entity file: {}".format(c, diff))
+                    raise ValueError("entity mismatch")
 
             # for resources that have entity_columns: only consider all permutations on entity columns
             if len(entity_cols) > 0:
