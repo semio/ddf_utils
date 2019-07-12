@@ -346,7 +346,9 @@ class DDFcsv(DataPackage):
 
             pkeys_prop = dict()
             for c in pkeys:
-                if c not in self.ddf.concepts:
+                if c == 'cocnept':
+                    pkeys_prop[c] = {'type': 'concept'}
+                elif c not in self.ddf.concepts:
                     pkeys_prop[c] = {'type': 'non_concept'}
                 else:
                     concept = self.ddf.concepts[c]
@@ -371,6 +373,12 @@ class DDFcsv(DataPackage):
                         perm.append(tuple([c]))
 
                 all_permutations.add(tuple(perm))
+
+            # if data is empty. Just emit an object with primarykey and null value
+            if len(all_permutations) == 0:
+                obj = {'primaryKey': pkeys, 'value': None, 'resource': resource.name}
+                logger.debug('yielding: {}'.format(str(obj)))
+                yield obj
 
             for row in all_permutations:
                 for perm in product(*row):

@@ -212,15 +212,6 @@ def create_datapackage(path, gen_schema=True, **kwargs):
                 schema['fields'].append({'name': h})
             resources[n].update({'schema': schema})
 
-        elif 'concepts' in name_res:
-            with open(os.path.join(path, r['path'])) as f:
-                reader = csv.reader(f, delimiter=',', quotechar='"')
-                header = next(reader)
-            schema['primaryKey'] = 'concept'
-            for h in header:
-                schema['fields'].append({'name': h})
-
-            resources[n].update({'schema': schema})
         elif 'synonyms' in name_res:
             with open(os.path.join(path, r['path'])) as f:
                 reader = csv.reader(f, delimiter=',', quotechar='"')
@@ -230,9 +221,18 @@ def create_datapackage(path, gen_schema=True, **kwargs):
             schema['primaryKey'] = [k1, k2]
             for h in header:
                 schema['fields'].append({'name': h})
-
             resources[n].update({'schema': schema})
-        else:  # not entity/concept/datapoint. it's not supported yet so we don't include them.
+
+        elif 'concepts' in name_res:
+            with open(os.path.join(path, r['path'])) as f:
+                reader = csv.reader(f, delimiter=',', quotechar='"')
+                header = next(reader)
+            schema['primaryKey'] = 'concept'
+            for h in header:
+                schema['fields'].append({'name': h})
+            resources[n].update({'schema': schema})
+
+        else:  # not entity/concept/datapoint/synonym. it's not supported yet so we don't include them.
             print("not supported file: " + name_res)
             resources[n] = None
 
