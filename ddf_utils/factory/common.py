@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import os.path as osp
 import attr
 from abc import abstractmethod, ABC
 
@@ -8,6 +9,7 @@ from time import sleep
 from functools import wraps
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
+from tqdm import tqdm
 
 
 # from https://www.peterbe.com/plog/best-practice-with-retries-with-requests
@@ -45,11 +47,70 @@ def retry(times=5, backoff=0.5):
                     raise
                 except Exception as e:
                     ttimes = ttimes - 1
+                    if ttimes == 0:
+                        raise
                     sleep(backoff * (mtimes - ttimes))
                 else:
                     break
         return newfunc
     return wrapper
+
+
+def download(url, out_file, session=None, resume=True, retry_times=5, backoff=0.5):
+    """Download a url, and optionally try to resume it.
+
+    Parameters
+    ==========
+
+    url : `str`
+        URL to be downloaded
+    out_file : `filepath`
+        output file path
+    session : requests session object
+        Please note that if you want to use `requests_retry_session`, you must not
+        use resume=True
+    resume : bool
+        whether to resume the download
+    times : int
+    backoff : float
+    """
+    @retry(times=retry_times, backoff=backoff)
+    def run(url_, out_file_, session_, resume_):
+        if osp.exists(out_file_) and resume_:
+            first_byte = osp.getsize(out_file_)
+        else:
+            first_byte = 0
+        if not session_:
+            session_ = req.Session()
+
+        response = session_.get(url_, stream=True)
+        response.raise_for_status()
+        file_size = int(response.headers['content-length'])
+
+        if first_byte >= file_size:
+            print("download was completed")
+            return
+
+        if first_byte > 0:
+            print('resumming...')
+            header = {"Range": f'bytes={first_byte}-{file_size}'}
+            response = session_.get(url_, stream=True, headers=header)
+            response.raise_for_status()
+
+        pbar = tqdm(total=file_size, initial=first_byte, unit='B', unit_scale=True)
+        with open(out_file_, 'ab') as f:
+            for chunk in response.iter_content(chunk_size=1024):
+                if chunk:
+                    f.write(chunk)
+                    f.flush()
+                    pbar.update(1024)
+            f.close()
+        pbar.close()
+        if osp.getsize(out_file_) < file_size:
+            raise ValueError
+        return
+
+    run(url, out_file, session, resume)
 
 
 @attr.s
