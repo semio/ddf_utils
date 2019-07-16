@@ -41,4 +41,4 @@ def test_retry():
         pass
     t1 = time.time()
     print('Took', t1 - t0, 'seconds')
-    assert_almost_equal(t1 - t0, 5, 1)  # 0.5 + 1 + 1.5 + 2 = 5
+    assert_almost_equal(t1 - t0, 3, 1)  # 0.5 + 1 + 1.5 = 3
