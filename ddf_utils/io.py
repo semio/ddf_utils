@@ -68,12 +68,18 @@ def open_google_spreadsheet(docid):
     return None
 
 
-def cleanup(path, how='ddf'):
+def cleanup(path, how='ddf', exclude=None, ues_default_exclude=True):
     """remove all ddf files in the given path"""
-    # TODO: support names don't have standard ddf name format.
+    default_exclude = ['etl', 'lang', 'langsplit', 'datapackage.json', 'README.md']
+    if exclude and use_default_exclude:
+        for e in exclude:
+            default_exclude.append(e)
+    exclude = default_exclude
+
     if how == 'ddf':
         for f in os.listdir(path):
-            if f.startswith("ddf--"):
+            # only keep dot files and etl/ lang/ langsplit/ and datapackage.json
+            if f not in exclude and not f.startswith('.'):
                 p = os.path.join(path, f)
                 if os.path.isdir(p):
                     shutil.rmtree(p)
