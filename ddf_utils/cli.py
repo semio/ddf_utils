@@ -301,9 +301,14 @@ def etl_type(script_dir):
         fn = ''
         tp = 'python'
     except ModuleNotFoundError:
-        fn = ''
-        tp = 'manual'
-    print ('{},{}'.format(tp, fn))
+        if os.path.exists(os.path.join(script_dir, 'etl.py')):
+            click.echo("There are modules in etl.py which are not installed.")
+            fn = ''
+            tp = 'python'
+        else:
+            fn = ''
+            tp = 'manual'
+    click.echo('{},{}'.format(tp, fn))
     return
 
 

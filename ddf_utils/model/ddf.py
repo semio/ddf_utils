@@ -89,6 +89,10 @@ class EntityDomain:
     def get_entity_set(self, s):
         return [e for e in self.entities if s in e.sets]
 
+    def has_entity(self, sid):
+        all_ids = [e.id for e in self.entities]
+        return sid in all_ids
+
     def to_dict(self, eset=None):
         if eset:
             entities = self.get_entity_set(eset)
