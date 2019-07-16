@@ -1,14 +1,14 @@
 ## version 1.0.2 2019-07-08
 
 - ddf reader: read synonyms for entity set from entity domain synonyms
-- chef: imporvments on `window` procedure, improvements for `to_recipe` method
+- chef: imporvments on `window` procedure, improvements on `to_recipe` method
 - datapackage: improvments on ddfschema generation process
 - minor changes
 
 ## version 1.0.1 2019-06-29
 
 - added options to modify column headers for chef output (#116)
-- fixed an chef debug option issue
+- fixed a chef debug option issue
 - added more examples/docs
 
 ## version 1.0.0 2019-05-20
