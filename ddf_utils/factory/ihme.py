@@ -21,7 +21,7 @@ import pandas as pd
 from tqdm import tqdm
 
 from ddf_utils.chef.helpers import read_opt
-from . common import requests_retry_session, DataFactory, retry
+from . common import requests_retry_session, DataFactory, download
 
 
 # TODO: add missing context/base configures.
@@ -151,14 +151,8 @@ class IHMELoader(DataFactory):
 
         return [i[:8] for i in taskIDs]
 
-    @retry(times=3)
     def _run_download(self, u, out_dir, taskID):
         '''accept an URL and download it to out_dir'''
-        download_file = requests_retry_session().get(u, stream=True, timeout=60)
-
-        if download_file.status_code != 200:
-            print(f'can not download source file: {u}')
-            return
 
         if not osp.exists(osp.join(out_dir, taskID[:8])):
             os.mkdir(osp.join(out_dir, taskID[:8]))
@@ -166,17 +160,7 @@ class IHMELoader(DataFactory):
         fn = osp.join(out_dir, taskID[:8], osp.basename(u))
         print('downloading {} to {}'.format(u, fn))
 
-        block_size = 1024
-        total_size = int(download_file.headers.get('content-length', 0))
-        wrote = 0
-        with open(fn, 'wb') as f:
-            for c in tqdm(download_file.iter_content(chunk_size=block_size),
-                          total=math.ceil(total_size // block_size), unit='KB', unit_scale=True):
-                f.write(c)
-                wrote = wrote + len(c)
-                f.flush()
-        if wrote != total_size:
-            raise ValueError("download failed.")
+        download(u, fn)
 
     def _make_query(self, context, version, **kwargs):
         # metadata
