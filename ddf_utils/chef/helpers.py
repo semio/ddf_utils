@@ -20,6 +20,8 @@ from tempfile import mkdtemp
 from . import ops
 from ..model.package import DDFcsv
 
+from ddf_utils.str import to_concept_id
+
 
 memory = Memory(location=mkdtemp(), verbose=0)
 
@@ -51,8 +53,15 @@ def dsk_to_pandas(data):
     return data
 
 
-def build_dictionary(chef, dict_def, ignore_case=False):
+def build_dictionary(chef, dict_def, ignore_case=False, value_modifier=None):
     """build a dictionary from a dictionary definition"""
+
+    def modify(d):
+        if value_modifier:
+            return dict((k, value_modifier(v)) for k, v in d.items())
+        else:
+            return d
+
     if (len(dict_def) == 3 and
             'base' in dict_def and
             'key' in dict_def and
@@ -72,18 +81,18 @@ def build_dictionary(chef, dict_def, ignore_case=False):
                     res[k.lower()] = v
             else:
                 res = di.copy()
-            return res
+            return modify(res)
         elif ingredient.dtype == 'entities':
             df = ingredient.get_data()[ingredient.key]
-            return build_dictionary_from_dataframe(df, keys, value, ignore_case)
+            return modify(build_dictionary_from_dataframe(df, keys, value, ignore_case))
         else:
             raise NotImplementedError('unsupported data type {}'.format(ingredient.dtype))
     elif isinstance(dict_def, str):
         base_path = chef.config['dictionaries_dir']
         path = os.path.join(base_path, dict_def)
-        return build_dictionary_from_file(path)
+        return modify(build_dictionary_from_file(path))
     else:
-        return dict_def
+        return modify(dict_def)
 
 
 def build_dictionary_from_file(file_path):
