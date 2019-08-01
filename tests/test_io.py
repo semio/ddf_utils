@@ -9,16 +9,16 @@ from tempfile import mkdtemp
 
 def test_download_csv():
     urls = [
-        'http://cdiac.ornl.gov/ftp/ndp030/CSV-FILES/nation.1751_2014.csv',
-        'http://cdiac.ornl.gov/ftp/ndp030/CSV-FILES/nation.1751_2013.csv'
+        'http://ipv4.download.thinkbroadband.com/5MB.zip',
+        'http://ipv4.download.thinkbroadband.com/10MB.zip'
     ]
     temp_dir = mkdtemp()
 
     download_csv(urls, temp_dir)
 
     flist = [
-        'nation.1751_2014.csv',
-        'nation.1751_2013.csv'
+        '5MB.zip',
+        '10MB.zip'
     ]
 
     for f in flist:

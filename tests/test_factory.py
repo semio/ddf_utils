@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from ddf_utils.factory import (CDIACLoader, ClioInfraLoader, IGMELoader,
-                               IHMELoader, ILOLoader, OECDLoader, WorldBankLoader)
+from ddf_utils.factory import (ClioInfraLoader, IHMELoader, ILOLoader, OECDLoader, WorldBankLoader)
 import tempfile
 
 
@@ -25,12 +24,7 @@ def test_ilo():
     ilo.has_newer_source('GDP_211P_NOC_NB_A', '2012-10-01')
 
 
-def test_cdiac():
-    cdiac = CDIACLoader()
-    cdiac.has_newer_source('2012-10-01')
-
-
 def test_other_factory():
-    for loader in [IGMELoader, OECDLoader, ClioInfraLoader]:
+    for loader in [OECDLoader, ClioInfraLoader]:
         ld = loader()
         ld.load_metadata()
