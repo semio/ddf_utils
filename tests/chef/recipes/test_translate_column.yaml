@@ -47,6 +47,7 @@ cooking:
               base: gw-countries-synonym
               key: synonym
               value: geo
+              value_modifier: no_exist
       result: final-entity
   datapoints:
     - procedure: translate_column

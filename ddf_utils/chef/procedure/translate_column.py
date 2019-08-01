@@ -96,8 +96,9 @@ def translate_column(chef: Chef, ingredients: List[Ingredient], result, dictiona
         modifier = to_concept_id
     else:
         # TODO: accept more modifiers
-        logger.warning("for now only `to_concept_id` is accepted")
-        modifier = None
+        if value_modifier is not None:
+            logger.warning("for now only `to_concept_id` is accepted")
+            modifier = None
 
     # build the dictionary
     dictionary_ = build_dictionary(chef, dictionary, ignore_case, value_modifier=modifier)
