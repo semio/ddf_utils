@@ -70,7 +70,7 @@ def open_google_spreadsheet(docid):
 
 def cleanup(path, how='ddf', exclude=None, ues_default_exclude=True):
     """remove all ddf files in the given path"""
-    default_exclude = ['etl', 'lang', 'langsplit', 'datapackage.json', 'README.md']
+    default_exclude = ['etl', 'lang', 'langsplit', 'datapackage.json', 'README.md', 'assets']
     if exclude and use_default_exclude:
         for e in exclude:
             default_exclude.append(e)
