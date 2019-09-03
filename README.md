@@ -13,7 +13,7 @@ DSL designed to manipulate datasets to generate new datasets, and other
 functions we find useful in daily works in [Gapminder][5].
 
 [1]: http://specs.frictionlessdata.io/tabular-data-package
-[2]: https://github.com/open-numbers/wiki/wiki/Introduction-to-DDF
+[2]: https://open-numbers.github.io/ddf.html
 [3]: https://en.wikipedia.org/wiki/Extract,_transform,_load
 [4]: https://ddf-utils.readthedocs.io/en/latest/recipe.html
 [5]: https://www.gapminder.org/

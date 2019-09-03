@@ -9,7 +9,7 @@ datapackage.json, reading data form DDF datasets, running :doc:`recipes
 datasets, and other functions we find useful in daily works in Gapminder_.
 
 .. _Tabular Data Package: http://specs.frictionlessdata.io/tabular-data-package
-.. _DDF model: https://github.com/open-numbers/wiki/wiki/Introduction-to-DDF
+.. _DDF model: https://open-numbers.github.io/ddf.html
 .. _ETL: https://en.wikipedia.org/wiki/Extract,_transform,_load
 .. _Gapminder: https://www.gapminder.org
 
