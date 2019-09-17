@@ -45,7 +45,13 @@ class IHMELoader(DataFactory):
         metadata = {}
 
         for k in meta['data'].keys():
-            metadata[k] = pd.DataFrame.from_dict(meta['data'][k], orient='index')
+            if k == 'location':  # locations metadata id messed up, need to reset
+                loc = pd.DataFrame.from_dict(meta['data'][k], orient='index')
+                loc['id'] = loc.index
+                loc = loc.drop('location_id', axis=1)
+                metadata[k] = loc
+            else:
+                metadata[k] = pd.DataFrame.from_dict(meta['data'][k], orient='index')
 
         metadata['version'] = pd.DataFrame.from_dict(versions['data'], orient='index')
         self.metadata = metadata
@@ -85,30 +91,24 @@ class IHMELoader(DataFactory):
                 break
             sleep(10)
 
-    def bulk_download(self, out_dir, version, context=None, query=None, **kwargs):
+    def bulk_download(self, out_dir, version, context, **kwargs):
         """download the selected contexts/queries from GBD result tools.
 
-        Either context or query should be supplied. If both are supplied,
-        query will be used.
+        ``context`` could be a string or a list of strings. The
+        complete query will be generated with ``_make_query`` method
+        and all keywork args. When context is a list, multiple queries
+        will be run.
 
-        `context` should be a list of string and `query` should be a list
-        of dictionaries containing post requests data.
         """
         if not self.metadata:
             self.load_metadata()
 
         metadata = self.metadata
 
-        if query is None and context is None:
-            raise ValueError('one of context and query should be supplied!')
-        elif query is None:
-            if isinstance(context, list):
-                query = [self._make_query(c, version, **kwargs) for c in context]
-            else:
-                query = [self._make_query(context, version, **kwargs)]
+        if isinstance(context, list):
+            query = [self._make_query(c, version, **kwargs) for c in context]
         else:
-            if not isinstance(query, list):
-                query = [query]
+            query = [self._make_query(context, version, **kwargs)]
 
         taskIDs = set()
 
@@ -163,6 +163,12 @@ class IHMELoader(DataFactory):
         download(u, fn)
 
     def _make_query(self, context, version, **kwargs):
+        """generate a query with the context, version and all keyword arguments.
+
+        if a parameter is mandatory but not provided, it will fill
+        with default values.
+
+        """
         # metadata
         if not self.metadata:
             self.load_metadata()
@@ -171,7 +177,7 @@ class IHMELoader(DataFactory):
         ages = metadata['age']['id'].values
         # location: there is a `custom` location. don't include that one.
         locations_md = metadata['location']
-        locations = locations_md[locations_md['location_id'] != 'custom']['id'].tolist()
+        locations = locations_md[locations_md['id'] != 'custom']['id'].tolist()
         sexs = metadata['sex']['id'].tolist()
         years = metadata['year']['id'].tolist()
         metrics = metadata['metric']['id'].tolist()
