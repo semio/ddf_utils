@@ -23,6 +23,10 @@ class ILOLoader(DataFactory):
     other_meta_url_tmpl = urljoin(main_url, 'dic/{table}_{lang}.csv')
 
     def load_metadata(self, table='indicator', lang='en'):
+        """get code list for a specified table and language.
+
+        Check ILO doc for all available tables and languages.
+        """
         if table == 'indicator':
             tmpl = self.indicator_meta_url_tmpl
         else:
@@ -37,6 +41,8 @@ class ILOLoader(DataFactory):
         return self.metadata
 
     def has_newer_source(self, indicator, date):
+        """check if an indicator's last modified date is newer than given date.
+        """
         if self.metadata is None:
             self.load_metadata()
         md = self.metadata
@@ -48,6 +54,8 @@ class ILOLoader(DataFactory):
         return False
 
     def download(self, i, out_dir):
+        """Download an indicator to out_dir.
+        """
         url = urljoin(self.main_url, f'indicator/{i}.csv.gz')
         res = requests_retry_session().get(url, stream=True, timeout=60)
         if res.status_code != 200:
@@ -59,9 +67,10 @@ class ILOLoader(DataFactory):
                 f.write(chunk)
                 f.flush()
 
-    def bulk_download(self, out_dir, indicators: list):
-
+    def bulk_download(self, out_dir, indicators: list, pool_size=5):
+        """Download a list of indicators simultaneously.
+        """
         download_ = partial(self.download, out_dir=out_dir)
 
-        with Pool(5) as p:
+        with Pool(pool_size) as p:
             p.map(download_, indicators)

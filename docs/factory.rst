@@ -5,7 +5,7 @@
 
 ddf_utils provides a few classes under ``ddf_utils.factory`` module to
 help downloading data from serval data providers. Currently we support
-downloading files from `IHME GBD`_, ILOStat_, OECD_ and
+downloading files from `Clio-infra`_, `IHME GBD`_, ILOStat_, OECD_ and
 WorldBank_. Whenever possible we will use bulk download method from
 the provider.
 
@@ -13,6 +13,7 @@ the provider.
 .. _ILOstat: https://www.ilo.org/ilostat
 .. _OECD: https://stats.oecd.org/
 .. _WorldBank: https://data.worldbank.org/
+.. _`Clio-infra`: https://www.clio-infra.eu/index.html
 
 General Interface
 -----------------
@@ -42,6 +43,8 @@ dictionary of query parameters to the :py:meth:`bulk_download
 docstring for bulk_download for the usage). And the values for them should be the
 numeric IDs from IHME. We can check these ID from metadata.
 
+Example Usage:
+
 .. code-block:: ipython
 
    In [1]: from ddf_utils.factory.ihme import IHMELoader
@@ -62,11 +65,25 @@ numeric IDs from IHME. We can check these ID from metadata.
    12  12  35 to 39         35    12     1   specific
    13  13  40 to 44         40    13     1   specific
 
+   In [6]: l.bulk_download('/tmp/', context='le', version=376, year=[2017], email='your-email@mailer.com')
+   working on https://s3.healthdata.org/gbd-api-2017-public/xxxx
+   check status as http://ghdx.healthdata.org/gbd-results-tool/result/xxxx
+   available downloads:
+   http://s3.healthdata.org/gbd-api-2017-public/xxxx_files/IHME-GBD_2017_DATA-03cf30ab-1.zip
+   downloading http://s3.healthdata.org/gbd-api-2017-public/xxxx_files/IHME-GBD_2017_DATA-03cf30ab-1.zip to /tmp/xxxx/IHME-GBD_2017_DATA-xxxx-1.zip
+   1.13MB [00:01, 582kB/s]
+   Out[6]: ['03cf30ab']
+
 
 ILOStat Loader
 --------------
 
-TBD
+The ILO data loader use the `bulk download facility`_ from ILO.
+
+See the `API doc`_ for how to use this loader.
+
+.. _`bulk download facility`: http://www.ilo.org/ilostat-files/WEB_bulk_download/ILOSTAT_BulkDownload_Guidelines.pdf
+.. _`API doc`: https://ddf-utils.readthedocs.io/en/dev/ddf_utils.factory.html#module-ddf_utils.factory.ilo
 
 WorldBank Loader
 ----------------
@@ -75,5 +92,10 @@ TBD
 
 OECD Loader
 -----------
+
+TBD
+
+Clio-infra Loader
+-----------------
 
 TBD
