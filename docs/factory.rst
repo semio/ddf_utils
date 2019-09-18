@@ -88,14 +88,94 @@ See the `API doc`_ for how to use this loader.
 WorldBank Loader
 ----------------
 
-TBD
+The Worldbank loader can download all datasets listed in the `data catalog`_ in CSV(zip) format.
+
+.. _`data catalog`: https://datacatalog.worldbank.org/
+
+Example Usage:
+
+.. code-block:: ipython
+
+   In [1]: from ddf_utils.factory.worldbank import WorldBankLoader
+
+   In [2]: w = WorldBankLoader()
+
+   In [3]: md = w.load_metadata()
+
+   In [4]: md.head()
+   Out[4]:
+                        accessoption acronym api                          apiaccessurl  ...
+   0  API, Bulk download, Query tool     WDI   1  http://data.worldbank.org/developers  ...
+   1  API, Bulk download, Query tool     ADI   1  http://data.worldbank.org/developers  ...
+   2  API, Bulk download, Query tool     GEM   1  http://data.worldbank.org/developers  ...
+   3                      Query tool     NaN   0                                   NaN  ...
+   4  API, Bulk download, Query tool    MDGs   1  http://data.worldbank.org/developers  ...
+   ...
+
+   In [5]: w.bulk_download('MDGs', '/tmp/')
+   Out[5]: '/tmp/'
+
 
 OECD Loader
 -----------
 
-TBD
+The OECD loader can download all datasets in `OECD stats`_. We use the SDMX-JSON api and the downloaded dataset will be in json file. Learn more about SDMX-JSON in the `OECD api doc`_.
+
+.. _`OECD stats`: https://stats.oecd.org/
+.. _`OECD api doc`: https://data.oecd.org/api/sdmx-json-documentation/
+
+Example Usage:
+
+.. code-block:: ipython
+
+   In [1]: from ddf_utils.factory.oecd import OECDLoader
+
+   In [2]: o = OECDLoader()
+
+   In [3]: md = o.load_metadata()
+
+   In [4]: # metadata contains all available datasets.
+
+   In [5]: md.head()
+   Out[5]:
+   id                                               name
+   0          QNA                        Quarterly National Accounts
+   1      PAT_IND                                  Patent indicators
+   2  SNA_TABLE11     11. Government expenditure by function (COFOG)
+   3    EO78_MAIN  Economic Outlook No 78 - December 2005 - Annua...
+   4        ANHRS    Average annual hours actually worked per worker
+
+   In [6]: o.bulk_download('/tmp/', 'EO78_MAIN')
 
 Clio-infra Loader
 -----------------
 
-TBD
+The Clio infra loader parse the `home page for clio infra`_ and do bulk download for all datasets or all country profiles.
+
+.. _`home page for clio infra`: https://clio-infra.eu/
+
+Example Usage:
+
+.. code-block:: ipython
+
+   In [1]: from ddf_utils.factory.clio_infra import ClioInfraLoader
+
+   In [2]: c = ClioInfraLoader()
+
+   In [3]: md = c.load_metadata()
+
+   In [4]: md.head()
+   Out[4]:
+                     name                                     url     type
+   0    Cattle per Capita    ../data/CattleperCapita_Compact.xlsx  dataset
+   1  Cropland per Capita  ../data/CroplandperCapita_Compact.xlsx  dataset
+   2     Goats per Capita     ../data/GoatsperCapita_Compact.xlsx  dataset
+   3   Pasture per Capita   ../data/PastureperCapita_Compact.xlsx  dataset
+   4      Pigs per Capita      ../data/PigsperCapita_Compact.xlsx  dataset
+
+   In [5]: md['type'].unique()
+   Out[5]: array(['dataset', 'country'], dtype=object)
+
+   In [6]: c.bulk_download('/tmp', data_type='dataset')
+   downloading https://clio-infra.eu/data/CattleperCapita_Compact.xlsx to /tmp/Cattle per Capita.xlsx
+   ...
