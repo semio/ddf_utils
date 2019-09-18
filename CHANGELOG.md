@@ -1,3 +1,10 @@
+## version 1.0.4 2019-09-18
+
+- data factory: fixed issues in ihme loader and remove outdated loaders.
+- exclude assets folder in `ddf cleanup`
+- chef: added modifier for translate_header (#94)
+- more docs
+
 ## version 1.0.3 2019-07-16
 
 - ddf cleanup: remove all files in folders
