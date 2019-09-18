@@ -13,6 +13,7 @@ Contents:
 
    intro
    recipe
+   factory
    utils
    modules
 

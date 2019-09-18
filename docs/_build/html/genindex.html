@@ -9,7 +9,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Index &mdash; ddf_utils 0.1dev documentation</title>
+  <title>Index &mdash; ddf_utils 1.0.1 documentation</title>
   
 
   
@@ -59,7 +59,7 @@
             
             
               <div class="version">
-                0.1
+                1.0.1
               </div>
             
           
@@ -86,6 +86,7 @@
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="recipe.html">Recipe Cookbook (draft)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="factory.html">Downloading Data from Source Providers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="utils.html">Use ddf_utils for ETL tasks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="modules.html">API References</a></li>
 </ul>
@@ -228,14 +229,12 @@
 </li>
       <li><a href="ddf_utils.chef.html#ddf_utils.chef.helpers.build_dictionary_from_file">build_dictionary_from_file() (in module ddf_utils.chef.helpers)</a>
 </li>
-      <li><a href="ddf_utils.factory.html#ddf_utils.factory.cdiac.CDIACLoader.bulk_download">bulk_download() (ddf_utils.factory.cdiac.CDIACLoader method)</a>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="ddf_utils.factory.html#ddf_utils.factory.clio_infra.ClioInfraLoader.bulk_download">bulk_download() (ddf_utils.factory.clio_infra.ClioInfraLoader method)</a>
 
       <ul>
-        <li><a href="ddf_utils.factory.html#ddf_utils.factory.clio_infra.ClioInfraLoader.bulk_download">(ddf_utils.factory.clio_infra.ClioInfraLoader method)</a>
-</li>
         <li><a href="ddf_utils.factory.html#ddf_utils.factory.common.DataFactory.bulk_download">(ddf_utils.factory.common.DataFactory method)</a>
-</li>
-        <li><a href="ddf_utils.factory.html#ddf_utils.factory.igme.IGMELoader.bulk_download">(ddf_utils.factory.igme.IGMELoader method)</a>
 </li>
         <li><a href="ddf_utils.factory.html#ddf_utils.factory.ihme.IHMELoader.bulk_download">(ddf_utils.factory.ihme.IHMELoader method)</a>
 </li>
@@ -252,8 +251,6 @@
 <h2 id="C">C</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="ddf_utils.factory.html#ddf_utils.factory.cdiac.CDIACLoader">CDIACLoader (class in ddf_utils.factory.cdiac)</a>
-</li>
       <li><a href="ddf_utils.chef.model.html#ddf_utils.chef.model.chef.Chef">Chef (class in ddf_utils.chef.model.chef)</a>
 </li>
       <li><a href="ddf_utils.chef.html#ddf_utils.chef.exceptions.ChefRuntimeError">ChefRuntimeError</a>
@@ -366,13 +363,9 @@
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="ddf_utils.factory.html#module-ddf_utils.factory.cdiac">ddf_utils.factory.cdiac (module)</a>
-</li>
       <li><a href="ddf_utils.factory.html#module-ddf_utils.factory.clio_infra">ddf_utils.factory.clio_infra (module)</a>
 </li>
       <li><a href="ddf_utils.factory.html#module-ddf_utils.factory.common">ddf_utils.factory.common (module)</a>
-</li>
-      <li><a href="ddf_utils.factory.html#module-ddf_utils.factory.igme">ddf_utils.factory.igme (module)</a>
 </li>
       <li><a href="ddf_utils.factory.html#module-ddf_utils.factory.ihme">ddf_utils.factory.ihme (module)</a>
 </li>
@@ -415,7 +408,11 @@
       <li><a href="ddf_utils.chef.model.html#ddf_utils.chef.model.dag.BaseNode.detect_missing_dependency">detect_missing_dependency() (ddf_utils.chef.model.dag.BaseNode method)</a>
 </li>
       <li><a href="ddf_utils.factory.html#ddf_utils.factory.ilo.ILOLoader.download">download() (ddf_utils.factory.ilo.ILOLoader method)</a>
+
+      <ul>
+        <li><a href="ddf_utils.factory.html#ddf_utils.factory.common.download">(in module ddf_utils.factory.common)</a>
 </li>
+      </ul></li>
       <li><a href="ddf_utils.html#ddf_utils.io.download_csv">download_csv() (in module ddf_utils.io)</a>
 </li>
       <li><a href="ddf_utils.factory.html#ddf_utils.factory.ihme.IHMELoader.download_links">download_links() (ddf_utils.factory.ihme.IHMELoader method)</a>
@@ -586,6 +583,8 @@
 </li>
       <li><a href="ddf_utils.chef.html#ddf_utils.chef.helpers.get_procedure">get_procedure() (in module ddf_utils.chef.helpers)</a>
 </li>
+      <li><a href="ddf_utils.model.html#ddf_utils.model.ddf.DDF.get_synonyms">get_synonyms() (ddf_utils.model.ddf.DDF method)</a>
+</li>
       <li><a href="ddf_utils.chef.procedure.html#ddf_utils.chef.procedure.groupby.groupby">groupby() (in module ddf_utils.chef.procedure.groupby)</a>
 </li>
       <li><a href="ddf_utils.chef.html#ddf_utils.chef.ops.gt">gt() (in module ddf_utils.chef.ops)</a>
@@ -596,14 +595,12 @@
 <h2 id="H">H</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="ddf_utils.factory.html#ddf_utils.factory.cdiac.CDIACLoader.has_newer_source">has_newer_source() (ddf_utils.factory.cdiac.CDIACLoader method)</a>
+      <li><a href="ddf_utils.model.html#ddf_utils.model.ddf.EntityDomain.has_entity">has_entity() (ddf_utils.model.ddf.EntityDomain method)</a>
+</li>
+      <li><a href="ddf_utils.factory.html#ddf_utils.factory.clio_infra.ClioInfraLoader.has_newer_source">has_newer_source() (ddf_utils.factory.clio_infra.ClioInfraLoader method)</a>
 
       <ul>
-        <li><a href="ddf_utils.factory.html#ddf_utils.factory.clio_infra.ClioInfraLoader.has_newer_source">(ddf_utils.factory.clio_infra.ClioInfraLoader method)</a>
-</li>
         <li><a href="ddf_utils.factory.html#ddf_utils.factory.common.DataFactory.has_newer_source">(ddf_utils.factory.common.DataFactory method)</a>
-</li>
-        <li><a href="ddf_utils.factory.html#ddf_utils.factory.igme.IGMELoader.has_newer_source">(ddf_utils.factory.igme.IGMELoader method)</a>
 </li>
         <li><a href="ddf_utils.factory.html#ddf_utils.factory.ihme.IHMELoader.has_newer_source">(ddf_utils.factory.ihme.IHMELoader method)</a>
 </li>
@@ -624,8 +621,6 @@
 <h2 id="I">I</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="ddf_utils.factory.html#ddf_utils.factory.igme.IGMELoader">IGMELoader (class in ddf_utils.factory.igme)</a>
-</li>
       <li><a href="ddf_utils.factory.html#ddf_utils.factory.ihme.IHMELoader">IHMELoader (class in ddf_utils.factory.ihme)</a>
 </li>
       <li><a href="ddf_utils.factory.html#ddf_utils.factory.ilo.ILOLoader">ILOLoader (class in ddf_utils.factory.ilo)</a>
@@ -636,10 +631,10 @@
 </li>
       <li><a href="ddf_utils.chef.model.html#ddf_utils.chef.model.ingredient.Ingredient">Ingredient (class in ddf_utils.chef.model.ingredient)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="ddf_utils.chef.model.html#ddf_utils.chef.model.ingredient.ingredient_from_dict">ingredient_from_dict() (in module ddf_utils.chef.model.ingredient)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="ddf_utils.chef.model.html#ddf_utils.chef.model.ingredient.Ingredient.ingredient_type">ingredient_type() (ddf_utils.chef.model.ingredient.Ingredient property)</a>
 </li>
       <li><a href="ddf_utils.chef.html#ddf_utils.chef.exceptions.IngredientError">IngredientError</a>
@@ -668,14 +663,10 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="ddf_utils.model.html#ddf_utils.model.package.DDFcsv.load_ddf">load_ddf() (ddf_utils.model.package.DDFcsv method)</a>
 </li>
-      <li><a href="ddf_utils.factory.html#ddf_utils.factory.cdiac.CDIACLoader.load_metadata">load_metadata() (ddf_utils.factory.cdiac.CDIACLoader method)</a>
+      <li><a href="ddf_utils.factory.html#ddf_utils.factory.clio_infra.ClioInfraLoader.load_metadata">load_metadata() (ddf_utils.factory.clio_infra.ClioInfraLoader method)</a>
 
       <ul>
-        <li><a href="ddf_utils.factory.html#ddf_utils.factory.clio_infra.ClioInfraLoader.load_metadata">(ddf_utils.factory.clio_infra.ClioInfraLoader method)</a>
-</li>
         <li><a href="ddf_utils.factory.html#ddf_utils.factory.common.DataFactory.load_metadata">(ddf_utils.factory.common.DataFactory method)</a>
-</li>
-        <li><a href="ddf_utils.factory.html#ddf_utils.factory.igme.IGMELoader.load_metadata">(ddf_utils.factory.igme.IGMELoader method)</a>
 </li>
         <li><a href="ddf_utils.factory.html#ddf_utils.factory.ihme.IHMELoader.load_metadata">(ddf_utils.factory.ihme.IHMELoader method)</a>
 </li>
@@ -860,6 +851,8 @@
 </li>
       <li><a href="ddf_utils.html#ddf_utils.str.to_concept_id">to_concept_id() (in module ddf_utils.str)</a>
 </li>
+      <li><a href="ddf_utils.model.html#ddf_utils.model.ddf.Synonym.to_dataframe">to_dataframe() (ddf_utils.model.ddf.Synonym method)</a>
+</li>
       <li><a href="ddf_utils.model.html#ddf_utils.model.repo.Repo.to_datapackage">to_datapackage() (ddf_utils.model.repo.Repo method)</a>
 </li>
       <li><a href="ddf_utils.model.html#ddf_utils.model.ddf.Concept.to_dict">to_dict() (ddf_utils.model.ddf.Concept method)</a>
@@ -912,20 +905,16 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="ddf_utils.chef.model.html#ddf_utils.chef.model.dag.BaseNode.upstream_list">upstream_list() (ddf_utils.chef.model.dag.BaseNode property)</a>
 </li>
-      <li><a href="ddf_utils.factory.html#ddf_utils.factory.cdiac.CDIACLoader.url">url (ddf_utils.factory.cdiac.CDIACLoader attribute)</a>
+      <li><a href="ddf_utils.factory.html#ddf_utils.factory.clio_infra.ClioInfraLoader.url">url (ddf_utils.factory.clio_infra.ClioInfraLoader attribute)</a>
 
       <ul>
-        <li><a href="ddf_utils.factory.html#ddf_utils.factory.clio_infra.ClioInfraLoader.url">(ddf_utils.factory.clio_infra.ClioInfraLoader attribute)</a>
-</li>
-        <li><a href="ddf_utils.factory.html#ddf_utils.factory.igme.IGMELoader.url">(ddf_utils.factory.igme.IGMELoader attribute)</a>
-</li>
         <li><a href="ddf_utils.factory.html#ddf_utils.factory.worldbank.WorldBankLoader.url">(ddf_utils.factory.worldbank.WorldBankLoader attribute)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="ddf_utils.factory.html#ddf_utils.factory.ihme.IHMELoader.url_data">url_data (ddf_utils.factory.ihme.IHMELoader attribute)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="ddf_utils.factory.html#ddf_utils.factory.ihme.IHMELoader.url_hir">url_hir (ddf_utils.factory.ihme.IHMELoader attribute)</a>
 </li>
       <li><a href="ddf_utils.factory.html#ddf_utils.factory.ihme.IHMELoader.url_metadata">url_metadata (ddf_utils.factory.ihme.IHMELoader attribute)</a>

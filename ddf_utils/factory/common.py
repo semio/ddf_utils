@@ -56,7 +56,7 @@ def retry(times=5, backoff=0.5):
     return wrapper
 
 
-def download(url, out_file, session=None, resume=True, retry_times=5, backoff=0.5):
+def download(url, out_file, session=None, resume=True, retry_times=5, backoff=0.5, progress_bar=True):
     """Download a url, and optionally try to resume it.
 
     Parameters
@@ -73,6 +73,8 @@ def download(url, out_file, session=None, resume=True, retry_times=5, backoff=0.
         whether to resume the download
     times : int
     backoff : float
+    progress_bar : bool
+        whether to display a progress bar
     """
     @retry(times=retry_times, backoff=backoff)
     def run(url_, out_file_, session_, resume_):
@@ -97,15 +99,18 @@ def download(url, out_file, session=None, resume=True, retry_times=5, backoff=0.
             response = session_.get(url_, stream=True, headers=header)
             response.raise_for_status()
 
-        pbar = tqdm(total=file_size, initial=first_byte, unit='B', unit_scale=True)
+        if progress_bar:
+            pbar = tqdm(total=file_size, initial=first_byte, unit='B', unit_scale=True)
         with open(out_file_, 'ab') as f:
             for chunk in response.iter_content(chunk_size=1024):
                 if chunk:
                     f.write(chunk)
                     f.flush()
-                    pbar.update(1024)
+                    if progress_bar:
+                        pbar.update(1024)
             f.close()
-        pbar.close()
+        if progress_bar:
+            pbar.close()
         if osp.getsize(out_file_) < file_size:
             raise ValueError
         return

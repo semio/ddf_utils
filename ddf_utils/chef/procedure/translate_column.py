@@ -5,9 +5,11 @@
 import logging
 from typing import List
 
-from .. helpers import debuggable, build_dictionary
+from .. helpers import debuggable, build_dictionary, read_opt
 from .. model.ingredient import Ingredient, get_ingredient_class
 from .. model.chef import Chef
+
+from ddf_utils.str import to_concept_id
 
 logger = logging.getLogger('translate_column')
 
@@ -15,7 +17,7 @@ logger = logging.getLogger('translate_column')
 @debuggable
 def translate_column(chef: Chef, ingredients: List[Ingredient], result, dictionary,
                      column, *, target_column=None, not_found='drop',
-                     ambiguity='prompt', ignore_case=False) -> Ingredient:
+                     ambiguity='prompt', ignore_case=False, value_modifier=None) -> Ingredient:
     """Translate column values.
 
     Procedure format:
@@ -68,6 +70,8 @@ def translate_column(chef: Chef, ingredients: List[Ingredient], result, dictiona
         the behavior when there is values not found in the mapping dictionary, default is 'drop'
     ambiguity : {'prompt', 'skip', 'error'}, optional
         the behavior when there is ambiguity in the dictionary, default is 'prompt'
+    value_modifier : `str`, optional
+        a function to modify new column values, default is None
 
     See Also
     --------
@@ -86,10 +90,22 @@ def translate_column(chef: Chef, ingredients: List[Ingredient], result, dictiona
     di = ingredient.get_data()
     new_data = dict()
 
+    # modifier
+    value_modifier = read_opt(dictionary, 'value_modifier', default=None, method='pop')
+    if value_modifier == 'to_concept_id':
+        modifier = to_concept_id
+    else:
+        # TODO: accept more modifiers
+        if value_modifier is not None:
+            logger.warning("for now only `to_concept_id` is accepted")
+        modifier = None
+
     # build the dictionary
-    dictionary_ = build_dictionary(chef, dictionary, ignore_case)
+    dictionary_ = build_dictionary(chef, dictionary, ignore_case, value_modifier=modifier)
     dict_type = 'inline'
     base_df = None
+
+    # modifier
 
     for k, df in di.items():
         logger.debug("running on: " + k)

@@ -12,27 +12,10 @@ ddf_utils.factory.common module
     :undoc-members:
     :show-inheritance:
 
-ddf_utils.factory.cdiac module
-------------------------------
-
-.. automodule:: ddf_utils.factory.cdiac
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 ddf_utils.factory.clio_infra module
 -----------------------------------
 
 .. automodule:: ddf_utils.factory.clio_infra
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-
-ddf_utils.factory.igme module
------------------------------
-
-.. automodule:: ddf_utils.factory.igme
     :members:
     :undoc-members:
     :show-inheritance:
