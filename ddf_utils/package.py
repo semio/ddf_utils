@@ -43,7 +43,7 @@ def is_datapackage(path):
         return False
 
 
-def get_datapackage(path, use_existing=True, update=False):
+def get_datapackage(path, use_existing=True, update=False, progress_bar=False):
     """get the datapackage.json from a dataset path, create one if it's not exists
 
     Parameters
@@ -73,18 +73,18 @@ def get_datapackage(path, use_existing=True, update=False):
                 datapackage_old.pop('ddfSchema')  # and ddf schema
             except KeyError:
                 logger.warning('no resources or ddfSchema in datapackage.json')
-            datapackage_new = create_datapackage(path, **datapackage_old)
+            datapackage_new = create_datapackage(path, progress_bar=progress_bar, **datapackage_old)
         else:
-            datapackage_new = create_datapackage(path)
+            datapackage_new = create_datapackage(path, progress_bar=progress_bar)
     else:
         if use_existing:
             print("WARNING: no existing datapackage.json")
-        datapackage_new = create_datapackage(path)
+        datapackage_new = create_datapackage(path, progress_bar=progress_bar)
 
     return datapackage_new
 
 
-def create_datapackage(path, gen_schema=True, **kwargs):
+def create_datapackage(path, gen_schema=True, progress_bar=False, **kwargs):
     """create datapackage.json base on the files in `path`.
 
     If you want to set some attributes manually, you can pass them as
@@ -240,9 +240,9 @@ def create_datapackage(path, gen_schema=True, **kwargs):
 
     # generate ddf schema
     if gen_schema:
-        dp = DDFcsv.from_dict(datapackage, base_path=path)
         logger.info('generating ddf schema, may take some time...')
-        dp.ddfSchema = dp.generate_ddf_schema()
+        dp = DDFcsv.from_dict(datapackage, base_path=path)
+        dp.ddfSchema = dp.generate_ddf_schema(progress_bar=progress_bar)
         result = dp.to_dict()
     else:
         result = datapackage

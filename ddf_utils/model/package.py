@@ -290,11 +290,17 @@ class DDFcsv(DataPackage):
         # return complete DDF object
         return DDF(concepts=concepts, entities=domains, datapoints=datapoints, synonyms=synonyms, props=self.props)
 
-    def generate_ddf_schema(self):
+    def generate_ddf_schema(self, progress_bar=False):
         hash_table = {}
         ddf_schema = {'concepts': [], 'entities': [], 'datapoints': [], 'synonyms': []}
         entity_value_cache = dict()
         dtypes = dict()
+
+        # check if we need progress bar
+        if progress_bar:
+            if logger.getEffectiveLevel() == 10:  # debug: force not showing progress bar
+                logger.warning("progress bar will be disabled in debugging mode.")
+                progress_bar = False
 
         # generate set-membership details for every single entity in dataset
         # also create dtypes for later use
@@ -409,19 +415,17 @@ class DDFcsv(DataPackage):
                 hash_table[hash_val]['resources'].add(resource_schema['resource'])
 
         # make progressbar and run the process to generate schema
-        # TODO: improve progress bar codes
-
-        if logger.getEffectiveLevel() != 10:
+        if progress_bar:
             pbar = tqdm(total=len(self.resources))
 
         for g in map(_gen_key_value_object, self.resources):
-            if logger.getEffectiveLevel() != 10:
+            if progress_bar:
                 pbar.update(1)
             for kvo in g:
                 logging.debug("adding kvo {}".format(str(kvo)))
                 _add_to_schema(kvo)
 
-        if logger.getEffectiveLevel() != 10:
+        if progress_bar:
             pbar.close()
 
         for sch in hash_table.values():
