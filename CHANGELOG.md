@@ -1,3 +1,7 @@
+## version 1.0.5 2019-10-01
+
+- update progress bar options (#118)
+
 ## version 1.0.4 2019-09-18
 
 - data factory: fixed issues in ihme loader and remove outdated loaders.
