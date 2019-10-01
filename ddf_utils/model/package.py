@@ -291,6 +291,15 @@ class DDFcsv(DataPackage):
         return DDF(concepts=concepts, entities=domains, datapoints=datapoints, synonyms=synonyms, props=self.props)
 
     def generate_ddf_schema(self, progress_bar=False):
+        """generate ddf schema from all resources.
+
+        Parameters
+        ----------
+
+        progress_bar : bool
+            whether progress bar should be shown when generating ddfSchema.
+
+        """
         hash_table = {}
         ddf_schema = {'concepts': [], 'entities': [], 'datapoints': [], 'synonyms': []}
         entity_value_cache = dict()

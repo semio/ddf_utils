@@ -58,6 +58,8 @@ def get_datapackage(path, use_existing=True, update=False, progress_bar=False):
     update : bool
         if update is true, will update the resources and schema in existing datapackage.json. else just return existing
         datapackage.json
+    progress_bar : bool
+        whether progress bar should be shown when generating ddfSchema.
     """
     datapackage_path = os.path.join(path, 'datapackage.json')
 
@@ -102,6 +104,8 @@ def create_datapackage(path, gen_schema=True, progress_bar=False, **kwargs):
         the dataset path to create datapackage.json
     gen_schema : bool
         whether to create DDFSchema in datapackage.json. Default is True
+    progress_bar : bool
+        whether progress bar should be shown when generating ddfSchema.
     kwargs : dict
         metadata to write into datapackage.json. According to spec,
         title, description, author and license SHOULD be fields in datapackage.json.
