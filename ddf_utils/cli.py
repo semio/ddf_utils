@@ -65,7 +65,9 @@ def cleanup(path, how, force):
               help='update existing datapackage.json')
 @click.option('--overwrite', '-n', 'overwrite', flag_value=True, default=False,
               help='overwrite existing datapackage.json')
-def create_datapackage(path, update, overwrite):
+@click.option('--progress-bar', '-p', 'progress_bar', flag_value=True, default=False,
+              help='show progress bar when generating DDF schema')
+def create_datapackage(path, update, overwrite, progress_bar):
     """create datapackage.json"""
     from ddf_utils.package import get_datapackage
     import json
@@ -73,7 +75,7 @@ def create_datapackage(path, update, overwrite):
         if os.path.exists(os.path.join(path, 'datapackage.json')):
             click.echo('datapackage.json already exists. use --update to update or --overwrite to create new')
             return
-        res = get_datapackage(path, use_existing=False)
+        res = get_datapackage(path, use_existing=False, progress_bar=progress_bar)
     else:
         if os.path.exists(os.path.join(path, 'datapackage.json')):
             click.echo('backing up previous datapackage.json...')
@@ -81,9 +83,9 @@ def create_datapackage(path, update, overwrite):
             shutil.copy(os.path.join(path, 'datapackage.json'),
                         os.path.join(path, 'datapackage.json.bak'))
         if overwrite:
-            res = get_datapackage(path, use_existing=False)
+            res = get_datapackage(path, use_existing=False, progress_bar=progress_bar)
         else:
-            res = get_datapackage(path, use_existing=True, update=True)
+            res = get_datapackage(path, use_existing=True, update=True, progress_bar=progress_bar)
 
     with open(os.path.join(path, 'datapackage.json'), 'w', encoding='utf8') as f:
         json.dump(res, f, indent=4, ensure_ascii=False)

@@ -16,7 +16,7 @@ datasets, and other functions we find useful in daily works in Gapminder_.
 Installation
 ------------
 
-Python 3.5+ is required in order to run this module.
+Python 3.6+ is required in order to run this module.
 
 To install this package from pypi, run:
 
