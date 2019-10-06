@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from ddf_utils.factory import (ClioInfraLoader, IHMELoader, ILOLoader, OECDLoader, WorldBankLoader)
+from ddf_utils.factory.common import download
 import tempfile
 
 
@@ -28,3 +29,13 @@ def test_other_factory():
     for loader in [OECDLoader, ClioInfraLoader]:
         ld = loader()
         ld.load_metadata()
+
+
+def test_download_function():
+    tmpf = tempfile.mktemp()
+    test_url = 'http://ipv4.download.thinkbroadband.com/5MB.zip'
+    download(test_url, tmpf, progress_bar=False)
+
+    tmpf = tempfile.mktemp()
+    test_url2 = 'https://unstats.un.org/SDGAPI/v1/sdg/Series/DataCSV'
+    download(test_url2, tmpf, method="POST", post_data={'seriesCodes': 'DC_ODA_BDVDL'}, progress_bar=False)
