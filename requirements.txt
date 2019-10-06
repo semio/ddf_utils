@@ -20,7 +20,7 @@ ruamel.yaml
 graphviz
 coloredlogs
 pytz
-requests
+requests[security]
 gitpython
 hy
 ipdb

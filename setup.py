@@ -29,7 +29,7 @@ requirements = [
     'graphviz',
     'coloredlogs',
     'pytz',
-    'requests',
+    'requests[security]',
     'gitpython',
     'hy',
     'attrs>18.1.0',
