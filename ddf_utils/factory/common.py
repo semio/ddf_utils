@@ -109,7 +109,7 @@ def download(url, out_file, session=None, resume=True, method="GET", post_data=N
             print(f'resumming {out_file_}...')
             header = {"Range": f'bytes={first_byte}-{file_size}'}
             prepped.headers = header
-            response = session_.send(stream=True, headers=header)
+            response = session_.send(prepped, stream=True)
             response.raise_for_status()
 
         if progress_bar:
@@ -125,7 +125,7 @@ def download(url, out_file, session=None, resume=True, method="GET", post_data=N
         if progress_bar:
             pbar.close()
         if osp.getsize(out_file_) < file_size:
-            raise ValueError
+            raise ValueError("file size mismatched")
         return
 
     run(url, out_file, session, resume)
