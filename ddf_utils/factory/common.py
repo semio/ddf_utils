@@ -7,6 +7,7 @@ from abc import abstractmethod, ABC
 import requests as req
 from time import sleep
 from functools import wraps
+from requests import Request
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
 from tqdm import tqdm
@@ -56,7 +57,7 @@ def retry(times=5, backoff=0.5):
     return wrapper
 
 
-def download(url, out_file, session=None, resume=True, retry_times=5, backoff=0.5, progress_bar=True):
+def download(url, out_file, session=None, resume=True, method="GET", post_data=None, retry_times=5, backoff=0.5, progress_bar=True):
     """Download a url, and optionally try to resume it.
 
     Parameters
@@ -71,6 +72,9 @@ def download(url, out_file, session=None, resume=True, retry_times=5, backoff=0.
         use resume=True
     resume : bool
         whether to resume the download
+    method : `str`
+        could be "GET" or "POST". When posting you can pass a dictionary to `post_data`
+    post_data : dict
     times : int
     backoff : float
     progress_bar : bool
@@ -85,7 +89,15 @@ def download(url, out_file, session=None, resume=True, retry_times=5, backoff=0.
         if not session_:
             session_ = req.Session()
 
-        response = session_.get(url_, stream=True)
+        if method == 'GET':
+            basereq = Request(method='GET', url=url_)
+        elif method == 'POST':
+            basereq = Request(method='POST', url=url_, data=post_data)
+        else:
+            raise ValueError("method {} not supported".format(method))
+        prepped = basereq.prepare()
+
+        response = session_.send(prepped, stream=True)
         response.raise_for_status()
         file_size = int(response.headers['content-length'])
 
@@ -94,9 +106,10 @@ def download(url, out_file, session=None, resume=True, retry_times=5, backoff=0.
             return
 
         if first_byte > 0:
-            print('resumming...')
+            print(f'resumming {out_file_}...')
             header = {"Range": f'bytes={first_byte}-{file_size}'}
-            response = session_.get(url_, stream=True, headers=header)
+            prepped.headers = header
+            response = session_.send(stream=True, headers=header)
             response.raise_for_status()
 
         if progress_bar:
