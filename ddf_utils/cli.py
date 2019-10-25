@@ -37,7 +37,9 @@ def new():
 @click.argument('how', default='ddf', type=click.Choice(['ddf', 'lang', 'langsplit']))
 @click.argument('path', default='./')
 @click.option('--force', flag_value=True, default=False, help='force deletion')
-def cleanup(path, how, force):
+@click.option('--exclude', default=None, multiple=True, help='exclude file or folders')
+@click.option('--no-default-exclude', flag_value=True, default=False, help='do not use default excludes')
+def cleanup(path, how, force, exclude, no_default_exclude):
     """clean up ddf files or translation files.
 
     :arguments
@@ -48,14 +50,15 @@ def cleanup(path, how, force):
     """
     from ddf_utils.io import cleanup as cl
     from ddf_utils.package import is_datapackage
+    use_default_exclude = not no_default_exclude
     if force:
-        cl(path, how)
+        cl(path, how, exclude=exclude, use_default_exclude=use_default_exclude)
     else:
         if not is_datapackage(path):
             print('not a dataset path: {}. Please set correct path or '
                   'use --force to force run.'.format(os.path.abspath(path)))
         else:
-            cl(path, how)
+            cl(path, how, exclude=exclude, use_default_exclude=use_default_exclude)
     click.echo('Done.')
 
 
