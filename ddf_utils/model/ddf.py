@@ -198,7 +198,7 @@ class Synonym:
 class DDF:
     # Here I use dictionaries for the data structure, just for performance
     # in fact they can be just lists, i.e. concepts is just a list of Concept objects.
-    concepts: Dict[str, Concept]
+    concepts: Dict[str, Concept] = attr.ib(factory=dict)
     entities: Dict[str, EntityDomain] = attr.ib(factory=dict)
     datapoints: Dict[str, Dict[str, DataPoint]] = attr.ib(factory=dict)
     synonyms: Dict[str, Synonym] = attr.ib(factory=dict)
