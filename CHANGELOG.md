@@ -1,3 +1,7 @@
+## version 1.0.6 2019-11-11
+
+- improve performance of entity loading in DDFcsv reader (#119)
+
 ## version 1.0.5 2019-10-01
 
 - update progress bar options (#118)
