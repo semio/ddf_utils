@@ -80,7 +80,7 @@ class EntityDomain:
 
     @entities.validator
     def _check_entities_identity(self, attribute, value):
-        entities_id_list = [x.id for x in value]
+        entities_id_list = self.entity_ids
         counter = Counter(entities_id_list)
         error = False
         for k, v in counter.items():
@@ -89,6 +89,27 @@ class EntityDomain:
                 error = True
         if error:
             raise ValueError("duplicated entity detected")
+
+    @classmethod
+    def from_entity_list(cls, domain_id, entities, allow_duplicated=True, **kwargs):
+        if not allow_duplicated:
+            return cls(id=domain_id, entities=entities, props=kwargs)
+        # if there are duplicates, we need to combine all duplicates
+        # now construct a new entities list without duplicates
+        entity_ids = [x.id for x in entities]
+        entities_new = dict((i, Entity(id=i, domain=domain_id, sets=[], props={})) for i in entity_ids)
+        for x in entities:
+            en = entities_new[x.id]
+            for s in x.sets:
+                if s not in en.sets:
+                    en.sets.append(s)
+            en.props.update(x.props)
+            entities_new[x.id] = en
+        return cls(id=domain_id, entities=list(entities_new.values()), props=kwargs)
+
+    @property
+    def entity_ids(self):
+        return [x.id for x in self.entities]
 
     @property
     def entity_sets(self):
@@ -102,8 +123,7 @@ class EntityDomain:
         return [e for e in self.entities if s in e.sets]
 
     def has_entity(self, sid):
-        all_ids = [e.id for e in self.entities]
-        return sid in all_ids
+        return sid in self.entity_ids
 
     def to_dict(self, eset=None):
         if eset:

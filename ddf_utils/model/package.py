@@ -252,7 +252,10 @@ class DDFcsv(DataPackage):
             domains_tmp[domain].append(entity)
 
         for domain, entities_ in domains_tmp.items():
-            domains[domain] = EntityDomain(id=domain, entities=entities_)
+            # TODO: maybe get properties from concepts table
+            # Allow duplicated entity because they may be defined in multiple resources
+            # i.e. multiple entity sets in separated files.
+            domains[domain] = EntityDomain.from_entity_list(domain_id=domain, entities=entities_, allow_duplicated=True)
 
         # load datapoints. Here we will use Dask for all
         # 1. create categories for entity domains
