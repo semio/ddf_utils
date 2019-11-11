@@ -245,11 +245,14 @@ class DDFcsv(DataPackage):
         # load entities
         entities = list(self._gen_entities(concepts))
         domains = dict()
+        domains_tmp = dict()
         for domain, entity in entities:
-            if domain not in domains.keys():
-                domains[domain] = EntityDomain(id=domain, entities=[])
+            if domain not in domains_tmp.keys():
+                domains_tmp[domain] = list()
+            domains_tmp[domain].append(entity)
 
-            domains[domain].add_entity(entity)
+        for domain, entities_ in domains_tmp.items():
+            domains[domain] = EntityDomain(id=domain, entities=entities_)
 
         # load datapoints. Here we will use Dask for all
         # 1. create categories for entity domains

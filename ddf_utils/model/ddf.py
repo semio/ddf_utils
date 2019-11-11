@@ -10,7 +10,7 @@ import json
 from pathlib import Path
 from itertools import product
 from tqdm import tqdm
-from collections import OrderedDict
+from collections import OrderedDict, Counter
 
 import numpy as np
 import pandas as pd
@@ -75,8 +75,20 @@ class Entity:
 @attr.s(auto_attribs=True)
 class EntityDomain:
     id: str
-    entities: List[Entity]
+    entities: List[Entity] = attr.ib(factory=list)
     props: dict = attr.ib(factory=dict)
+
+    @entities.validator
+    def _check_entities_identity(self, attribute, value):
+        entities_id_list = [x.id for x in value]
+        counter = Counter(entities_id_list)
+        error = False
+        for k, v in counter.items():
+            if v > 1:
+                logger.critical(f"entity {k} exists {v} times in entity table!")
+                error = True
+        if error:
+            raise ValueError("duplicated entity detected")
 
     @property
     def entity_sets(self):
