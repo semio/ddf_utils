@@ -32,7 +32,7 @@ requirements = [
     'requests[security]',
     'gitpython',
     'hy',
-    'attrs>18.1.0',
+    'attrs>=19.2.0',
     'joblib',
     'lxml'
 ]
