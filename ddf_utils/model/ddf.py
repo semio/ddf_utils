@@ -80,7 +80,13 @@ class EntityDomain:
 
     @entities.validator
     def _check_entities_identity(self, attribute, value):
+        if len(value) == 0:  # do nothing if there are no entities yet.
+            return
         entities_id_list = self.entity_ids
+        entities_domain_set = set([x.domain for x in self.entities])
+        if len(entities_domain_set) > 1 or self.id not in entities_domain_set:
+            other_domains = list(entities_domain_set - set([self.id]))
+            raise ValueError(f"there are entities with different domain: {other_domains}. Expected domain: {self.id}")
         counter = Counter(entities_id_list)
         error = False
         for k, v in counter.items():
@@ -146,6 +152,7 @@ class EntityDomain:
 
     def add_entity(self, ent: Entity):
         if ent.domain != self.id:
+            logger.critical(f"trying to add Entity(id={ent.id}, domain={ent.domain}) to {self.id} domain")
             raise ValueError('domain name mismatch for the entity object and domain object!')
         for existing_ent in self.entities:
             if ent.id == existing_ent.id:
