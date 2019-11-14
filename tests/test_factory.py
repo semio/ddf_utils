@@ -11,7 +11,7 @@ def test_ihme():
     ihme.has_newer_source(376)
 
     tmpdir = tempfile.mkdtemp()
-    test_url = 'http://ipv4.download.thinkbroadband.com/5MB.zip'
+    test_url = 'http://semio.space/1m.txt'
     ihme._run_download(test_url, tmpdir, '12345678')
 
 
@@ -33,7 +33,7 @@ def test_other_factory():
 
 def test_download_function():
     tmpf = tempfile.mktemp()
-    test_url = 'http://ipv4.download.thinkbroadband.com/5MB.zip'
+    test_url = 'http://semio.space/1m.txt'
     download(test_url, tmpf, progress_bar=False)
 
     tmpf = tempfile.mktemp()
