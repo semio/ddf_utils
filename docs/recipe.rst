@@ -1,5 +1,13 @@
+.. _recipe:
+
 Recipe Cookbook (draft)
 =======================
+
+This document assumes that readers already know the DDF data model. If
+you are not familiar with it, please refer to `DDF data model`_
+document.
+
+.. _`DDF data model`: https://docs.google.com/document/d/1Cd2kEH5w3SRJYaDcu-M4dU5SY8No84T3g-QlNSW6pIE
 
 What is Recipe
 --------------

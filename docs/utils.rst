@@ -1,12 +1,26 @@
 Use ddf_utils for ETL tasks
 ===========================
 
-Create DDF dataset using data model
------------------------------------
+Create DDF dataset from non-DDF data files
+------------------------------------------
 
-Check `the example`_ for how to build datasets with the class functions.
+If you want to learn how to compose DDF datasets, read
+:ref:`recipe`. If you are not familiar with DDF model, please refer to
+`DDF data model`_ document.
 
-.. _`the example`: https://github.com/semio/ddf_utils/tree/master/examples/etl
+ddf_utils provides most of data classes and methods in terms of the
+DDF model: concept/entity/datapoint/synonmy (and more to come.)
+Together with the other utility functions, we hope to provide a tool
+box for users to easily create a DDF dataset. To see it in action,
+check `this notebook`_ for a demo.
+
+In general, we are building scripts to transform data from one format
+to the other format, so guidelines for programming and data ETL
+applies here. You should care about the correctness of the scripts and
+be ware of bad data.
+
+.. _`this notebook`: https://github.com/semio/ddf_utils/tree/master/examples/etl/migrant.ipynb
+.. _`DDF data model`: https://docs.google.com/document/d/1Cd2kEH5w3SRJYaDcu-M4dU5SY8No84T3g-QlNSW6pIE
 
 Create DDF dataset from CSV file
 --------------------------------
