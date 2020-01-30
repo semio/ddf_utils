@@ -80,9 +80,14 @@ class EntityDomain:
 
     @entities.validator
     def _check_entities_identity(self, attribute, value):
-        if len(value) == 0:  # do nothing if there are no entities yet.
+        """double check entities provided in initialization
+
+        1. domains should be same as the domain id
+        2. an entity should be exists only once in the list
+        """
+        if len(value) == 0:  # do nothing if the entities list is empty.
             return
-        entities_id_list = self.entity_ids
+        entities_id_list = [x.id for x in self.entities]
         entities_domain_set = set([x.domain for x in self.entities])
         if len(entities_domain_set) > 1 or self.id not in entities_domain_set:
             other_domains = list(entities_domain_set - set([self.id]))
