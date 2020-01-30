@@ -62,7 +62,7 @@ def cleanup(path, how, force, exclude, no_default_exclude):
     click.echo('Done.')
 
 
-@ddf.command()
+@ddf.command(name='create_datapackage')
 @click.argument('path')
 @click.option('--update', '-u', 'update', flag_value=True, default=False,
               help='update existing datapackage.json')
@@ -96,7 +96,7 @@ def create_datapackage(path, update, overwrite, progress_bar):
 
 
 # chef and recipe
-@ddf.command()
+@ddf.command(name='run_recipe')
 @click.option('--recipe', '-i', type=click.Path(exists=True), required=True)
 @click.option('--outdir', '-o', type=click.Path(exists=True))
 @click.option('--ddf_dir', type=click.Path(exists=True), default=None)
@@ -145,7 +145,7 @@ def run_recipe(recipe, outdir, ddf_dir, update, dry_run, gen_dp, show_tree):
     click.echo("Done.")
 
 
-@ddf.command()
+@ddf.command(name='build_recipe')
 @click.argument('recipe', type=click.Path(exists=True))
 @click.option('--format', '-f', type=click.Choice(['json', 'yaml']), default='json',
               help='set output format')
@@ -163,7 +163,7 @@ def build_recipe(recipe, format):
 
 
 # Translation related tasks
-@ddf.command()
+@ddf.command(name='split_translation')
 @click.argument('path', type=click.Path(exists=True))
 @click.option('--type', '-t', 'dtype', type=click.Choice(['csv', 'json']), help='split file type',
               default='csv')
@@ -184,7 +184,7 @@ def split_translation(path, split_path, dtype, exclude_concepts, overwrite):
     click.echo('Done.')
 
 
-@ddf.command()
+@ddf.command(name='merge_translation')
 @click.argument('path', type=click.Path(exists=True))
 @click.option('--overwrite/--no-overwrite', default=False, help='overwrite existing files or not')
 @click.option('--type', '-t', 'dtype', type=click.Choice(['json', 'csv']), help='split file type')
@@ -265,7 +265,7 @@ def diff(dataset1, dataset2, git, checkout_path, indicator, on_key, git_base_pat
 
 
 # csv to ddfcsv
-@ddf.command()
+@ddf.command(name='from_csv')
 @click.option('-i', 'input', type=click.Path(exists=True), default='./')
 @click.option('-o', 'out_path', type=click.Path(exists=True))
 def from_csv(input, out_path):
@@ -284,7 +284,7 @@ def from_csv(input, out_path):
 
 
 # detect etl script type for a dataset
-@ddf.command()
+@ddf.command(name='etl_type')
 @click.option('-d', 'script_dir', type=click.Path(), default='etl/scripts')
 def etl_type(script_dir):
     import sys

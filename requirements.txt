@@ -5,7 +5,7 @@ pyyaml
 orderedattrdict
 typing
 cookiecutter
-Click<7
+Click
 daff
 sphinx_rtd_theme
 sphinxcontrib-napoleon
@@ -26,4 +26,3 @@ hy
 ipdb
 attrs>=19.2.0
 joblib
-lxml
