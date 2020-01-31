@@ -1,3 +1,9 @@
+## version 1.0.7 2020-01-31
+
+- improve logging for datapackage generation (#120)
+- update dependencies version (#121)
+- minor changes
+
 ## version 1.0.6 2019-11-11
 
 - improve performance of entity loading in DDFcsv reader (#119)
