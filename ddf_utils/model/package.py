@@ -359,7 +359,7 @@ class DDFcsv(DataPackage):
                     ents_ = data_[c].unique()
                     diff = set(ents_) - set(ents)
                     logger.critical("in file {}:".format(resource.path))
-                    logger.critical("{} column contains entity which is not in entity file: {}".format(c, diff))
+                    logger.critical("{} column contains entity which does not belong to {} domain/set: {}".format(c, c, list(diff)))
                     raise ValueError("entity mismatch")
 
             # for resources that have entity_columns: only consider all permutations on entity columns
