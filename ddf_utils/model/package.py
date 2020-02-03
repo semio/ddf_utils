@@ -358,6 +358,7 @@ class DDFcsv(DataPackage):
                     ents = dtypes[c].categories.values
                     ents_ = data_[c].unique()
                     diff = set(ents_) - set(ents)
+                    logger.critical("in file {}:".format(resource.path))
                     logger.critical("{} column contains entity which is not in entity file: {}".format(c, diff))
                     raise ValueError("entity mismatch")
 
