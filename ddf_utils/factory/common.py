@@ -43,7 +43,7 @@ def retry(times=5, backoff=0.5):
             ttimes = times
             while ttimes > 0:
                 try:
-                    func(*args, **kwargs)
+                    res = func(*args, **kwargs)
                 except KeyboardInterrupt:
                     raise
                 except Exception as e:
@@ -53,6 +53,7 @@ def retry(times=5, backoff=0.5):
                     sleep(backoff * (mtimes - ttimes))
                 else:
                     break
+            return res
         return newfunc
     return wrapper
 
@@ -80,36 +81,32 @@ def download(url, out_file, session=None, resume=True, method="GET", post_data=N
     progress_bar : bool
         whether to display a progress bar
     """
+
     @retry(times=retry_times, backoff=backoff)
-    def run(url_, out_file_, session_, resume_):
+    def get_file_size(request, session_):
+        response = session_.send(request, stream=True)
+        response.raise_for_status()
+        return int(response.headers['Content-length'])
+
+    @retry(times=retry_times, backoff=backoff)
+    def run(request, session_, out_file_, resume_, file_size):
         if osp.exists(out_file_) and resume_:
             first_byte = osp.getsize(out_file_)
         else:
             first_byte = 0
-        if not session_:
-            session_ = req.Session()
-
-        if method == 'GET':
-            basereq = Request(method='GET', url=url_)
-        elif method == 'POST':
-            basereq = Request(method='POST', url=url_, data=post_data)
-        else:
-            raise ValueError("method {} not supported".format(method))
-        prepped = basereq.prepare()
-
-        response = session_.send(prepped, stream=True)
-        response.raise_for_status()
-        file_size = int(response.headers['content-length'])
-
-        if first_byte >= file_size:
-            print("download was completed")
-            return
 
         if first_byte > 0:
+            if first_byte >= file_size:
+                print("download was completed")
+                return
             print(f'resumming {out_file_}...')
             header = {"Range": f'bytes={first_byte}-{file_size}'}
-            prepped.headers = header
-            response = session_.send(prepped, stream=True)
+            request.headers = header
+            response = session_.send(request, stream=True)
+            response.raise_for_status()
+        else:
+            print(f'begin downloading {out_file_}...')
+            response = session_.send(request, stream=True)
             response.raise_for_status()
 
         if progress_bar:
@@ -124,11 +121,24 @@ def download(url, out_file, session=None, resume=True, method="GET", post_data=N
             f.close()
         if progress_bar:
             pbar.close()
-        if osp.getsize(out_file_) < file_size:
+        if osp.getsize(out_file_) != file_size:
             raise ValueError("file size mismatched")
         return
 
-    run(url, out_file, session, resume)
+    # prepare the request
+    if method == 'GET':
+        basereq = Request(method='GET', url=url)
+    elif method == 'POST':
+        basereq = Request(method='POST', url=url, data=post_data)
+    else:
+        raise ValueError("method {} not supported".format(method))
+    request = basereq.prepare()
+
+    if not session:
+            session = req.Session()
+
+    file_size = get_file_size(request, session)
+    run(request, session, out_file, resume, file_size)
 
 
 @attr.s
