@@ -10,6 +10,7 @@ from functools import wraps
 from requests import Request
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
+from requests.exceptions import ChunkedEncodingError
 from tqdm import tqdm
 
 
@@ -34,7 +35,7 @@ def requests_retry_session(
     return session
 
 
-def retry(times=5, backoff=0.5):
+def retry(times=5, backoff=0.5, exceptions=(Exception)):
     """general wrapper to retry things"""
     def wrapper(func):
         @wraps(func)
@@ -46,7 +47,7 @@ def retry(times=5, backoff=0.5):
                     res = func(*args, **kwargs)
                 except KeyboardInterrupt:
                     raise
-                except Exception as e:
+                except exceptions as e:
                     ttimes = ttimes - 1
                     if ttimes == 0:
                         raise
@@ -88,7 +89,7 @@ def download(url, out_file, session=None, resume=True, method="GET", post_data=N
         response.raise_for_status()
         return int(response.headers['Content-length'])
 
-    @retry(times=retry_times, backoff=backoff)
+    @retry(times=retry_times, backoff=backoff, exceptions=(Exception, ChunkedEncodingError))
     def run(request, session_, out_file_, resume_, file_size):
         if osp.exists(out_file_) and resume_:
             first_byte = osp.getsize(out_file_)
