@@ -12,14 +12,16 @@ Source link: `WorldBank website`_
 
 import os.path as osp
 
+import logging
 import requests
 import pandas as pd
 
 from urllib.parse import urlsplit
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-from . common import DataFactory
+from . common import DataFactory, requests_retry_session
 
+logger = logging.getLogger("WorldBankLoader")
 
 class WorldBankLoader(DataFactory):
     __doc__ = """T.B.D"""
@@ -79,7 +81,8 @@ class WorldBankLoader(DataFactory):
         metadata = self.metadata
         s = metadata.loc[metadata.acronym == dataset, 'bulkdownload'].values[0]
         url = s.split(';')[1].split('=')[1]
-        res = requests.get(url, stream=True)
+        session = requests_retry_session()
+        res = session.get(url, stream=True)
 
         fs_path = osp.join(out_dir, osp.basename(urlsplit(url).path))
 
