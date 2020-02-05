@@ -19,7 +19,7 @@ import pandas as pd
 from urllib.parse import urlsplit
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-from . common import DataFactory, requests_retry_session
+from . common import DataFactory, download
 
 logger = logging.getLogger("WorldBankLoader")
 
@@ -81,14 +81,7 @@ class WorldBankLoader(DataFactory):
         metadata = self.metadata
         s = metadata.loc[metadata.acronym == dataset, 'bulkdownload'].values[0]
         url = s.split(';')[1].split('=')[1]
-        session = requests_retry_session()
-        res = session.get(url, stream=True)
-
         fs_path = osp.join(out_dir, osp.basename(urlsplit(url).path))
-
-        with open(fs_path, 'wb') as f:
-            for c in res.iter_content(chunk_size=1024):
-                f.write(c)
-            f.close()
+        download(url, fs_path)
 
         return out_dir
