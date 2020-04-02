@@ -16,20 +16,20 @@ from tqdm import tqdm
 
 # from https://www.peterbe.com/plog/best-practice-with-retries-with-requests
 def requests_retry_session(
-    retries=5,
-    backoff_factor=0.3,
-    status_forcelist=(500, 502, 504),
-    session=None,
+        retries=5,
+        backoff_factor=0.3,
+        status_forcelist=(500, 502, 504),
+        session=None,
 ):
     session = session or req.Session()
-    retry = Retry(
+    max_retry = Retry(
         total=retries,
         read=retries,
         connect=retries,
         backoff_factor=backoff_factor,
         status_forcelist=status_forcelist,
     )
-    adapter = HTTPAdapter(max_retries=retry)
+    adapter = HTTPAdapter(max_retries=max_retry)
     session.mount('http://', adapter)
     session.mount('https://', adapter)
     return session
@@ -139,7 +139,7 @@ def download(url, out_file, session=None, resume=True, method="GET", post_data=N
     request = basereq.prepare()
 
     if not session:
-            session = req.Session()
+        session = req.Session()
 
     file_size = get_file_size(request, session)
     run(request, session, out_file, resume, file_size)
