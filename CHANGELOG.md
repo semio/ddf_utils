@@ -1,3 +1,8 @@
+## version 1.0.8 2020-04-02
+
+- imporve general retry/download functions
+- imporve WDI data loader
+
 ## version 1.0.7 2020-01-31
 
 - improve logging for datapackage generation (#120)
