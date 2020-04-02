@@ -104,8 +104,7 @@ def download(url, out_file, session=None, resume=True, method="GET", post_data=N
                 print("download was completed")
                 return
             print(f'resumming {out_file_}...')
-            header = {"Range": f'bytes={first_byte}-{file_size}'}
-            request.headers = header
+            request.headers['Range'] = f'bytes={first_byte}-{file_size}'
             response = session_.send(request, stream=True, timeout=timeout)
             response.raise_for_status()
         else:
@@ -115,7 +114,13 @@ def download(url, out_file, session=None, resume=True, method="GET", post_data=N
 
         if progress_bar:
             pbar = tqdm(total=file_size, initial=first_byte, unit='B', unit_scale=True)
-        with open(out_file_, 'ab') as f:
+
+        if resume_:
+            mode = 'ab'
+        else:
+            mode = 'wb'
+
+        with open(out_file_, mode) as f:
             for chunk in response.iter_content(chunk_size=1024):
                 if chunk:
                     f.write(chunk)
@@ -136,10 +141,11 @@ def download(url, out_file, session=None, resume=True, method="GET", post_data=N
         basereq = Request(method='POST', url=url, data=post_data)
     else:
         raise ValueError("method {} not supported".format(method))
-    request = basereq.prepare()
 
     if not session:
         session = req.Session()
+
+    request = session.prepare_request(basereq)
 
     file_size = get_file_size(request, session)
     run(request, session, out_file, resume, file_size)
