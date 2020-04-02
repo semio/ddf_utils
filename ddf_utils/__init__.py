@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-__version__ = '1.0.8'
+__version__ = '1.0.9dev0'
 
 from . import (str, cli, i18n, io, patch, qa, transformer, factory)
 from ddf_utils.model.package import DataPackage
