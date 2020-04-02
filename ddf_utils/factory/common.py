@@ -59,7 +59,8 @@ def retry(times=5, backoff=0.5, exceptions=(Exception)):
     return wrapper
 
 
-def download(url, out_file, session=None, resume=True, method="GET", post_data=None, retry_times=5, backoff=0.5, progress_bar=True):
+def download(url, out_file, session=None, resume=True, method="GET", post_data=None,
+             retry_times=5, backoff=0.5, progress_bar=True, timeout=10):
     """Download a url, and optionally try to resume it.
 
     Parameters
@@ -81,11 +82,13 @@ def download(url, out_file, session=None, resume=True, method="GET", post_data=N
     backoff : float
     progress_bar : bool
         whether to display a progress bar
+    timeout : int
+        maximum time to wait for connect/read server responses. (Note: not the time limit for total response)
     """
 
     @retry(times=retry_times, backoff=backoff)
     def get_file_size(request, session_):
-        response = session_.send(request, stream=True)
+        response = session_.send(request, stream=True, timeout=timeout)
         response.raise_for_status()
         return int(response.headers['Content-length'])
 
@@ -103,11 +106,11 @@ def download(url, out_file, session=None, resume=True, method="GET", post_data=N
             print(f'resumming {out_file_}...')
             header = {"Range": f'bytes={first_byte}-{file_size}'}
             request.headers = header
-            response = session_.send(request, stream=True)
+            response = session_.send(request, stream=True, timeout=timeout)
             response.raise_for_status()
         else:
             print(f'begin downloading {out_file_}...')
-            response = session_.send(request, stream=True)
+            response = session_.send(request, stream=True, timeout=timeout)
             response.raise_for_status()
 
         if progress_bar:
