@@ -85,70 +85,71 @@ def download(url, out_file, session=None, resume=True, method="GET", post_data=N
     timeout : int
         maximum time to wait for connect/read server responses. (Note: not the time limit for total response)
     """
-
-    @retry(times=retry_times, backoff=backoff)
-    def get_file_size(request, session_):
-        response = session_.send(request, stream=True, timeout=timeout)
-        response.raise_for_status()
-        return int(response.headers['Content-length'])
-
-    @retry(times=retry_times, backoff=backoff, exceptions=(Exception, ChunkedEncodingError))
-    def run(request, session_, out_file_, resume_, file_size):
-        if osp.exists(out_file_) and resume_:
-            first_byte = osp.getsize(out_file_)
-        else:
-            first_byte = 0
-
-        if first_byte > 0:
-            if first_byte >= file_size:
-                print("download was completed")
-                return
-            print(f'resumming {out_file_}...')
-            request.headers['Range'] = f'bytes={first_byte}-{file_size}'
-            response = session_.send(request, stream=True, timeout=timeout)
-            response.raise_for_status()
-        else:
-            print(f'begin downloading {out_file_}...')
-            response = session_.send(request, stream=True, timeout=timeout)
-            response.raise_for_status()
-
-        if progress_bar:
-            pbar = tqdm(total=file_size, initial=first_byte, unit='B', unit_scale=True)
-
-        if resume_:
-            mode = 'ab'
-        else:
-            mode = 'wb'
-
-        with open(out_file_, mode) as f:
-            for chunk in response.iter_content(chunk_size=1024):
-                if chunk:
-                    f.write(chunk)
-                    f.flush()
-                    if progress_bar:
-                        pbar.update(1024)
-            f.close()
-        if progress_bar:
-            pbar.close()
-        if osp.getsize(out_file_) != file_size:
-            raise ValueError("file size mismatched")
-        return
-
-    # prepare the request
-    if method == 'GET':
-        basereq = Request(method='GET', url=url)
-    elif method == 'POST':
-        basereq = Request(method='POST', url=url, data=post_data)
-    else:
-        raise ValueError("method {} not supported".format(method))
-
+    # start session
     if not session:
         session = req.Session()
 
-    request = session.prepare_request(basereq)
+    # prepare the request
+    # to ensure requests don't get modify for retries, we use a function to create them.
+    def prepare_request():
+        if method == 'GET':
+            basereq = Request(method='GET', url=url)
+        elif method == 'POST':
+            basereq = Request(method='POST', url=url, data=post_data)
+        else:
+            raise ValueError("method {} not supported".format(method))
 
-    file_size = get_file_size(request, session)
-    run(request, session, out_file, resume, file_size)
+        request = session.prepare_request(basereq)
+        return request
+
+    @retry(times=retry_times, backoff=backoff, exceptions=(Exception, ChunkedEncodingError))
+    def get_response(first_byte=None, file_size=None):
+        request = prepare_request()
+        if first_byte and file_size:
+            request.headers['Range'] = f'bytes={first_byte}-{file_size}'
+        response = session.send(request, stream=True, timeout=timeout)
+        response.raise_for_status()
+        return response
+
+    # main function body
+    print(f"begin downloading {out_file}...")
+    if resume:
+        mode = 'ab'
+    else:
+        mode = 'wb'
+
+    response = get_response()
+    file_size = int(response.headers['Content-Length'])
+
+    if osp.exists(out_file) and resume:
+        first_byte = osp.getsize(out_file)
+        if first_byte == file_size:
+            print("download was completed")
+            return
+        elif first_byte < file_size:
+            print(f'resumming {out_file}...')
+            response = get_response(first_byte, file_size)
+        else:
+            print(f'file broken: {out_file}, re-download entire file')
+            # ignore resume mode, download it again
+            mode = 'wb'
+
+    if progress_bar:
+        pbar = tqdm(total=file_size, initial=first_byte, unit='B', unit_scale=True)
+
+    with open(out_file, mode) as f:
+        for chunk in response.iter_content(chunk_size=1024):
+            if chunk:
+                f.write(chunk)
+                f.flush()
+                if progress_bar:
+                    pbar.update(1024)
+        f.close()
+    if progress_bar:
+        pbar.close()
+    if osp.getsize(out_file) != file_size:
+        raise ValueError(f"file size doesn't match content length from server: {out_file}")
+    return
 
 
 @attr.s
