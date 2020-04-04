@@ -60,7 +60,7 @@ def retry(times=5, backoff=0.5, exceptions=(Exception)):
 
 
 def download(url, out_file, session=None, resume=True, method="GET", post_data=None,
-             retry_times=5, backoff=0.5, progress_bar=True, timeout=10):
+             retry_times=5, backoff=0.5, progress_bar=True, timeout=30):
     """Download a url, and optionally try to resume it.
 
     Parameters
