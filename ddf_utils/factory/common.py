@@ -133,6 +133,7 @@ def download(url, out_file, session=None, resume=True, method="GET", post_data=N
             print(f'file broken: {out_file}, re-download entire file')
             # ignore resume mode, download it again
             mode = 'wb'
+            first_byte = 0
     else:
         first_byte = 0
 
