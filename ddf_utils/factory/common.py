@@ -134,10 +134,10 @@ def download(url, out_file, session=None, resume=True, method="GET", post_data=N
             filemode = 'wb'
         response = session.send(request, stream=True, timeout=timeout)
         response.raise_for_status()
-        if resume_:
+        if first_byte > 0 and resume_:
             # check if status code is 206: Partial Content
             if response.status_code != 206:
-                raise ValueError("Status code not 206! The server does not support resuming.")
+                raise ValueError(f"Status code was {response.status_code}, not 206! The server does not support resuming.")
 
         if progress_bar:
             pbar = tqdm(total=file_size_, initial=first_byte, unit='B', unit_scale=True)
