@@ -52,6 +52,7 @@ def retry(times=5, backoff=0.5, exceptions=(Exception)):
                     if ttimes == 0:
                         raise
                     sleep(backoff * (mtimes - ttimes))
+                    print("retrying...")
                 else:
                     break
             return res
@@ -102,58 +103,69 @@ def download(url, out_file, session=None, resume=True, method="GET", post_data=N
         request = session.prepare_request(basereq)
         return request
 
-    @retry(times=retry_times, backoff=backoff, exceptions=(Exception, ChunkedEncodingError))
-    def get_response(first_byte=None, file_size=None):
+    @retry(times=retry_times, backoff=backoff, exceptions=(Exception))
+    def get_response():
         request = prepare_request()
-        if first_byte and file_size:
-            request.headers['Range'] = f'bytes={first_byte}-{file_size}'
         response = session.send(request, stream=True, timeout=timeout)
         response.raise_for_status()
         return response
 
+    @retry(times=retry_times, backoff=backoff, exceptions=(Exception, ChunkedEncodingError))
+    def run(file_size_, resume_=False):
+        if osp.exists(out_file) and resume_:
+            first_byte = osp.getsize(out_file)
+            if first_byte == file_size:
+                print("download was completed")
+                return
+            elif first_byte < file_size:
+                print(f'resumming {out_file}...')
+            else:
+                print(f'file broken: {out_file}, re-download entire file')
+                resume_ = False
+                first_byte = 0
+        else:
+            first_byte = 0
+
+        request = prepare_request()
+        if first_byte > 0:
+            request.headers['Range'] = f'bytes={first_byte}-'
+            filemode = 'ab'
+        else:
+            filemode = 'wb'
+        response = session.send(request, stream=True, timeout=timeout)
+        response.raise_for_status()
+        if resume_:
+            # check if status code is 206: Partial Content
+            if response.status_code != 206:
+                raise ValueError("Status code not 206! The server does not support resuming.")
+
+        if progress_bar:
+            pbar = tqdm(total=file_size_, initial=first_byte, unit='B', unit_scale=True)
+
+        with open(out_file, filemode) as f:
+            for chunk in response.iter_content(chunk_size=1024):
+                if chunk:
+                    f.write(chunk)
+                    f.flush()
+                    if progress_bar:
+                        pbar.update(1024)
+            f.close()
+        if progress_bar:
+            pbar.close()
+        # validate if download succeed
+        if osp.getsize(out_file) != file_size_:
+            raise ValueError(f"file size doesn't match content length from server: {out_file}")
+
     # main function body
     print(f"begin downloading {out_file}...")
-    if resume:
-        mode = 'ab'
-    else:
-        mode = 'wb'
+    # check server for resuming support
+    head_response = get_response()
+    if not head_response.headers.get('Accept-Ranges'):
+        print("server doesn't support resuming, we will run download without resuming")
+        resume = False
 
-    response = get_response()
-    file_size = int(response.headers['Content-Length'])
-
-    if osp.exists(out_file) and resume:
-        first_byte = osp.getsize(out_file)
-        if first_byte == file_size:
-            print("download was completed")
-            return
-        elif first_byte < file_size:
-            print(f'resumming {out_file}...')
-            response = get_response(first_byte, file_size)
-        else:
-            print(f'file broken: {out_file}, re-download entire file')
-            # ignore resume mode, download it again
-            mode = 'wb'
-            first_byte = 0
-    else:
-        first_byte = 0
-
-    if progress_bar:
-        pbar = tqdm(total=file_size, initial=first_byte, unit='B', unit_scale=True)
-
-    with open(out_file, mode) as f:
-        for chunk in response.iter_content(chunk_size=1024):
-            if chunk:
-                f.write(chunk)
-                f.flush()
-                if progress_bar:
-                    pbar.update(1024)
-        f.close()
-    if progress_bar:
-        pbar.close()
-    if osp.getsize(out_file) != file_size:
-        raise ValueError(f"file size doesn't match content length from server: {out_file}")
-    return
-
+    file_size = int(head_response.headers['Content-Length'])
+    run(file_size, resume)
 
 @attr.s
 class DataFactory(ABC):
