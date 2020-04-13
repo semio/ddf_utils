@@ -75,13 +75,13 @@ class WorldBankLoader(DataFactory):
         else:
             return False
 
-    def bulk_download(self, dataset, out_dir):
+    def bulk_download(self, dataset, out_dir, **kwargs):
         if self.metadata is None:
             self.load_metadata()
         metadata = self.metadata
         s = metadata.loc[metadata.acronym == dataset, 'bulkdownload'].values[0]
         url = s.split(';')[1].split('=')[1]
         fs_path = osp.join(out_dir, osp.basename(urlsplit(url).path))
-        download(url, fs_path)
+        download(url, fs_path, **kwargs)
 
         return out_dir
