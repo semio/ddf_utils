@@ -159,9 +159,9 @@ cooking:
                   value: sum
           result: rolling_datapoints_4
 
-      - procedure: serve
-        ingredients:
-            - rolling_datapoints_1
-            - rolling_datapoints_2
-            - rolling_datapoints_3
-            - rolling_datapoints_4
+        - procedure: serve
+          ingredients:
+              - rolling_datapoints_1
+              - rolling_datapoints_2
+              - rolling_datapoints_3
+              - rolling_datapoints_4
