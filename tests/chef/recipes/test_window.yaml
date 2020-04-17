@@ -2,7 +2,7 @@ info:
     id: test_window
 
 ingredients:
-    - id: window-datapoints-sorted
+    - id: window-datapoints
       key: 'geo,year'
       value: '*'
       data:
@@ -55,65 +55,12 @@ ingredients:
               year: 1995
               value: 6
 
-    - id: window-datapoints-unsorted
-      key: 'geo,year'
-      value: '*'
-      data:
-	  -
-	      geo: g1
-	      year: 1990
-	      value: 1
-	  -
-	      geo: g1
-	      year: 1991
-	      value: 1
-	  -
-	      geo: g1
-	      year: 1992
-	      value: 1
-	  -
-	      geo: g1
-	      year: 1993
-	      value: 1
-	  -
-	      geo: g1
-	      year: 1994
-	      value: 1
-	  -
-	      geo: g1
-	      year: 1995
-	      value: 1
-	  -
-	      geo: g2
-	      year: 1990
-	      value: 1
-	  -
-	      geo: g2
-	      year: 1993
-	      value: 4
-	  -
-	      geo: g2
-	      year: 1994
-	      value: 5
-	  -
-	      geo: g2
-	      year: 1991
-	      value: 2
-	  -
-	      geo: g2
-	      year: 1992
-	      value: 3
-	  -
-	      geo: g2
-	      year: 1995
-	      value: 6
-
 
 cooking:
     datapoints:
         - procedure: window
           ingredients:
-	      - window-datapoints-sorted
+              - window-datapoints
           options:
               window:
                   column: year
@@ -121,11 +68,12 @@ cooking:
                   # min_periods: 1
               aggregate:
                   value: mean
+              debug: true
           result: rolling_datapoints_1
 
         - procedure: window
           ingredients:
-	      - window-datapoints-sorted
+              - window-datapoints
           options:
               window:
                   column: year
@@ -133,35 +81,10 @@ cooking:
                   min_periods: 1
               aggregate:
                   value: sum
+              debug: true
           result: rolling_datapoints_2
-
-	- procedure: window
-	  ingredients:
-	      - window-datapoints-unsorted
-	  options:
-	      window:
-		  column: year
-		  size: 3
-		  # min_periods: 1
-	      aggregate:
-		  value: mean
-	  result: rolling_datapoints_3
-
-	- procedure: window
-	  ingredients:
-	      - window-datapoints-unsorted
-	  options:
-	      window:
-		  column: year
-		  size: expanding
-		  min_periods: 1
-	      aggregate:
-		  value: sum
-	  result: rolling_datapoints_4
 
         - procedure: serve
           ingredients:
               - rolling_datapoints_1
               - rolling_datapoints_2
-	      - rolling_datapoints_3
-	      - rolling_datapoints_4

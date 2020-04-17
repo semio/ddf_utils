@@ -164,13 +164,10 @@ def test_window():
 
     dp1 = chef.dag.get_node('rolling_datapoints_1').evaluate().compute()
     dp2 = chef.dag.get_node('rolling_datapoints_2').evaluate().compute()
-    dp3 = chef.dag.get_node('rolling_datapoints_3').evaluate().compute()
-    dp4 = chef.dag.get_node('rolling_datapoints_4').evaluate().compute()
 
     assert dp1['value']['value'].tolist() == [1, 1, 1, 1, 1, 1, 1, 1.5, 2, 3, 4, 5]
     assert dp2['value']['value'].tolist() == [1, 2, 3, 4, 5, 6, 1, 3, 6, 10, 15, 21]
-    assert dp3['value']['value'].tolist() == [1, 1, 1, 1, 1, 1, 1, 1.5, 2, 3, 4, 5]
-    assert dp4['value']['value'].tolist() == [1, 2, 3, 4, 5, 6, 1, 3, 6, 10, 15, 21]
+
 
 def test_serving():
     chef1 = chef_fn('test_serve_procedure.yaml')

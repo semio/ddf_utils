@@ -102,24 +102,18 @@ def window(chef: Chef, ingredients: List[DataPointIngredient], result, **options
         # keys for grouping. in multidimensional data like datapoints, we want create
         # groups before rolling. Just group all key column except the column to aggregate.
         keys = ingredient.key.copy()
-
+        keys.remove(column)
         df = data[k].copy()
-
-	# always sort before rolling
-	df = df.sort_values(keys)
-
-	# then remove the rolling column from primary keys, group by remaining keys
-	keys.remove(column)
 
         if size == 'expanding':
             res = []
-	    groups = df.groupby(by=keys, sort=False)
+            groups = df.groupby(by=keys)
             for _, df_g in groups:
                 res.append(df_g.set_index(ingredient.key)
                            .expanding(min_periods=min_periods, center=center).agg(f))
             newdata[k] = pd.concat(res, sort=False).reset_index()
         else:
-	    newdata[k] = (df.groupby(by=keys, sort=False)
+            newdata[k] = (df.groupby(by=keys)
                           .rolling(on=column, window=size, min_periods=min_periods, center=center)
                           .agg({k: f}).reset_index(ingredient.key).dropna())
 
