@@ -26,6 +26,15 @@ from ddf_utils.str import to_concept_id
 memory = Memory(location=mkdtemp(), verbose=0)
 
 
+def make_abs_path(path, base_dir):
+    """return a absolute path from a relative path and base dir.
+
+    If path is absoulte path arleady, it will ignore base dir and return path as is."""
+    if os.path.isabs(path):
+        return path
+    return os.path.join(base_dir, path)
+
+
 @memory.cache
 def read_local_ddf(ddf_id, base_dir='./'):
     """read local dataset and return the DDF object."""
@@ -264,7 +273,7 @@ def get_procedure(procedure, base_dir):
     """
     import ddf_utils.chef.procedure as pc
     if '.' in procedure:
-        assert 'base_dir' is not None, "please set procedure_dir in config if you have custom procedures"
+        assert base_dir is not None, "please set procedure_dir in config if you have custom procedures"
         sys.path.insert(0, base_dir)
         module_name, func_name = procedure.split('.')
         _mod = __import__(module_name)

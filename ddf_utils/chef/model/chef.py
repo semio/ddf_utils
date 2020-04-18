@@ -20,7 +20,7 @@ from typing import List
 
 from . dag import DAG, IngredientNode, ProcedureNode
 from .. exceptions import ChefRuntimeError
-from .. helpers import get_procedure, gen_sym, query, read_local_ddf
+from .. helpers import get_procedure, gen_sym, query, read_local_ddf, make_abs_path
 from . ingredient import Ingredient, ingredient_from_dict
 
 
@@ -375,17 +375,23 @@ class Chef:
 
         # the base dir of recipe file. for building paths for dictionary_dir and
         # sub recipe paths.
-        base_dir = os.path.dirname(recipe_file)
+        base_dir = os.path.abspath(os.path.dirname(recipe_file))
 
-        # the dictionary dir to retrieve translation dictionaries
+        # adding configurations
         if 'config' not in recipe.keys():
-            dict_dir = None
+            dict_dir = base_dir
             external_csv_dir = base_dir
             recipe_dir = base_dir
+            procedure_dir = base_dir
         else:
-            dict_dir = recipe['config'].get('dictionary_dir', None)
-            external_csv_dir = recipe['config'].get('external_csv_dir', base_dir)
-            recipe_dir = recipe['config'].get('recipes_dir', base_dir)
+            _fn = lambda k: make_abs_path(recipe['config'][k], base_dir) if k in recipe['config'] else base_dir
+            dict_dir = _fn('dictionary_dir')
+            external_csv_dir = _fn('external_csv_dir')
+            recipe_dir = _fn('recipes_dir')
+            procedure_dir = _fn('procedure_dir')
+
+        recipe['config'] = {'dict_dir': dict_dir, 'external_csv_dir': external_csv_dir,
+                            'recipe_dir': recipe_dir, 'procedure_dir': procedure_dir}
 
         def external_csv_abs_path(ing):
             """change the csv file in `data` to full path"""
@@ -420,9 +426,7 @@ class Chef:
         if 'ingredients' in recipe.keys():
             recipe['ingredients'] = [external_csv_abs_path(ing) for ing in recipe['ingredients']]
 
-        if 'include' not in recipe.keys():
-            return recipe
-        else:  # append sub-recipe entities into main recipe
+        if 'include' in recipe.keys(): # append sub-recipe entities into main recipe
             sub_recipes = []
             for i in recipe['include']:
                 if os.path.isabs(recipe_dir):
@@ -472,8 +476,7 @@ class Chef:
                     else:
                         recipe['cooking'] = {}
                         recipe['cooking'][p] = rcp['cooking'][p]
-
-            return recipe
+        return recipe
 
     @staticmethod
     def _get_dishes(recipe):
