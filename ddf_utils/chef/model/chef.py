@@ -32,7 +32,10 @@ def _loadfile(f):
     if re.match(r'.*\.json', f):
         res = json.load(open(f))
     else:
-        res = yaml.load(open(f), Loader=yaml.Loader)
+        try:
+            res = yaml.load(open(f), Loader=yaml.Loader)
+        except:
+            import ipdb; ipdb.set_trace()
 
     return res
 
@@ -346,7 +349,7 @@ class Chef:
         return g
 
     @staticmethod
-    def _build_recipe(recipe_file, to_disk=False, **kwargs):
+    def _build_recipe(recipe_file, to_disk=False, base_dir=None, **kwargs):
         """build a complete recipe object.
 
         This function will check each part of recipe, convert string (the ingredient ids,
@@ -375,7 +378,8 @@ class Chef:
 
         # the base dir of recipe file. for building paths for dictionary_dir and
         # sub recipe paths.
-        base_dir = os.path.abspath(os.path.dirname(recipe_file))
+        if not base_dir:
+            base_dir = os.path.abspath(os.path.dirname(recipe_file))
 
         # adding configurations
         if 'config' not in recipe.keys():
@@ -384,7 +388,9 @@ class Chef:
             recipe_dir = base_dir
             procedure_dir = base_dir
         else:
-            _fn = lambda k: make_abs_path(recipe['config'][k], base_dir) if k in recipe['config'] else base_dir
+            # TODO: when building sub_recipes, pass configs from main recipe to sub recipe.
+            recipe_base_dir = os.path.abspath(os.path.dirname(recipe_file))
+            _fn = lambda k: make_abs_path(recipe['config'][k], recipe_base_dir) if k in recipe['config'] else base_dir
             dict_dir = _fn('dictionary_dir')
             external_csv_dir = _fn('external_csv_dir')
             recipe_dir = _fn('recipes_dir')
@@ -433,7 +439,7 @@ class Chef:
                     path = os.path.join(recipe_dir, i)
                 else:
                     path = os.path.expanduser(os.path.join(base_dir, recipe_dir, i))
-                sub_recipes.append(Chef._build_recipe(path))
+                sub_recipes.append(Chef._build_recipe(path, base_dir=base_dir))
 
             for rcp in sub_recipes:
                 # appending ingredients form sub recipes
