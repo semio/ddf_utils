@@ -32,10 +32,7 @@ def _loadfile(f):
     if re.match(r'.*\.json', f):
         res = json.load(open(f))
     else:
-        try:
-            res = yaml.load(open(f), Loader=yaml.Loader)
-        except:
-            import ipdb; ipdb.set_trace()
+        res = yaml.load(open(f), Loader=yaml.Loader)
 
     return res
 
@@ -388,7 +385,7 @@ class Chef:
             recipe_dir = base_dir
             procedure_dir = base_dir
         else:
-            # TODO: when building sub_recipes, pass configs from main recipe to sub recipe.
+            # TODO: when building sub_recipes, pass configs from main recipe to sub recipes
             recipe_base_dir = os.path.abspath(os.path.dirname(recipe_file))
             _fn = lambda k: make_abs_path(recipe['config'][k], recipe_base_dir) if k in recipe['config'] else base_dir
             dict_dir = _fn('dictionary_dir')
