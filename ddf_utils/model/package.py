@@ -267,7 +267,7 @@ class DDFcsv(DataPackage):
         # 2. dtype for time
         for c_id, c in concepts.items():
             if c.concept_type == 'time':
-                dtypes[c_id] = 'uint64'  # TODO: maybe there are other format for time.
+                dtypes[c_id] = 'int64'  # TODO: maybe there are other format for time.
         # 3. group files for same indicator together
         indicators = dict()
         for field, pkey, path in self._gen_datapoints():
