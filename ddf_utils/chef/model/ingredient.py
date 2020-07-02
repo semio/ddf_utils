@@ -119,8 +119,14 @@ class Ingredient(ABC):
     @property
     def ddf_id(self):
         if self.ingredient_type == 'ddf':
+            return self.ddf.props.get('name', self.dataset)
+        return None
+
+    @property
+    def ddf(self):
+        if self.ingredient_type == 'ddf':
             ddf = read_local_ddf(self.dataset_path)
-            return ddf.props.get('name', self.dataset)
+            return ddf
         return None
 
     @classmethod
