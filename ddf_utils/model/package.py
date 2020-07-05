@@ -260,14 +260,17 @@ class DDFcsv(DataPackage):
         # load datapoints. Here we will use Dask for all
         # 1. create categories for entity domains
         dtypes = dict()
+        # parse_dates = list()
+        concept_types = dict()
         for domain_name, domain in domains.items():
             dtypes[domain_name] = self.entity_domain_to_categorical(domain)
             for eset in domain.entity_sets:
                 dtypes[eset] = self.entity_set_to_categorical(domain, eset)
-        # 2. dtype for time
+        # 2. get all concept types, update dtypes for time concepts
         for c_id, c in concepts.items():
+            concept_types[c_id] = c.concept_type
             if c.concept_type == 'time':
-                dtypes[c_id] = 'int64'  # TODO: maybe there are other format for time.
+                dtypes[c_id] = 'str'
         # 3. group files for same indicator together
         indicators = dict()
         for field, pkey, path in self._gen_datapoints():
@@ -286,8 +289,9 @@ class DDFcsv(DataPackage):
             datapoints[i] = dict()
             dtypes_ = dtypes.copy()
             # dtypes_[i] = 'float'  # TODO: supporting string/float datatypes, not just float
+            read_csv_options = dict(dtype=dtypes)
             for k, paths in v.items():
-                dp = DaskDataPoint(id=i, dimensions=k, path=paths, dtypes=dtypes_)
+                dp = DaskDataPoint(id=i, dimensions=k, path=paths, concept_types=concept_types, read_csv_options=read_csv_options)
                 datapoints[i][k] = dp
 
         # load synonyms

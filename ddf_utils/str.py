@@ -3,6 +3,7 @@
 
 import re
 import pandas as pd
+import dask.dataframe as dd
 from unidecode import unidecode
 import decimal
 
@@ -148,3 +149,44 @@ def format_float_sigfig(number, sigfig=5, threshold=None):
     if sign:
         result.insert(0, '-')
     return ''.join(result)
+
+
+def parse_time_series(ser, engine='pandas'):
+    """try to parse date time from a Series of string
+
+    see document https://docs.google.com/document/d/1Cd2kEH5w3SRJYaDcu-M4dU5SY8No84T3g-QlNSW6pIE/edit#heading=h.oafc7aswaafy
+    for more details of formats
+    """
+    # infer time format from a record
+    if engine == 'pandas':
+        s0 = ser.iloc[0]
+        mod = pd
+    else:  # dask
+        s0 = ser.head(1).iloc[0]
+        mod = dd
+    s0_len = len(s0)
+    if s0_len == 4:  # YYYY
+        return mod.to_datetime(ser, format='%Y').dt.to_period('Y')
+    elif s0_len == 8:  # YYYYMMDD
+        return mod.to_datetime(ser, format='%Y%M%D').dt.to_period('D')
+    else:
+        s0_4 = s0[4]
+        if s0_4 == '-':  # YYYY-MM
+            return mod.to_datetime(ser, format='%Y%M%D').dt.to_period('D')
+        elif s0_4 == 'w':  # YYYYwWW
+            fmt = '%Gw%V%u'  # must add '1' and %u to indicate the week day.
+            return mod.to_datetime(ser + '1', format=fmt).dt.to_period('W-Mon')
+        elif s0_4 == 'q':  # YYYYqQ
+            # python strptime didn't have quarter directives but to_datetime supports it
+            return mod.to_datetime(ser, infer_datetime_format=True).dt.to_period('Q')
+        else:
+            # not defined but maybe supported by to_datetime
+            # just return DatetimeArray instead of PeriodArray
+            return mod.to_datetime(ser, infer_datetime_format=True)
+
+
+# def format_time(t, time_type):
+#     if time_type == 'week':
+#         return t.strftime('%Gw%V')
+#     else:
+#         return str(t).lower()
