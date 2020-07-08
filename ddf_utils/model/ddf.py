@@ -218,7 +218,7 @@ class DaskDataPoint(DataPoint):
     @property
     def data(self):
         cols = [*self.dimensions, self.id]
-        df = dd.read_csv(self.path, **self.read_csv_options)[cols]
+        df = dd.read_csv(self.path, usecols=cols, **self.read_csv_options)
         # handling time columns
         for k, v in self.concept_types.items():
             if v == 'time':
