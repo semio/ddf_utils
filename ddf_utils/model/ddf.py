@@ -220,9 +220,12 @@ class DaskDataPoint(DataPoint):
         cols = [*self.dimensions, self.id]
         df = dd.read_csv(self.path, usecols=cols, **self.read_csv_options)
         # handling time columns
-        for k, v in self.concept_types.items():
-            if v == 'time':
-                df[k] = parse_time_series(df[k], engine='dask')
+        # Because df.query() performance is poor when the df contains pd.Period dtype
+        # we decided not to parse them, which will result in string dtype
+        # TODO: use Period when perofrmance become better
+        # for k, v in self.concept_types.items():
+        #     if v == 'time':
+        #         df[k] = parse_time_series(df[k], engine='dask')
         return df
 
 
