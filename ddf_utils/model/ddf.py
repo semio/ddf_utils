@@ -16,6 +16,8 @@ import numpy as np
 import pandas as pd
 import dask.dataframe as dd
 
+from ddf_utils.str import parse_time_series
+
 import logging
 
 logger = logging.getLogger(__name__)
@@ -209,13 +211,22 @@ class PandasDataPoint(DataPoint):
 class DaskDataPoint(DataPoint):
     """load datapoints with dask"""
     path: Union[List[str], str] = attr.ib()  # can be a list of paths
-    dtypes: dict = attr.ib()
+    concept_types: dict = attr.ib()
+    read_csv_options: dict = attr.ib(factory=dict)
     store = attr.ib(default='dask')
 
     @property
     def data(self):
         cols = [*self.dimensions, self.id]
-        return dd.read_csv(self.path, dtype=self.dtypes)[cols]
+        df = dd.read_csv(self.path, usecols=cols, **self.read_csv_options)
+        # handling time columns
+        # Because df.query() performance is poor when the df contains pd.Period dtype
+        # we decided not to parse them, which will result in string dtype
+        # TODO: use Period when perofrmance become better
+        # for k, v in self.concept_types.items():
+        #     if v == 'time':
+        #         df[k] = parse_time_series(df[k], engine='dask')
+        return df
 
 
 @attr.s(auto_attribs=True, repr=False)

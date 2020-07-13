@@ -3,8 +3,9 @@
 import os
 import tempfile
 
+from ddf_utils.model.package import DDFcsv
+
 def test_dataset():
-    from ddf_utils.model.package import DDFcsv
 
     dataset_path = os.path.join(os.path.dirname(__file__),
                                 'chef/datasets/ddf--gapminder--dummy_companies')
@@ -35,3 +36,14 @@ def test_dataset():
     str(ds)
 
     str(syms['region'])
+
+
+def test_dtype():
+    dataset_path = os.path.join(os.path.dirname(__file__),
+                                'chef/datasets/ddf--cme')
+
+    ds = DDFcsv.from_path(dataset_path).ddf
+
+    dp = ds.get_datapoints('imr_lower', ('country', 'year')).data
+    assert dp['year'].dtype == 'object'
+    assert dp['country'].dtype == 'category'

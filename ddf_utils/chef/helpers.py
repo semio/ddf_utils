@@ -6,7 +6,7 @@ import hashlib
 import logging
 import json
 from functools import wraps, partial
-from collections.abc import Sequence, Mapping
+from collections.abc import Mapping
 from time import time
 
 import click
@@ -293,52 +293,88 @@ def gen_sym(key, others=None, options=None):
 
 def gen_query(conds, scope=None, available_scopes=None):
     """generate dataframe query from mongo-like queries"""
+    # TODO: in/not in should only accept list, others should only accept one value
     comparison_keywords = {
         '$eq': '==',
         '$gt': '>',
         '$gte': '>=',
         '$lt': '<',
-        '$lte': '>',
+        '$lte': '<=',
         '$ne': '!=',
         '$in': 'in',
         '$nin': 'not in'
     }
     logical_keywords = ['$and', '$or', '$not', '$nor']
+    time_concepts = ['time', 'year', 'month', 'day', 'week', 'quarter']
 
-    def process_values(n):
-        if isinstance(n, str):
-            return "'{}'".format(n)
+    def process_one_query(key, comparsion, value, is_time_value=False):
+        if is_time_value:
+            if isinstance(value, list):
+                value_str = ','.join(list(map(lambda x: "'{}'".format(x), value)))
+                value_str = "[{}]".format(value_str)
+            else:
+                value_str = "'{}'".format(str(value))
         else:
-            return str(n)
+            if isinstance(value, str):
+                value_str = "'{}'".format(value)
+            else:
+                value_str = str(value)
+
+        return "`{}` {} {}".format(key, comparsion, value_str)
 
     res = []
+
+    # Multiple predicates appearing together in a json object
+    # they are automatically anded together
+    if len(conds) > 1:
+        conds = {'$and': [{k: v} for k, v in conds.items()]}
 
     for key, val in conds.items():
         if key in logical_keywords:
             if key in ['$and', '$or']:
+                assert isinstance(val, list), f"{key} keyword should follow by a list of conditions"
                 to_join = ' {} '.format(key[1:])
-                queries = [gen_query({k: v}, scope, available_scopes) for k, v in val.items()]
+                queries = [gen_query(cond, scope, available_scopes) for cond in val]
                 return '({})'.format(to_join.join(filter(lambda x: x != '', queries)))
-            if key == '$not':
-                queries = [gen_query({k: v}, scope, available_scopes) for k, v in val.items()]
-                return '~({})'.format(' and '.join(filter(lambda x: x != '', queries)))
             if key == '$nor':
-                queries = [gen_query({k: v}, scope, available_scopes) for k, v in val.items()]
-                return ' and '.join(['~({})'.format(filter(lambda x: x != '', queries))])
+                assert isinstance(val, list), f"{key} keyword should follow by a list of conditions"
+                queries = [gen_query(cond, scope, available_scopes) for cond in val]
+                return ' and '.join(
+                    ['~({})'.format(q) for q in filter(lambda x: x != '', queries)])
+            if key == '$not':
+                assert isinstance(val, Mapping), f"{key} keyword should follow by a dictionary"
+                queries = gen_query(val, scope, available_scopes)
+                return '~({})'.format(queries)
         else:
             if key in comparison_keywords.keys():
-                assert not isinstance(val, Mapping)
+                # subroutine for the last case below.
+                assert not isinstance(val, Mapping), \
+                    "expected single value or list, but got dictionary: {}".format(val)
                 assert scope != None
-                res.append("{} {} {}".format(scope,
-                                             comparison_keywords[key],
-                                             process_values(val)))
-            elif isinstance(val, str):
-                res.append("{} == {}".format(key, process_values(val)))
-            elif isinstance(val, Sequence):
-                res.append("{} in {}".format(key, process_values(val)))
+                is_time_value = scope in time_concepts
+                res.append(process_one_query(scope, comparison_keywords[key], val, is_time_value))
+            elif not isinstance(val, Mapping):
+                # handle cases like:
+                # key: value
+                # key:
+                # - val1
+                # - val2
+                is_time_value = key in time_concepts
+                if isinstance(val, list):
+                    res.append(process_one_query(key, 'in', val, is_time_value))
+                else:
+                    res.append(process_one_query(key, '==', val, is_time_value))
             else:
+                # handle cases like:
+                # key:
+                #   $in:
+                #     - val1
+                #     - val2
+                # this will call itself again to generate the query string for the second level
                 if available_scopes is None or key in available_scopes:
                     res.append(gen_query(val, scope=key, available_scopes=available_scopes))
+                else:
+                    raise ValueError('the query can not be understood: {}'.format(conds))
     return ' and '.join(res)
 
 
