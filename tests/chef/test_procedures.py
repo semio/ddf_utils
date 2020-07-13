@@ -62,7 +62,7 @@ def test_filter():
     assert set(dps.keys()) == {'imr_upper', 'imr_lower'}
     for dp in dps.values():
         # assert dp.year.dtype == np.int64
-        assert np.all(dp.year > 2000)
+        assert np.all(dp.year > "2000")
         assert set(dp.country.unique()) == {'usa', 'swe'}
 
     assert set(country.columns) == {'country', 'countryname'}
@@ -115,7 +115,6 @@ def test_translate_column():
     chef.run()
 
     res = chef.dag.get_node('bp-datapoints-aligned').evaluate().compute()
-    # assert res['biofuels_production_kboed'].dtypes['year'] == np.int64
 
 
 def test_translate_header():
@@ -195,7 +194,7 @@ def test_merge():
     # assert data['imr_median'].dtypes['year'] == np.int64
 
     imr_lower = data['imr_lower'].set_index(['geo', 'year'])
-    assert imr_lower.loc[('afg', 1961), 'imr_lower'] == 2055
+    assert imr_lower.loc[('afg', "1961"), 'imr_lower'] == 2055
 
 
 def test_merge_2():

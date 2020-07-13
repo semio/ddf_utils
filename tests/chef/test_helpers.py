@@ -6,10 +6,31 @@ from ddf_utils.chef.helpers import gen_query, sort_df
 
 
 def test_gen_query():
-    cond = {'$and': {'year': {'$gt': 1990, '$lt': 2000}}}
-    cond = {'$not': {'year': {'$ne': 1990, '$lt': 2000}}}
-    cond = {'$nor': {'year': {'$ne': 1990, '$lt': 2000}}}
-    gen_query(cond)
+    cond = {'year': {'$gt': 2000}}
+    assert gen_query(cond) == "`year` > '2000'"
+
+    cond = {'year': {'$gte': '2000'}}
+    assert gen_query(cond) == "`year` >= '2000'"
+
+    cond = {'indicator': {'$lt': 2000}}
+    assert gen_query(cond) == "`indicator` < 2000"
+
+    cond = {'$and': [ {'country': {'$in': ['georgia']}}, {'is--country': True}]}
+    assert gen_query(cond) == "(`country` in ['georgia'] and `is--country` == True)"
+
+    cond = {'$or': [ {'country': 'geo'}, {'$and': [ {'name': 'Georgia' }, {'is--country': True}]}]}
+    assert gen_query(cond) == "(`country` == 'geo' or (`name` == 'Georgia' and `is--country` == True))"
+
+    cond = {'year': {'$gt': 2000}, 'country': {'$eq': 'swe'}}
+    assert gen_query(cond) == "(`year` > '2000' and `country` == 'swe')"
+
+    cond = {'$not': {'$and':
+                     [{'year': {'$gt': 2000}}, {'year': {'$lt': 2010}}],
+                     'country': {'$eq': 'swe'}}}
+    assert gen_query(cond) == "~(((`year` > '2000' and `year` < '2010') and `country` == 'swe'))"
+
+    cond = {'$nor': [ {'country': 'geo'}, {'$and': [ {'name': 'Georgia' }, {'is--country': True}]}]}
+    assert gen_query(cond) == "~(`country` == 'geo') and ~((`name` == 'Georgia' and `is--country` == True))"
 
 
 def test_sort_df():
