@@ -1,3 +1,7 @@
+## version 1.0.9 2020-07-17
+
+- chef: use string for time concepts (#124)
+
 ## version 1.0.8 2020-04-02
 
 - imporve general retry/download functions
