@@ -2,7 +2,7 @@
 
 import numpy as np
 import pandas as pd
-from ddf_utils.chef.helpers import gen_query, sort_df
+from ddf_utils.chef.helpers import gen_query, sort_df, query
 
 
 def test_gen_query():
@@ -31,6 +31,22 @@ def test_gen_query():
 
     cond = {'$nor': [ {'country': 'geo'}, {'$and': [ {'name': 'Georgia' }, {'is--country': True}]}]}
     assert gen_query(cond) == "~(`country` == 'geo') and ~((`name` == 'Georgia' and `is--country` == True))"
+
+
+def test_query():
+    country = list(range(100))
+    year = list(range(1900, 2100))
+    idx = pd.MultiIndex.from_product([country, year], names=['country', 'year_num'])
+    values = np.random.rand(idx.shape[0])
+    df = pd.DataFrame(values, index=idx, columns=['value']).reset_index()
+
+    cond = {'$and': [{'year_num': {'$gt': 2000}}, {'year_num': {'$lt': 2020}}]}
+    df_1 = query(df, cond, df.columns)
+    assert np.all(df_1.year_num > 2000) and np.all(df_1.year_num < 2020)
+
+    cond = {'not_exist': {'$ne': 1}}
+    df_2 = query(df, cond, df.columns)
+    assert df.equals(df_2)
 
 
 def test_sort_df():

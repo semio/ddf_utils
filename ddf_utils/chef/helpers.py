@@ -373,6 +373,9 @@ def gen_query(conds, scope=None, available_scopes=None):
                 # this will call itself again to generate the query string for the second level
                 if available_scopes is None or key in available_scopes:
                     res.append(gen_query(val, scope=key, available_scopes=available_scopes))
+                elif key not in available_scopes:
+                    # the column to filter is not available, return empty query
+                    return ''
                 else:
                     raise ValueError('the query can not be understood: {}'.format(conds))
     return ' and '.join(res)
