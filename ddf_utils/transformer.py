@@ -428,7 +428,7 @@ def extract_concepts(dfs, base=None, join='full_outer'):
     return concepts.reset_index()
 
 
-def merge_keys(df, dictionary, target_column=None, merged='drop'):
+def merge_keys(df, dictionary, target_column, merged='drop'):
     """merge keys"""
     rename_dict = dict()
     for new_key, val in dictionary.items():
@@ -436,14 +436,20 @@ def merge_keys(df, dictionary, target_column=None, merged='drop'):
             rename_dict[old_key] = new_key
     # TODO: limit the rename inside target_column
     # after pandas 0.20.0 there will be a level option for df.rename
-    df_new = df.rename(index=rename_dict).groupby(level=list(range(len(df.index.levels)))).sum()
-    if merged == 'drop':
-        return df_new
-    elif merged == 'keep':
-        df_ = pd.concat([df, df_new])
-        return df_[~df_.index.duplicated()]  # remove all duplicated indies
-    else:
+    df_new = (df.rename(index=rename_dict, level=target_column)
+              .groupby(level=list(range(len(df.index.levels))))
+              .sum())
+
+    if df.index.get_level_values(target_column).dtype.name == 'category':
+        new_idx = df_new.index.get_level_values(target_column).astype('category')
+        df_new.index.set_levels(new_idx, level=target_column)
+
+    if merged == 'keep':
+        df_new = pd.concat([df, df_new])
+    elif merged != 'drop':
         raise ValueError('only "drop", "keep" is allowed')
+
+    return df_new
 
 
 def split_keys(df, target_column, dictionary, splited='drop'):
@@ -508,8 +514,12 @@ def split_keys(df, target_column, dictionary, splited='drop'):
     final = pd.concat(to_concat)
     if splited == 'drop':
         final = final[~final.index.get_level_values(target_column).isin(dictionary.keys())]
-        return final.sort_index()
-    elif splited == 'keep':
-        return final.sort_index()
-    else:
+    elif splited != 'keep':
         raise ValueError('only support drop == "drop" and "keep".')
+
+    if df.index.get_level_values(target_column).dtype.name == 'category':
+        final = final.reindex(
+            final.index.get_level_values(target_column).astype('category'),
+            level=target_column)
+
+    return final.sort_index()

@@ -74,13 +74,19 @@ def test_merge_keys():
     from ddf_utils.transformer import merge_keys
 
     df = pd.DataFrame([['c1', 1992, 1], ['c2', 1992, 2], ['c3', 1992, 3]], columns=['geo', 'time', 'val'])
+    df2 = df.copy()
+    df2['geo'] = df2['geo'].astype('category')
     di = {'nc': ['c1', 'c2', 'c3']}
 
-    res1 = merge_keys(df.set_index(['geo', 'time']), di)
-    assert res1.at[('nc', 1992), 'val'] == 6
+    res1_1 = merge_keys(df.set_index(['geo', 'time']), di, 'geo')
+    res1_2 = merge_keys(df2.set_index(['geo', 'time']), di, 'geo')
+    assert res1_1.at[('nc', 1992), 'val'] == 6
+    assert res1_2.at[('nc', 1992), 'val'] == 6
 
-    res2 = merge_keys(df.set_index(['geo', 'time']), di, merged='keep')
-    assert res2.at[('c1', 1992), 'val'] == 1
+    res2_1 = merge_keys(df.set_index(['geo', 'time']), di, 'geo', merged='keep')
+    res2_2 = merge_keys(df2.set_index(['geo', 'time']), di, 'geo', merged='keep')
+    assert res2_1.at[('c1', 1992), 'val'] == 1
+    assert res2_2.at[('c1', 1992), 'val'] == 1
 
 
 def test_split_keys():
@@ -88,10 +94,14 @@ def test_split_keys():
 
     df = pd.DataFrame([['n0', 1991, 6], ['c1', 1992, 1], ['c2', 1992, 2], ['c3', 1992, 3]],
                       columns=['geo', 'time', 'val'])
+    df2 = df.copy()
+    df2['geo'] = df2['geo'].astype('category')
     di = {'n0': ['c1', 'c2', 'c3']}
 
     res1 = split_keys(df.set_index(['geo', 'time']), 'geo', di)
+    res2 = split_keys(df2.set_index(['geo', 'time']), 'geo', di)
     assert res1.at[('c1', 1991), 'val'] == 1
+    assert res2.at[('c1', 1991), 'val'] == 1
 
 
 def test_extract_concepts():
