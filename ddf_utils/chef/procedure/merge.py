@@ -128,10 +128,7 @@ def _merge_two(left: Dict[str, Union[pd.DataFrame, dd.DataFrame]],
                 if k in left.keys():
                     columns = left[k].columns.values
                     # res_data[k] = left[k].append(df[columns], interleave_partitions=True)
-                    ldf = left[k].compute()
-                    rdf = df[columns].compute()
-                    # res_data[k] = dd.concat([left[k], df[columns]], axis=0, interleave_partitions=True)
-                    res_data[k] = pd.concat([ldf, rdf], axis=0)
+                    res_data[k] = dd.concat([left[k], df[columns]], axis=0, interleave_partitions=True)
                     res_data[k] = res_data[k].drop_duplicates(subset=index_col, keep='last')
                     # res_data[k] = res_data[k].sort_values(by=index_col)
                 else:
