@@ -440,14 +440,15 @@ def merge_keys(df, dictionary, target_column, merged='drop'):
               .groupby(level=list(range(len(df.index.levels))))
               .sum())
 
-    if df.index.get_level_values(target_column).dtype.name == 'category':
-        new_idx = df_new.index.get_level_values(target_column).astype('category')
-        df_new.index.set_levels(new_idx, level=target_column)
-
     if merged == 'keep':
-        df_new = pd.concat([df, df_new])
+        df_new = pd.concat([df_new, df])
     elif merged != 'drop':
         raise ValueError('only "drop", "keep" is allowed')
+
+    if df.index.get_level_values(target_column).dtype.name == 'category':
+        df_new = df_new.reset_index()
+        df_new[target_column] = df_new[target_column].astype('category')
+        df_new = df_new.set_index(df.index.names)
 
     return df_new
 
@@ -518,8 +519,8 @@ def split_keys(df, target_column, dictionary, splited='drop'):
         raise ValueError('only support drop == "drop" and "keep".')
 
     if df.index.get_level_values(target_column).dtype.name == 'category':
-        final = final.reindex(
-            final.index.get_level_values(target_column).astype('category'),
-            level=target_column)
+        final = final.reset_index()
+        final[target_column] = final[target_column].astype('category')
+        final = final.set_index(df.index.names)
 
     return final.sort_index()

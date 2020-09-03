@@ -82,11 +82,13 @@ def test_merge_keys():
     res1_2 = merge_keys(df2.set_index(['geo', 'time']), di, 'geo')
     assert res1_1.at[('nc', 1992), 'val'] == 6
     assert res1_2.at[('nc', 1992), 'val'] == 6
+    assert res1_2.index.get_level_values('geo').dtype.name == 'category'
 
     res2_1 = merge_keys(df.set_index(['geo', 'time']), di, 'geo', merged='keep')
     res2_2 = merge_keys(df2.set_index(['geo', 'time']), di, 'geo', merged='keep')
     assert res2_1.at[('c1', 1992), 'val'] == 1
     assert res2_2.at[('c1', 1992), 'val'] == 1
+    assert res2_2.index.get_level_values('geo').dtype.name == 'category'
 
 
 def test_split_keys():
@@ -102,6 +104,7 @@ def test_split_keys():
     res2 = split_keys(df2.set_index(['geo', 'time']), 'geo', di)
     assert res1.at[('c1', 1991), 'val'] == 1
     assert res2.at[('c1', 1991), 'val'] == 1
+    assert res2.index.get_level_values('geo').dtype.name == 'category'
 
 
 def test_extract_concepts():
