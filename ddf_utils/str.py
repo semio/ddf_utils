@@ -18,7 +18,7 @@ def to_concept_id(s, sep='_'):
         if k in s:
             s = s.replace(k, v)
 
-    pattern = re.compile('[\W_]+')  # match all Non-alphanumeric
+    pattern = re.compile(r'[\W_]+')  # match all Non-alphanumeric
     snew = unidecode(s.strip())
     snew = pattern.sub(sep, snew).lower()
 
