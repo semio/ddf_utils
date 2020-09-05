@@ -1,0 +1,230 @@
+{
+    "name": "ddf--datapackage--testing",
+    "language": {
+        "id": "en"
+    },
+    "resources": [
+        {
+            "path": "ddf--concepts.csv",
+            "name": "ddf--concepts",
+            "schema": {
+                "fields": [
+                    {
+                        "name": "concept"
+                    },
+                    {
+                        "name": "name"
+                    },
+                    {
+                        "name": "concept_type"
+                    },
+                    {
+                        "name": "domain"
+                    }
+                ],
+                "primaryKey": "concept"
+            }
+        },
+        {
+            "path": "ddf--datapoints--population--by--geo--gender--year.csv",
+            "name": "ddf--datapoints--population--by--geo--gender--year",
+            "schema": {
+                "fields": [
+                    {
+                        "name": "geo"
+                    },
+                    {
+                        "name": "gender"
+                    },
+                    {
+                        "name": "year"
+                    },
+                    {
+                        "name": "population"
+                    }
+                ],
+                "primaryKey": [
+                    "geo",
+                    "gender",
+                    "year"
+                ]
+            }
+        },
+        {
+            "path": "ddf--entities--gender.csv",
+            "name": "ddf--entities--gender",
+            "schema": {
+                "fields": [
+                    {
+                        "name": "gender"
+                    },
+                    {
+                        "name": "name"
+                    },
+                    {
+                        "name": "is--nonbinary"
+                    }
+                ],
+                "primaryKey": "gender"
+            }
+        },
+        {
+            "path": "ddf--entities--geo.csv",
+            "name": "ddf--entities--geo",
+            "schema": {
+                "fields": [
+                    {
+                        "name": "geo"
+                    },
+                    {
+                        "name": "name"
+                    },
+                    {
+                        "name": "is--city"
+                    }
+                ],
+                "primaryKey": "geo"
+            }
+        }
+    ],
+    "ddfSchema": {
+        "concepts": [
+            {
+                "primaryKey": [
+                    "concept"
+                ],
+                "value": "domain",
+                "resources": [
+                    "ddf--concepts"
+                ]
+            },
+            {
+                "primaryKey": [
+                    "concept"
+                ],
+                "value": "concept_type",
+                "resources": [
+                    "ddf--concepts"
+                ]
+            },
+            {
+                "primaryKey": [
+                    "concept"
+                ],
+                "value": "name",
+                "resources": [
+                    "ddf--concepts"
+                ]
+            }
+        ],
+        "entities": [
+            {
+                "primaryKey": [
+                    "gender"
+                ],
+                "value": "is--nonbinary",
+                "resources": [
+                    "ddf--entities--gender"
+                ]
+            },
+            {
+                "primaryKey": [
+                    "gender"
+                ],
+                "value": "name",
+                "resources": [
+                    "ddf--entities--gender"
+                ]
+            },
+            {
+                "primaryKey": [
+                    "nonbinary"
+                ],
+                "value": "is--nonbinary",
+                "resources": [
+                    "ddf--entities--gender"
+                ]
+            },
+            {
+                "primaryKey": [
+                    "nonbinary"
+                ],
+                "value": "name",
+                "resources": [
+                    "ddf--entities--gender"
+                ]
+            },
+            {
+                "primaryKey": [
+                    "geo"
+                ],
+                "value": "is--city",
+                "resources": [
+                    "ddf--entities--geo"
+                ]
+            },
+            {
+                "primaryKey": [
+                    "geo"
+                ],
+                "value": "name",
+                "resources": [
+                    "ddf--entities--geo"
+                ]
+            },
+            {
+                "primaryKey": [
+                    "city"
+                ],
+                "value": "is--city",
+                "resources": [
+                    "ddf--entities--geo"
+                ]
+            },
+            {
+                "primaryKey": [
+                    "city"
+                ],
+                "value": "name",
+                "resources": [
+                    "ddf--entities--geo"
+                ]
+            }
+        ],
+        "datapoints": [
+            {
+                "primaryKey": [
+                    "gender",
+                    "geo",
+                    "year"
+                ],
+                "value": "population",
+                "resources": [
+                    "ddf--datapoints--population--by--geo--gender--year"
+                ]
+            },
+            {
+                "primaryKey": [
+                    "geo",
+                    "nonbinary",
+                    "year"
+                ],
+                "value": "population",
+                "resources": [
+                    "ddf--datapoints--population--by--geo--gender--year"
+                ]
+            },
+            {
+                "primaryKey": [
+                    "city",
+                    "gender",
+                    "year"
+                ],
+                "value": "population",
+                "resources": [
+                    "ddf--datapoints--population--by--geo--gender--year"
+                ]
+            }
+        ]
+    }
+}

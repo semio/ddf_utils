@@ -1,0 +1,9 @@
+concept,name,concept_type,domain
+geo,Geo,entity_domain,
+city,City,entity_set,geo
+gender,Gender,entity_domain,
+nonbinary,nonbinary,entity_set,gender
+population,Population,measure,
+name,name,string,
+domain,domain,string,
+year,year,time,

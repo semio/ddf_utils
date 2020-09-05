@@ -182,6 +182,13 @@ def create_datapackage(path, gen_schema=True, progress_bar=False, **kwargs):
             headers = set(headers)
             fields = headers.difference(set(primary_keys))
 
+            # check if headers and file name matched
+            if len(headers) - len(fields) != len(primary_keys):
+                logger.critical(f'in file: {name_res}: ')
+                logger.critical(f'expected keys are {primary_keys}, but columns are {headers}')
+                logger.critical(f'which does not contain all primary keys')
+                raise ValueError("file name and file headers not matched")
+
             for field in fields:
                 schema['fields'].append({'name': field})
             schema['primaryKey'] = primary_keys

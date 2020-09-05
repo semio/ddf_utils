@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 
 import os
+import pytest
+
+from ddf_utils.model.package import DDFcsv
+from ddf_utils.package import get_datapackage
 
 
 def test_create_datapackage_1():
-    from ddf_utils.model.package import DDFcsv
-    from ddf_utils.package import get_datapackage
-
     dataset_path = os.path.join(os.path.dirname(__file__),
                                 'chef/datasets/ddf--gapminder--dummy_companies')
 
@@ -35,8 +36,6 @@ def test_create_datapackage_1():
 
 
 def test_create_datapackage_2():
-    from ddf_utils.model.package import DDFcsv
-
     dataset_path = os.path.join(os.path.dirname(__file__),
                                 'chef/datasets/ddf--datapackage--testing')
 
@@ -46,3 +45,12 @@ def test_create_datapackage_2():
     assert 'ddfSchema' in datapackage.keys()
 
     assert len(datapackage['ddfSchema']['datapoints']) == 3
+
+
+def test_create_datapackage_3():
+
+    dataset_path = os.path.join(os.path.dirname(__file__),
+                                'chef/datasets/ddf--datapackage--testing_fail')
+
+    with pytest.raises(ValueError):
+        get_datapackage(dataset_path, update=True, use_existing=False)
