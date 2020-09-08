@@ -428,20 +428,20 @@ def extract_concepts(dfs, base=None, join='full_outer'):
     return concepts.reset_index()
 
 
-def merge_keys(df, dictionary, target_column, merged='drop'):
+def merge_keys(df, dictionary, target_column, merged='drop', agg_method='sum'):
     """merge keys"""
     rename_dict = dict()
     for new_key, val in dictionary.items():
         for old_key in val:
             rename_dict[old_key] = new_key
-    # TODO: limit the rename inside target_column
-    # after pandas 0.20.0 there will be a level option for df.rename
+
     df_new = (df.rename(index=rename_dict, level=target_column)
               .groupby(level=list(range(len(df.index.levels))))
-              .sum())
+	      .agg(agg_method))
 
     if merged == 'keep':
-        df_new = pd.concat([df_new, df])
+	df_old_key_only = df[df.index.get_level_values(target_column).isin(list(rename_dict.keys()))]
+	df_new = pd.concat([df_new, df_old_key_only], verify_integrity=True, sort=True)
     elif merged != 'drop':
         raise ValueError('only "drop", "keep" is allowed')
 
@@ -458,34 +458,8 @@ def split_keys(df, target_column, dictionary, splited='drop'):
     keys = df.index.names
     df_ = df.reset_index()
 
-    ratio = dict()
-
-    for k, v in dictionary.items():
-        # dictionary format:
-        # {entity_to_split: [sub_entity_1, ...]}
-        # the split ratio will be calculated from first valid values of sub entities.
-        # so it assumes existence of sub entities
-        # TODO: maybe make it work even sub entities not exists.
-        before_spl = list()
-        for spl in v:
-            if spl not in df_[target_column].values:
-                raise ValueError('entity not in data: ' + spl)
-            tdf = df_[df_[target_column] == spl].set_index(keys).sort_index()
-            last = pd.DataFrame(tdf.loc[tdf.index[0], tdf.columns]).T
-            last.index.names = keys
-            logger.debug("using {} for first valid index".format(tdf.index[0]))
-            last = last.reset_index()
-            for key in keys:
-                if key != target_column:
-                    last = last.drop(key, axis=1)
-            before_spl.append(last.set_index(target_column))
-        before_spl = pd.concat(before_spl)
-        total = before_spl.sum()
-        ptc = before_spl / total
-        ratio[k] = ptc.to_dict()
-
-    logger.debug(ratio)
-    # the ratio format will be:
+    # create a dictionary containing split ratios.
+    # the ratio dictionary format will be:
     # ratio = {
     #     'entity_to_split': {
     #         'concept_1': {
@@ -500,7 +474,30 @@ def split_keys(df, target_column, dictionary, splited='drop'):
     #         }
     #     }
     # }
+    ratio = dict()
+    for k, v in dictionary.items():
+	# input dictionary format:
+        # {entity_to_split: [sub_entity_1, ...]}
+        # the split ratio will be calculated from first valid values of sub entities.
+        # so it assumes existence of sub entities
+        # TODO: maybe make it work even sub entities not exists.
+        before_spl = list()
+        for spl in v:
+            if spl not in df_[target_column].values:
+                raise ValueError('entity not in data: ' + spl)
+	    tdf = df_[df_[target_column] == spl].sort_values(by=keys)
+	    last = tdf.head(1)
+	    logger.debug("using {} for first valid index".format(last.set_index(keys).index[0]))
+            for key in keys:
+                if key != target_column:
+                    last = last.drop(key, axis=1)
+            before_spl.append(last.set_index(target_column))
+        before_spl = pd.concat(before_spl)
+        total = before_spl.sum()
+        ptc = before_spl / total
+        ratio[k] = ptc.to_dict()
 
+    logger.debug(ratio)
     to_concat = []
     for k, v in ratio.items():
         t = df_[df_[target_column] == k].copy()
