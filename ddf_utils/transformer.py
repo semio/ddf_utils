@@ -437,11 +437,11 @@ def merge_keys(df, dictionary, target_column, merged='drop', agg_method='sum'):
 
     df_new = (df.rename(index=rename_dict, level=target_column)
               .groupby(level=list(range(len(df.index.levels))))
-	      .agg(agg_method))
+              .agg(agg_method))
 
     if merged == 'keep':
-	df_old_key_only = df[df.index.get_level_values(target_column).isin(list(rename_dict.keys()))]
-	df_new = pd.concat([df_new, df_old_key_only], verify_integrity=True, sort=True)
+        df_old_key_only = df[df.index.get_level_values(target_column).isin(list(rename_dict.keys()))]
+        df_new = pd.concat([df_new, df_old_key_only], verify_integrity=True, sort=True)
     elif merged != 'drop':
         raise ValueError('only "drop", "keep" is allowed')
 
@@ -476,7 +476,7 @@ def split_keys(df, target_column, dictionary, splited='drop'):
     # }
     ratio = dict()
     for k, v in dictionary.items():
-	# input dictionary format:
+        # input dictionary format:
         # {entity_to_split: [sub_entity_1, ...]}
         # the split ratio will be calculated from first valid values of sub entities.
         # so it assumes existence of sub entities
@@ -485,9 +485,9 @@ def split_keys(df, target_column, dictionary, splited='drop'):
         for spl in v:
             if spl not in df_[target_column].values:
                 raise ValueError('entity not in data: ' + spl)
-	    tdf = df_[df_[target_column] == spl].sort_values(by=keys)
-	    last = tdf.head(1)
-	    logger.debug("using {} for first valid index".format(last.set_index(keys).index[0]))
+            tdf = df_[df_[target_column] == spl].sort_values(by=keys)
+            last = tdf.head(1)
+            logger.debug("using {} for first valid index".format(last.set_index(keys).index[0]))
             for key in keys:
                 if key != target_column:
                     last = last.drop(key, axis=1)
