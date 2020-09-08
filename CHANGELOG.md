@@ -1,3 +1,10 @@
+## version 1.0.10 2020-09-08
+
+- merge/split entities: handle categorical dtype columns (#128)
+- create_datapackage: check if headers match file name (#127)
+- query: handle queries contains columns not exists in the dataframe
+- minor changes
+
 ## version 1.0.9 2020-07-17
 
 - chef: use string for time concepts (#124)
