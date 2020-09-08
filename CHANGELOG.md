@@ -2,7 +2,7 @@
 
 - merge/split entities: handle categorical dtype columns (#128)
 - create_datapackage: check if headers match file name (#127)
-- query: handle queries contains columns not exists in the dataframe
+- query: handle query contains columns not exist in the dataframe
 - minor changes
 
 ## version 1.0.9 2020-07-17
