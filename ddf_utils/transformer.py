@@ -435,6 +435,8 @@ def merge_keys(df, dictionary, target_column, merged='drop', agg_method='sum'):
         for old_key in val:
             rename_dict[old_key] = new_key
 
+    # rename old names -> new names and do aggregation
+    # note that if new name already exists this will also include them
     df_new = (df.rename(index=rename_dict, level=target_column)
               .groupby(level=list(range(len(df.index.levels))))
               .agg(agg_method))
