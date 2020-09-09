@@ -487,7 +487,7 @@ def split_keys(df, target_column, dictionary, splited='drop'):
                 raise ValueError('entity not in data: ' + spl)
             tdf = df_[df_[target_column] == spl].sort_values(by=keys)
             last = tdf.head(1)
-            logger.debug("using {} for first valid index".format(last.set_index(keys).index[0]))
+            logger.debug("using {} for first valid index".format(last[keys].values[0]))
             for key in keys:
                 if key != target_column:
                     last = last.drop(key, axis=1)

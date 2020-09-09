@@ -84,7 +84,9 @@ def test_merge_keys():
     res1_2 = merge_keys(df2.set_index(['geo', 'time']), di, 'geo')
     assert not np.any(res1_1.index.duplicated())
     assert not np.any(res1_2.index.duplicated())
+    assert res1_1.shape[0] == 1
     assert res1_1.at[('nc', 1992), 'val'] == 6
+    assert res1_2.shape[0] == 1
     assert res1_2.at[('nc', 1992), 'val'] == 6
     assert res1_2.index.get_level_values('geo').dtype.name == 'category'
 
@@ -92,8 +94,12 @@ def test_merge_keys():
     res2_2 = merge_keys(df2.set_index(['geo', 'time']), di, 'geo', merged='keep')
     assert not np.any(res2_1.index.duplicated())
     assert not np.any(res2_2.index.duplicated())
+    assert res2_1.shape[0] == 4
     assert res2_1.at[('c1', 1992), 'val'] == 1
+    assert res2_1.at[('nc', 1992), 'val'] == 6
+    assert res2_2.shape[0] == 4
     assert res2_2.at[('c1', 1992), 'val'] == 1
+    assert res2_2.at[('nc', 1992), 'val'] == 6
     assert res2_2.index.get_level_values('geo').dtype.name == 'category'
 
 
@@ -106,11 +112,33 @@ def test_split_keys():
     df2['geo'] = df2['geo'].astype('category')
     di = {'n0': ['c1', 'c2', 'c3']}
 
-    res1 = split_keys(df.set_index(['geo', 'time']), 'geo', di)
-    res2 = split_keys(df2.set_index(['geo', 'time']), 'geo', di)
-    assert res1.at[('c1', 1991), 'val'] == 1
-    assert res2.at[('c1', 1991), 'val'] == 1
-    assert res2.index.get_level_values('geo').dtype.name == 'category'
+    res1_1 = split_keys(df.set_index(['geo', 'time']), 'geo', di)
+    res1_2 = split_keys(df2.set_index(['geo', 'time']), 'geo', di)
+    assert res1_1.at[('c1', 1991), 'val'] == 1
+    assert res1_1.at[('c2', 1991), 'val'] == 2
+    assert res1_1.at[('c3', 1991), 'val'] == 3
+    assert res1_1.at[('c3', 1992), 'val'] == 3
+    assert res1_2.at[('c1', 1991), 'val'] == 1
+    assert res1_2.at[('c2', 1991), 'val'] == 2
+    assert res1_2.at[('c3', 1991), 'val'] == 3
+    assert res1_2.at[('c3', 1992), 'val'] == 3
+    assert 'n0' not in res1_1.index.get_level_values('geo')
+    assert 'n0' not in res1_2.index.get_level_values('geo')
+    assert res1_2.index.get_level_values('geo').dtype.name == 'category'
+
+    res2_1 = split_keys(df.set_index(['geo', 'time']), 'geo', di, splited='keep')
+    res2_2 = split_keys(df2.set_index(['geo', 'time']), 'geo', di, splited='keep')
+    assert res2_1.at[('c1', 1991), 'val'] == 1
+    assert res2_1.at[('c2', 1991), 'val'] == 2
+    assert res2_1.at[('c3', 1991), 'val'] == 3
+    assert res2_1.at[('c3', 1992), 'val'] == 3
+    assert res2_2.at[('c1', 1991), 'val'] == 1
+    assert res2_2.at[('c2', 1991), 'val'] == 2
+    assert res2_2.at[('c3', 1991), 'val'] == 3
+    assert res2_2.at[('c3', 1992), 'val'] == 3
+    assert res2_2.at[('n0', 1991), 'val'] == 6
+    assert res2_2.at[('n0', 1991), 'val'] == 6
+    assert res2_2.index.get_level_values('geo').dtype.name == 'category'
 
 
 def test_extract_concepts():
