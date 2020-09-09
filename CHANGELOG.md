@@ -1,6 +1,8 @@
 ## version 1.0.11 2020-09-09
 
-- merge: fix datapoints deep merge logic
+- merge procedure: fix datapoints deep merge logic
+- merge_keys: option to choose aggregation method and fix a bug
+  when merged='keep'
 - more test cases
 
 ## version 1.0.10 2020-09-08
