@@ -208,6 +208,18 @@ def test_merge_2():
     assert data.loc['col1', 'col2'] == 'bar'
     assert data.loc['col2', 'col1'] is np.nan
 
+def test_merge_3():
+    chef = chef_fn('test_merge_3.yaml')
+    res = chef.run()
+
+    data = res[0].compute()
+    data = data['indicator'].set_index(['country', 'year'])
+    assert data.loc[('chn', 2000), 'indicator'] == 1
+    assert data.loc[('chn', 2001), 'indicator'] == 2
+    assert data.loc[('chn', 2002), 'indicator'] == 3
+    assert data.loc[('chn', 2003), 'indicator'] == 3
+    assert data.loc[('chn', 2004), 'indicator'] == 3
+
 
 def test_merge_fail():
     chef = chef_fn('test_merge_fail.yaml')
