@@ -1,0 +1,60 @@
+info:
+    id: test-merge-3
+
+ingredients:
+    - id: datapoints-1
+      key: country, year
+      data:
+          -
+              country: chn
+              year: 2000
+              indicator: 1
+          -
+              country: chn
+              year: 2001
+              indicator: 1
+          -
+              country: chn
+              year: 2002
+              indicator: 1
+    - id: datapoints-2
+      key: country, year
+      data:
+          -
+              country: chn
+              year: 2001
+              indicator: 2
+          -
+              country: chn
+              year: 2002
+              indicator: 2
+          -
+              country: chn
+              year: 2003
+              indicator: 2
+    - id: datapoints-3
+      key: country, year
+      data:
+          -
+              country: chn
+              year: 2002
+              indicator: 3
+          -
+              country: chn
+              year: 2003
+              indicator: 3
+          -
+              country: chn
+              year: 2004
+              indicator: 3
+
+cooking:
+    datapoints:
+        - procedure: merge
+          ingredients:
+              - datapoints-1
+              - datapoints-2
+              - datapoints-3
+          options:
+              deep: true
+          result: result
