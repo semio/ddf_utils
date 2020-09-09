@@ -1,3 +1,8 @@
+## version 1.0.11 2020-09-09
+
+- merge: fix datapoints deep merge logic
+- more test cases
+
 ## version 1.0.10 2020-09-08
 
 - merge/split entities: handle categorical dtype columns (#128)
