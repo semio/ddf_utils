@@ -317,5 +317,14 @@ def etl_type(script_dir):
     return
 
 
+# download a dataset
+@ddf.command(name='get')
+@click.option('-u', 'url', help="url to download")
+@click.option('-o', 'out_path', type=click.Path(), default='./',
+              help="output path, default to current dir")
+def get(url, out_path, local_vcs_dir):
+    pass
+
+
 if __name__ == '__main__':
     ddf()
