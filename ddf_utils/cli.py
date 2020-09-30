@@ -319,11 +319,12 @@ def etl_type(script_dir):
 
 # download a dataset
 @ddf.command(name='get')
-@click.option('-u', 'url', help="url to download")
-@click.option('-o', 'out_path', type=click.Path(), default='./',
-              help="output path, default to current dir")
-def get(url, out_path, local_vcs_dir):
-    pass
+@click.argument('package')
+def get(package):
+    from ddf_utils.vcs.base import VersionControl
+    dataset_path = os.getenv("DATASET_DIR", os.path.expanduser("~/datasets"))
+    vcs = VersionControl.from_uri(package)
+    vcs.checkout(dataset_path)
 
 
 if __name__ == '__main__':
