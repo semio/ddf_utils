@@ -323,8 +323,8 @@ def etl_type(script_dir):
 def get(package):
     from ddf_utils.vcs.base import VersionControl
     dataset_path = os.getenv("DATASET_DIR", os.path.expanduser("~/datasets"))
-    vcs = VersionControl.from_uri(package)
-    vcs.checkout(dataset_path)
+    vcs = VersionControl.from_uri(package, dataset_path)
+    vcs.backend.clone()
 
 
 if __name__ == '__main__':

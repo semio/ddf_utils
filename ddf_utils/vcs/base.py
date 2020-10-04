@@ -40,14 +40,36 @@ def local_path_from_url(url, dataset_dir):
 
 
 @attr.s(auto_attribs=True)
+class VCSBackend(object):
+    name: str
+    executable: str
+
+    def clone(self, url, path):
+        raise NotImplementedError
+
+    def checkout(self, rev, path):
+        raise NotImplementedError
+
+    def export(self, rev, path, target_dir):
+        raise NotImplementedError
+
+
+@attr.s(auto_attribs=True)
 class VersionControl(object):
     protocol: str
     url: str
     revision: str
+    dataset_dir: str
+    backend: VCSBackend
+    _local_path: str = attr.ib(init=False)
 
     @classmethod
-    def from_uri(uri):
+    def from_uri(cls, uri, dataset_dir):
         pass
 
-    def checkout(dataset_dir):
+    @property
+    def local_path(self):
+        pass
+
+    def local_path_exists(self):
         pass
