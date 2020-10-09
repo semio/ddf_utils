@@ -34,9 +34,24 @@ def is_url(name):
     return scheme in ['http', 'https', 'file', 'ftp'] + ALL_SCHEMES
 
 
+def get_rev(name):
+    if is_url(name):
+        rev = name.split('@')[-1]
+        if not rev:
+            return 'master'
+        return rev
+
+
 def local_path_from_url(url, dataset_dir):
     """return a local path corresponding to the url"""
     pass
+
+
+def local_path_from_requirement(name, dataset_dir):
+    """return a local path corresponding to a requirement string"""
+    if '@' in name:
+        return os.path.join(dataset_dir, 'repos', name)
+    return os.path.join(dataset_dir, 'repos', name + '@master')
 
 
 @attr.s(auto_attribs=True)
