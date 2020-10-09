@@ -9,7 +9,6 @@ import subprocess
 
 import attr
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -31,7 +30,7 @@ def is_url(name):
     scheme = get_url_scheme(name)
     if scheme is None:
         return False
-    return scheme in ['http', 'https', 'file', 'ftp'] + ALL_SCHEMES
+    return any(x in scheme for x in ['http', 'https', 'file', 'ftp'] + ALL_SCHEMES)
 
 
 def get_rev(name):
@@ -44,7 +43,11 @@ def get_rev(name):
 
 def local_path_from_url(url, dataset_dir):
     """return a local path corresponding to the url"""
-    pass
+    if is_url(url):
+        rel_path = url.split(':', 1)[1].lower().split('@')[0][2:]
+        return os.path.join(dataset_dir, rel_path)
+    else:
+        raise ValueError(f"not an url: {url}")
 
 
 def local_path_from_requirement(name, dataset_dir):
@@ -75,16 +78,35 @@ class VersionControl(object):
     url: str
     revision: str
     dataset_dir: str
-    backend: VCSBackend
-    _local_path: str = attr.ib(init=False)
+    # backend: VCSBackend
+    _backend: VCSBackend = attr.ib(init=False, default=None)
+    _local_path: str = attr.ib(init=False, default=None)
 
     @classmethod
     def from_uri(cls, uri, dataset_dir):
-        pass
+        assert is_url(uri), f"not an url: {uri}"
+        for s in ALL_SCHEMES:
+            if s in uri:
+                protocol = s
+                break
+        else:
+            scheme = get_url_scheme(uri)
+            raise ValueError(f"scheme not supported: {scheme}")
+        revision = get_rev(uri)
+        return cls(protocol, uri, revision, dataset_dir)
+
+    @property
+    def backend(self):
+        return self._backend
+
+    def set_backend(self, backend):
+        self._backend = backend
 
     @property
     def local_path(self):
-        pass
+        if not self._local_path:
+            self._local_path = local_path_from_url(self.url, self.dataset_dir)
+        return self._local_path
 
     def local_path_exists(self):
-        pass
+        return os.path.exists(self.local_path)
