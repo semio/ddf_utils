@@ -57,7 +57,94 @@ def local_path_from_requirement(name, dataset_dir):
     return os.path.join(dataset_dir, 'repos', name + '@master')
 
 
-@attr.s(auto_attribs=True)
+def call_subprocess(
+        cmd,  # type: Union[List[str], CommandArgs]
+        cwd=None,  # type: Optional[str]
+        extra_environ=None,  # type: Optional[Mapping[str, Any]]
+        extra_ok_returncodes=None,  # type: Optional[Iterable[int]]
+        log_failed_cmd=True  # type: Optional[bool]
+):
+    # type: (...) -> Text
+    """
+    Args:
+      extra_ok_returncodes: an iterable of integer return codes that are
+        acceptable, in addition to 0. Defaults to None, which means [].
+      log_failed_cmd: if false, failed commands are not logged,
+        only raised.
+    """
+    if extra_ok_returncodes is None:
+        extra_ok_returncodes = []
+
+    # log the subprocess output at DEBUG level.
+    # log_subprocess = subprocess_logger.debug
+
+    env = os.environ.copy()
+    if extra_environ:
+        env.update(extra_environ)
+
+    # Whether the subprocess will be visible in the console.
+    # showing_subprocess = True
+
+    # command_desc = format_command_args(cmd)
+    try:
+        proc = subprocess.Popen(
+            # Convert HiddenText objects to the underlying str.
+            # reveal_command_args(cmd),
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            cwd=cwd
+        )
+        if proc.stdin:
+            proc.stdin.close()
+    except Exception as exc:
+        # if log_failed_cmd:
+        #     subprocess_logger.critical(
+        #         "Error %s while executing command %s", exc, command_desc,
+        #     )
+        raise
+    all_output = []
+    while True:
+        # The "line" value is a unicode string in Python 2.
+        line = None
+        if proc.stdout:
+            line = proc.stdout.readline().decode('utf-8')
+        if not line:
+            break
+        line = line.rstrip()
+        all_output.append(line + '\n')
+
+        # Show the line immediately.
+        print(line)
+    try:
+        proc.wait()
+    finally:
+        if proc.stdout:
+            proc.stdout.close()
+
+    proc_had_error = (
+        proc.returncode and proc.returncode not in extra_ok_returncodes
+    )
+    if proc_had_error:
+        # if not showing_subprocess and log_failed_cmd:
+        #     # Then the subprocess streams haven't been logged to the
+        #     # console yet.
+        #     msg = make_subprocess_output_error(
+        #         cmd_args=cmd,
+        #         cwd=cwd,
+        #         lines=all_output,
+        #         exit_status=proc.returncode,
+        #     )
+        #     subprocess_logger.error(msg)
+        # exc_msg = (
+        #     'Command errored out with exit status {}: {} '
+        #     'Check the logs for full command output.'
+        # ).format(proc.returncode, command_desc)
+        # raise SubProcessError(exc_msg)
+        raise ValueError(f'command {cmd} failed with exit code: {proc.returncode}')
+    return ''.join(all_output)
+
+
 class VCSBackend(object):
     name: str
     executable: str
@@ -69,6 +156,9 @@ class VCSBackend(object):
         raise NotImplementedError
 
     def export(self, rev, path, target_dir):
+        raise NotImplementedError
+
+    def run_command(cmd):
         raise NotImplementedError
 
 
@@ -97,9 +187,13 @@ class VersionControl(object):
 
     @property
     def backend(self):
-        return self._backend
+        if self._backend:
+            return self._backend
+        else:
+            raise ValueError("please set a backend first.")
 
     def set_backend(self, backend):
+        # TODO: add a backend list (registry)
         self._backend = backend
 
     @property
@@ -110,3 +204,10 @@ class VersionControl(object):
 
     def local_path_exists(self):
         return os.path.exists(self.local_path)
+
+    def clone(self, custom_path=None):
+        if not custom_path:
+            self.backend.clone(self.url, self.local_path)
+        else:
+            relpath = os.path.relpath(self.dataset_dir, self.local_path)
+            self.backend.clone(self.url, os.path.join(custom_path,  relpath))
