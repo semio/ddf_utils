@@ -322,9 +322,12 @@ def etl_type(script_dir):
 @click.argument('package')
 def get(package):
     from ddf_utils.vcs.base import VersionControl
+    from ddf_utils.vcs.git import GitBackend
     dataset_path = os.getenv("DATASET_DIR", os.path.expanduser("~/datasets"))
     vcs = VersionControl.from_uri(package, dataset_path)
-    vcs.backend.clone()
+    # FIXME: auto detect backend
+    vcs.set_backend(GitBackend())
+    vcs.clone()
 
 
 if __name__ == '__main__':

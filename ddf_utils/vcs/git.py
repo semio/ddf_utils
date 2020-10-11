@@ -14,7 +14,7 @@ class GitBackend(VCSBackend):
     executable = 'git'
 
     def clone(self, url, path):
-        cmd = ['clone', url, path]
+        cmd = ['clone', '--progress', url, path]
         os.makedirs(path, exist_ok=False)
         self.run_command(cmd)
 

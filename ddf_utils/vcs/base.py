@@ -41,11 +41,20 @@ def get_rev(name):
         return rev
 
 
+def extract_url_rev(name):
+    if is_url(name):
+        url_and_rev = name.split('+', 1)[1]
+        result = url_and_rev.split('@', 1)
+        if len(result) == 1:
+            return (result[0], 'master')
+        return (result[0], result[1])
+
+
 def local_path_from_url(url, dataset_dir):
     """return a local path corresponding to the url"""
     if is_url(url):
         rel_path = url.split(':', 1)[1].lower().split('@')[0][2:]
-        return os.path.join(dataset_dir, rel_path)
+        return os.path.join(dataset_dir, 'repos', rel_path)
     else:
         raise ValueError(f"not an url: {url}")
 
@@ -92,8 +101,9 @@ def call_subprocess(
             # reveal_command_args(cmd),
             cmd,
             stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            cwd=cwd
+            stderr=subprocess.STDOUT,
+            cwd=cwd,
+            text=True
         )
         if proc.stdin:
             proc.stdin.close()
@@ -108,7 +118,7 @@ def call_subprocess(
         # The "line" value is a unicode string in Python 2.
         line = None
         if proc.stdout:
-            line = proc.stdout.readline().decode('utf-8')
+            line = proc.stdout.readline()
         if not line:
             break
         line = line.rstrip()
@@ -182,8 +192,8 @@ class VersionControl(object):
         else:
             scheme = get_url_scheme(uri)
             raise ValueError(f"scheme not supported: {scheme}")
-        revision = get_rev(uri)
-        return cls(protocol, uri, revision, dataset_dir)
+        url, rev = extract_url_rev(uri)
+        return cls(protocol, url, rev, dataset_dir)
 
     @property
     def backend(self):
@@ -210,4 +220,4 @@ class VersionControl(object):
             self.backend.clone(self.url, self.local_path)
         else:
             relpath = os.path.relpath(self.dataset_dir, self.local_path)
-            self.backend.clone(self.url, os.path.join(custom_path,  relpath))
+            self.backend.clone(self.url, os.path.join(custom_path, relpath))
