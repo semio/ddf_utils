@@ -22,7 +22,12 @@ class GitBackend(VCSBackend):
         pass
 
     def export(self, path, rev, target_dir):
-        pass
+        if not target_dir.endswith('/'):
+            target_dir = target_dir + '/'
+
+        self.run_command(
+            ['checkout-index', '-a', '-f', '--prefix', target_dir]
+        )
 
     def run_command(self, cmd, **kwargs):
         if isinstance(cmd, str):
