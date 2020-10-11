@@ -50,13 +50,18 @@ def extract_url_rev(name):
         return (result[0], result[1])
 
 
-def local_path_from_url(url, dataset_dir):
-    """return a local path corresponding to the url"""
+def local_rel_path_from_url(url):
     if is_url(url):
         rel_path = url.split(':', 1)[1].lower().split('@')[0][2:]
-        return os.path.join(dataset_dir, 'repos', rel_path)
+        return rel_path
     else:
         raise ValueError(f"not an url: {url}")
+
+
+def local_path_from_url(url, dataset_dir):
+    """return a local path corresponding to the url"""
+    rel_path = local_rel_path_from_url(url)
+    return os.path.join(dataset_dir, 'repos', rel_path)
 
 
 def local_path_from_requirement(name, dataset_dir):
@@ -221,3 +226,8 @@ class VersionControl(object):
         else:
             relpath = os.path.relpath(self.dataset_dir, self.local_path)
             self.backend.clone(self.url, os.path.join(custom_path, relpath))
+
+    def install(self):
+        pkg_rel_path = local_rel_path_from_url(self.url) + '@' + self.revision
+        pkg_path = os.path.join(self.dataset_dir, 'pkgs', pkg_rel_path)
+        self.backend.export(self.local_path, self.revision, pkg_path)

@@ -330,5 +330,23 @@ def get(package):
     vcs.clone()
 
 
+# install a dataset
+@ddf.command(name='install')
+@click.argument('package')
+# TODO: add local-vcs-proxy support
+# @click.option('--local-vcs-proxy', default=False, flag_value=True)
+def install(package):
+    from ddf_utils.vcs.base import VersionControl
+    from ddf_utils.vcs.git import GitBackend
+    dataset_path = os.getenv("DATASET_DIR", os.path.expanduser("~/datasets"))
+    vcs = VersionControl.from_uri(package, dataset_path)
+    if vcs.local_path_exists():
+        print('target folder exists, not cloning')
+    else:
+        vcs.set_backend(GitBackend())
+        vcs.clone()
+    vcs.install()
+
+
 if __name__ == '__main__':
     ddf()

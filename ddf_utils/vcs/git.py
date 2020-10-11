@@ -18,10 +18,10 @@ class GitBackend(VCSBackend):
         os.makedirs(path, exist_ok=False)
         self.run_command(cmd)
 
-    def checkout(self, rev, path):
+    def checkout(self, path, rev):
         pass
 
-    def export(self, rev, path, target_dir):
+    def export(self, path, rev, target_dir):
         pass
 
     def run_command(self, cmd, **kwargs):
