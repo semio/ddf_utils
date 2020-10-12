@@ -340,6 +340,7 @@ def install(package):
     from ddf_utils.vcs.git import GitBackend
     dataset_path = os.getenv("DATASET_DIR", os.path.expanduser("~/datasets"))
     vcs = VersionControl.from_uri(package, dataset_path)
+    vcs.set_backend(GitBackend())
     if vcs.local_path_exists():
         print('target folder exists, not cloning')
     else:

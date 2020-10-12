@@ -3,6 +3,7 @@ git functions
 """
 
 import os
+import shutil
 import attr
 from ddf_utils.vcs.base import (
     VCSBackend, local_path_from_url, get_url_scheme, call_subprocess
@@ -26,8 +27,10 @@ class GitBackend(VCSBackend):
             target_dir = target_dir + '/'
 
         self.run_command(
-            ['checkout-index', '-a', '-f', '--prefix', target_dir]
+            ['clone', '--shared', '--branch', rev, '.', target_dir],
+            cwd=path
         )
+        shutil.rmtree(os.path.join(target_dir, '.git'))
 
     def run_command(self, cmd, **kwargs):
         if isinstance(cmd, str):
