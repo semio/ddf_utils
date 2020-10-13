@@ -27,10 +27,14 @@ class GitBackend(VCSBackend):
             target_dir = target_dir + '/'
 
         self.run_command(
-            ['clone', '--shared', '--branch', rev, '.', target_dir],
+            ['worktree', 'add', '-f', target_dir, rev],
             cwd=path
         )
-        shutil.rmtree(os.path.join(target_dir, '.git'))
+        os.remove(os.path.join(target_dir, '.git'))
+        self.run_command(
+            ['worktree', 'prune'],
+            cwd=path
+        )
 
     def run_command(self, cmd, **kwargs):
         if isinstance(cmd, str):
