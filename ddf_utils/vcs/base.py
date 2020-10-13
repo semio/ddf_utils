@@ -200,6 +200,34 @@ class VersionControl(object):
         url, rev = extract_url_rev(uri)
         return cls(protocol, url, rev, dataset_dir)
 
+    @classmethod
+    def from_requirement(cls, package, dataset_dir):
+        if '@' in package:
+            package, rev = package.split('@', 1)
+        else:
+            rev = 'master'
+        if not os.path.isabs(package):
+            if package == '.':
+                full_path = os.path.abspath(package)
+            else:
+                if os.path.exists(os.path.abspath(package)):
+                    full_path = os.path.abspath(package)
+                elif os.path.exists(os.path.join(dataset_dir, package)):
+                    full_path = os.path.join(dataset_dir, package)
+                else:
+                    raise OSError(f"Couldn't find package {package} in "
+                                  "current working dir and $DATASET_DIR!")
+        else:
+            full_path = package
+            if not os.path.exists(full_path):
+                raise OSError(f"Couldn't find package {package}!")
+
+        protocol = 'local'
+        url = 'file://' + full_path
+        result = cls(protocol,  url, rev, dataset_dir)
+        result._local_path = full_path
+        return result
+
     @property
     def backend(self):
         if self._backend:
@@ -228,6 +256,7 @@ class VersionControl(object):
             self.backend.clone(self.url, os.path.join(custom_path, relpath))
 
     def install(self):
+        # FIXME: path for install from local repo not correct.
         pkg_rel_path = local_rel_path_from_url(self.url) + '@' + self.revision
         pkg_path = os.path.join(self.dataset_dir, 'pkgs', pkg_rel_path)
         self.backend.export(self.local_path, self.revision, pkg_path)

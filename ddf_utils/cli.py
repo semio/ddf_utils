@@ -321,13 +321,9 @@ def etl_type(script_dir):
 @ddf.command(name='get')
 @click.argument('package')
 def get(package):
-    from ddf_utils.vcs.base import VersionControl
-    from ddf_utils.vcs.git import GitBackend
+    from ddf_utils.vcs.commands import get as _get
     dataset_path = os.getenv("DATASET_DIR", os.path.expanduser("~/datasets"))
-    vcs = VersionControl.from_uri(package, dataset_path)
-    # FIXME: auto detect backend
-    vcs.set_backend(GitBackend())
-    vcs.clone()
+    _get(package, dataset_path)
 
 
 # install a dataset
@@ -336,17 +332,9 @@ def get(package):
 # TODO: add local-vcs-proxy support
 # @click.option('--local-vcs-proxy', default=False, flag_value=True)
 def install(package):
-    from ddf_utils.vcs.base import VersionControl
-    from ddf_utils.vcs.git import GitBackend
+    from ddf_utils.vcs.commands import install as _install
     dataset_path = os.getenv("DATASET_DIR", os.path.expanduser("~/datasets"))
-    vcs = VersionControl.from_uri(package, dataset_path)
-    vcs.set_backend(GitBackend())
-    if vcs.local_path_exists():
-        print('target folder exists, not cloning')
-    else:
-        vcs.set_backend(GitBackend())
-        vcs.clone()
-    vcs.install()
+    _install(package, dataset_path)
 
 
 if __name__ == '__main__':
