@@ -14,6 +14,11 @@ class GitBackend(VCSBackend):
     name = 'git'
     executable = 'git'
 
+    @property
+    def remote_url(self):
+        cmd = ['config', '--get', 'remote.origin.url']
+        return self.run_command(cmd)
+
     def clone(self, url, path):
         cmd = ['clone', '--progress', url, path]
         os.makedirs(path, exist_ok=False)
@@ -41,4 +46,4 @@ class GitBackend(VCSBackend):
             sub_cmd = [cmd]
         else:
             sub_cmd = cmd
-        call_subprocess([self.executable] + sub_cmd, **kwargs)
+        return call_subprocess([self.executable] + sub_cmd, **kwargs)

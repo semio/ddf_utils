@@ -42,6 +42,7 @@ def get_rev(name):
 
 
 def extract_url_rev(name):
+    # TODO: if revision is a hash, change it to full length / a fixed length
     if is_url(name):
         url_and_rev = name.split('+', 1)[1]
         result = url_and_rev.split('@', 1)
@@ -157,7 +158,7 @@ def call_subprocess(
         # ).format(proc.returncode, command_desc)
         # raise SubProcessError(exc_msg)
         raise ValueError(f'command {cmd} failed with exit code: {proc.returncode}')
-    return ''.join(all_output)
+    return ''.join(all_output).strip()
 
 
 class VCSBackend(object):
@@ -186,6 +187,7 @@ class VersionControl(object):
     # backend: VCSBackend
     _backend: VCSBackend = attr.ib(init=False, default=None)
     _local_path: str = attr.ib(init=False, default=None)
+    _package_name: str = attr.ib(init=False, default=None)
 
     @classmethod
     def from_uri(cls, uri, dataset_dir):
@@ -245,6 +247,17 @@ class VersionControl(object):
             self._local_path = local_path_from_url(self.url, self.dataset_dir)
         return self._local_path
 
+    @property
+    def package_name(self):
+        if not self._package_name:
+            if self.protocol == 'local':
+                remote_url = self.backend.remote_url
+                # TODO: if remote url haven't been configured?
+                self._package_name = local_rel_path_from_url(remote_url)
+            else:
+                self._package_name = local_rel_path_from_url(self.url)
+        return self._package_name
+
     def local_path_exists(self):
         return os.path.exists(self.local_path)
 
@@ -256,7 +269,6 @@ class VersionControl(object):
             self.backend.clone(self.url, os.path.join(custom_path, relpath))
 
     def install(self):
-        # FIXME: path for install from local repo not correct.
-        pkg_rel_path = local_rel_path_from_url(self.url) + '@' + self.revision
+        pkg_rel_path = self.package_name + '@' + self.revision
         pkg_path = os.path.join(self.dataset_dir, 'pkgs', pkg_rel_path)
         self.backend.export(self.local_path, self.revision, pkg_path)
