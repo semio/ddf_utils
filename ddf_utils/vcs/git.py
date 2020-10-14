@@ -6,13 +6,43 @@ import os
 import shutil
 import attr
 from ddf_utils.vcs.base import (
-    VCSBackend, local_path_from_url, get_url_scheme, call_subprocess
+    VCSBackend, local_path_from_url, get_url_scheme, call_subprocess,
+    vcs
 )
 
 
 class GitBackend(VCSBackend):
     name = 'git'
+    dirname = '.git'
     executable = 'git'
+    schemes = (
+        'git', 'git+http', 'git+https', 'git+ssh', 'git+git', 'git+file',
+    )
+    # Prevent the user's environment variables from interfering with pip:
+    # see github.com/pypa/pip issues#1130
+    unset_environ = ('GIT_DIR', 'GIT_WORK_TREE')
+    default_arg_rev = 'HEAD'
+
+    @classmethod
+    def get_repository_root(cls, location):
+        loc = super(GitBackend, cls).get_repository_root(location)
+        if loc:
+            return loc
+        try:
+            r = cls.run_command(
+                ['rev-parse', '--show-toplevel'],
+                cwd=location,
+                log_failed_cmd=False,
+            )
+        except Exception:
+            return None
+        # except BadCommand:
+        #     logger.debug("could not determine if %s is under git control "
+        #                  "because git is not available", location)
+        #     return None
+        # except SubProcessError:
+        #     return None
+        return os.path.normpath(r.rstrip('\r\n'))
 
     @property
     def remote_url(self):
@@ -47,3 +77,6 @@ class GitBackend(VCSBackend):
         else:
             sub_cmd = cmd
         return call_subprocess([self.executable] + sub_cmd, **kwargs)
+
+
+vcs.register(GitBackend)

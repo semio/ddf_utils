@@ -6,6 +6,7 @@ import logging
 import os
 import shutil
 import subprocess
+import urllib
 
 import attr
 
@@ -70,6 +71,34 @@ def local_path_from_requirement(name, dataset_dir):
     if '@' in name:
         return os.path.join(dataset_dir, 'repos', name)
     return os.path.join(dataset_dir, 'repos', name + '@master')
+
+
+def find_path_to_dp_from_repo_root(location, repo_root):
+    # type: (str, str) -> Optional[str]
+    """
+    Find the path to `datapackage.json` by searching up the filesystem from `location`.
+    Return the path to `datapackage.json` relative to `repo_root`.
+    Return None if `datapackage.json` is in `repo_root` or cannot be found.
+    """
+    # find setup.py
+    orig_location = location
+    while not os.path.exists(os.path.join(location, 'datapackage.json')):
+        last_location = location
+        location = os.path.dirname(location)
+        if location == last_location:
+            # We've traversed up to the root of the filesystem without
+            # finding setup.py
+            logger.warning(
+                "Could not find datapackage.json for directory %s (tried all "
+                "parent directories)",
+                orig_location,
+            )
+            return None
+
+    if os.path.samefile(repo_root, location):
+        return None
+
+    return os.path.relpath(location, repo_root)
 
 
 def call_subprocess(
@@ -177,6 +206,121 @@ class VCSBackend(object):
     def run_command(cmd):
         raise NotImplementedError
 
+    @classmethod
+    def get_repository_root(cls, location):
+        # type: (str) -> Optional[str]
+        """
+        Return the "root" (top-level) directory controlled by the vcs,
+        or `None` if the directory is not in any.
+
+        It is meant to be overridden to implement smarter detection
+        mechanisms for specific vcs.
+
+        This can do more than is_repository_directory() alone. For
+        example, the Git override checks that Git is actually available.
+        """
+        if cls.is_repository_directory(location):
+            return location
+        return None
+
+    @classmethod
+    def is_repository_directory(cls, path):
+        # type: (str) -> bool
+        """
+        Return whether a directory path is a repository directory.
+        """
+        logger.debug('Checking in %s for %s (%s)...',
+                     path, cls.dirname, cls.name)
+        return os.path.exists(os.path.join(path, cls.dirname))
+
+
+@attr.s()
+class VcsSupport:
+    schemes: list = attr.ib(default=ALL_SCHEMES)
+    _registry: dict = attr.ib(factory=dict, init=False)
+
+    def __attrs_post_init__(self):
+        urllib.parse.uses_netloc.extend(self.schemes)
+        urllib.parse.uses_fragment.extend(self.schemes)
+
+    @property
+    def backends(self):
+        # type: () -> List[VersionControl]
+        return list(self._registry.values())
+
+    @property
+    def dirnames(self):
+        # type: () -> List[str]
+        return [backend.dirname for backend in self.backends]
+
+    @property
+    def all_schemes(self):
+        # type: () -> List[str]
+        schemes = []  # type: List[str]
+        for backend in self.backends:
+            schemes.extend(backend.schemes)
+        return schemes
+
+    def register(self, cls):
+        # type: (Type[VersionControl]) -> None
+        if not hasattr(cls, 'name'):
+            logger.warning('Cannot register VCS %s', cls.__name__)
+            return
+        if cls.name not in self._registry:
+            self._registry[cls.name] = cls()
+            logger.debug('Registered VCS backend: %s', cls.name)
+
+    def unregister(self, name):
+        # type: (str) -> None
+        if name in self._registry:
+            del self._registry[name]
+
+    def get_backend_for_dir(self, location):
+        # type: (str) -> Optional[VersionControl]
+        """
+        Return a VersionControl object if a repository of that type is found
+        at the given directory.
+        """
+        vcs_backends = {}
+        for vcs_backend in self._registry.values():
+            repo_path = vcs_backend.get_repository_root(location)
+            if not repo_path:
+                continue
+            logger.debug('Determine that %s uses VCS: %s',
+                         location, vcs_backend.name)
+            vcs_backends[repo_path] = vcs_backend
+
+        if not vcs_backends:
+            return None
+
+        # Choose the VCS in the inner-most directory. Since all repository
+        # roots found here would be either `location` or one of its
+        # parents, the longest path should have the most path components,
+        # i.e. the backend representing the inner-most repository.
+        inner_most_repo_path = max(vcs_backends, key=len)
+        return vcs_backends[inner_most_repo_path]
+
+    def get_backend_for_scheme(self, scheme):
+        # type: (str) -> Optional[VersionControl]
+        """
+        Return a VersionControl object or None.
+        """
+        for vcs_backend in self._registry.values():
+            if scheme in vcs_backend.schemes:
+                return vcs_backend
+        return None
+
+    def get_backend(self, name):
+        # type: (str) -> Optional[VersionControl]
+        """
+        Return a VersionControl object or None.
+        """
+        name = name.lower()
+        return self._registry.get(name)
+
+
+vcs = VcsSupport()
+
 
 @attr.s(auto_attribs=True)
 class VersionControl(object):
@@ -235,7 +379,7 @@ class VersionControl(object):
         if self._backend:
             return self._backend
         else:
-            raise ValueError("please set a backend first.")
+            self._backend = vcs.get_backend_for_dir(self.local_path)()
 
     def set_backend(self, backend):
         # TODO: add a backend list (registry)
