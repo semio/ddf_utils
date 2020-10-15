@@ -44,10 +44,9 @@ class GitBackend(VCSBackend):
         #     return None
         return os.path.normpath(r.rstrip('\r\n'))
 
-    @property
-    def remote_url(self):
+    def remote_url(self, path):
         cmd = ['config', '--get', 'remote.origin.url']
-        return self.run_command(cmd)
+        return self.run_command(cmd, cwd=path)
 
     def clone(self, url, path):
         cmd = ['clone', '--progress', url, path]

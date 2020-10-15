@@ -344,7 +344,9 @@ class VersionControl(object):
             scheme = get_url_scheme(uri)
             raise ValueError(f"scheme not supported: {scheme}")
         url, rev = extract_url_rev(uri)
-        return cls(protocol, url, rev, dataset_dir)
+        res = cls(protocol, url, rev, dataset_dir)
+        res.set_backend(vcs.get_backend(protocol))
+        return res
 
     @classmethod
     def from_requirement(cls, package, dataset_dir):
@@ -358,8 +360,8 @@ class VersionControl(object):
             else:
                 if os.path.exists(os.path.abspath(package)):
                     full_path = os.path.abspath(package)
-                elif os.path.exists(os.path.join(dataset_dir, package)):
-                    full_path = os.path.join(dataset_dir, package)
+                elif os.path.exists(os.path.join(dataset_dir, 'repos', package)):
+                    full_path = os.path.join(dataset_dir, 'repos', package)
                 else:
                     raise OSError(f"Couldn't find package {package} in "
                                   "current working dir and $DATASET_DIR!")
@@ -376,10 +378,9 @@ class VersionControl(object):
 
     @property
     def backend(self):
-        if self._backend:
-            return self._backend
-        else:
-            self._backend = vcs.get_backend_for_dir(self.local_path)()
+        if not self._backend:
+            self._backend = vcs.get_backend_for_dir(self.local_path)
+        return self._backend
 
     def set_backend(self, backend):
         # TODO: add a backend list (registry)
@@ -395,7 +396,7 @@ class VersionControl(object):
     def package_name(self):
         if not self._package_name:
             if self.protocol == 'local':
-                remote_url = self.backend.remote_url
+                remote_url = self.backend.remote_url(self.local_path)
                 # TODO: if remote url haven't been configured?
                 self._package_name = local_rel_path_from_url(remote_url)
             else:
