@@ -4,11 +4,18 @@ git functions
 
 import os
 import shutil
-import attr
+import re
+from datetime import datetime, timezone
 from ddf_utils.vcs.base import (
     VCSBackend, local_path_from_url, get_url_scheme, call_subprocess,
     vcs
 )
+
+HASH_REGEX = re.compile('^[a-fA-F0-9]{40}$')
+
+
+def looks_like_hash(sha):
+    return bool(HASH_REGEX.match(sha))
 
 
 class GitBackend(VCSBackend):
@@ -78,6 +85,40 @@ class GitBackend(VCSBackend):
             ['rev-parse', rev], cwd=location,
         )
         return current_rev.strip()
+
+    @classmethod
+    def tag_or_sha(cls, location, rev):
+        # Pass rev to pre-filter the list.
+        output = cls.run_command(['show-ref', rev], cwd=location)
+        refs = {}
+        for line in output.strip().splitlines():
+            try:
+                sha, ref = line.split()
+            except ValueError:
+                # Include the offending line to simplify troubleshooting if
+                # this error ever occurs.
+                raise ValueError('unexpected show-ref line: {!r}'.format(line))
+
+            refs[ref] = sha
+
+        # TODO: support remote branch and rev parameter is already the whole ref
+        branch_ref = 'refs/heads/{}'.format(rev)
+        tag_ref = 'refs/tags/{}'.format(rev)
+
+        sha = refs.get(branch_ref)
+        if sha is not None:
+            return (sha, True)
+
+        sha = refs.get(tag_ref)
+
+        return (sha, False)
+
+    @classmethod
+    def get_commit_time(cls, location, rev):
+        cmd = ['show', '-s', '--format=%cI', rev]
+        output = cls.run_command(cmd, cwd=location)
+        time_str = output.strip()
+        return datetime.fromisoformat(time_str).astimezone(timezone.utc)
 
     @classmethod
     def run_command(self, cmd, **kwargs):
