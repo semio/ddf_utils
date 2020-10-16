@@ -358,7 +358,7 @@ class VersionControl(object):
         if '@' in package:
             package, rev = package.split('@', 1)
         else:
-            rev = 'master'
+            rev = 'HEAD'
         if not os.path.isabs(package):
             if package == '.':
                 full_path = os.path.abspath(package)
