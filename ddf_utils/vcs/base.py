@@ -203,6 +203,7 @@ class VCSBackend(object):
     def export(self, rev, path, target_dir):
         raise NotImplementedError
 
+    @classmethod
     def run_command(cmd):
         raise NotImplementedError
 
@@ -318,6 +319,10 @@ class VcsSupport:
         name = name.lower()
         return self._registry.get(name)
 
+    def get_repository_root(self, location):
+        return (self.get_backend_for_dir(location)
+                .get_repository_root(location))
+
 
 vcs = VcsSupport()
 
@@ -373,7 +378,7 @@ class VersionControl(object):
         protocol = 'local'
         url = 'file://' + full_path
         result = cls(protocol,  url, rev, dataset_dir)
-        result._local_path = full_path
+        result._local_path = vcs.get_repository_root(full_path)
         return result
 
     @property

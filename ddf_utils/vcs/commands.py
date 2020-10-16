@@ -2,6 +2,7 @@
 commands
 """
 
+import os
 from ddf_utils.vcs.base import VersionControl, is_url
 from ddf_utils.vcs.git import GitBackend
 
@@ -24,4 +25,6 @@ def install(package, dataset_dir):
     else:
         # vcs.set_backend(GitBackend())
         vcs.clone()
+    if not os.path.exists(os.path.join(vcs.local_path, 'datapackage.json')):
+        raise OSError(f'datapackage.json not found in {vcs.local_path}!')
     vcs.install()

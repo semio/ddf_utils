@@ -70,6 +70,7 @@ class GitBackend(VCSBackend):
             cwd=path
         )
 
+    @classmethod
     def run_command(self, cmd, **kwargs):
         if isinstance(cmd, str):
             sub_cmd = [cmd]
