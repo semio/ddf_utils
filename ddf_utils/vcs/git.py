@@ -44,31 +44,40 @@ class GitBackend(VCSBackend):
         #     return None
         return os.path.normpath(r.rstrip('\r\n'))
 
-    def remote_url(self, path):
+    @classmethod
+    def remote_url(cls, path):
         cmd = ['config', '--get', 'remote.origin.url']
-        return self.run_command(cmd, cwd=path)
+        return cls.run_command(cmd, cwd=path)
 
-    def clone(self, url, path):
+    @classmethod
+    def clone(cls, url, path):
         cmd = ['clone', '--progress', url, path]
         os.makedirs(path, exist_ok=False)
-        self.run_command(cmd)
+        cls.run_command(cmd)
 
-    def checkout(self, path, rev):
-        pass
-
-    def export(self, path, rev, target_dir):
+    @classmethod
+    def export(cls, path, rev, target_dir):
         if not target_dir.endswith('/'):
             target_dir = target_dir + '/'
 
-        self.run_command(
+        cls.run_command(
             ['worktree', 'add', '-f', target_dir, rev],
             cwd=path
         )
         os.remove(os.path.join(target_dir, '.git'))
-        self.run_command(
+        cls.run_command(
             ['worktree', 'prune'],
             cwd=path
         )
+
+    @classmethod
+    def get_revision(cls, location, rev=None):
+        if rev is None:
+            rev = 'HEAD'
+        current_rev = cls.run_command(
+            ['rev-parse', rev], cwd=location,
+        )
+        return current_rev.strip()
 
     @classmethod
     def run_command(self, cmd, **kwargs):
