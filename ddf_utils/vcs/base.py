@@ -419,27 +419,29 @@ class VersionControl(object):
             self.backend.clone(self.url, os.path.join(custom_path, relpath))
 
     def install(self, latest=False):
-        def make_pseudo_version(sha):
+        def make_pseudo_version(base, sha):
+            if not base:
+                base = 'v0.0.0'
             time = self.backend.get_commit_time(self.local_path, sha)
             time_str = time.strftime('%Y%m%d%H%M%S')
             # TODO: support base version
-            return f'v0.0.0-{time_str}-{sha[:12]}'
+            return f'{base}-{time_str}-{sha[:12]}'
 
         if latest:  # symlink to @latest folder
             pkg_rel_path = self.package_name + '@latest'
             pkg_path = os.path.join(self.dataset_dir, 'pkgs', pkg_rel_path)
             os.symlink(self.local_path, pkg_path)
         else:  # do git export
-            # rev = self.backend.sha_or_tag(self.revision)
+            base_tag = self.backend.get_latest_tag(self.local_path, self.revision)
             sha, is_branch = self.backend.tag_or_sha(self.local_path, self.revision)
             if is_branch:
-                ver = make_pseudo_version(sha)
+                ver = make_pseudo_version(base_tag, sha)
             else:
                 if sha:
                     ver = self.revision
                 else:
                     sha = self.backend.get_revision(self.local_path, self.revision)
-                    ver = make_pseudo_version(sha)
+                    ver = make_pseudo_version(base_tag, sha)
 
             pkg_rel_path = self.package_name + '@' + ver
             pkg_path = os.path.join(self.dataset_dir, 'pkgs', pkg_rel_path)

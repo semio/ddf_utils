@@ -89,7 +89,8 @@ class GitBackend(VCSBackend):
     @classmethod
     def tag_or_sha(cls, location, rev):
         # Pass rev to pre-filter the list.
-        output = cls.run_command(['show-ref', rev], cwd=location)
+        output = cls.run_command(['show-ref', rev], cwd=location,
+                                 extra_ok_returncodes=[1])
         refs = {}
         for line in output.strip().splitlines():
             try:
@@ -121,12 +122,21 @@ class GitBackend(VCSBackend):
         return datetime.fromisoformat(time_str).astimezone(timezone.utc)
 
     @classmethod
-    def run_command(self, cmd, **kwargs):
+    def get_latest_tag(cls, location, rev='HEAD'):
+        sha = cls.get_revision(location, rev)
+        tag_cmd = ['describe', '--tags', '--abbrev=0', '--always', sha]
+        tag = cls.run_command(tag_cmd, cwd=location).strip()
+        if tag == sha:
+            return None
+        return tag
+
+    @classmethod
+    def run_command(cls, cmd, **kwargs):
         if isinstance(cmd, str):
             sub_cmd = [cmd]
         else:
             sub_cmd = cmd
-        return call_subprocess([self.executable] + sub_cmd, **kwargs)
+        return call_subprocess([cls.executable] + sub_cmd, **kwargs)
 
 
 vcs.register(GitBackend)
