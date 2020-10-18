@@ -13,7 +13,7 @@ from collections.abc import Mapping, Sequence
 from itertools import product
 from functools import singledispatch
 from typing import Optional, Union, Dict
-
+import glob
 import shutil
 
 import numpy as np
@@ -25,7 +25,8 @@ from abc import ABC, abstractmethod
 
 from ddf_utils.model.package import DDFcsv
 from ddf_utils.model.ddf import DDF
-from ddf_utils.model.repo import Repo, is_url
+# from ddf_utils.model.repo import Repo, is_url
+from ddf_utils.vcs.base import is_url, VersionControl
 from ddf_utils.str import format_float_digits
 from ..exceptions import IngredientError
 from ..helpers import gen_sym, query, read_opt, sort_df, read_local_ddf, create_dsk
@@ -656,6 +657,15 @@ def infer_type_from_keys(keys: list):
         return 'datapoints'
 
 
+def resolve_pkg_path(dataset, dataset_dir):
+    if '@' in dataset:
+        pkg_path = os.path.join(dataset_dir, 'pkgs', dataset)
+    else:
+        pkgs = glob.glob(os.path.join(dataset_dir, 'pkgs', dataset + '*'))
+        pkg_path = sorted(pkgs)[-1]
+    return pkg_path
+
+
 def ingredient_from_dict(dictionary: dict, **chef_options) -> Ingredient:
     """create ingredient from recipe definition and options. Parameters
     for ingredient should be passed in a dictionary. See the doc for
@@ -692,8 +702,16 @@ def ingredient_from_dict(dictionary: dict, **chef_options) -> Ingredient:
 
     if ingredient_type == 'ddf':
         if is_url(dataset):  # data will read from github dataset
-            repo = Repo(dataset, base_path=dataset_dir)  # this will clone the repo to dataset_dir if it doesn't exist
-            dataset = os.path.relpath(repo.local_path, dataset_dir)
+            # repo = Repo(dataset, base_path=dataset_dir)  # this will clone the repo to dataset_dir if it doesn't exist
+            # dataset = os.path.relpath(repo.local_path, dataset_dir)
+            vc = VersionControl.from_uri(dataset, dataset_dir)
+            if not vc.local_path_exists():
+                vc.clone()
+        else:
+            vc = VersionControl.from_requirement(dataset, dataset_dir)
+            if not vc.local_path_exists():
+                raise ValueError(f'required dataset repo {vc.local_path} not found!')
+        dataset = resolve_pkg_path(vc.package_name + '@' + vc.revision)
         # else:
         #     dataset = os.path.join(dataset_dir, dataset)
 
