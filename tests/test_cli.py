@@ -77,7 +77,9 @@ def test_ddf_cli_2():
 
     # etl_type
     result = runner.invoke(ddf, args=['etl_type', '-d',
-                                      os.path.join(base_path, 'chef/datasets/ddf--gapminder--co2_emission/', 'etl/scripts')])
+                                      os.path.join(base_path,
+                                                   'chef/datasets/pkgs/ddf--gapminder--co2_emission/',
+                                                   'etl/scripts')])
     assert result.exit_code == 0
 
     # cleanup
@@ -97,7 +99,9 @@ def test_ddf_cli_3():
                                       '-i', 'max_pct_chg',
                                       '-i', 'new_datapoints',
                                       '-i', 'dropped_datapoints',
-                                      os.path.join(base_path, 'chef/datasets/ddf--gapminder--co2_emission'),
-                                      os.path.join(base_path, 'chef/datasets/ddf--gapminder--co2_emission_2')])
+                                      os.path.join(base_path,
+                                                   'chef/datasets/pkgs/ddf--gapminder--co2_emission'),
+                                      os.path.join(base_path,
+                                                   'chef/datasets/pkgs/ddf--gapminder--co2_emission_2')])
 
     assert result.exit_code == 0
