@@ -378,7 +378,7 @@ class VersionControl(object):
 
         protocol = 'local'
         url = 'file://' + full_path
-        result = cls(protocol,  url, rev, dataset_dir)
+        result = cls(protocol, url, rev, dataset_dir)
         if vcs.get_backend_for_dir(full_path):
             result._local_path = vcs.get_repository_root(full_path)
         else:
@@ -425,7 +425,7 @@ class VersionControl(object):
             self.backend.clone(self.url, os.path.join(custom_path, relpath))
 
     def install(self, prefix=None):
-        def make_pseudo_version(base, sha, tag):
+        def make_pseudo_version(base, sha, tag=None):
             if not base:
                 base = 'v0.0.0'
             if sha:

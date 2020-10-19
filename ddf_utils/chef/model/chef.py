@@ -19,7 +19,7 @@ from graphviz import Digraph
 from typing import List
 
 from . dag import DAG, IngredientNode, ProcedureNode
-from .. exceptions import ChefRuntimeError
+from .. exceptions import ChefRuntimeError, IngredientError
 from .. helpers import get_procedure, gen_sym, query, read_local_ddf, make_abs_path
 from . ingredient import Ingredient, ingredient_from_dict
 
@@ -137,7 +137,10 @@ class Chef:
                 datasets.append(ingred)
         not_exists = set()
         for d in datasets:
-            if not os.path.exists(d.dataset_path):
+            try:
+                if not os.path.exists(d.dataset_path):
+                    not_exists.add(d.dataset)
+            except IngredientError:
                 not_exists.add(d.dataset)
         if len(not_exists) > 0:
             logger.critical("not enough datasets! please checkout following datasets:\n{}\n"

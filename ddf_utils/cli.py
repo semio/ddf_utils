@@ -122,7 +122,7 @@ def run_recipe(recipe, outdir, ddf_dir, update, dry_run, gen_dp, show_tree):
     if ddf_dir:
         chef = Chef.from_recipe(recipe, ddf_dir=ddf_dir)
     else:
-        chef = Chef.from_recipe(recipe)
+        chef = Chef.from_recipe(recipe, ddf_dir=os.environ.get('DATASET_DIR', None))
     if show_tree:
         chef.dag.tree_view()
         return

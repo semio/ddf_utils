@@ -708,10 +708,17 @@ def ingredient_from_dict(dictionary: dict, **chef_options) -> Ingredient:
             vc = VersionControl.from_uri(dataset, dataset_dir)
             if not vc.local_path_exists():
                 vc.clone()
-                vc.install()
-        else:
-            vc = VersionControl.from_requirement(dataset, dataset_dir)
             vc.install()
+            dataset = vc.package_name
+        else:
+            try:
+                vc = VersionControl.from_requirement(dataset, dataset_dir)
+                vc.install()
+                dataset = vc.package_name
+            except OSError:
+                # don't do anything, the dataset might be exists in pkg path,
+                # if it doesn't , the issue will be handled in chef.validate()
+                pass
 
     if ingredient_type == 'external':
         data = os.path.join(external_csv_dir, data)
