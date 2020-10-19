@@ -35,14 +35,6 @@ def is_url(name):
     return any(x in scheme for x in ['http', 'https', 'file', 'ftp'] + ALL_SCHEMES)
 
 
-def get_rev(name):
-    if is_url(name):
-        rev = name.split('@')[-1]
-        if not rev:
-            return 'master'
-        return rev
-
-
 def extract_url_rev(name):
     # TODO: if revision is a hash, change it to full length / a fixed length
     if is_url(name):
@@ -69,9 +61,10 @@ def local_path_from_url(url, dataset_dir):
 
 def local_path_from_requirement(name, dataset_dir):
     """return a local path corresponding to a requirement string"""
-    if '@' in name:
+    if '@' not in name:
         return os.path.join(dataset_dir, 'repos', name)
-    return os.path.join(dataset_dir, 'repos', name + '@master')
+    name = name.split('@')[0]
+    return os.path.join(dataset_dir, 'repos', name)
 
 
 def find_path_to_dp_from_repo_root(location, repo_root):
