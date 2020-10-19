@@ -1,0 +1,77 @@
+info:
+    id: ddf--gapminder--co2_emission
+    base:
+        - &d1 open-numbers/ddf--global_carbon_project--global_carbon_budget
+        - &d3 open-numbers/ddf--open_numbers
+
+config:
+    recipe_dir: ./
+    procedure_dir: ./procedures
+    dictionary_dir: ./translation_dictionaries
+
+ingredients:
+    - id: gcp-datapoints
+      dataset: *d1
+      key: nation, year
+      value:
+          - territorial_emissions
+          - consumption_emissions
+    - id: gcp-entities
+      dataset: *d1
+      key: nation
+      value: "*"
+    - id: gapminder-country-synonym
+      dataset: *d3
+      key: synonym, geo
+      value: "*"
+    - id: gapminder-countries
+      dataset: *d3
+      key: country
+      value: "*"
+
+cooking:
+    datapoints:
+        # adapt to Gapminder's geo
+        - procedure: translate_column
+          ingredients:
+              - gcp-entities
+          options:
+              column: name
+              target_column: geo_gm
+              dictionary:
+                  key: synonym
+                  value: geo
+                  base: gapminder-country-synonym
+              not_found: drop
+              ignore_case: true
+          result: gcp-geo-entities-aligned
+
+        - procedure: translate_column
+          ingredients:
+              - gcp-datapoints
+          options:
+              column: nation
+              target_column: nation
+              dictionary:
+                  key: nation
+                  value: geo_gm
+                  base: gcp-geo-entities-aligned
+              not_found: drop
+          result: gcp-datapoints-aligned
+
+        - procedure: translate_header
+          ingredients:
+              - gcp-datapoints-aligned
+          options:
+              dictionary:
+                  nation: country
+          result: gcp-datapoints-translated
+
+        - procedure: run_op
+          ingredients:
+              - gcp-datapoints-translated
+          options:
+              op:
+                  yearly_co2_emissions_1000_tonnes: territorial_emissions * 3.667 * 1000
+                  consumption_co2_emissions_1000_tonnes: consumption_emissions * 3.667 * 1000
+          result: gcp-total_emissions-datapoints

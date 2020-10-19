@@ -43,7 +43,7 @@ ingredients:
           col2: 2
   - id: github-repo-datapoints
     key: country, year
-    dataset: https://github.com/open-numbers/ddf--gapminder--co2_emission
+    dataset: git+https://github.com/open-numbers/ddf--gapminder--co2_emission
 
 
 cooking:
