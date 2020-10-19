@@ -35,6 +35,16 @@ from ..helpers import gen_sym, query, read_opt, sort_df, read_local_ddf, create_
 logger = logging.getLogger('Ingredient')
 
 
+def resolve_pkg_path(dataset, dataset_dir):
+    if '@' in dataset:
+        return os.path.join(dataset_dir, 'pkgs', dataset)
+    else:
+        pkgs = glob.glob(os.path.join(dataset_dir, 'pkgs', dataset + '*'))
+        if len(pkgs) > 0:
+            return sorted(pkgs)[-1]
+    return None
+
+
 @attr.s
 class Ingredient(ABC):
     """Protocol class for all ingredients.
@@ -112,9 +122,10 @@ class Ingredient(ABC):
     def dataset_path(self):
         """return the full path to ingredient's dataset if the ingredient is from local ddf dataset."""
         if self.ingredient_type == 'ddf':
-            if os.path.isabs(self.dataset):
-                return self.dataset
-            return os.path.join(self.base_dir, self.dataset)
+            path = resolve_pkg_path(self.dataset, self.base_dir)
+            if not path:
+                raise IngredientError(f"dataset not installed: {self.dataset}")
+            return path
         return None
 
     @property
@@ -657,15 +668,6 @@ def infer_type_from_keys(keys: list):
         return 'datapoints'
 
 
-def resolve_pkg_path(dataset, dataset_dir):
-    if '@' in dataset:
-        pkg_path = os.path.join(dataset_dir, 'pkgs', dataset)
-    else:
-        pkgs = glob.glob(os.path.join(dataset_dir, 'pkgs', dataset + '*'))
-        pkg_path = sorted(pkgs)[-1]
-    return pkg_path
-
-
 def ingredient_from_dict(dictionary: dict, **chef_options) -> Ingredient:
     """create ingredient from recipe definition and options. Parameters
     for ingredient should be passed in a dictionary. See the doc for
@@ -701,19 +703,15 @@ def ingredient_from_dict(dictionary: dict, **chef_options) -> Ingredient:
         logger.warning("Ignoring following keys: {}".format(list(dictionary.keys())))
 
     if ingredient_type == 'ddf':
-        if is_url(dataset):  # data will read from github dataset
-            # repo = Repo(dataset, base_path=dataset_dir)  # this will clone the repo to dataset_dir if it doesn't exist
-            # dataset = os.path.relpath(repo.local_path, dataset_dir)
+        # clone if it's an url and local path not exists
+        if is_url(dataset):
             vc = VersionControl.from_uri(dataset, dataset_dir)
             if not vc.local_path_exists():
                 vc.clone()
+                vc.install()
         else:
             vc = VersionControl.from_requirement(dataset, dataset_dir)
-            if not vc.local_path_exists():
-                raise ValueError(f'required dataset repo {vc.local_path} not found!')
-        dataset = resolve_pkg_path(vc.package_name + '@' + vc.revision)
-        # else:
-        #     dataset = os.path.join(dataset_dir, dataset)
+            vc.install()
 
     if ingredient_type == 'external':
         data = os.path.join(external_csv_dir, data)
