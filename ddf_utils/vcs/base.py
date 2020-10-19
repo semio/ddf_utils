@@ -7,6 +7,7 @@ import os
 import shutil
 import subprocess
 import urllib
+from datetime import datetime
 
 import attr
 
@@ -378,7 +379,12 @@ class VersionControl(object):
         protocol = 'local'
         url = 'file://' + full_path
         result = cls(protocol,  url, rev, dataset_dir)
-        result._local_path = vcs.get_repository_root(full_path)
+        if vcs.get_backend_for_dir(full_path):
+            result._local_path = vcs.get_repository_root(full_path)
+        else:
+            # FIXME: detect the upper level folder which contains datapackage.json
+            result._local_path = full_path
+            result._package_name = os.path.basename(os.path.normpath(full_path))
         return result
 
     @property
@@ -418,32 +424,61 @@ class VersionControl(object):
             relpath = os.path.relpath(self.dataset_dir, self.local_path)
             self.backend.clone(self.url, os.path.join(custom_path, relpath))
 
-    def install(self, latest=False):
-        def make_pseudo_version(base, sha):
+    def install(self, prefix=None):
+        def make_pseudo_version(base, sha, tag):
             if not base:
                 base = 'v0.0.0'
-            time = self.backend.get_commit_time(self.local_path, sha)
-            time_str = time.strftime('%Y%m%d%H%M%S')
-            # TODO: support base version
-            return f'{base}-{time_str}-{sha[:12]}'
-
-        if latest:  # symlink to @latest folder
-            pkg_rel_path = self.package_name + '@latest'
-            pkg_path = os.path.join(self.dataset_dir, 'pkgs', pkg_rel_path)
-            os.symlink(self.local_path, pkg_path)
-        else:  # do git export
-            base_tag = self.backend.get_latest_tag(self.local_path, self.revision)
-            sha, is_branch = self.backend.tag_or_sha(self.local_path, self.revision)
-            if is_branch:
-                ver = make_pseudo_version(base_tag, sha)
+            if sha:
+                time = self.backend.get_commit_time(self.local_path, sha)
+                time_str = time.strftime('%Y%m%d%H%M%S')
             else:
-                if sha:
-                    ver = self.revision
-                else:
-                    sha = self.backend.get_revision(self.local_path, self.revision)
-                    ver = make_pseudo_version(base_tag, sha)
+                time = datetime.today()
+                time_str = time.strftime('%Y%m%d%H%M%S')
+            if sha:
+                if tag:
+                    return f'{base}-{time_str}-{sha[:12]}+{tag}'
+                return f'{base}-{time_str}-{sha[:12]}'
+            else:
+                if tag:
+                    return f'{base}-{time_str}+{tag}'
+                return f'{base}-{time_str}+no_commit'
 
-            pkg_rel_path = self.package_name + '@' + ver
-            pkg_path = os.path.join(self.dataset_dir, 'pkgs', pkg_rel_path)
-            if not os.path.exists(pkg_path):
-                self.backend.export(self.local_path, self.revision, pkg_path)
+        if prefix:
+            base_path = os.path.join(self.dataset_dir, 'pkgs', prefix)
+        else:
+            base_path = os.path.join(self.dataset_dir, 'pkgs')
+
+        if not self.backend:
+            print('no backend detected')
+            if self.revision == 'latest':
+                pkg_rel_path = self.package_name + '@latest'
+                pkg_path = os.path.join(base_path, pkg_rel_path)
+                os.symlink(self.local_path, pkg_path)
+            else:
+                ver = make_pseudo_version(None, None, 'no_vcs')
+                pkg_rel_path = self.package_name + '@' + ver
+                pkg_path = os.path.join(base_path, pkg_rel_path)
+                if not os.path.exists(pkg_path):
+                    shutil.copytree(self.local_path, pkg_path)
+
+        else:
+            if self.revision == 'latest':  # symlink to @latest folder
+                pkg_rel_path = self.package_name + '@latest'
+                pkg_path = os.path.join(base_path, pkg_rel_path)
+                os.symlink(self.local_path, pkg_path)
+            else:  # do git export
+                base_tag = self.backend.get_latest_tag(self.local_path, self.revision)
+                sha, is_branch = self.backend.tag_or_sha(self.local_path, self.revision)
+                if is_branch:
+                    ver = make_pseudo_version(base_tag, sha)
+                else:
+                    if sha:
+                        ver = self.revision
+                    else:
+                        sha = self.backend.get_revision(self.local_path, self.revision)
+                        ver = make_pseudo_version(base_tag, sha)
+
+                pkg_rel_path = self.package_name + '@' + ver
+                pkg_path = os.path.join(base_path, pkg_rel_path)
+                if not os.path.exists(pkg_path):
+                    self.backend.export(self.local_path, self.revision, pkg_path)
