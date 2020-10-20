@@ -329,12 +329,13 @@ def get(package):
 # install a dataset
 @ddf.command(name='install')
 @click.argument('package')
+@click.option('-p', '--prefix', 'prefix')
 # TODO: add local-vcs-proxy support
 # @click.option('--local-vcs-proxy', default=False, flag_value=True)
-def install(package):
+def install(package, prefix):
     from ddf_utils.vcs.commands import install as _install
     dataset_path = os.getenv("DATASET_DIR", os.path.expanduser("~/datasets"))
-    _install(package, dataset_path)
+    _install(package, dataset_path, prefix)
 
 
 if __name__ == '__main__':
