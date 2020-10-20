@@ -17,14 +17,15 @@ def get(package, dataset_dir):
 def install(package, dataset_dir):
     if is_url(package):
         vcs = VersionControl.from_uri(package, dataset_dir)
+        if vcs.local_path_exists():
+            print('target folder exists, not cloning')
+        else:
+            # vcs.set_backend(GitBackend())
+            vcs.clone()
     else:
         vcs = VersionControl.from_requirement(package, dataset_dir)
-    # vcs.set_backend(GitBackend())
-    if vcs.local_path_exists():
-        print('target folder exists, not cloning')
-    else:
-        # vcs.set_backend(GitBackend())
-        vcs.clone()
+
     if not os.path.exists(os.path.join(vcs.local_path, 'datapackage.json')):
         raise OSError(f'datapackage.json not found in {vcs.local_path}!')
+
     vcs.install()
