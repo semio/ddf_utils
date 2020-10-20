@@ -14,7 +14,7 @@ import attr
 logger = logging.getLogger(__name__)
 
 
-ALL_SCHEMES = ['ssh', 'git', 'hg', 'bzr', 'sftp', 'svn']
+ALL_SCHEMES = ['git', 'hg', 'bzr', 'sftp', 'svn', 'ssh']
 
 
 def get_url_scheme(url):
@@ -132,7 +132,7 @@ def call_subprocess(
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             cwd=cwd,
-            text=True
+            universal_newlines=True
         )
         if proc.stdin:
             proc.stdin.close()
