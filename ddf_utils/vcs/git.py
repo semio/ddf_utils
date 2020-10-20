@@ -53,7 +53,7 @@ class GitBackend(VCSBackend):
 
     @classmethod
     def remote_url(cls, path):
-        cmd = ['config', '--get', 'remote.origin.url']
+        cmd = ['ls-remote', '--get-url', 'origin']
         return cls.run_command(cmd, cwd=path)
 
     @classmethod

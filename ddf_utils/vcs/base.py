@@ -14,9 +14,6 @@ import attr
 logger = logging.getLogger(__name__)
 
 
-ALL_SCHEMES = ['git', 'hg', 'bzr', 'sftp', 'svn', 'ssh']
-
-
 def get_url_scheme(url):
     # type: (Union[str, Text]) -> Optional[Text]
     if ':' not in url:
@@ -32,7 +29,9 @@ def is_url(name):
     scheme = get_url_scheme(name)
     if scheme is None:
         return False
-    return any(x in scheme for x in ['http', 'https', 'file', 'ftp'] + ALL_SCHEMES)
+    if '@' in scheme:
+        scheme = scheme.split('@')[0]
+    return scheme in ['http', 'https', 'file', 'ftp'] + vcs.all_schemes
 
 
 def extract_url_rev(name):
@@ -47,7 +46,12 @@ def extract_url_rev(name):
 
 def local_rel_path_from_url(url):
     if is_url(url):
-        rel_path = url.split(':', 1)[1].lower().split('@')[0][2:]
+        scheme = get_url_scheme(url)
+        if '@' in scheme:  # such as git@github.com:abc/xyz
+            host = scheme.split('@', 1)[1]
+            rel_path = os.path.join(host, url.split(':')[1].lower().split('@')[0])
+        else:  # such as https://github.com/abc/xyz
+            rel_path = url.split(':', 1)[1].lower().split('@')[0][2:]
         return rel_path
     else:
         raise ValueError(f"not an url: {url}")
@@ -231,7 +235,8 @@ class VCSBackend(object):
 
 @attr.s()
 class VcsSupport:
-    schemes: list = attr.ib(default=ALL_SCHEMES)
+    schemes: list = attr.ib(
+        default=['ssh', 'git', 'hg', 'bzr', 'sftp', 'svn'], init=False)
     _registry: dict = attr.ib(factory=dict, init=False)
 
     def __attrs_post_init__(self):
@@ -335,7 +340,7 @@ class VersionControl(object):
     @classmethod
     def from_uri(cls, uri, dataset_dir):
         assert is_url(uri), f"not an url: {uri}"
-        for s in ALL_SCHEMES:
+        for s in vcs.all_schemes:
             if s in uri:
                 protocol = s
                 break
