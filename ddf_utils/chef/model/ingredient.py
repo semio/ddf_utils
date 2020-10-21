@@ -26,7 +26,7 @@ from abc import ABC, abstractmethod
 from ddf_utils.model.package import DDFcsv
 from ddf_utils.model.ddf import DDF
 # from ddf_utils.model.repo import Repo, is_url
-from ddf_utils.vcs.base import is_url, VersionControl
+from ddf_utils.vcs.base import is_url, VersionControl, dataset_pkg_path, dataset_repo_path
 from ddf_utils.str import format_float_digits
 from ..exceptions import IngredientError
 from ..helpers import gen_sym, query, read_opt, sort_df, read_local_ddf, create_dsk
@@ -40,11 +40,11 @@ def resolve_pkg_path(dataset, dataset_dir):
     if dataset.startswith('open-numbers'):
         dataset = 'github.com/' + dataset
     if '@' in dataset:
-        pkg_path = os.path.join(dataset_dir, 'pkgs', dataset)
+        pkg_path = os.path.join(dataset_pkg_path(dataset_dir), dataset)
         if os.path.exists(pkg_path):
             return pkg_path
     else:
-        pkgs = glob.glob(os.path.join(dataset_dir, 'pkgs', dataset + '*'))
+        pkgs = glob.glob(os.path.join(dataset_pkg_path(dataset_dir), dataset + '*'))
         if len(pkgs) > 0:
             return sorted(pkgs)[-1]
     return None

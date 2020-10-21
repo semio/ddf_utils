@@ -22,7 +22,7 @@ from . dag import DAG, IngredientNode, ProcedureNode
 from .. exceptions import ChefRuntimeError, IngredientError
 from .. helpers import get_procedure, gen_sym, query, read_local_ddf, make_abs_path
 from . ingredient import Ingredient, ingredient_from_dict, resolve_pkg_path
-
+from ddf_utils.vcs.base import dataset_pkg_path
 
 logger = logging.getLogger('Chef')
 
@@ -141,7 +141,8 @@ class Chef:
                 if not selected:
                     not_exists.add(d)
                 else:
-                    rel_path = os.path.relpath(selected, os.path.join(self.config['ddf_dir'], 'pkgs'))
+                    rel_path = os.path.relpath(selected,
+                                               dataset_pkg_path(self.config['ddf_dir']))
                     logger.info(f'use: {rel_path}')
             if len(not_exists) > 0:
                 logger.critical("not enough datasets! please install following datasets:\n{}\n"

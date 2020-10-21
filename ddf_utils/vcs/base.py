@@ -44,6 +44,14 @@ def extract_url_rev(name):
         return (result[0], result[1])
 
 
+def dataset_repo_path(dataset_dir):
+    return os.path.join(dataset_dir, 'repo')
+
+
+def dataset_pkg_path(dataset_dir):
+    return os.path.join(dataset_dir, 'pkg')
+
+
 def local_rel_path_from_url(url):
     if is_url(url):
         scheme = get_url_scheme(url)
@@ -60,15 +68,15 @@ def local_rel_path_from_url(url):
 def local_path_from_url(url, dataset_dir):
     """return a local path corresponding to the url"""
     rel_path = local_rel_path_from_url(url)
-    return os.path.join(dataset_dir, 'repos', rel_path)
+    return os.path.join(dataset_repo_path(dataset_dir), rel_path)
 
 
 def local_path_from_requirement(name, dataset_dir):
     """return a local path corresponding to a requirement string"""
     if '@' not in name:
-        return os.path.join(dataset_dir, 'repos', name)
+        return os.path.join(dataset_repo_path(dataset_dir), name)
     name = name.split('@')[0]
-    return os.path.join(dataset_dir, 'repos', name)
+    return os.path.join(dataset_repo_path(dataset_dir), name)
 
 
 def find_path_to_dp_from_repo_root(location, repo_root):
@@ -367,11 +375,13 @@ class VersionControl(object):
             else:
                 if os.path.exists(os.path.abspath(package)):
                     full_path = os.path.abspath(package)
-                elif os.path.exists(os.path.join(dataset_dir, 'repos', package)):
-                    full_path = os.path.join(dataset_dir, 'repos', package)
+                elif os.path.exists(os.path.join(dataset_repo_path(dataset_dir), package)):
+                    full_path = os.path.join(dataset_repo_path(dataset_dir), package)
                 # shortcut for open-numbers
-                elif os.path.exists(os.path.join(dataset_dir, 'repos/github.com', package)):
-                    full_path = os.path.join(dataset_dir, 'repos/github.com', package)
+                elif os.path.exists(os.path.join(dataset_repo_path(dataset_dir),
+                                                 'github.com', package)):
+                    full_path = os.path.join(dataset_repo_path(dataset_dir),
+                                             'github.com', package)
                 else:
                     raise OSError(f"Couldn't find package {package} in "
                                   "current working dir and $DATASET_DIR!")
@@ -448,9 +458,9 @@ class VersionControl(object):
                 return f'{base}-{time_str}+no_commit'
 
         if prefix:
-            base_path = os.path.join(self.dataset_dir, 'pkgs', prefix)
+            base_path = os.path.join(dataset_pkg_path(self.dataset_dir), prefix)
         else:
-            base_path = os.path.join(self.dataset_dir, 'pkgs')
+            base_path = dataset_pkg_path(self.dataset_dir)
 
         logger.info(f'installing {self.package_name} into {base_path}')
         if not self.backend:
