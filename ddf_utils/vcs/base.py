@@ -11,7 +11,7 @@ from datetime import datetime
 
 import attr
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('Package')
 
 
 def get_url_scheme(url):
@@ -449,8 +449,9 @@ class VersionControl(object):
         else:
             base_path = os.path.join(self.dataset_dir, 'pkgs')
 
+        logger.info(f'installing {self.package_name} into {base_path}')
         if not self.backend:
-            print('no backend detected')
+            logger.warning('no backend detected')
             if self.revision == 'latest':
                 pkg_rel_path = self.package_name + '@latest'
                 pkg_path = os.path.join(base_path, pkg_rel_path)

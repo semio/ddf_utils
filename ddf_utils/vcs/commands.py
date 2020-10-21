@@ -3,11 +3,15 @@ commands
 """
 
 import os
+import logging
 from ddf_utils.vcs.base import VersionControl, is_url
-from ddf_utils.vcs.git import GitBackend
+
+
+logger = logging.getLogger('Package')
 
 
 def get(package, dataset_dir):
+    logger.info(f'downloading {package} into {dataset_dir}/repos')
     vcs = VersionControl.from_uri(package, dataset_dir)
     # FIXME: auto detect backend
     # vcs.set_backend(GitBackend())
@@ -15,6 +19,7 @@ def get(package, dataset_dir):
 
 
 def install(package, dataset_dir, prefix=None):
+    logger.info(f'installing {package} into {dataset_dir}/pkgs')
     if is_url(package):
         vcs = VersionControl.from_uri(package, dataset_dir)
         if vcs.local_path_exists():
