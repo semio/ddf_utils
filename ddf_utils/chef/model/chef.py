@@ -21,10 +21,10 @@ from typing import List
 from . dag import DAG, IngredientNode, ProcedureNode
 from .. exceptions import ChefRuntimeError, IngredientError
 from .. helpers import get_procedure, gen_sym, query, read_local_ddf, make_abs_path
-from . ingredient import Ingredient, ingredient_from_dict
+from . ingredient import Ingredient, ingredient_from_dict, resolve_pkg_path
 
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('Chef')
 
 
 def _loadfile(f):
@@ -131,17 +131,18 @@ class Chef:
         """
         # 1. check dataset availability
         if check_dataset_installed:
-            datasets = list()
+            datasets = set()
             for ingred in self.ingredients:
                 if ingred.ingredient_type == 'ddf':
-                    datasets.append(ingred)
+                    datasets.add(ingred.dataset)
             not_exists = set()
             for d in datasets:
-                try:
-                    if not os.path.exists(d.dataset_path):
-                        not_exists.add(d.dataset)
-                except IngredientError:
-                    not_exists.add(d.dataset)
+                selected = resolve_pkg_path(d, self.config['ddf_dir'])
+                if not selected:
+                    not_exists.add(d)
+                else:
+                    rel_path = os.path.relpath(selected, os.path.join(self.config['ddf_dir'], 'pkgs'))
+                    logger.info(f'use: {rel_path}')
             if len(not_exists) > 0:
                 logger.critical("not enough datasets! please install following datasets:\n{}\n"
                                 .format('\n'.join(list(not_exists))))

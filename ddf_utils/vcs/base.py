@@ -369,6 +369,9 @@ class VersionControl(object):
                     full_path = os.path.abspath(package)
                 elif os.path.exists(os.path.join(dataset_dir, 'repos', package)):
                     full_path = os.path.join(dataset_dir, 'repos', package)
+                # shortcut for open-numbers
+                elif os.path.exists(os.path.join(dataset_dir, 'repos/github.com', package)):
+                    full_path = os.path.join(dataset_dir, 'repos/github.com', package)
                 else:
                     raise OSError(f"Couldn't find package {package} in "
                                   "current working dir and $DATASET_DIR!")
