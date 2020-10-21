@@ -39,6 +39,8 @@ def extract_url_rev(name):
     if is_url(name):
         url_and_rev = name.split('+', 1)[1]
         result = url_and_rev.split('@', 1)
+        if not is_url(result[0]):
+            result = [url_and_rev]
         if len(result) == 1:
             return (result[0], 'master')
         return (result[0], result[1])
