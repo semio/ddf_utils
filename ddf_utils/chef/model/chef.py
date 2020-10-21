@@ -120,7 +120,7 @@ class Chef:
                     config=deepcopy(self._config), cooking=deepcopy(self.cooking),
                     serving=deepcopy(self._serving), recipe=deepcopy(self._recipe))
 
-    def validate(self):
+    def validate(self, check_dataset_installed=False):
         """validate if the chef is good to run.
 
         The following will be tested:
@@ -130,22 +130,22 @@ class Chef:
         3. check if the DAG is valid. i.e no dependency cycle, no missing dependency.
         """
         # 1. check dataset availability
-        ddf_dir = self.config['ddf_dir']
-        datasets = list()
-        for ingred in self.ingredients:
-            if ingred.ingredient_type == 'ddf':
-                datasets.append(ingred)
-        not_exists = set()
-        for d in datasets:
-            try:
-                if not os.path.exists(d.dataset_path):
+        if check_dataset_installed:
+            datasets = list()
+            for ingred in self.ingredients:
+                if ingred.ingredient_type == 'ddf':
+                    datasets.append(ingred)
+            not_exists = set()
+            for d in datasets:
+                try:
+                    if not os.path.exists(d.dataset_path):
+                        not_exists.add(d.dataset)
+                except IngredientError:
                     not_exists.add(d.dataset)
-            except IngredientError:
-                not_exists.add(d.dataset)
-        if len(not_exists) > 0:
-            logger.critical("not enough datasets! please checkout following datasets:\n{}\n"
-                            .format('\n'.join(list(not_exists))))
-            raise ChefRuntimeError('not enough datasets')
+            if len(not_exists) > 0:
+                logger.critical("not enough datasets! please install following datasets:\n{}\n"
+                                .format('\n'.join(list(not_exists))))
+                raise ChefRuntimeError('not enough datasets')
 
         # 2. check procedure availability
         for k, ps in self.cooking.items():
@@ -255,7 +255,7 @@ class Chef:
         setattr(pc, func.__name__, func)
 
     def run(self, serve=False, outpath=None):
-        self.validate()
+        self.validate(check_dataset_installed=True)
 
         results = [self.dag.get_node(x['id']).evaluate() for x in self.serving]
 
