@@ -97,8 +97,9 @@ def create_datapackage(path, update, overwrite, progress_bar):
 
 # chef and recipe
 @ddf.command(name='run_recipe')
-@click.option('--recipe', '-i', type=click.Path(exists=True), required=True)
-@click.option('--outdir', '-o', type=click.Path(exists=True))
+@click.option('--recipe', '-i', type=click.Path(exists=True), required=True,
+              default='etl/recipes/etl.yaml')
+@click.option('--outdir', '-o', type=click.Path(exists=True), default='./')
 @click.option('--ddf_dir', type=click.Path(exists=True), default=None)
 @click.option('--update', 'update', flag_value=False, help="Don't use. Not implemented yet")
 @click.option('--dry_run', '-d', 'dry_run', flag_value=True, default=False,
