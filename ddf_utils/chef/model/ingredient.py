@@ -703,17 +703,14 @@ def ingredient_from_dict(dictionary: dict, **chef_options) -> Ingredient:
         logger.warning("Ignoring following keys: {}".format(list(dictionary.keys())))
 
     if ingredient_type == 'ddf':
-        # clone if it's an url and local path not exists
         if is_url(dataset):
+            # TODO: should I clone and install?
             vc = VersionControl.from_uri(dataset, dataset_dir)
-            if not vc.local_path_exists():
-                vc.clone()
-            vc.install()
             dataset = vc.package_name
         else:
             try:
                 vc = VersionControl.from_requirement(dataset, dataset_dir)
-                vc.install()
+                # vc.install()
                 dataset = vc.package_name
             except OSError:
                 # don't do anything, the dataset might be exists in pkg path,
