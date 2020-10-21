@@ -3,13 +3,17 @@ git functions
 """
 
 import os
-import shutil
+import logging
 import re
 from datetime import datetime, timezone
 from ddf_utils.vcs.base import (
     VCSBackend, local_path_from_url, get_url_scheme, call_subprocess,
     vcs
 )
+
+
+logger = logging.getLogger('Git')
+
 
 HASH_REGEX = re.compile('^[a-fA-F0-9]{40}$')
 
@@ -40,6 +44,7 @@ class GitBackend(VCSBackend):
                 ['rev-parse', '--show-toplevel'],
                 cwd=location,
                 log_failed_cmd=False,
+                silent=True
             )
         except Exception:
             return None
@@ -54,13 +59,14 @@ class GitBackend(VCSBackend):
     @classmethod
     def remote_url(cls, path):
         cmd = ['ls-remote', '--get-url', 'origin']
-        return cls.run_command(cmd, cwd=path)
+        return cls.run_command(cmd, cwd=path, silent=True)
 
     @classmethod
     def clone(cls, url, path):
+        logger.info(f"cloning {url} into {path}")
         cmd = ['clone', '--progress', url, path]
         os.makedirs(path, exist_ok=False)
-        cls.run_command(cmd)
+        cls.run_command(cmd, silent=True)
 
     @classmethod
     def export(cls, path, rev, target_dir):
@@ -69,12 +75,14 @@ class GitBackend(VCSBackend):
 
         cls.run_command(
             ['worktree', 'add', '-f', target_dir, rev],
-            cwd=path
+            cwd=path,
+            silent=True
         )
         os.remove(os.path.join(target_dir, '.git'))
         cls.run_command(
             ['worktree', 'prune'],
-            cwd=path
+            cwd=path,
+            silent=True
         )
 
     @classmethod
@@ -82,7 +90,7 @@ class GitBackend(VCSBackend):
         if rev is None:
             rev = 'HEAD'
         current_rev = cls.run_command(
-            ['rev-parse', rev], cwd=location,
+            ['rev-parse', rev], cwd=location, silent=True
         )
         return current_rev.strip()
 
@@ -90,7 +98,7 @@ class GitBackend(VCSBackend):
     def tag_or_sha(cls, location, rev):
         # Pass rev to pre-filter the list.
         output = cls.run_command(['show-ref', rev], cwd=location,
-                                 extra_ok_returncodes=[1])
+                                 extra_ok_returncodes=[1], silent=True)
         refs = {}
         for line in output.strip().splitlines():
             try:
@@ -117,7 +125,7 @@ class GitBackend(VCSBackend):
     @classmethod
     def get_commit_time(cls, location, rev):
         cmd = ['show', '-s', '--format=%cI', rev]
-        output = cls.run_command(cmd, cwd=location)
+        output = cls.run_command(cmd, cwd=location, silent=True)
         time_str = output.strip()
         return datetime.fromisoformat(time_str).astimezone(timezone.utc)
 
@@ -125,7 +133,7 @@ class GitBackend(VCSBackend):
     def get_latest_tag(cls, location, rev='HEAD'):
         sha = cls.get_revision(location, rev)
         tag_cmd = ['describe', '--tags', '--abbrev=0', '--always', sha]
-        tag = cls.run_command(tag_cmd, cwd=location).strip()
+        tag = cls.run_command(tag_cmd, cwd=location, silent=True).strip()
         if tag == sha:
             return None
         return tag

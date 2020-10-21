@@ -104,7 +104,8 @@ def call_subprocess(
         cwd=None,  # type: Optional[str]
         extra_environ=None,  # type: Optional[Mapping[str, Any]]
         extra_ok_returncodes=None,  # type: Optional[Iterable[int]]
-        log_failed_cmd=True  # type: Optional[bool]
+        log_failed_cmd=True,  # type: Optional[bool]
+        silent=False
 ):
     # type: (...) -> Text
     """
@@ -113,6 +114,7 @@ def call_subprocess(
         acceptable, in addition to 0. Defaults to None, which means [].
       log_failed_cmd: if false, failed commands are not logged,
         only raised.
+      silent: if true, don't print any output to console
     """
     if extra_ok_returncodes is None:
         extra_ok_returncodes = []
@@ -158,7 +160,8 @@ def call_subprocess(
         all_output.append(line + '\n')
 
         # Show the line immediately.
-        print(line)
+        if not silent:
+            print(line)
     try:
         proc.wait()
     finally:
