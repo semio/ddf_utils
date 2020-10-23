@@ -38,16 +38,16 @@ def extract_url_rev(name):
     # TODO: if revision is a hash, change it to full length / a fixed length
     if is_url(name):
         url_and_rev = name.split('+', 1)[1]
-        result = url_and_rev.split('@', 1)
-        if not is_url(result[0]):
-            result_part = url_and_rev.split('@')
-            if len(result_part) == 3:
-                result = ('@'.join(result_part[:2]), result_part[2])
-            else:
-                result = [url_and_rev]
+        result = url_and_rev.split('@')
         if len(result) == 1:
             return (result[0], 'master')
-        return (result[0], result[1])
+        elif len(result) == 2:
+            if is_url(result[0]):
+                return (result[0], result[1])
+            else:
+                return (url_and_rev, 'master')
+        else:
+            return ('@'.join(result[:-1]), result[-1])
 
 
 def dataset_repo_path(dataset_dir):
