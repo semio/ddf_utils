@@ -331,7 +331,7 @@ def get(package):
 @ddf.command(name='install')
 @click.option('-p', '--prefix', 'prefix')
 @click.option('-f', '--force', 'force', is_flag=True)
-@click.argument('package')
+@click.argument('package', default='.')
 # TODO: add local-vcs-proxy support
 # @click.option('--local-vcs-proxy', default=False, flag_value=True)
 def install(package, prefix, force):
