@@ -63,6 +63,9 @@ class GitBackend(VCSBackend):
 
     @classmethod
     def clone(cls, url, path):
+        if os.path.exists(path):
+            logger.warning(f'clone path {path} already exists')
+            return
         logger.info(f"cloning {url} into {path}")
         cmd = ['clone', '--progress', url, path]
         os.makedirs(path, exist_ok=False)

@@ -40,7 +40,11 @@ def extract_url_rev(name):
         url_and_rev = name.split('+', 1)[1]
         result = url_and_rev.split('@', 1)
         if not is_url(result[0]):
-            result = [url_and_rev]
+            result_part = url_and_rev.split('@')
+            if len(result_part) == 3:
+                result = ('@'.join(result_part[:2]), result_part[2])
+            else:
+                result = [url_and_rev]
         if len(result) == 1:
             return (result[0], 'master')
         return (result[0], result[1])
@@ -440,7 +444,7 @@ class VersionControl(object):
             relpath = os.path.relpath(self.dataset_dir, self.local_path)
             self.backend.clone(self.url, os.path.join(custom_path, relpath))
 
-    def install(self, prefix=None):
+    def install(self, prefix=None, force=False):
         def make_pseudo_version(base, sha, tag=None):
             if not base:
                 base = 'v0.0.0'
@@ -477,6 +481,12 @@ class VersionControl(object):
                 pkg_path = os.path.join(base_path, pkg_rel_path)
                 if not os.path.exists(pkg_path):
                     shutil.copytree(self.local_path, pkg_path)
+                else:
+                    if force:
+                        shutil.rmtree(pkg_path)
+                        shutil.copytree(self.local_path, pkg_path)
+                    else:
+                        logger.info(f'{pkg_rel_path} already installed')
 
         else:
             if self.revision == 'latest':  # symlink to @latest folder
@@ -499,3 +509,9 @@ class VersionControl(object):
                 pkg_path = os.path.join(base_path, pkg_rel_path)
                 if not os.path.exists(pkg_path):
                     self.backend.export(self.local_path, self.revision, pkg_path)
+                else:
+                    if force:
+                        shutil.rmtree(pkg_path)
+                        self.backend.export(self.local_path, self.revision, pkg_path)
+                    else:
+                        logger.info(f'{pkg_rel_path} already installed')

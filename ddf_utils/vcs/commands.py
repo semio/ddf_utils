@@ -17,7 +17,7 @@ def get(package, dataset_dir):
     vcs.clone()
 
 
-def install(package, dataset_dir, prefix=None):
+def install(package, dataset_dir, prefix=None, force=False):
     if is_url(package):
         logger.info(f'package is an url, see if we need to clone')
         vcs = VersionControl.from_uri(package, dataset_dir)
@@ -32,4 +32,4 @@ def install(package, dataset_dir, prefix=None):
     if not os.path.exists(os.path.join(vcs.local_path, 'datapackage.json')):
         raise OSError(f'datapackage.json not found in {vcs.local_path}! Not installing.')
 
-    vcs.install(prefix=prefix)
+    vcs.install(prefix=prefix, force=force)
