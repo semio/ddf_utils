@@ -23,6 +23,7 @@ from .. exceptions import ChefRuntimeError, IngredientError
 from .. helpers import get_procedure, gen_sym, query, read_local_ddf, make_abs_path
 from . ingredient import Ingredient, ingredient_from_dict, resolve_pkg_path
 from ddf_utils.vcs.base import dataset_pkg_path
+from ddf_utils.vcs.commands import install
 
 logger = logging.getLogger('Chef')
 
@@ -145,9 +146,11 @@ class Chef:
                                                dataset_pkg_path(self.config['ddf_dir']))
                     logger.info(f'use: {rel_path}')
             if len(not_exists) > 0:
-                logger.critical("not enough datasets! please install following datasets:\n{}\n"
-                                .format('\n'.join(list(not_exists))))
-                raise ChefRuntimeError('not enough datasets')
+                logger.warning("not enough datasets! trying to install following datasets:\n{}\n"
+                               .format('\n'.join(list(not_exists))))
+                for d in not_exists:
+                    install(d, self.config['ddf_dir'])
+                # raise ChefRuntimeError('not enough datasets')
 
         # 2. check procedure availability
         for k, ps in self.cooking.items():
