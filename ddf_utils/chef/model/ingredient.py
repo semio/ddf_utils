@@ -707,20 +707,18 @@ def ingredient_from_dict(dictionary: dict, **chef_options) -> Ingredient:
     if len(dictionary.keys()) > 0:
         logger.warning("Ignoring following keys: {}".format(list(dictionary.keys())))
 
-    # if ingredient_type == 'ddf':
-    #     if is_url(dataset):
-    #         # TODO: should I clone and install?
-    #         vc = VersionControl.from_uri(dataset, dataset_dir)
-    #         dataset = vc.package_name
-    #     else:
-    #         try:
-    #             vc = VersionControl.from_requirement(dataset, dataset_dir)
-    #             # vc.install()
-    #             dataset = vc.package_name
-    #         except OSError:
-    #             # don't do anything, the dataset might be exists in pkg path,
-    #             # if it doesn't , the issue will be handled in chef.validate()
-    #             pass
+    if ingredient_type == 'ddf':
+        if is_url(dataset):
+            vc = VersionControl.from_uri(dataset, dataset_dir)
+            dataset = vc.package_name
+        else:
+            try:
+                vc = VersionControl.from_requirement(dataset, dataset_dir)
+                dataset = vc.package_name
+            except OSError:
+                # don't do anything, the dataset might be exists in pkg path,
+                # if it doesn't , the issue will be handled in chef.validate()
+                pass
 
     if ingredient_type == 'external':
         data = os.path.join(external_csv_dir, data)
