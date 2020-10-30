@@ -8,6 +8,7 @@ import shutil
 import subprocess
 import urllib
 from datetime import datetime
+from typing import Union, Optional, Text, List, Iterable, Mapping, Any, Type
 
 import attr
 
@@ -114,7 +115,7 @@ def find_path_to_dp_from_repo_root(location, repo_root):
 
 
 def call_subprocess(
-        cmd,  # type: Union[List[str], CommandArgs]
+        cmd,  # type: Union[List[str]]
         cwd=None,  # type: Optional[str]
         extra_environ=None,  # type: Optional[Mapping[str, Any]]
         extra_ok_returncodes=None,  # type: Optional[Iterable[int]]
@@ -208,6 +209,8 @@ def call_subprocess(
 class VCSBackend(object):
     name: str
     executable: str
+    dirname: str
+    schemes: List[str]
 
     def clone(self, url, path):
         raise NotImplementedError
@@ -262,7 +265,7 @@ class VcsSupport:
 
     @property
     def backends(self):
-        # type: () -> List[VersionControl]
+        # type: () -> List[VCSBackend]
         return list(self._registry.values())
 
     @property
