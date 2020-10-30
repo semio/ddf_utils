@@ -10,8 +10,8 @@ wd = os.path.dirname(__file__)
 
 def test_compare_func():
     from ddf_utils.qa import compare_with_func
-    d1 = DDFcsv.from_path(os.path.join(wd, 'chef/datasets/pkgs/ddf--bp--energy')).ddf
-    d2 = DDFcsv.from_path(os.path.join(wd, 'chef/datasets/pkgs/ddf--cme')).ddf
+    d1 = DDFcsv.from_path(os.path.join(wd, 'chef/datasets/pkg/ddf--bp--energy')).ddf
+    d2 = DDFcsv.from_path(os.path.join(wd, 'chef/datasets/pkg/ddf--cme')).ddf
 
     res1 = compare_with_func(d1, d1, fns=['rval', 'avg_pct_chg', 'max_pct_chg'])
     res2 = compare_with_func(d1, d2, fns=['rval', 'avg_pct_chg', 'max_pct_chg'])
@@ -29,8 +29,8 @@ def test_compare_func():
 
 def test_compare_func2():
     from ddf_utils.qa import compare_with_func
-    d1 = DDFcsv.from_path(os.path.join(wd, 'chef/datasets/pkgs/ddf--bp--energy')).ddf
-    d2 = DDFcsv.from_path(os.path.join(wd, 'chef/datasets/pkgs/ddf--cme')).ddf
+    d1 = DDFcsv.from_path(os.path.join(wd, 'chef/datasets/pkg/ddf--bp--energy')).ddf
+    d2 = DDFcsv.from_path(os.path.join(wd, 'chef/datasets/pkg/ddf--cme')).ddf
 
     res1 = compare_with_func(d1, d1, fns=['rval', 'max_change_index'])
     res2 = compare_with_func(d1, d2, fns=['rval', 'max_change_index'])

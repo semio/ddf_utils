@@ -7,6 +7,7 @@ need input from user.
 import os
 import tempfile
 from ddf_utils.cli import ddf
+from ddf_utils.transformer import _translate_column_df as tc
 
 import click
 from click.testing import CliRunner
@@ -19,7 +20,6 @@ def test_translate_column():
 
     @click.command()
     def test():
-        from ddf_utils.transformer import _translate_column_df as tc
         df = pd.DataFrame([['congo', 'Congo']], columns=['country', 'name'])
         base_df = pd.DataFrame([['cod', 'Congo', 'Democratic Republic of the Congo'],
                                 ['cog', 'Congo', 'Republic of the Congo']],
@@ -78,7 +78,7 @@ def test_ddf_cli_2():
     # etl_type
     result = runner.invoke(ddf, args=['etl_type', '-d',
                                       os.path.join(base_path,
-                                                   'chef/datasets/pkgs/ddf--gapminder--co2_emission/',
+                                                   'chef/datasets/pkg/ddf--gapminder--co2_emission/',
                                                    'etl/scripts')])
     assert result.exit_code == 0
 
@@ -100,8 +100,8 @@ def test_ddf_cli_3():
                                       '-i', 'new_datapoints',
                                       '-i', 'dropped_datapoints',
                                       os.path.join(base_path,
-                                                   'chef/datasets/pkgs/ddf--gapminder--co2_emission'),
+                                                   'chef/datasets/pkg/ddf--gapminder--co2_emission'),
                                       os.path.join(base_path,
-                                                   'chef/datasets/pkgs/ddf--gapminder--co2_emission_2')])
+                                                   'chef/datasets/pkg/ddf--gapminder--co2_emission_2')])
 
     assert result.exit_code == 0

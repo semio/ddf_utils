@@ -149,8 +149,10 @@ class Chef:
                 logger.warning("not enough datasets! trying to install following datasets:\n{}\n"
                                .format('\n'.join(list(not_exists))))
                 for d in not_exists:
-                    install(d, self.config['ddf_dir'])
-                # raise ChefRuntimeError('not enough datasets')
+                    try:
+                        install(d, self.config['ddf_dir'])
+                    except OSError as ose:
+                        raise ChefRuntimeError(str(ose))
 
         # 2. check procedure availability
         for k, ps in self.cooking.items():

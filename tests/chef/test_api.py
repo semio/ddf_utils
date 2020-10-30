@@ -69,7 +69,7 @@ def test_chef_load_recipe():
     recipe_file = os.path.join(wd, 'recipes/test_flatten.yml')
     chef = Chef.from_recipe(recipe_file)
     with pytest.raises(ChefRuntimeError):
-        chef.validate()
+        chef.validate(check_dataset_installed=True)
 
 
 def test_ingredients_concepts():

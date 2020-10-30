@@ -39,12 +39,12 @@ def test_local_path_from_url():
     url = 'git+https://github.com/open-numbers/ddf--gapminder--wdi@v1.0'
     assert local_path_from_url(url, dataset_path) == \
         os.path.join(dataset_path,
-                     'repos/github.com/open-numbers/ddf--gapminder--wdi')
+                     'repo/github.com/open-numbers/ddf--gapminder--wdi')
 
     url = 'git+https://github.com/open-numbers/ddf--gapminder--wdi'
     assert local_path_from_url(url, dataset_path) == \
         os.path.join(dataset_path,
-                     'repos/github.com/open-numbers/ddf--gapminder--wdi')
+                     'repo/github.com/open-numbers/ddf--gapminder--wdi')
 
 
 def test_local_path_from_requirement():
@@ -52,4 +52,4 @@ def test_local_path_from_requirement():
     name = 'github.com/open-numbers/ddf--gapminder--wdi@v1.0'
     assert local_path_from_requirement(name, dataset_path) == \
         os.path.join(dataset_path,
-                     'repos/github.com/open-numbers/ddf--gapminder--wdi')
+                     'repo/github.com/open-numbers/ddf--gapminder--wdi')
