@@ -2,6 +2,7 @@
 git functions
 """
 
+import sys
 import os
 import logging
 import re
@@ -10,6 +11,11 @@ from ddf_utils.vcs.base import (
     VCSBackend, local_path_from_url, get_url_scheme, call_subprocess,
     vcs
 )
+
+# get fromisoformat for python 3.6
+if sys.version_info.major == 3 and sys.version_info.minor <= 3.6:
+    from backports.datetime_fromisoformat import MonkeyPatch
+    MonkeyPatch.patch_fromisoformat()
 
 
 logger = logging.getLogger('Git')

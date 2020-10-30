@@ -26,3 +26,4 @@ hy
 ipdb
 attrs>=19.2.0
 joblib
+backports-datetime-fromisoformat

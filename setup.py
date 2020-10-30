@@ -33,7 +33,8 @@ requirements = [
     'hy',
     'attrs>=19.2.0',
     'joblib',
-    'lxml'
+    'lxml',
+    'backports-datetime-fromisoformat'
 ]
 
 setup(
