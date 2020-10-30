@@ -4,11 +4,19 @@ tests for vcs functions
 
 import os
 import tempfile
+import pytest
 from ddf_utils.vcs.base import (get_url_scheme, is_url,
                                 extract_url_rev,
                                 local_path_from_url,
-                                local_path_from_requirement
+                                local_path_from_requirement,
+                                VersionControl
                                 )
+from ddf_utils.vcs.commands import get, install
+
+
+@pytest.fixture(scope='module')
+def dataset_path():
+    return tempfile.mkdtemp()
 
 
 def test_uri_from_requirement():
@@ -34,8 +42,7 @@ def test_uri_from_requirement():
                     'refs/pull/123/head']
 
 
-def test_local_path_from_url():
-    dataset_path = '/tmp/datasets'
+def test_local_path_from_url(dataset_path):
     url = 'git+https://github.com/open-numbers/ddf--gapminder--wdi@v1.0'
     assert local_path_from_url(url, dataset_path) == \
         os.path.join(dataset_path,
@@ -47,9 +54,23 @@ def test_local_path_from_url():
                      'repo/github.com/open-numbers/ddf--gapminder--wdi')
 
 
-def test_local_path_from_requirement():
-    dataset_path = '/tmp/datasets'
+def test_local_path_from_requirement(dataset_path):
     name = 'github.com/open-numbers/ddf--gapminder--wdi@v1.0'
     assert local_path_from_requirement(name, dataset_path) == \
         os.path.join(dataset_path,
                      'repo/github.com/open-numbers/ddf--gapminder--wdi')
+
+def test_get_command(dataset_path):
+    url = 'git+https://github.com/open-numbers/ddf--semio--dag_test'
+    get(url, dataset_path)
+
+
+def test_install_command(dataset_path):
+    url = 'git+https://github.com/open-numbers/ddf--semio--dag_test'
+    install(url, dataset_path, force=True)
+
+
+def test_version_control_class(dataset_path):
+    name = 'github.com/open-numbers/ddf--semio--dag_test'
+    vcs = VersionControl.from_requirement(name, dataset_path)
+    vcs.install()
