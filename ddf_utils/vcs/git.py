@@ -148,6 +148,14 @@ class GitBackend(VCSBackend):
         return tag
 
     @classmethod
+    def fetch(cls):
+        raise NotImplementedError
+
+    @classmethod
+    def has_uncommited_change(cls):
+        raise NotImplementedError
+
+    @classmethod
     def run_command(cls, cmd, **kwargs):
         if isinstance(cmd, str):
             sub_cmd = [cmd]
