@@ -32,7 +32,7 @@ def is_url(name):
         return False
     if '@' in scheme:
         scheme = scheme.split('@')[0]
-    return scheme in ['http', 'https', 'file', 'ftp'] + vcs.all_schemes
+    return scheme in ['ssh', 'http', 'https', 'file', 'ftp'] + vcs.all_schemes
 
 
 def extract_url_rev(name):
