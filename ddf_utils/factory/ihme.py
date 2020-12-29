@@ -33,7 +33,7 @@ class IHMELoader(DataFactory):
     # http://ghdx.healthdata.org/sites/all/modules/custom/ihme_query_tool/gbd-search/php/data.php
     # below is url for download data as zip
     url_data = 'http://ghdx.healthdata.org/sites/all/modules/custom/ihme_query_tool/gbd-search/php/download.php'
-    url_task = 'https://s3.healthdata.org/gbd-api-2017-public/{hash}'  # access to download link
+    url_task = 'https://s3.healthdata.org/gbd-api-2019-public/{hash}'  # access to download link
 
     def load_metadata(self):
         """load all codes used in GBD in a dictionary."""
