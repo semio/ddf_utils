@@ -44,7 +44,7 @@ def resolve_pkg_path(dataset, dataset_dir):
         if os.path.exists(pkg_path):
             return pkg_path
     else:
-        pkgs = glob.glob(os.path.join(dataset_pkg_path(dataset_dir), dataset + '*'))
+        pkgs = glob.glob(os.path.join(dataset_pkg_path(dataset_dir), dataset + '@*'))
         if len(pkgs) > 0:
             return sorted(pkgs)[-1]
     return None
