@@ -77,7 +77,9 @@ class IHMELoader(DataFactory):
 
         while True:
             res_json = session.get(url).json()
-
+            if 'urls' not in res_json:
+                sleep(30)
+                continue
             dus = res_json['urls']
             for du in dus:
                 if du in sent_urls:
@@ -89,7 +91,7 @@ class IHMELoader(DataFactory):
 
             if res_json['state'] in success_results:
                 break
-            sleep(10)
+            sleep(30)
 
     def bulk_download(self, out_dir, version, context, **kwargs):
         """download the selected contexts/queries from GBD result tools.
