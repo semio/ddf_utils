@@ -710,11 +710,11 @@ def ingredient_from_dict(dictionary: dict, **chef_options) -> Ingredient:
     if ingredient_type == 'ddf':
         if is_url(dataset):
             vc = VersionControl.from_uri(dataset, dataset_dir)
-            dataset = vc.package_name
+            dataset = vc.package_name + '@' + vc.revision
         else:
             try:
                 vc = VersionControl.from_requirement(dataset, dataset_dir)
-                dataset = vc.package_name
+                dataset = vc.package_name + '@' + vc.revision
             except OSError:
                 # don't do anything, the dataset might be exists in pkg path,
                 # if it doesn't , the issue will be handled in chef.validate()

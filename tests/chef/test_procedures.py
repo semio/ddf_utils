@@ -105,7 +105,7 @@ def test_custom_procedure():
 
 
 def test_ingredients():
-    for i in range(1, 4):
+    for i in range(1, 5):
         chef = chef_fn('test_ingredients_{}.yaml'.format(i))
         chef.run()
 

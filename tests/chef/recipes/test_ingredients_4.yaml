@@ -1,0 +1,25 @@
+info:
+  id: test_ingredients
+
+ingredients:
+    - id: test-concepts
+      key: concept
+      dataset: git+https://github.com/open-numbers/ddf--semio--dag_test@v0.0.1
+      value: "*"
+
+    - id: test-datapoints
+      key: ent, time
+      dataset: git+https://github.com/open-numbers/ddf--semio--dag_test
+      value: "*"
+
+cooking:
+    datapoints:
+        -
+            procedure: serve
+            ingredients:
+                - test-datapoints
+    concepts:
+        -
+            procedure: serve
+            ingredients:
+                - test-concepts
