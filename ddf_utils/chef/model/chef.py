@@ -22,7 +22,7 @@ from . dag import DAG, IngredientNode, ProcedureNode
 from .. exceptions import ChefRuntimeError, IngredientError
 from .. helpers import get_procedure, gen_sym, query, read_local_ddf, make_abs_path
 from . ingredient import Ingredient, ingredient_from_dict, resolve_pkg_path
-from ddf_utils.vcs.base import dataset_pkg_path
+from ddf_utils.vcs.base import dataset_pkg_path, VersionControl
 from ddf_utils.vcs.commands import install
 
 logger = logging.getLogger('Chef')
@@ -121,6 +121,43 @@ class Chef:
                     config=deepcopy(self._config), cooking=deepcopy(self.cooking),
                     serving=deepcopy(self._serving), recipe=deepcopy(self._recipe))
 
+    def ensure_local_datasets(self):
+        """ensure all datasets is installed locally.
+
+        this method will also change ingredient's `dataset` variable if it's an url.
+        """
+        checked = set()
+        not_exists = set()
+        ddf_dir = self.config['ddf_dir']
+        for ingred in self.ingredients:
+            dataset = ingred.dataset
+            if ingred.ingredient_type == 'ddf' and ingred.dataset not in checked:
+                vc = VersionControl.from_dataset_string(dataset, ddf_dir)
+                if vc:
+                    if '@' in dataset:
+                        pkg_name = vc.package_name + '@' + vc.revision
+                    else:
+                        pkg_name = vc.package_name
+                else:
+                    pkg_name = dataset
+                # update the dataset name of the ingredient
+                ingred.dataset = pkg_name
+                selected = resolve_pkg_path(pkg_name, ddf_dir)
+                if not selected:
+                    not_exists.add(dataset)
+                else:
+                    rel_path = os.path.relpath(selected,
+                                               dataset_pkg_path(self.config['ddf_dir']))
+                    logger.info(f'use: {rel_path}')
+        if len(not_exists) > 0:
+            logger.warning("not enough datasets! trying to install following datasets:\n{}\n"
+                           .format('\n'.join(list(not_exists))))
+            for d in not_exists:
+                try:
+                    install(d, self.config['ddf_dir'])
+                except OSError as ose:
+                    raise ChefRuntimeError(str(ose))
+
     def validate(self, check_dataset_installed=False):
         """validate if the chef is good to run.
 
@@ -132,28 +169,7 @@ class Chef:
         """
         # 1. check dataset availability
         if check_dataset_installed:
-            datasets = set()
-            for ingred in self.ingredients:
-                if ingred.ingredient_type == 'ddf':
-                    datasets.add(ingred.dataset)
-            not_exists = set()
-            for d in datasets:
-                selected = resolve_pkg_path(d, self.config['ddf_dir'])
-                if not selected:
-                    not_exists.add(d)
-                else:
-                    rel_path = os.path.relpath(selected,
-                                               dataset_pkg_path(self.config['ddf_dir']))
-                    logger.info(f'use: {rel_path}')
-            if len(not_exists) > 0:
-                logger.warning("not enough datasets! trying to install following datasets:\n{}\n"
-                               .format('\n'.join(list(not_exists))))
-                for d in not_exists:
-                    try:
-                        install(d, self.config['ddf_dir'])
-                    except OSError as ose:
-                        raise ChefRuntimeError(str(ose))
-
+            self.ensure_local_datasets()
         # 2. check procedure availability
         for k, ps in self.cooking.items():
             for p in ps:

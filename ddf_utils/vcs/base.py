@@ -410,6 +410,18 @@ class VersionControl(object):
             result._package_name = os.path.basename(os.path.normpath(full_path))
         return result
 
+    @classmethod
+    def from_dataset_string(cls, dataset, dataset_dir):
+        if is_url(dataset):
+            return cls.from_uri(dataset, dataset_dir)
+        else:
+            try:
+                return cls.from_requirement(dataset, dataset_dir)
+            except OSError:
+                # don't do anything, dataset repo not in the repo path, but
+                # the dataset might be installed in pkg path.
+                return None
+
     @property
     def backend(self):
         if not self._backend:
