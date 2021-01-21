@@ -9,7 +9,7 @@ from ddf_utils.package import get_datapackage
 
 def test_create_datapackage_1():
     dataset_path = os.path.join(os.path.dirname(__file__),
-                                'chef/datasets/pkg/ddf--gapminder--dummy_companies')
+                                'chef/datasets/pkg/ddf--gapminder--dummy_companies@v0.0.1')
 
     dp1 = get_datapackage(dataset_path, use_existing=True)
     assert dp1['license'] == 'foo'
@@ -37,7 +37,7 @@ def test_create_datapackage_1():
 
 def test_create_datapackage_2():
     dataset_path = os.path.join(os.path.dirname(__file__),
-                                'chef/datasets/pkg/ddf--datapackage--testing')
+                                'chef/datasets/pkg/ddf--datapackage--testing@v0.0.1')
 
     dp = DDFcsv.from_path(dataset_path)
     dp.get_ddf_schema(update=True)
@@ -50,7 +50,7 @@ def test_create_datapackage_2():
 def test_create_datapackage_3():
 
     dataset_path = os.path.join(os.path.dirname(__file__),
-                                'chef/datasets/pkg/ddf--datapackage--testing_fail')
+                                'chef/datasets/pkg/ddf--datapackage--testing_fail@v0.0.1')
 
     with pytest.raises(ValueError):
         get_datapackage(dataset_path, update=True, use_existing=False)

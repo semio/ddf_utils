@@ -5,7 +5,7 @@ import shutil
 
 
 test_dataset_path = os.path.join(os.path.dirname(__file__),
-                                 'chef/datasets/pkg/ddf--gapminder--dummy_companies')
+                                 'chef/datasets/pkg/ddf--gapminder--dummy_companies@v0.0.1')
 
 
 def test_split_translation():

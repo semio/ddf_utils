@@ -8,7 +8,7 @@ from ddf_utils.model.package import DDFcsv
 def test_dataset():
 
     dataset_path = os.path.join(os.path.dirname(__file__),
-                                'chef/datasets/pkg/ddf--gapminder--dummy_companies')
+                                'chef/datasets/pkg/ddf--gapminder--dummy_companies@v0.0.1')
 
     ds = DDFcsv.from_path(dataset_path).ddf
 
@@ -40,7 +40,7 @@ def test_dataset():
 
 def test_dtype():
     dataset_path = os.path.join(os.path.dirname(__file__),
-                                'chef/datasets/pkg/ddf--cme')
+                                'chef/datasets/pkg/ddf--cme@v0.0.1')
 
     ds = DDFcsv.from_path(dataset_path).ddf
 
