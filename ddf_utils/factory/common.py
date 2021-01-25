@@ -111,6 +111,24 @@ def download(url, out_file, session=None, resume=True, method="GET", post_data=N
         return response
 
     @retry(times=retry_times, backoff=backoff, exceptions=(Exception, ChunkedEncodingError))
+    def run_simple():
+        request = prepare_request()
+        response = session.send(request, stream=True, timeout=timeout)
+        response.raise_for_status()
+        if progress_bar:
+            pbar = tqdm(unit='B', unit_scale=True)
+        with open(out_file, 'wb') as f:
+            for chunk in response.iter_content(chunk_size=1024):
+                if chunk:
+                    f.write(chunk)
+                    f.flush()
+                    if progress_bar:
+                        pbar.update(1024)
+            f.close()
+        if progress_bar:
+            pbar.close()
+
+    @retry(times=retry_times, backoff=backoff, exceptions=(Exception, ChunkedEncodingError))
     def run(file_size_, resume_=False):
         if osp.exists(out_file) and resume_:
             first_byte = osp.getsize(out_file)
@@ -161,11 +179,17 @@ def download(url, out_file, session=None, resume=True, method="GET", post_data=N
     # check server for resuming support
     head_response = get_response()
     if not head_response.headers.get('Accept-Ranges'):
-        print("server doesn't support resuming, we will run download without resuming")
-        resume = False
-
-    file_size = int(head_response.headers['Content-Length'])
-    run(file_size, resume)
+        if resume:
+            print("server doesn't support resuming, we will run download without resuming")
+            resume = False
+    if not head_response.headers.get('Content-Length'):
+        if resume:
+            print("server doesn't support resuming, we will run download without resuming")
+            resume = False
+        run_simple()
+    else:
+        file_size = int(head_response.headers['Content-Length'])
+        run(file_size, resume)
 
 @attr.s
 class DataFactory(ABC):
