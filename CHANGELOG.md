@@ -1,3 +1,7 @@
+## version 1.0.12 2021-01-19
+
+- ihme loader: update link template and fix json issue (#130)
+
 ## version 1.0.11 2020-09-09
 
 - merge procedure: fix datapoints deep merge logic
