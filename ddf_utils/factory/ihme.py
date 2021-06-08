@@ -224,7 +224,8 @@ class IHMELoader(DataFactory):
             # TODO: should be split, don't combine these context here.
             measure = read_opt(kwargs, 'measure', default=measures)
             metric = read_opt(kwargs, 'metric', default=[1, 2, 3])
-            context_values = rei[rei['type'] == context]['rei_id'].tolist()
+            context_values = rei[rei['type'] == context]['id'].tolist()
+            context_values = read_opt(kwargs, 'rei', default=context_values)  # use user-provided ids if given
             cause = read_opt(kwargs, 'cause', default=causes)
             queries.update({
                 'measure[]': measure,
