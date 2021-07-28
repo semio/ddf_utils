@@ -20,7 +20,7 @@ from typing import List
 
 from . dag import DAG, IngredientNode, ProcedureNode
 from .. exceptions import ChefRuntimeError
-from .. helpers import get_procedure, gen_sym, query, read_local_ddf, make_abs_path
+from .. helpers import get_procedure, make_abs_path, memory
 from . ingredient import Ingredient, ingredient_from_dict
 
 
@@ -271,6 +271,7 @@ class Chef:
                         dish_result.serve(outpath)
 
             _serve_all(self.serving).compute()
+            memory.reduce_size()
 
         return results
 
