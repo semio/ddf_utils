@@ -133,13 +133,15 @@ class EntityDomain:
         return list(sets)
 
     def get_entity_set(self, s):
+        if s == [] or s is None:
+            return [e for e in self.entities if e.sets == []]
         return [e for e in self.entities if s in e.sets]
 
     def has_entity(self, sid):
         return sid in self.entity_ids
 
-    def to_dict(self, eset=None):
-        if eset:
+    def to_dict(self, eset=False):
+        if eset or eset == []:
             entities = self.get_entity_set(eset)
             return [e.to_dict(eset) for e in entities]
         else:
