@@ -1,3 +1,9 @@
+## version 1.0.13 2021-08-11
+
+- rewrite the download() function to use libcurl
+- EntityDomain class support querying entities with no sets
+- ihme loader: add support for filtering rei context (#132)
+
 ## version 1.0.12 2021-01-19
 
 - ihme loader: update link template and fix json issue (#130)
