@@ -132,6 +132,9 @@ class DDFcsv(DataPackage):
 
     # config for read_csv
     _default_reader_options = {'keep_default_na': False, 'na_values': ['']}
+    _default_dask_reader_options = {'keep_default_na': False,
+                                    'na_values': [''],
+                                    'sample_rows': 1000000}
 
     def __attrs_post_init__(self):
         super(DDFcsv, self).__attrs_post_init__()
@@ -287,11 +290,13 @@ class DDFcsv(DataPackage):
         datapoints = dict()
         for i, v in indicators.items():
             datapoints[i] = dict()
-            dtypes_ = dtypes.copy()
+            # dtypes_ = dtypes.copy()
             # dtypes_[i] = 'float'  # TODO: supporting string/float datatypes, not just float
-            read_csv_options = dict(dtype=dtypes)
+            read_csv_options = self._default_dask_reader_options.copy()
+            read_csv_options.update(dict(dtype=dtypes))
             for k, paths in v.items():
-                dp = DaskDataPoint(id=i, dimensions=k, path=paths, concept_types=concept_types, read_csv_options=read_csv_options)
+                dp = DaskDataPoint(id=i, dimensions=k, path=paths, concept_types=concept_types,
+                                   read_csv_options=read_csv_options)
                 datapoints[i][k] = dp
 
         # load synonyms
