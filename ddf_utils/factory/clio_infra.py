@@ -13,7 +13,7 @@ from lxml import etree
 import requests
 from urllib.parse import urljoin
 
-from .common import DataFactory
+from .common import DataFactory, download
 
 
 class ClioInfraLoader(DataFactory):
@@ -81,14 +81,8 @@ class ClioInfraLoader(DataFactory):
             path = row['url']
 
             file_url = urljoin(self.url, path)
-            res = requests.get(file_url, stream=True, verify=False)
             fn = osp.join(out_dir, f'{name}.xlsx')
 
-            print("downloading {} to {}".format(file_url, fn))
-            with open(fn, 'wb') as f:
-                for chunk in res.iter_content(chunk_size=1024):
-                    if chunk:
-                        f.write(chunk)
-                        f.flush()
-                f.close()
+            print("downloading {} to {}".format(file_url,
+            download(file_url, fn, resume=False, progress_bar=False)
         print('Done downloading source files.')
