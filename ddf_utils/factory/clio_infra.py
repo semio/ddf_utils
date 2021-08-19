@@ -83,6 +83,6 @@ class ClioInfraLoader(DataFactory):
             file_url = urljoin(self.url, path)
             fn = osp.join(out_dir, f'{name}.xlsx')
 
-            print("downloading {} to {}".format(file_url,
+            print("downloading {} to {}".format(file_url, fn))
             download(file_url, fn, resume=False, progress_bar=False)
         print('Done downloading source files.')
