@@ -137,6 +137,7 @@ def download(url, out_file, resume=True, method=None, post_data=None,
     c.setopt(c.TIMEOUT, timeout)
     c.setopt(c.CAINFO, certifi.where())  # For HTTPS
     c.setopt(c.USERAGENT, "ddf_utils/1.0")
+    c.setopt(c.COOKIEFILE, "")
     # c.setopt(c.VERBOSE, True)
     if progress_bar:
         c.setopt(c.NOPROGRESS, False)
