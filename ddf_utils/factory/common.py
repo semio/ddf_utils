@@ -276,20 +276,22 @@ def download_2(url, out_file, session=None, resume=True, method="GET", post_data
 
     # main function body
     print(f"begin downloading {out_file}...")
-    # check server for resuming support
-    head_response = get_response('HEAD')
-    if not head_response.headers.get('Accept-Ranges'):
-        if resume:
+
+    if resume:
+        # check server for resuming support, reset to not resuming if it's not supported
+        head_response = get_response('HEAD')
+        if not head_response.headers.get('Accept-Ranges'):
             print("server doesn't support resuming, we will run download without resuming")
             resume = False
-    if not head_response.headers.get('Content-Length'):
-        if resume:
-            print("server doesn't support resuming, we will run download without resuming")
+        if not head_response.headers.get('Content-Length'):
+            print("content length missing. we will run download without resuming")
             resume = False
-        run_simple()
-    else:
+    if resume:
         file_size = int(head_response.headers['Content-Length'])
         run(file_size, resume)
+    else:
+        run_simple()
+
 
 @attr.s
 class DataFactory(ABC):
