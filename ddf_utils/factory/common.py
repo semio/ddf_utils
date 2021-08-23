@@ -130,22 +130,25 @@ def download(url, out_file, resume=True, method=None, post_data=None,
     when setting resume = True, it's user's responsibility to ensure the file
     on disk is the same version as the file on server.
     """
-    # TODO: add more configurations from kwargs
-    c = pycurl.Curl()
-    c.setopt(c.FOLLOWLOCATION, True)
-    c.setopt(c.URL, url)
-    c.setopt(c.TIMEOUT, timeout)
-    c.setopt(c.CAINFO, certifi.where())  # For HTTPS
-    c.setopt(c.USERAGENT, "ddf_utils/1.0")
-    c.setopt(c.COOKIEFILE, "")
-    # c.setopt(c.VERBOSE, True)
-    if progress_bar:
-        c.setopt(c.NOPROGRESS, False)
-    if post_data:
-        c.setopt(c.POSTFIELDS, urlencode(post_data))
+    def prepare_curl():
+        # TODO: add more configurations from kwargs
+        c = pycurl.Curl()
+        c.setopt(c.FOLLOWLOCATION, True)
+        c.setopt(c.URL, url)
+        c.setopt(c.TIMEOUT, timeout)
+        c.setopt(c.CAINFO, certifi.where())  # For HTTPS
+        c.setopt(c.USERAGENT, "ddf_utils/1.0")
+        c.setopt(c.COOKIEFILE, "")
+        # c.setopt(c.VERBOSE, True)
+        if progress_bar:
+            c.setopt(c.NOPROGRESS, False)
+        if post_data:
+            c.setopt(c.POSTFIELDS, urlencode(post_data))
+        return c
 
     @retry(times=retry_times, backoff=backoff, exceptions=(Exception))
     def run(resume):
+        c = prepare_curl()
         acceptor = DownloadAcceptor(c, out_file, resume)
         if resume and osp.exists(out_file):
             first_byte = osp.getsize(out_file)
@@ -155,10 +158,11 @@ def download(url, out_file, resume=True, method=None, post_data=None,
         if c.getinfo(c.HTTP_CODE) == 416:
             print("the http status code is 416, possibly the download was completed.")
             print("if you believe it's not completed, please remove the file and try again.")
+        c.close()
         return
 
     run(resume)
-    c.close()
+
 
 
 def download_2(url, out_file, session=None, resume=True, method="GET", post_data=None,
