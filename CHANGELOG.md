@@ -1,3 +1,8 @@
+## version 1.0.14 2021-08-24
+
+- improved and fixed bug in the curl download function
+- imporved dask datapoint reader to correctly determine dtypes
+
 ## version 1.0.13 2021-08-11
 
 - rewrite the download() function to use libcurl
