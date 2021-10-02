@@ -5,6 +5,7 @@
 import logging
 from typing import List
 
+import numpy as np
 import pandas as pd
 
 from .. helpers import debuggable
@@ -82,7 +83,9 @@ def run_op(chef: Chef, ingredients: List[DataPointIngredient], result, op) -> Da
     df = df.set_index(keys)
 
     for k, v in op.items():
-        res = df.eval(v).dropna()  # type(res) is Series
+        # run the operation and drop inf and na from result
+        # type(res) is Series
+        res = df.eval(v).replace([np.inf, -np.inf], np.nan).dropna()
         res.name = k
         if k not in df.columns:
             df[k] = res
