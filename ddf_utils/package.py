@@ -261,7 +261,7 @@ def create_datapackage(path, gen_schema=True, progress_bar=False, **kwargs):
     return sort_json(result)
 
 
-def get_ddf_files(path, root=None):
+def get_ddf_files(path, root=None, skiplist=['lang', 'etl', 'langsplit']):
     """yield all csv files which are named following the DDF model standard.
 
     Parameters
@@ -270,26 +270,28 @@ def get_ddf_files(path, root=None):
         the path to check
     root : `str`, optional
         if path is relative, append the root to all files.
+    skiplist : `str`, optional
+        subfolders to exclude
     """
-    info = next(os.walk(path))
+    dirname, subdirs, files = next(os.walk(path))
 
     # don't include hidden and lang/etl dir.
-    sub_dirs = [
-        x for x in info[1] if (not x.startswith('.') and x not in ['lang', 'etl', 'langsplit'])
+    sub_dirs_minus_skiplist = [
+        x for x in subdirs if (not x.startswith('.') and x not in skiplist)
     ]
-    files = list()
-    for x in info[2]:
+    files_ddf = list()
+    for x in files:
         if x.startswith('ddf--') and x != 'ddf--index.csv' and x.endswith('.csv'):
-            files.append(x)
+            files_ddf.append(x)
         else:
             logging.warning('skipping file {}'.format(x))
 
-    for f in files:
+    for f in files_ddf:
         if root:
-            yield os.path.join(root, f)
+            yield os.path.join(root, dirname, f)
         else:
-            yield f
+            yield os.path.join(dirname, f)
 
-    for sd in sub_dirs:
-        for p in get_ddf_files(os.path.join(path, sd), root=sd):
+    for sd in sub_dirs_minus_skiplist:
+        for p in get_ddf_files(os.path.join(dirname, sd), root=None, skiplist=[]):
             yield p
