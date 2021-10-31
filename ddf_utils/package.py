@@ -288,10 +288,13 @@ def get_ddf_files(path, root=None, skiplist=['lang', 'etl', 'langsplit']):
 
     for f in files_ddf:
         if root:
-            yield os.path.join(root, dirname, f)
+            yield os.path.join(root, f)
         else:
-            yield os.path.join(dirname, f)
+            yield f
 
     for sd in sub_dirs_minus_skiplist:
         for p in get_ddf_files(os.path.join(dirname, sd), root=None, skiplist=[]):
-            yield p
+            if root:
+                yield os.path.join(root, sd, p)
+            else:
+                yield os.path.join(sd, p)
