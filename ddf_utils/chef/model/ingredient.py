@@ -363,7 +363,7 @@ class EntityIngredient(Ingredient):
                     if len(noset) > 0:
                         df_noset = df.loc[noset].drop(is_headers, axis=1).dropna(axis=1, how='all')
                         path = os.path.join(outpath, 'ddf--entities--{}.csv'.format(k))
-                        df_noset = sort_df(df_noset, key=domain)
+                        df_noset = sort_df(df_noset, key=domain, custom_column_order=custom_column_order)
                         df_noset.to_csv(path, index=False)
             else:
                 # FIXME: is it even possible that self.key(domain) is not same as k?

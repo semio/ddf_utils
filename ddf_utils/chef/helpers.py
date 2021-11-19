@@ -187,8 +187,9 @@ def sort_df(df, key, sort_key_columns=True, custom_column_order=None):
         order = dict([(x, 0) for x in cols_minus_key])
         order.update(custom_column_order)
         # sort in a dataframe and back to list.
-        order_new = (pd.DataFrame.from_dict(order, orient='index', columns=['Ord'])
-                     .sort_values(by='Ord', ascending=False).index.tolist())
+        order_new = (pd.DataFrame.from_dict(order, orient='index', columns=['Ord']).reset_index()
+                     .sort_values(by=['Ord', 'index'], ascending=[False, True])['index']
+                     .values.tolist())
         cols_minus_key_new = [x for x in order_new if x in cols_minus_key]
         cols_minus_key = cols_minus_key_new
     else:
