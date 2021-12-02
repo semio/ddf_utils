@@ -8,6 +8,7 @@ import json
 import csv
 import re
 from datetime import datetime, timezone
+from pathlib import Path, PurePosixPath, WindowsPath
 
 from collections.abc import Mapping, Sequence
 from collections import OrderedDict
@@ -142,7 +143,8 @@ def create_datapackage(path, gen_schema=True, progress_bar=False, **kwargs):
     names_sofar = dict()
 
     for f in get_ddf_files(path):
-        path_res = f
+        # use PurePosixPath to ensure paths are in unix style in datapackage.json
+        path_res = str(PurePosixPath(f))
         name_res = os.path.splitext(os.path.basename(f))[0]
 
         if name_res in names_sofar.keys():
@@ -288,13 +290,13 @@ def get_ddf_files(path, root=None, skiplist=['lang', 'etl', 'langsplit']):
 
     for f in files_ddf:
         if root:
-            yield os.path.join(root, f)
+            yield Path(root) / Path(f)
         else:
-            yield f
+            yield Path(f)
 
     for sd in sub_dirs_minus_skiplist:
         for p in get_ddf_files(os.path.join(dirname, sd), root=None, skiplist=[]):
             if root:
-                yield os.path.join(root, sd, p)
+                yield Path(root) / Path(sd) / Path(p)
             else:
-                yield os.path.join(sd, p)
+                yield Path(sd) / Path(p)
