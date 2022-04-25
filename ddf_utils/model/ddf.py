@@ -80,6 +80,9 @@ class EntityDomain:
     entities: List[Entity] = attr.ib(factory=list)
     props: dict = attr.ib(factory=dict)
 
+    # TODO: maybe I don't need to use the validator. just change the init part
+    # to add entities one by one and check them? But with this I can't show
+    # how many duplicates are there...
     @entities.validator
     def _check_entities_identity(self, attribute, value):
         """double check entities provided in initialization
