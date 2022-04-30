@@ -93,13 +93,13 @@ class IHMELoader(DataFactory):
                 break
             sleep(30)
 
-    def bulk_download(self, out_dir, version, context, **kwargs):
+    def send_query(self, version, context, **kwargs):
         """download the selected contexts/queries from GBD result tools.
 
-        ``context`` could be a string or a list of strings. The
-        complete query will be generated with ``_make_query`` method
-        and all keywork args. When context is a list, multiple queries
-        will be run.
+        ``context`` should be a string which available values are in
+        the ``context`` option of GBD results tool. The complete query
+        will be generated with ``_make_query`` method and all keywork
+        args. When context is a list, multiple queries will be run.
 
         """
         if not self.metadata:
@@ -107,51 +107,32 @@ class IHMELoader(DataFactory):
 
         metadata = self.metadata
 
-        if isinstance(context, list):
-            query = [self._make_query(c, version, **kwargs) for c in context]
-        else:
-            query = [self._make_query(context, version, **kwargs)]
-
-        taskIDs = set()
-
-        # make a series of queries, the server will response a series of task ids.
+        query = self._make_query(context, version, **kwargs)
         session = requests_retry_session()
-        for q in query:
-            res_data = session.post(self.url_data, data=q)
-            # print(res_data.json())
-            if res_data.status_code not in [200, 202]:
-                print(res_data.text)
-                raise ValueError("status code not 200: {}".format(res_data.status_code))
-            if isinstance(res_data.json()['taskID'], list):
-                for taskID in res_data.json()['taskID']:
-                    taskIDs.add(taskID)
-            else:
-                taskIDs.add(res_data.json()['taskID'])
+        res_data = session.post(self.url_data, data=query)
+        if res_data.status_code not in [200, 202]:
+            print(res_data.text)
+            raise ValueError("status code not 200: {}".format(res_data.status_code))
+        print("Finished sending query to GBD results tool. Please check your "
+              "mailbox and get the taskID and run bulk_down with the taskID. ")
 
-        # then, we check each task, download all files linked to the task.
-        if len(taskIDs) == 0:
-            print('no available results')
-            return
+    def bulk_download(self, out_dir, taskID):
+        url = self.url_task.format(hash=taskID)
+        print('working on {}'.format(url))
+        print('check status as http://ghdx.healthdata.org/gbd-results-tool/result/{}'.format(taskID))
+        print('available downloads:')
 
-        for i in taskIDs:
-            url = self.url_task.format(hash=i)
-            print('working on {}'.format(url))
-            print('check status as http://ghdx.healthdata.org/gbd-results-tool/result/{}'.format(i))
-            print('available downloads:')
-
-            for u in self.download_links(url):
-                tries = 1
-                while tries <= 5:
-                    try:
-                        self._run_download(u, out_dir, taskID=i)
-                        break
-                    except (ValueError, requests.exceptions.ConnectionError) as e:
-                        if tries == 5:
-                            raise
-                        print("download interrupted, retrying...")
-                        tries = tries + 1
-
-        return [i[:8] for i in taskIDs]
+        for u in self.download_links(url):
+            tries = 1
+            while tries <= 5:
+                try:
+                    self._run_download(u, out_dir, taskID=taskID)
+                    break
+                except (ValueError, requests.exceptions.ConnectionError):
+                    if tries == 5:
+                        raise
+                    print("download interrupted, retrying...")
+                    tries = tries + 1
 
     def _run_download(self, u, out_dir, taskID):
         '''accept an URL and download it to out_dir'''
