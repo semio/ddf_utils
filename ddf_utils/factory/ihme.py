@@ -26,13 +26,13 @@ from . common import requests_retry_session, DataFactory, download
 
 # TODO: add missing context/base configures.
 class IHMELoader(DataFactory):
-    url_hir = 'http://ghdx.healthdata.org/sites/all/modules/custom/ihme_query_tool/gbd-search/php/hierarchy/'
-    url_metadata = 'http://ghdx.healthdata.org/sites/all/modules/custom/ihme_query_tool/gbd-search/php/metadata/'
-    url_version = 'http://ghdx.healthdata.org/sites/all/modules/custom/ihme_query_tool/gbd-search/php/version/'
+    url_hir = 'https://ghdx.healthdata.org/sites/all/modules/custom/ihme_query_tool/gbd-search/php/hierarchy/'
+    url_metadata = 'https://ghdx.healthdata.org/sites/all/modules/custom/ihme_query_tool/gbd-search/php/metadata/'
+    url_version = 'https://ghdx.healthdata.org/sites/all/modules/custom/ihme_query_tool/gbd-search/php/version/'
     # url for query data:
     # http://ghdx.healthdata.org/sites/all/modules/custom/ihme_query_tool/gbd-search/php/data.php
     # below is url for download data as zip
-    url_data = 'http://ghdx.healthdata.org/sites/all/modules/custom/ihme_query_tool/gbd-search/php/download.php'
+    url_data = 'https://ghdx.healthdata.org/sites/all/modules/custom/ihme_query_tool/gbd-search/php/download.php'
     url_task = 'https://s3.healthdata.org/gbd-api-2019-public/{hash}'  # access to download link
 
     def load_metadata(self):
@@ -119,7 +119,7 @@ class IHMELoader(DataFactory):
     def bulk_download(self, out_dir, taskID):
         url = self.url_task.format(hash=taskID)
         print('working on {}'.format(url))
-        print('check status as http://ghdx.healthdata.org/gbd-results-tool/result/{}'.format(taskID))
+        print('check status as https://ghdx.healthdata.org/gbd-results-tool/result/{}'.format(taskID))
         print('available downloads:')
 
         for u in self.download_links(url):
@@ -221,7 +221,7 @@ class IHMELoader(DataFactory):
             raise NotImplementedError
 
         # insert context and version and other configs
-        rows = read_opt(kwargs, 'rows', default=10000000)  # the maximum records we can get
+        rows = read_opt(kwargs, 'rows', default=500000)  # the maximum records we can get
         # ^ Note: user guide[1] says it's 500000 row. But actually we can set this to 10000000
         # [1]: http://www.healthdata.org/sites/default/files/files/Data_viz/GBD_2017_Tools_Overview.pdf
         email = read_opt(kwargs, 'email', default='downloader@gapminder.org')
@@ -233,6 +233,9 @@ class IHMELoader(DataFactory):
         age = read_opt(kwargs, 'age', default=ages)
         sex = read_opt(kwargs, 'sex', default=sexs)
         year = read_opt(kwargs, 'year', default=years)
+        audience = read_opt(kwargs, 'audience', default='public')
+        toolid = read_opt(kwargs, 'toolID', default=1)
+        gbdRound = read_opt(kwargs, 'gbdRound', default=2019)
 
         queries.setdefault('context', context)
         queries.setdefault('version', version)
@@ -245,5 +248,16 @@ class IHMELoader(DataFactory):
         queries.setdefault('age[]', age)
         queries.setdefault('sex[]', sex)
         queries.setdefault('year[]', year)
+        queries.setdefault('audience', audience)
+        queries.setdefault('toolID', toolid)
+        queries.setdefault('gbdRound', gbdRound)
+        queries['numParams'] = (
+            len(age)
+            * len(year)
+            * len(sex)
+            * len(location)
+            * len(cause)
+            * len(metric)
+            * len(measure))
 
         return queries
