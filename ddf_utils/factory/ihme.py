@@ -9,6 +9,11 @@ make use of it.
 
 .. _`GBD result tool`: http://ghdx.healthdata.org/gbd-results-tool
 
+To see how to use this downloader, please check the scripts at
+open-numbers' `IHME dataset`_
+
+.. _`IHME dataset`: https://github.com/open-numbers/ddf--ihme--death_cause_compact/blob/0e0951eb6a41c02a3f3928849ace7fb56e968c38/etl/scripts/update_source.py
+
 """
 
 import os
