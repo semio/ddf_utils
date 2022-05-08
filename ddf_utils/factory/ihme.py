@@ -126,7 +126,7 @@ class IHMELoader(DataFactory):
             tries = 1
             while tries <= 5:
                 try:
-                    self._run_download(u, out_dir, taskID=taskID)
+                    self._run_download(u, out_dir)
                     break
                 except (ValueError, requests.exceptions.ConnectionError):
                     if tries == 5:
@@ -134,13 +134,13 @@ class IHMELoader(DataFactory):
                     print("download interrupted, retrying...")
                     tries = tries + 1
 
-    def _run_download(self, u, out_dir, taskID):
+    def _run_download(self, u, out_dir):
         '''accept an URL and download it to out_dir'''
 
-        if not osp.exists(osp.join(out_dir, taskID[:8])):
-            os.mkdir(osp.join(out_dir, taskID[:8]))
+        if not osp.exists(osp.join(out_dir)):
+            os.mkdir(osp.join(out_dir))
 
-        fn = osp.join(out_dir, taskID[:8], osp.basename(u))
+        fn = osp.join(out_dir, osp.basename(u))
         print('downloading {} to {}'.format(u, fn))
 
         download(u, fn)
