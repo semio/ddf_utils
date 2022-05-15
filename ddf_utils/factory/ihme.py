@@ -31,13 +31,13 @@ from . common import requests_retry_session, DataFactory, download
 
 # TODO: add missing context/base configures.
 class IHMELoader(DataFactory):
-    url_hir = 'https://ghdx.healthdata.org/sites/all/modules/custom/ihme_query_tool/gbd-search/php/hierarchy/'
-    url_metadata = 'https://ghdx.healthdata.org/sites/all/modules/custom/ihme_query_tool/gbd-search/php/metadata/'
-    url_version = 'https://ghdx.healthdata.org/sites/all/modules/custom/ihme_query_tool/gbd-search/php/version/'
+    url_hir = 'https://vizhub.healthdata.org/gbd-results/php/hierarchy/'
+    url_metadata = 'https://vizhub.healthdata.org/gbd-results/php/metadata/'
+    url_version = 'https://vizhub.healthdata.org/gbd-results/php/version/'
     # url for query data:
     # http://ghdx.healthdata.org/sites/all/modules/custom/ihme_query_tool/gbd-search/php/data.php
     # below is url for download data as zip
-    url_data = 'https://ghdx.healthdata.org/sites/all/modules/custom/ihme_query_tool/gbd-search/php/download.php'
+    url_data = 'https://vizhub.healthdata.org/sites/all/modules/custom/ihme_query_tool/gbd-search/php/download.php'
     url_task = 'https://s3.healthdata.org/gbd-api-2019-public/{hash}'  # access to download link
 
     def load_metadata(self):
@@ -49,14 +49,18 @@ class IHMELoader(DataFactory):
 
         metadata = {}
 
-        for k in meta['data'].keys():
-            if k == 'location':  # locations metadata id messed up, need to reset
-                loc = pd.DataFrame.from_dict(meta['data'][k], orient='index')
-                loc['id'] = loc.index
-                loc = loc.drop('location_id', axis=1)
-                metadata[k] = loc
+        for k, v in meta['data'].items():
+            # if k == 'location':  # locations metadata id messed up, need to reset
+            #     loc = pd.DataFrame.from_dict(meta['data'][k], orient='index').T
+            #     loc['id'] = loc.index
+            #     loc = loc.drop('location_id', axis=1)
+            #     metadata[k] = loc
+            # else:
+            #     metadata[k] = pd.DataFrame.from_dict(meta['data'][k], orient='index')
+            if v:
+                metadata[k] = pd.DataFrame.from_dict(v, orient='index')
             else:
-                metadata[k] = pd.DataFrame.from_dict(meta['data'][k], orient='index')
+                metadata[k] = None
 
         metadata['version'] = pd.DataFrame.from_dict(versions['data'], orient='index')
         self.metadata = metadata
