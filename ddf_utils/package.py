@@ -220,7 +220,7 @@ def create_datapackage(path, gen_schema=True, progress_bar=False, **kwargs):
                 # )
                 # key = header[0]
 
-            schema['primaryKey'] = key
+            schema['primaryKey'] = [key]
             for h in header:
                 schema['fields'].append({'name': h})
             resources[n].update({'schema': schema})
@@ -240,7 +240,7 @@ def create_datapackage(path, gen_schema=True, progress_bar=False, **kwargs):
             with open(os.path.join(path, r['path'])) as f:
                 reader = csv.reader(f, delimiter=',', quotechar='"')
                 header = next(reader)
-            schema['primaryKey'] = 'concept'
+            schema['primaryKey'] = ['concept']
             for h in header:
                 schema['fields'].append({'name': h})
             resources[n].update({'schema': schema})
