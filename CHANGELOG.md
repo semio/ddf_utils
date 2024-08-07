@@ -1,3 +1,7 @@
+## version 1.0.15 2024-08-07
+- all resources' primaryKey properity will be an array in datapackage.json now
+- update the code to make it work with newer version of pandas
+
 ## version 1.0.14 2021-08-24
 
 - improved and fixed bug in the curl download function
