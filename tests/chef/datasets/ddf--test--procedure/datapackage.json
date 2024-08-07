@@ -7,7 +7,7 @@
     "description": "",
     "author": "",
     "license": "",
-    "created": "2019-05-10T07:20:38.443109+00:00",
+    "created": "2024-08-06T03:01:12.086562+00:00",
     "resources": [
         {
             "name": "ddf--concepts",
@@ -24,7 +24,9 @@
                         "name": "concept_type"
                     }
                 ],
-                "primaryKey": "concept"
+                "primaryKey": [
+                    "concept"
+                ]
             }
         },
         {
@@ -89,7 +91,9 @@
                         "name": "name"
                     }
                 ],
-                "primaryKey": "country"
+                "primaryKey": [
+                    "country"
+                ]
             }
         },
         {
@@ -104,7 +108,9 @@
                         "name": "name"
                     }
                 ],
-                "primaryKey": "sex"
+                "primaryKey": [
+                    "sex"
+                ]
             }
         }
     ],

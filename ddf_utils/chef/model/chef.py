@@ -13,7 +13,7 @@ from time import time
 
 from dask import delayed
 
-import ruamel.yaml as yaml
+from ruamel.yaml import YAML
 from graphviz import Digraph
 
 from typing import List
@@ -26,13 +26,14 @@ from . ingredient import Ingredient, ingredient_from_dict
 
 logger = logging.getLogger(__name__)
 
+yaml = YAML(typ='rt')
 
 def _loadfile(f):
     """load json/yaml file, into AttrDict"""
     if re.match(r'.*\.json', f):
         res = json.load(open(f))
     else:
-        res = yaml.load(open(f), Loader=yaml.Loader)
+        res = yaml.load(open(f))
 
     return res
 
@@ -309,7 +310,7 @@ class Chef:
             if len(v) > 0:
                 recipe['cooking'][k] = v
 
-        yaml.round_trip_dump(recipe, fp)
+        yaml.dump(recipe, fp)
 
     def to_graph(self, node=None):
 

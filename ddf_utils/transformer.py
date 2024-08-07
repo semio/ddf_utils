@@ -370,6 +370,8 @@ def trend_bridge(old_ser: pd.Series, new_ser: pd.Series, bridge_length: int) -> 
     fraction = bridge_height / bridge_length
 
     bridge_data = old_data.copy()
+    # because fraction is float numbers. we should also cast bridge data to float
+    bridge_data = bridge_data.astype('float64')
 
     for i in old_data.loc[bridge_start:bridge_end].index:
         bridge_data.loc[i:bridge_end] = bridge_data.loc[i:bridge_end] + fraction

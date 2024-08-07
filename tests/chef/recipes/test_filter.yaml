@@ -59,9 +59,9 @@ cooking:
       ingredients:
           - cme-concepts
       options:
-          item:
-              $in:
-                  concept:
+          row:
+              concept:
+                  $in:
                       - imr_lower
                       - no_exist
       result: cme-concepts-filtered

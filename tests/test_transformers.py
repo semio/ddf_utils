@@ -40,8 +40,8 @@ def test_trend_bridge():
     assert res4.index.values.tolist() == [0, 1, 2, 3, 7, 8, 9, 10]
     assert_almost_equal(res4.loc[7], s2.loc[7])
 
-    tr1 = pd.date_range('1990', '1995', freq='A')
-    tr2 = pd.date_range('1994', '2000', freq='A')
+    tr1 = pd.date_range('1990', '1995', freq='YE')
+    tr2 = pd.date_range('1994', '2000', freq='YE')
     s1 = pd.Series([1, 2, 3, 4, 5], index=tr1)
     s2 = pd.Series([6, 7, 8, 9, 10, 11], index=tr2)
     trend_bridge(s1, s2, 3)

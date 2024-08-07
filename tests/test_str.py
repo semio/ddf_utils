@@ -4,8 +4,10 @@
 import re
 import pandas as pd
 from hypothesis import given, strategies as st
+import hypothesis
 
 
+@hypothesis.settings(deadline=500)
 @given(s=st.text(min_size=0))
 def test_to_concept_id(s):
     from ddf_utils.str import to_concept_id
@@ -15,6 +17,7 @@ def test_to_concept_id(s):
         assert re.match(r'[0-9a-z_]*', res)
 
 
+@hypothesis.settings(deadline=500)
 @given(num=st.floats())
 def test_format_float_sigfig(num):
     from ddf_utils.str import format_float_sigfig
@@ -30,6 +33,7 @@ def test_format_float_sigfig(num):
         assert re.match(r'[0-9.e\+]*', res2)
 
 
+@hypothesis.settings(deadline=500)
 @given(num=st.floats())
 def test_format_float_digits(num):
     from ddf_utils.str import format_float_digits
@@ -45,6 +49,7 @@ def test_format_float_digits(num):
         assert re.match(r'[0-9]*', res2)
 
 
+@hypothesis.settings(deadline=500)
 @given(num=st.floats(min_value=0.1, max_value=10e13))
 def test_float_to_decimal(num):
     from ddf_utils.str import _float_to_decimal

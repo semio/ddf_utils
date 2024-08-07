@@ -142,7 +142,7 @@ def _merge_two(left: Dict[str, Union[pd.DataFrame, dd.DataFrame]],
         right_df = pd.concat([x for x in right.values()], sort=False)
 
         if deep:
-            merged = left_df.append(right_df, sort=False)
+            merged = pd.concat([left_df, right_df], sort=False)
             res = merged.groupby(by=index_col).agg(__get_last_item)
             res_data = {'concept': res.reset_index()}
         else:
@@ -155,7 +155,7 @@ def _merge_two(left: Dict[str, Union[pd.DataFrame, dd.DataFrame]],
         if deep:
             for k, df in right.items():
                 if k in left.keys():
-                    left[k] = left[k].append(df, ignore_index=True, sort=False)
+                    left[k] = pd.concat([left[k], df], ignore_index=True, sort=False)
                     left[k] = left[k].groupby(index_col).agg(__get_last_item).reset_index()
                 else:
                     left[k] = df

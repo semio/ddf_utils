@@ -122,18 +122,15 @@ def trend_bridge(chef: Chef, ingredients: List[DataPointIngredient], bridge_star
 
     for c1, c2, c3 in zip(bridge_start['column'], bridge_end['column'], target_column):
         logger.info("bridge_start: {}, bridge_end: {}, target_column: {}".format(c1, c2, c3))
-        start_group = start_computed[c1].set_index(bridge_on).groupby(keys)
-        end_group = end_computed[c2].set_index(bridge_on).groupby(keys)
+        start_group = start_computed[c1].set_index(bridge_on).groupby(keys, observed=True)
+        end_group = end_computed[c2].set_index(bridge_on).groupby(keys, observed=True)
 
         # get all groups
-        # NOTE: currently pandas (0.24) always emits all values from a category when doing groupby, regardless whether
-        # the value is actually in the column.
-        g1 = list(start_group.groups.keys())
-        g2 = list(end_group.groups.keys())
-        all_groups = g1.copy()
-        for g in g2:
-            if g not in all_groups:
-                all_groups.append(g)
+        all_groups = []
+        for g, _ in start_group:
+            all_groups.append(g)
+        for g, _ in end_group:
+            all_groups.append(g)
 
         # calculate trend bridge on each group
         res_grouped = []
@@ -165,13 +162,9 @@ def trend_bridge(chef: Chef, ingredients: List[DataPointIngredient], bridge_star
         for g, v in res_grouped:
             v.name = c3
             v = v.reset_index()
-            if len(keys) == 1:
-                assert isinstance(g, str)
-                v[keys[0]] = g
-            else:
-                assert isinstance(g, tuple)
-                for i, k in enumerate(keys):
-                    v[k] = g[i]
+            assert len(keys) == len(g)
+            for i, k in enumerate(keys):
+                v[k] = g[i]
             res.append(v)
         new_data[c3] = pd.concat(res, ignore_index=True)
 

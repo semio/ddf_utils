@@ -7,7 +7,7 @@
     "description": "",
     "author": "",
     "license": "",
-    "created": "2019-05-02T02:37:15.255375+00:00",
+    "created": "2024-08-06T02:59:38.941880+00:00",
     "resources": [
         {
             "name": "ddf--concepts",
@@ -30,7 +30,9 @@
                         "name": "unit"
                     }
                 ],
-                "primaryKey": "concept"
+                "primaryKey": [
+                    "concept"
+                ]
             }
         },
         {
@@ -108,7 +110,9 @@
                         "name": "name"
                     }
                 ],
-                "primaryKey": "country"
+                "primaryKey": [
+                    "country"
+                ]
             }
         }
     ],

@@ -47,3 +47,7 @@ def test_dtype():
     dp = ds.get_datapoints('imr_lower', ('country', 'year')).data
     assert dp['year'].dtype == 'object'
     assert dp['country'].dtype == 'category'
+
+
+if __name__ == '__main__':
+    test_dtype()

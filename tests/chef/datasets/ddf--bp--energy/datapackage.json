@@ -3,10 +3,15 @@
     "language": {
         "id": "en"
     },
+    "title": "ddf--bp--energy",
+    "description": "",
+    "author": "",
+    "license": "",
+    "created": "2024-08-06T02:59:03.936244+00:00",
     "resources": [
         {
-            "path": "ddf--concepts.csv",
             "name": "ddf--concepts",
+            "path": "ddf--concepts.csv",
             "schema": {
                 "fields": [
                     {
@@ -19,12 +24,14 @@
                         "name": "name"
                     }
                 ],
-                "primaryKey": "concept"
+                "primaryKey": [
+                    "concept"
+                ]
             }
         },
         {
-            "path": "ddf--datapoints--biofuels_production_kboed--by--geo--year.csv",
             "name": "ddf--datapoints--biofuels_production_kboed--by--geo--year",
+            "path": "ddf--datapoints--biofuels_production_kboed--by--geo--year.csv",
             "schema": {
                 "fields": [
                     {
@@ -44,8 +51,8 @@
             }
         },
         {
-            "path": "ddf--datapoints--biofuels_production_ktoe--by--geo--year.csv",
             "name": "ddf--datapoints--biofuels_production_ktoe--by--geo--year",
+            "path": "ddf--datapoints--biofuels_production_ktoe--by--geo--year.csv",
             "schema": {
                 "fields": [
                     {
@@ -65,8 +72,8 @@
             }
         },
         {
-            "path": "ddf--entities--geo.csv",
             "name": "ddf--entities--geo",
+            "path": "ddf--entities--geo.csv",
             "schema": {
                 "fields": [
                     {
@@ -76,8 +83,66 @@
                         "name": "name"
                     }
                 ],
-                "primaryKey": "geo"
+                "primaryKey": [
+                    "geo"
+                ]
             }
         }
-    ]
+    ],
+    "ddfSchema": {
+        "concepts": [
+            {
+                "primaryKey": [
+                    "concept"
+                ],
+                "value": "concept_type",
+                "resources": [
+                    "ddf--concepts"
+                ]
+            },
+            {
+                "primaryKey": [
+                    "concept"
+                ],
+                "value": "name",
+                "resources": [
+                    "ddf--concepts"
+                ]
+            }
+        ],
+        "entities": [
+            {
+                "primaryKey": [
+                    "geo"
+                ],
+                "value": "name",
+                "resources": [
+                    "ddf--entities--geo"
+                ]
+            }
+        ],
+        "datapoints": [
+            {
+                "primaryKey": [
+                    "geo",
+                    "year"
+                ],
+                "value": "biofuels_production_kboed",
+                "resources": [
+                    "ddf--datapoints--biofuels_production_kboed--by--geo--year"
+                ]
+            },
+            {
+                "primaryKey": [
+                    "geo",
+                    "year"
+                ],
+                "value": "biofuels_production_ktoe",
+                "resources": [
+                    "ddf--datapoints--biofuels_production_ktoe--by--geo--year"
+                ]
+            }
+        ],
+        "synonyms": []
+    }
 }

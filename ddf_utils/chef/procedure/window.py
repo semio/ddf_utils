@@ -116,7 +116,7 @@ def window(chef: Chef, ingredients: List[DataPointIngredient], result, **options
             groups = df.groupby(by=keys, sort=False)
             for _, df_g in groups:
                 res.append(df_g.set_index(ingredient.key)
-                           .expanding(min_periods=min_periods, center=center).agg({k: f}))
+                           .expanding(min_periods=min_periods).agg({k: f}))
             newdata[k] = pd.concat(res, sort=False).reset_index()
         else:
             newdata[k] = (df.groupby(by=keys, sort=False)

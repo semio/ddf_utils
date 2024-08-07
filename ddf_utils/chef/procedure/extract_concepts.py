@@ -119,7 +119,7 @@ def extract_concepts(chef: Chef, ingredients: List[Ingredient], result,
 
     # add name column if there isn't one
     if 'name' not in concepts.columns:
-        concepts['name'] = np.nan
+        concepts['name'] = ""
     if 'name' not in concepts.index.values:
         concepts.loc['name', 'concept_type'] = 'string'
         concepts.loc['name', 'name'] = 'Name'

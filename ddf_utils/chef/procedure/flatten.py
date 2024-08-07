@@ -80,8 +80,8 @@ def flatten(chef: Chef, ingredients: List[DataPointIngredient], result, **option
         dfs = dict([(x, data[x]) for x in fnmatch.filter(data.keys(), from_name_tmpl)])
         for from_name, df_ in dfs.items():
             df = df_.compute()
-            grouper = df.groupby(flatten_dimensions)
-            for g, _ in grouper.groups.items():
+            grouper = df.groupby(flatten_dimensions, observed=False)
+            for g, _ in grouper:
                 # logger.warn(g)
                 # FIXME: There is an issue for pandas grouper for categorical data
                 # where it will return all categories even if it's already filtered
@@ -92,8 +92,6 @@ def flatten(chef: Chef, ingredients: List[DataPointIngredient], result, **option
                     continue
                 if df_.empty:
                     continue
-                if not isinstance(g, tuple):
-                    g = [g]
                 tmpl_dict = dict(zip(flatten_dimensions, g))
                 tmpl_dict['concept'] = from_name
                 new_name = new_name_tmpl.format(**tmpl_dict)

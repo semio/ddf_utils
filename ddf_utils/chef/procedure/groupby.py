@@ -110,17 +110,17 @@ def groupby(chef: Chef, ingredients: List[DataPointIngredient], result, **option
         for k in indicator_names:
             df = data[k].compute()
             if comp_type == 'aggregate':
-                newdata[k] = (df.groupby(by=by).agg({k: func})
+                newdata[k] = (df.groupby(by=by, observed=True).agg({k: func})
                               .reset_index().dropna())
             if comp_type == 'transform':
                 df = df.set_index(ingredient.key)
                 levels = [df.index.names.index(x) for x in by]
-                newdata[k] = (df.groupby(level=levels)[k].transform(func)
+                newdata[k] = (df.groupby(level=levels, observed=True)[k].transform(func)
                               .reset_index().dropna())
             if comp_type == 'filter':
                 df = df.set_index(ingredient.key)
                 levels = [df.index.names.index(x) for x in by]
-                newdata[k] = (df.groupby(level=levels)[k].filter(func)
+                newdata[k] = (df.groupby(level=levels, observed=True)[k].filter(func)
                               .reset_index().dropna())
             for col, val in insert_key.items():
                 newdata[k][col] = val

@@ -65,6 +65,7 @@ def open_google_spreadsheet(docid):
     res = req.get(url)
     if res.ok:
         return BytesIO(res.content)
+    res.close()
     return None
 
 
@@ -116,6 +117,7 @@ def download_csv(urls, out_path):
         with open(os.path.join(out_path, fn), 'wb') as fd:
             for chunk in r.iter_content(chunk_size=128):
                 fd.write(chunk)
+            fd.close()
 
     def create_tread(url_, out_path_):
         download_thread = threading.Thread(target=download, args=(url_, out_path_))
@@ -127,10 +129,16 @@ def download_csv(urls, out_path):
         threads.append(create_tread(url, out_path))
 
     # wait until all downloads are done
-    is_alive = [t.is_alive() for t in threads]
-    while any(is_alive):
-        time.sleep(1)
-        is_alive = [t.is_alive() for t in threads]
+    while True:
+        is_alive = False
+        for t in threads:
+            if t.is_alive():
+                is_alive = True
+                time.sleep(1)
+            else:
+                t.join()
+        if not is_alive:
+            break
 
 
 def csvs_to_ddf(files, out_path):

@@ -53,8 +53,11 @@ def test_extract_concepts():
 def test_filter():
     chef = chef_fn('test_filter.yaml')
     res = chef.run()
+    res_conc = list(filter(lambda x: True if x.dtype == 'concepts' else False, res))[0]
     res_ent = list(filter(lambda x: True if x.dtype == 'entities' else False, res))[0]
     res_dps = list(filter(lambda x: True if x.dtype == 'datapoints' else False, res))[0]
+
+    assert 'imr_lower' in res_conc.get_data()['concept']['concept'].values
 
     country = res_ent.get_data()['country']
     dps = res_dps.compute()

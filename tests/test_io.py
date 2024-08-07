@@ -42,7 +42,7 @@ def test_repo():
     from ddf_utils.cli import ddf
     from ddf_utils.model.repo import Repo
 
-    r = Repo('https://github.com/open-numbers/ddf--gapminder--co2_emission')
+    r = Repo('https://github.com/semio/ddf--gapminder--dummy_companies/')
     r.name
 
     runner = CliRunner()
@@ -51,3 +51,7 @@ def test_repo():
                                       '-o', os.path.join(r.local_path, 'etl/diff'),
                                       'HEAD', 'HEAD~1'])
     assert result.exit_code == 0
+
+
+if __name__ ==  '__main__':
+    test_repo()

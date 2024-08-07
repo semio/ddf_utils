@@ -234,7 +234,7 @@ class ConceptIngredient(Ingredient):
             # change boolean into string
             # and remove tailing spaces
             df = df_.copy()
-            for i, v in df.dtypes.iteritems():
+            for i, v in df.dtypes.items():
                 if v == 'bool':
                     df[i] = df[i].map(lambda x: str(x).upper())
                 if v == 'object':

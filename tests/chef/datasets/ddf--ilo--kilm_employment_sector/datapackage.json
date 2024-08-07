@@ -3,10 +3,15 @@
     "language": {
         "id": "en"
     },
+    "title": "ddf--ilo--kilm_employment_sector",
+    "description": "",
+    "author": "",
+    "license": "",
+    "created": "2024-08-06T03:01:06.438538+00:00",
     "resources": [
         {
-            "path": "ddf--concepts.csv",
             "name": "ddf--concepts",
+            "path": "ddf--concepts.csv",
             "schema": {
                 "fields": [
                     {
@@ -19,12 +24,14 @@
                         "name": "concept_type"
                     }
                 ],
-                "primaryKey": "concept"
+                "primaryKey": [
+                    "concept"
+                ]
             }
         },
         {
-            "path": "ddf--datapoints--agriculture_percentage--by--country--sex--year.csv",
             "name": "ddf--datapoints--agriculture_percentage--by--country--sex--year",
+            "path": "ddf--datapoints--agriculture_percentage--by--country--sex--year.csv",
             "schema": {
                 "fields": [
                     {
@@ -48,8 +55,8 @@
             }
         },
         {
-            "path": "ddf--datapoints--agriculture_thousands--by--country--sex--year.csv",
             "name": "ddf--datapoints--agriculture_thousands--by--country--sex--year",
+            "path": "ddf--datapoints--agriculture_thousands--by--country--sex--year.csv",
             "schema": {
                 "fields": [
                     {
@@ -73,8 +80,8 @@
             }
         },
         {
-            "path": "ddf--entities--country.csv",
             "name": "ddf--entities--country",
+            "path": "ddf--entities--country.csv",
             "schema": {
                 "fields": [
                     {
@@ -84,12 +91,14 @@
                         "name": "name"
                     }
                 ],
-                "primaryKey": "country"
+                "primaryKey": [
+                    "country"
+                ]
             }
         },
         {
-            "path": "ddf--entities--sex.csv",
             "name": "ddf--entities--sex",
+            "path": "ddf--entities--sex.csv",
             "schema": {
                 "fields": [
                     {
@@ -99,8 +108,77 @@
                         "name": "name"
                     }
                 ],
-                "primaryKey": "sex"
+                "primaryKey": [
+                    "sex"
+                ]
             }
         }
-    ]
+    ],
+    "ddfSchema": {
+        "concepts": [
+            {
+                "primaryKey": [
+                    "concept"
+                ],
+                "value": "concept_type",
+                "resources": [
+                    "ddf--concepts"
+                ]
+            },
+            {
+                "primaryKey": [
+                    "concept"
+                ],
+                "value": "name",
+                "resources": [
+                    "ddf--concepts"
+                ]
+            }
+        ],
+        "entities": [
+            {
+                "primaryKey": [
+                    "country"
+                ],
+                "value": "name",
+                "resources": [
+                    "ddf--entities--country"
+                ]
+            },
+            {
+                "primaryKey": [
+                    "sex"
+                ],
+                "value": "name",
+                "resources": [
+                    "ddf--entities--sex"
+                ]
+            }
+        ],
+        "datapoints": [
+            {
+                "primaryKey": [
+                    "country",
+                    "sex",
+                    "year"
+                ],
+                "value": "agriculture_percentage",
+                "resources": [
+                    "ddf--datapoints--agriculture_percentage--by--country--sex--year"
+                ]
+            },
+            {
+                "primaryKey": [
+                    "country",
+                    "sex",
+                    "year"
+                ],
+                "value": "agriculture_thousands",
+                "resources": [
+                    "ddf--datapoints--agriculture_thousands--by--country--sex--year"
+                ]
+            }
+        ],
+        "synonyms": []
+    }
 }

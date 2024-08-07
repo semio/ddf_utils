@@ -3,10 +3,15 @@
     "language": {
         "id": "en"
     },
+    "title": "ddf--cme",
+    "description": "",
+    "author": "",
+    "license": "",
+    "created": "2024-08-06T02:59:11.950963+00:00",
     "resources": [
         {
-            "path": "ddf--concepts--continuous.csv",
             "name": "ddf--concepts--continuous",
+            "path": "ddf--concepts--continuous.csv",
             "schema": {
                 "fields": [
                     {
@@ -19,12 +24,14 @@
                         "name": "concept_type"
                     }
                 ],
-                "primaryKey": "concept"
+                "primaryKey": [
+                    "concept"
+                ]
             }
         },
         {
-            "path": "ddf--concepts--discrete.csv",
             "name": "ddf--concepts--discrete",
+            "path": "ddf--concepts--discrete.csv",
             "schema": {
                 "fields": [
                     {
@@ -37,12 +44,14 @@
                         "name": "concept_type"
                     }
                 ],
-                "primaryKey": "concept"
+                "primaryKey": [
+                    "concept"
+                ]
             }
         },
         {
-            "path": "ddf--datapoints--imr_lower--by--country--year.csv",
             "name": "ddf--datapoints--imr_lower--by--country--year",
+            "path": "ddf--datapoints--imr_lower--by--country--year.csv",
             "schema": {
                 "fields": [
                     {
@@ -62,8 +71,8 @@
             }
         },
         {
-            "path": "ddf--datapoints--imr_median--by--country--year.csv",
             "name": "ddf--datapoints--imr_median--by--country--year",
+            "path": "ddf--datapoints--imr_median--by--country--year.csv",
             "schema": {
                 "fields": [
                     {
@@ -83,8 +92,8 @@
             }
         },
         {
-            "path": "ddf--datapoints--imr_upper--by--country--year.csv",
             "name": "ddf--datapoints--imr_upper--by--country--year",
+            "path": "ddf--datapoints--imr_upper--by--country--year.csv",
             "schema": {
                 "fields": [
                     {
@@ -104,8 +113,8 @@
             }
         },
         {
-            "path": "ddf--entities--country.csv",
             "name": "ddf--entities--country",
+            "path": "ddf--entities--country.csv",
             "schema": {
                 "fields": [
                     {
@@ -118,8 +127,87 @@
                         "name": "iso_code"
                     }
                 ],
-                "primaryKey": "country"
+                "primaryKey": [
+                    "country"
+                ]
             }
         }
-    ]
+    ],
+    "ddfSchema": {
+        "concepts": [
+            {
+                "primaryKey": [
+                    "concept"
+                ],
+                "value": "concept_type",
+                "resources": [
+                    "ddf--concepts--continuous",
+                    "ddf--concepts--discrete"
+                ]
+            },
+            {
+                "primaryKey": [
+                    "concept"
+                ],
+                "value": "name",
+                "resources": [
+                    "ddf--concepts--continuous",
+                    "ddf--concepts--discrete"
+                ]
+            }
+        ],
+        "entities": [
+            {
+                "primaryKey": [
+                    "country"
+                ],
+                "value": "countryname",
+                "resources": [
+                    "ddf--entities--country"
+                ]
+            },
+            {
+                "primaryKey": [
+                    "country"
+                ],
+                "value": "iso_code",
+                "resources": [
+                    "ddf--entities--country"
+                ]
+            }
+        ],
+        "datapoints": [
+            {
+                "primaryKey": [
+                    "country",
+                    "year"
+                ],
+                "value": "imr_lower",
+                "resources": [
+                    "ddf--datapoints--imr_lower--by--country--year"
+                ]
+            },
+            {
+                "primaryKey": [
+                    "country",
+                    "year"
+                ],
+                "value": "imr_median",
+                "resources": [
+                    "ddf--datapoints--imr_median--by--country--year"
+                ]
+            },
+            {
+                "primaryKey": [
+                    "country",
+                    "year"
+                ],
+                "value": "imr_upper",
+                "resources": [
+                    "ddf--datapoints--imr_upper--by--country--year"
+                ]
+            }
+        ],
+        "synonyms": []
+    }
 }

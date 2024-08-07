@@ -45,7 +45,7 @@ def split_translations_json(path, split_path='langsplit', exclude_concepts=None,
     for res in datapackage['resources']:
         file_path = res['path']
         key = res['schema']['primaryKey']
-        if key == 'concept':
+        if key == ['concept']:
             concepts.append(pd.read_csv(os.path.join(path, file_path)))
     concepts = pd.concat(concepts, ignore_index=True).set_index('concept')
 
@@ -110,7 +110,7 @@ def split_translations_csv(path, split_path='langsplit', exclude_concepts=None, 
     for res in datapackage['resources']:
         file_path = res['path']
         key = res['schema']['primaryKey']
-        if key == 'concept':
+        if key == ['concept']:
             concepts.append(pd.read_csv(os.path.join(path, file_path)))
     concepts = pd.concat(concepts, ignore_index=True).set_index('concept')
 
@@ -242,7 +242,8 @@ def merge_translations_json(path, split_path='langsplit', lang_path='lang', over
                     df = pd.read_json(os.path.join(root, fn), orient='index')
                     # add back the index name.
                     # the index name will be missing because it's not in the json file.
-                    df.index.name = key_mapping[name]
+                    assert len(key_mapping[name]) == 1, "only support concepts/entities files for this method"
+                    df.index.name = key_mapping[name][0]
                     if os.path.exists(target_file_path) and not overwrite:
                         df_old = pd.read_csv(target_file_path, index_col=0)
                         df_old.update(df)

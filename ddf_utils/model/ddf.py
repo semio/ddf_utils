@@ -14,6 +14,7 @@ from collections import OrderedDict, Counter
 
 import numpy as np
 import pandas as pd
+import dask
 import dask.dataframe as dd
 
 from ddf_utils.str import parse_time_series
@@ -222,6 +223,7 @@ class DaskDataPoint(DataPoint):
 
     @property
     def data(self):
+        dask.config.set({"dataframe.convert-string": False})
         cols = [*self.dimensions, self.id]
         df = dd.read_csv(self.path, usecols=cols, **self.read_csv_options)
         # handling time columns

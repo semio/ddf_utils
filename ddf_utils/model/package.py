@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 class TableSchema:
     """Table Schema Object Class"""
     fields: List[dict]
-    primaryKey: Union[List[str], str]
+    primaryKey: List[str]
 
     @classmethod
     def from_dict(cls, d: dict):
@@ -40,10 +40,7 @@ class TableSchema:
     def common_fields(self):
         field_names = self.field_names
         pkey = self.primaryKey
-        if isinstance(pkey, str):
-            common_fields = list(filter(lambda x: x != pkey, field_names))
-        else:
-            common_fields = list(filter(lambda x: x not in pkey, field_names))
+        common_fields = list(filter(lambda x: x not in pkey, field_names))
         return common_fields
 
     def __repr__(self):
@@ -144,8 +141,8 @@ class DDFcsv(DataPackage):
         syn = list()
         for r in self.resources:
             pkey = r.schema.primaryKey
-            if isinstance(pkey, str):
-                if pkey == 'concept':
+            if len(pkey) == 1:
+                if pkey[0] == 'concept':
                     conc.append(r)
                 else:
                     ent.append(r)
@@ -193,7 +190,7 @@ class DDFcsv(DataPackage):
 
     def _gen_entities(self, concepts: Dict[str, Concept]):
         for r in self.entities_resources:
-            pkey = r.schema.primaryKey
+            pkey = r.schema.primaryKey[0]
             if concepts[pkey].concept_type == 'entity_domain':
                 domain = concepts[pkey].id
             else:
@@ -349,10 +346,7 @@ class DDFcsv(DataPackage):
 
         def _gen_key_value_object(resource: Resource):
             logger.debug('working on: {}'.format(resource.path))
-            if isinstance(resource.schema.primaryKey, str):
-                pkeys = [resource.schema.primaryKey]
-            else:
-                pkeys = resource.schema.primaryKey
+            pkeys = resource.schema.primaryKey
 
             entity_cols = [x for x in pkeys
                            if x in self.ddf.concepts

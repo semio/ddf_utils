@@ -75,9 +75,12 @@ def compare_with_func(dataset1, dataset2, fns=None,
             comp_df = get_comp_df(indicator, k)
         except KeyError:
             return [np.nan] * len(fns)
-
         # return nan if indicator is not number type
-        if comp_df.dtypes[indicator+'_old'] == 'object' or comp_df.dtypes[indicator+'_new'] == 'object':
+        if (comp_df.dtypes[indicator+'_old'] == 'object'
+            or comp_df.dtypes[indicator+'_new'] == 'object'
+            or comp_df.dtypes[indicator+'_old'] == 'category'
+            or comp_df.dtypes[indicator+'_new'] == 'category'
+            ):
             return [np.nan] * len(fns)
 
         return [f(comp_df, indicator, **kwargs)
@@ -93,6 +96,8 @@ def compare_with_func(dataset1, dataset2, fns=None,
 
     # append new columns before we do calculation
     for f in fns:
+        # FIXME: using float (np.nan) is not good because some function might return strings
+        # in those cases we should use ""
         result[f] = np.nan
 
     result = result.set_index(['indicator', 'primary_key'])
@@ -117,7 +122,7 @@ def rval(comp_df, indicator, on='geo'):
         return r
 
     level = comp_df.index.names.index(on)
-    res = comp_df.groupby(level=level).apply(f)
+    res = comp_df.groupby(level=level, observed=False).apply(f)
 
     return res.mean()
 
@@ -135,7 +140,7 @@ def avg_pct_chg(comp_df, indicator, on='geo'):
 
         return chg.replace([np.inf, -np.inf], np.nan).mean()
 
-    res = comp_df.groupby(level=level).apply(f)
+    res = comp_df.groupby(level=level, observed=False).apply(f)
 
     return res.abs().mean()
 

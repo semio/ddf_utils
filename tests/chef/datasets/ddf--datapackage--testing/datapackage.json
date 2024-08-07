@@ -3,10 +3,15 @@
     "language": {
         "id": "en"
     },
+    "title": "ddf--datapackage--testing",
+    "description": "",
+    "author": "",
+    "license": "",
+    "created": "2024-08-06T02:59:18.266236+00:00",
     "resources": [
         {
-            "path": "ddf--concepts.csv",
             "name": "ddf--concepts",
+            "path": "ddf--concepts.csv",
             "schema": {
                 "fields": [
                     {
@@ -22,12 +27,14 @@
                         "name": "domain"
                     }
                 ],
-                "primaryKey": "concept"
+                "primaryKey": [
+                    "concept"
+                ]
             }
         },
         {
-            "path": "ddf--datapoints--population--by--geo--gender--year.csv",
             "name": "ddf--datapoints--population--by--geo--gender--year",
+            "path": "ddf--datapoints--population--by--geo--gender--year.csv",
             "schema": {
                 "fields": [
                     {
@@ -51,8 +58,8 @@
             }
         },
         {
-            "path": "ddf--entities--gender.csv",
             "name": "ddf--entities--gender",
+            "path": "ddf--entities--gender.csv",
             "schema": {
                 "fields": [
                     {
@@ -65,12 +72,14 @@
                         "name": "is--nonbinary"
                     }
                 ],
-                "primaryKey": "gender"
+                "primaryKey": [
+                    "gender"
+                ]
             }
         },
         {
-            "path": "ddf--entities--geo.csv",
             "name": "ddf--entities--geo",
+            "path": "ddf--entities--geo.csv",
             "schema": {
                 "fields": [
                     {
@@ -83,7 +92,9 @@
                         "name": "is--city"
                     }
                 ],
-                "primaryKey": "geo"
+                "primaryKey": [
+                    "geo"
+                ]
             }
         }
     ],
@@ -93,7 +104,7 @@
                 "primaryKey": [
                     "concept"
                 ],
-                "value": "domain",
+                "value": "concept_type",
                 "resources": [
                     "ddf--concepts"
                 ]
@@ -102,7 +113,7 @@
                 "primaryKey": [
                     "concept"
                 ],
-                "value": "concept_type",
+                "value": "domain",
                 "resources": [
                     "ddf--concepts"
                 ]
@@ -120,18 +131,27 @@
         "entities": [
             {
                 "primaryKey": [
-                    "gender"
+                    "city"
                 ],
-                "value": "is--nonbinary",
+                "value": "is--city",
                 "resources": [
-                    "ddf--entities--gender"
+                    "ddf--entities--geo"
+                ]
+            },
+            {
+                "primaryKey": [
+                    "geo"
+                ],
+                "value": "is--city",
+                "resources": [
+                    "ddf--entities--geo"
                 ]
             },
             {
                 "primaryKey": [
                     "gender"
                 ],
-                "value": "name",
+                "value": "is--nonbinary",
                 "resources": [
                     "ddf--entities--gender"
                 ]
@@ -147,7 +167,16 @@
             },
             {
                 "primaryKey": [
-                    "nonbinary"
+                    "city"
+                ],
+                "value": "name",
+                "resources": [
+                    "ddf--entities--geo"
+                ]
+            },
+            {
+                "primaryKey": [
+                    "gender"
                 ],
                 "value": "name",
                 "resources": [
@@ -158,15 +187,6 @@
                 "primaryKey": [
                     "geo"
                 ],
-                "value": "is--city",
-                "resources": [
-                    "ddf--entities--geo"
-                ]
-            },
-            {
-                "primaryKey": [
-                    "geo"
-                ],
                 "value": "name",
                 "resources": [
                     "ddf--entities--geo"
@@ -174,24 +194,26 @@
             },
             {
                 "primaryKey": [
-                    "city"
-                ],
-                "value": "is--city",
-                "resources": [
-                    "ddf--entities--geo"
-                ]
-            },
-            {
-                "primaryKey": [
-                    "city"
+                    "nonbinary"
                 ],
                 "value": "name",
                 "resources": [
-                    "ddf--entities--geo"
+                    "ddf--entities--gender"
                 ]
             }
         ],
         "datapoints": [
+            {
+                "primaryKey": [
+                    "city",
+                    "gender",
+                    "year"
+                ],
+                "value": "population",
+                "resources": [
+                    "ddf--datapoints--population--by--geo--gender--year"
+                ]
+            },
             {
                 "primaryKey": [
                     "gender",
@@ -213,18 +235,8 @@
                 "resources": [
                     "ddf--datapoints--population--by--geo--gender--year"
                 ]
-            },
-            {
-                "primaryKey": [
-                    "city",
-                    "gender",
-                    "year"
-                ],
-                "value": "population",
-                "resources": [
-                    "ddf--datapoints--population--by--geo--gender--year"
-                ]
             }
-        ]
+        ],
+        "synonyms": []
     }
 }
