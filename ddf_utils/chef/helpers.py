@@ -23,7 +23,8 @@ from ..model.package import DDFcsv
 from ddf_utils.str import to_concept_id
 
 
-memory = Memory(location=mkdtemp(), verbose=0, bytes_limit=3 * 1024 * 1024 * 1024)
+memory = Memory(location=mkdtemp(), verbose=0)
+memory.reduce_size(bytes_limit=3 * 1024 * 1024 * 1024)
 
 
 def make_abs_path(path, base_dir):

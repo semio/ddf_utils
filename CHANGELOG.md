@@ -1,3 +1,7 @@
+## version 1.0.16 2025-05-06
+- fix some depercated warnings
+- pin requirement versions so that it won't introduce breaking changes to published package
+
 ## version 1.0.15 2024-08-07
 - all resources' primaryKey properity will be an array in datapackage.json now
 - update the code to make it work with newer version of pandas
