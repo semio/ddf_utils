@@ -2,6 +2,7 @@
 
 """merge procedure for recipes"""
 
+from enum import STRICT
 import logging
 import time
 
@@ -11,13 +12,13 @@ import numpy as np
 import pandas as pd
 import dask.dataframe as dd
 
-from .. exceptions import ProcedureError
-from .. helpers import debuggable
-from .. model.ingredient import Ingredient, get_ingredient_class
-from .. model.chef import Chef
+from ..exceptions import ProcedureError
+from ..helpers import debuggable
+from ..model.ingredient import Ingredient, get_ingredient_class
+from ..model.chef import Chef
 
 
-logger = logging.getLogger('merge')
+logger = logging.getLogger("merge")
 
 
 @debuggable
@@ -80,9 +81,9 @@ def merge(chef: Chef, ingredients: List[Ingredient], result, deep=False) -> Ingr
     # the first ingredient
     dtype = ingredients[0].dtype
 
-    if dtype == 'datapoints':
+    if dtype == "datapoints":
         index_col = ingredients[0].key
-        newkey = ','.join(index_col)
+        newkey = ",".join(index_col)
     else:
         index_col = ingredients[0].key
         newkey = index_col
@@ -96,7 +97,7 @@ def merge(chef: Chef, ingredients: List[Ingredient], result, deep=False) -> Ingr
         res_all = _merge_two(res_all, i.get_data(), index_col, dtype, deep)
 
     if not result:
-        result = 'all_data_merged_' + str(int(time.time() * 1000))
+        result = "all_data_merged_" + str(int(time.time() * 1000))
 
     return get_ingredient_class(dtype).from_procedure_result(result, newkey, data_computed=res_all)
 
@@ -110,10 +111,13 @@ def __get_last_item(ser):
         return ser_.values[-1]
 
 
-def _merge_two(left: Dict[str, Union[pd.DataFrame, dd.DataFrame]],
-               right: Dict[str, Union[pd.DataFrame, dd.DataFrame]],
-               index_col: Union[List, str],
-               dtype: str, deep=False) -> Dict[str, pd.DataFrame]:
+def _merge_two(
+    left: Dict[str, Union[pd.DataFrame, dd.DataFrame]],
+    right: Dict[str, Union[pd.DataFrame, dd.DataFrame]],
+    index_col: Union[List, str],
+    dtype: str,
+    deep=False,
+) -> Dict[str, pd.DataFrame]:
     """merge 2 ingredient data."""
     if len(left) == 0:
         return right
@@ -121,34 +125,43 @@ def _merge_two(left: Dict[str, Union[pd.DataFrame, dd.DataFrame]],
     res_data = {}
 
     # for datapoints we use dask to help performance.
-    if dtype == 'datapoints':
+    if dtype == "datapoints":
         res_data = dict([(k, v) for k, v in left.items()])
         if deep:
             for k, df in right.items():
                 if k in left.keys():
                     columns = left[k].columns.values
-                    res_data[k] = dd.concat([left[k], df[columns]], axis=0, interleave_partitions=False)
-                    res_data[k] = res_data[k].drop_duplicates(subset=index_col, keep='last')
+                    res_data[k] = dd.concat(
+                        [left[k], df[columns]], axis=0, interleave_partitions=False
+                    )
+                    res_data[k] = res_data[k].drop_duplicates(subset=index_col, keep="last")
                 else:
                     res_data[k] = df
         else:
             for k, df in right.items():
                 res_data[k] = df
 
-    # for concepts/entities, we don't need to use dask.
-    elif dtype == 'concepts':
+        # preserve dtypes
+        dtypes_ = list(res_data.values())[0].dtypes[index_col]
+        dtypes = dict([k, v.name] for k, v in dtypes_.items())
+        for k, df in res_data.items():
+            if isinstance(index_col, str):
+                df[index_col] = df[index_col].astype(dtypes[index_col])
+            else:
+                for c in index_col:
+                    df[c] = df[c].astype(dtypes[c])
 
+    # for concepts/entities, we don't need to use dask.
+    elif dtype == "concepts":
         left_df = pd.concat([x for x in left.values()], sort=False)
         right_df = pd.concat([x for x in right.values()], sort=False)
 
         if deep:
             merged = pd.concat([left_df, right_df], sort=False)
             res = merged.groupby(by=index_col).agg(__get_last_item)
-            res_data = {'concept': res.reset_index()}
+            res_data = {"concept": res.reset_index()}
         else:
-            res_data = {'concept':
-                        right_df.drop_duplicates(subset='concept',
-                                                 keep='last')}
+            res_data = {"concept": right_df.drop_duplicates(subset="concept", keep="last")}
         res_data = res_data
 
     else:  # entities
