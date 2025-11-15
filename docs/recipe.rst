@@ -579,9 +579,6 @@ Currently supported procedures:
   aggregate/filter/transform
 - `window <#window>`__: run function on rolling windows
 - `filter`_: filter ingredient data with Mongo-like query
-- `filter\_row <#filter-row>`__: filter ingredient data by column
-  values
-- `filter\_item <#filter-item>`__: filter ingredient data by concepts
 - `run\_op <#run-op>`__: run math operations on ingredient columns
 - `extract\_concepts <#extract-concepts>`__: generate concepts
   ingredient from other ingredients
