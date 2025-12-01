@@ -20,7 +20,7 @@ functions we find useful in daily works in [Gapminder][5].
 
 ## Installation
 
-Python 3.6+ is required in order to run this module.
+Python 3.9+ is required in order to run this module.
 
 To install this package from pypi, run:
 

@@ -4,3 +4,9 @@
 - first do `python setup.py tag` to create a tag
 - then `python -m build` to create wheel and tarball in `dist/`
 - then `twine upload dist/*` to upload to pypi.
+
+## requirements
+
+- build
+- setuptools
+- twine
