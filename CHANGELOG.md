@@ -1,3 +1,7 @@
+## version 1.0.17 2025-12-01
+
+- update ILOSTAT factory methods
+
 ## version 1.0.16 2025-05-06
 - fix some depercated warnings
 - pin requirement versions so that it won't introduce breaking changes to published package
