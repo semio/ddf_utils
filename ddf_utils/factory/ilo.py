@@ -18,15 +18,22 @@ import pandas as pd
 
 
 class ILOLoader(DataFactory):
-    main_url = 'http://www.ilo.org/ilostat-files/WEB_bulk_download/'
-    indicator_meta_url_tmpl = urljoin(main_url, 'indicator/table_of_contents_{lang}.csv')
-    other_meta_url_tmpl = urljoin(main_url, 'dic/{table}_{lang}.csv')
+    main_url = 'https://rplumber.ilo.org/'
+    indicator_meta_url_tmpl = urljoin(main_url, 'metadata/toc/indicator?lang={lang}&format=.csv')
+    other_meta_url_tmpl = urljoin(main_url, 'metadata/dic?var={table}&lang={lang}&format=.csv')
+
+    def __init__(self):
+        self.metadata = dict()
 
     def load_metadata(self, table='indicator', lang='en'):
         """get code list for a specified table and language.
 
         Check ILO doc for all available tables and languages.
         """
+        key = f"{table}-{lang}"
+        if key in self.metadata:
+            return self.metadata[key]
+
         if table == 'indicator':
             tmpl = self.indicator_meta_url_tmpl
         else:
@@ -34,11 +41,16 @@ class ILOLoader(DataFactory):
 
         url = tmpl.format(table=table, lang=lang)
 
-        metadata = {}
-        metadata[table] = pd.read_csv(url)
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        }
 
-        self.metadata = metadata[table]
-        return self.metadata
+        session = requests_retry_session()
+        session.headers.update(headers)
+        data = pd.read_csv(url, storage_options={'User-Agent': headers['User-Agent']})
+
+        self.metadata[key] = data
+        return data
 
     def has_newer_source(self, indicator, date):
         """check if an indicator's last modified date is newer than given date.
@@ -56,8 +68,15 @@ class ILOLoader(DataFactory):
     def download(self, i, out_dir):
         """Download an indicator to out_dir.
         """
-        url = urljoin(self.main_url, f'indicator/{i}.csv.gz')
-        res = requests_retry_session().get(url, stream=True, timeout=60)
+        url = urljoin(self.main_url, f'data/indicator?id={i}&type=code&format=.csv.gz')
+        
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        }
+        
+        session = requests_retry_session()
+        session.headers.update(headers)
+        res = session.get(url, stream=True, timeout=60)
         if res.status_code != 200:
             print(f'can not download source file: {url}')
             return
