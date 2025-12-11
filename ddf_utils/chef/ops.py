@@ -15,7 +15,7 @@ def zcore(x):
 
 
 # Groupby Filter
-def gt(x, val, how='all', include_eq=False):
+def gt(x, val, how="all", include_eq=False):
     f = getattr(np, how)
     if include_eq:
         return f(x >= val)
@@ -23,7 +23,7 @@ def gt(x, val, how='all', include_eq=False):
         return f(x > val)
 
 
-def lt(x, val, how='all', include_eq=False):
+def lt(x, val, how="all", include_eq=False):
     f = getattr(np, how)
     if include_eq:
         return f(x <= val)
@@ -31,12 +31,20 @@ def lt(x, val, how='all', include_eq=False):
         return f(x < val)
 
 
-def between(x, lower, upper, how='all', include_upper=False, include_lower=False):
+def between(x, lower, upper, how="all", include_upper=False, include_lower=False):
     return gt(x, lower, how, include_lower) and lt(x, upper, how, include_upper)
 
 
+def first(arr):
+    return arr[0]
+
+
+def last(arr):
+    return arr[-1]
+
+
 # Rolling
-def aagr(df: pd.DataFrame, window: int=10):  # TODO: don't include the window
+def aagr(df: pd.DataFrame, window: int = 10):  # TODO: don't include the window
     """average annual growth rate
 
     Parameters
