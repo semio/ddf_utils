@@ -1,3 +1,7 @@
+## version 1.0.18 2025-12-11
+
+- add first/last operations to window/groupby procedures
+
 ## version 1.0.17 2025-12-01
 
 - update ILOSTAT factory methods
