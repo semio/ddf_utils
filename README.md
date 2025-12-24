@@ -1,6 +1,5 @@
 # ddf_utils
 
-![status](https://img.shields.io/travis/semio/ddf_utils.svg)
 ![version](https://img.shields.io/pypi/v/ddf_utils.svg)
 ![pyversion](https://img.shields.io/pypi/pyversions/ddf_utils.svg)
 [![codecov](https://codecov.io/gh/semio/ddf_utils/branch/master/graph/badge.svg)](https://codecov.io/gh/semio/ddf_utils)
