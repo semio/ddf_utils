@@ -1,3 +1,6 @@
+## version 1.0.19 2026-01-10
+- improve ddf etl_type command
+
 ## version 1.0.18 2025-12-11
 
 - add first/last operations to window/groupby procedures
