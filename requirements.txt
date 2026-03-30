@@ -137,7 +137,7 @@ pyarrow==20.0.0
     # via dask
 pycurl==7.45.6
     # via -r requirements.in
-pygments==2.19.1
+pygments==2.20.0
     # via
     #   ipython
     #   ipython-pygments-lexers
