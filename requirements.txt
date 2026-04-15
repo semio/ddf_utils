@@ -141,9 +141,10 @@ pygments==2.20.0
     # via
     #   ipython
     #   ipython-pygments-lexers
+    #   pytest
     #   rich
     #   sphinx
-pytest==8.3.5
+pytest==9.0.3
     # via
     #   -r requirements.in
     #   pytest-cov
