@@ -33,7 +33,7 @@ requirements = [
     "hy~=1.0.0",
     "attrs~=25.3.0",
     "joblib~=1.5.0",
-    "lxml~=5.4.0",
+    "lxml~=6.1.0",
     "pycurl~=7.45.6",
 ]
 
