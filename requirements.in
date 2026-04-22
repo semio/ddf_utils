@@ -1,4 +1,4 @@
-lxml
+lxml~=6.1.0
 pandas
 unidecode
 pyyaml
