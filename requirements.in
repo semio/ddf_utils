@@ -21,7 +21,7 @@ graphviz~=0.20.3
 coloredlogs~=15.0.1
 pytz~=2025.2
 requests[security]~=2.33.0
-gitpython~=3.1.44
+gitpython~=3.1.47
 hy~=1.0.0
 ipdb
 attrs~=25.3.0
